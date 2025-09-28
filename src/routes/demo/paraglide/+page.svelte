@@ -16,6 +16,9 @@
 	<button class=" cursor-pointer rounded-2xl bg-amber-300 px-3 py-2" onclick={() => setLocale('it')}
 		>it</button
 	>
+	<button class=" cursor-pointer rounded-2xl bg-amber-300 px-3 py-2" onclick={() => setLocale('de')}
+		>de</button
+	>
 </div>
 <p>
 	If you use VSCode, install the <a
