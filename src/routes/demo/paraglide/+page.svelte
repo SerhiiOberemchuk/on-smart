@@ -6,9 +6,16 @@
 </script>
 
 <h1>{m.hello_world({ name: 'SvelteKit User' })}</h1>
-<div>
-	<button onclick={() => setLocale('en')}>en</button>
-	<button onclick={() => setLocale('uk')}>uk</button>
+<div class="flex gap-2">
+	<button class=" cursor-pointer rounded-2xl bg-amber-300 px-3 py-2" onclick={() => setLocale('en')}
+		>en</button
+	>
+	<button class=" cursor-pointer rounded-2xl bg-amber-300 px-3 py-2" onclick={() => setLocale('uk')}
+		>uk</button
+	>
+	<button class=" cursor-pointer rounded-2xl bg-amber-300 px-3 py-2" onclick={() => setLocale('it')}
+		>it</button
+	>
 </div>
 <p>
 	If you use VSCode, install the <a
@@ -16,3 +23,4 @@
 		target="_blank">Sherlock i18n extension</a
 	> for a better i18n experience.
 </p>
+<span>{m.app_span()}</span>

@@ -1,4 +1,8 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Привіт, {name} ми з UA!"
+	"hello_world": "Привіт, {name} ми з UA!",
+	"app_span": "Це проміжок від en",
+	"app_button": "Це кнопка з en",
+	"app_input": "Це вхідні дані від en",
+	"app_textarea": "Це текстове поле з en"
 }

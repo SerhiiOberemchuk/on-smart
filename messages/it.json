@@ -1,0 +1,8 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"hello_world": "Ciao, {name} da en!",
+	"app_span": "Questo è un intervallo da en",
+	"app_button": "Questo è un pulsante da en",
+	"app_input": "Questo è un contributo da en",
+	"app_textarea": "Questa è un'area di testo da en"
+}
