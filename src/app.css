@@ -1,3 +1,27 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+body {
+	background-color: black;
+	color: whitesmoke;
+}
+a,
+button {
+	transition: all 0.3s ease-in-out;
+	cursor: pointer;
+}
+
+.pulse_scale {
+	animation: pulse_scale 2s infinite linear;
+}
+@keyframes pulse_scale {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05);
+	}
+	100% {
+		transform: scale(1);
+	}
+}

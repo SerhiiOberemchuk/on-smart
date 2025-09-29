@@ -1,1 +1,8 @@
-{"$schema":"https://inlang.com/schema/inlang-message-format","hello_world":"Hallo, {name} aus en!","app_span":"Dies ist eine Spanne von en","app_button":"Dies ist ein Button von en","app_input":"Dies ist ein Input von en","app_textarea":"Dies ist ein Textbereich fr 543 en"}
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"hello_world": "Hallo, {name} aus en!",
+	"app_span": "Dies ist eine Spanne von en",
+	"app_button": "Dies ist ein Button von en",
+	"app_input": "Dies ist ein Input von en",
+	"app_textarea": "Dies ist ein Textbereich fr 543 en"
+}

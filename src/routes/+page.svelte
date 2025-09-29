@@ -1,2 +1,23 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script>
+	import { setLocale } from '$lib/paraglide/runtime';
+	import HeroSection from '../components/pages/home/HeroSection.svelte';
+	import NovitaSection from '../components/pages/home/NovitaSection.svelte';
+</script>
+
+<HeroSection />
+<NovitaSection />
+
+<div class="flex gap-2">
+	<button class=" cursor-pointer rounded-2xl bg-amber-300 px-3 py-2" onclick={() => setLocale('en')}
+		>en</button
+	>
+	<button class=" cursor-pointer rounded-2xl bg-amber-300 px-3 py-2" onclick={() => setLocale('uk')}
+		>uk</button
+	>
+	<button class=" cursor-pointer rounded-2xl bg-amber-300 px-3 py-2" onclick={() => setLocale('it')}
+		>it</button
+	>
+	<button class=" cursor-pointer rounded-2xl bg-amber-300 px-3 py-2" onclick={() => setLocale('de')}
+		>de</button
+	>
+</div>
