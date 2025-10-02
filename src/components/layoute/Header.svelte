@@ -3,16 +3,15 @@
 	import carello from '$lib/assets/images/carello.png';
 	import camion from '$lib/assets/images/camion.png';
 	import { stateBascet } from '../../states/bascetState.svelte';
+	import Logo from '../common/Logo.svelte';
 	let search = $state('');
 </script>
 
-<header class=" p-4">
-	<div class="mx-auto flex max-w-[90rem] items-center justify-between gap-4">
-		<a href={localizeHref('/')}>LOGO</a>
-		{@render nav()}
-		{@render ricerca()}
-		{@render spedizione()}
-	</div>
+<header class="container_custom flex max-w-[90rem] items-center justify-between gap-4 p-4">
+	<Logo />
+	{@render nav()}
+	{@render ricerca()}
+	{@render spedizione()}
 </header>
 
 {#snippet nav()}
@@ -48,7 +47,7 @@
 				<span
 					class=" absolute right-0 bottom-0 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-green-400 text-center"
 				>
-					<span>{stateBascet.qnt}</span>
+					<span>{stateBascet.bascet?.length || 0}</span>
 				</span>
 			</span>
 		</a>

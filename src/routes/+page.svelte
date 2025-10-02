@@ -1,7 +1,7 @@
 <script>
 	import { setLocale } from '$lib/paraglide/runtime';
 	import HeroSection from '../components/pages/home/HeroSection.svelte';
-	import NovitaSection from '../components/pages/home/NovitaSection.svelte';
+	import NovitaSection from '../components/pages/home/novita-section/NovitaSection.svelte';
 </script>
 
 <HeroSection />

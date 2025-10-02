@@ -2,6 +2,7 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import Header from '../components/layoute/Header.svelte';
+	import Footer from '../components/layoute/Footer.svelte';
 
 	let { children } = $props();
 </script>
@@ -14,3 +15,4 @@
 <main>
 	{@render children?.()}
 </main>
+<Footer />
