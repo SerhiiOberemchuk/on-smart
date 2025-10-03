@@ -1,5 +1,7 @@
 import { transporter } from '$lib/utils/send-email';
+import type { Config } from '@sveltejs/adapter-vercel';
 import type { Actions } from './$types';
+export const config: Config = { runtime: 'nodejs22.x' };
 
 export const actions = {
 	default: async (event) => {
