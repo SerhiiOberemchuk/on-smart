@@ -1,12 +1,18 @@
 <script lang="ts">
 	import clsx from 'clsx';
-	import { sendEmail } from '../../routes/email.remote';
-	import Logo from '../common/Logo.svelte';
 
+	import Logo from '../common/Logo.svelte';
+	async function submit(e: SubmitEvent) {
+		e.preventDefault();
+
+		const form = new FormData(e.currentTarget as HTMLFormElement);
+		console.log({ form });
+	}
 	let showMessage = $state<boolean>();
 	$effect(() => {
-		showMessage = sendEmail.result?.status;
+		// showMessage = sendEmail.result?.status;
 	});
+	// $inspect(data, form);
 </script>
 
 <footer class="container_custom grid_container py-10">
@@ -27,7 +33,7 @@
 			>
 		</div>
 	{:else}
-		<form {...sendEmail} class=" flex flex-col gap-2">
+		<!-- <form onsubmit={submit} class=" flex flex-col gap-2">
 			<input
 				required
 				type="text"
@@ -62,7 +68,7 @@
 					<span>Inviare</span>
 				{/if}</button
 			>
-		</form>
+		</form> -->
 	{/if}
 </footer>
 

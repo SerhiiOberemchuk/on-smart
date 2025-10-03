@@ -1,9 +1,10 @@
 <script lang="ts">
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import Header from '../components/layoute/Header.svelte';
-	import Footer from '../components/layoute/Footer.svelte';
+
 	import type { Config } from '@sveltejs/adapter-vercel';
+	import Header from '$lib/components/layoute/Header.svelte';
+	import Footer from '$lib/components/layoute/Footer.svelte';
 	export const config: Config = {
 		runtime: 'nodejs22.x'
 	};
