@@ -1,14 +1,13 @@
 import { transporter } from '$lib/utils/send-email';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import type { Config } from '@sveltejs/adapter-vercel';
+// import type { Config } from '@sveltejs/adapter-vercel';
 
-export const config: Config = {
-	runtime: 'nodejs22.x'
-};
+// export const config: Config = {
+// 	runtime: 'nodejs22.x'
+// };
 export const POST: RequestHandler = async (event) => {
 	const requestData: { name: string; email: string; text: string } = await event.request.json();
-	console.log(requestData);
 
 	if (!requestData) return json({ status: false, data: { response: 'Send data' } });
 	try {
