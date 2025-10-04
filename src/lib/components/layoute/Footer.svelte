@@ -16,10 +16,10 @@
 					name,
 					email,
 					text
-				}),
-				headers: {
-					'content-type': 'application/json'
-				}
+				})
+				// headers: {
+				// 	'content-type': 'application/json'
+				// }
 			});
 
 			console.log({ resultjson: await result.json() });
