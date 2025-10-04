@@ -22,6 +22,7 @@
 				// }
 			});
 
+			console.log({ result });
 			console.log({ resultjson: await result.json() });
 		} catch (error) {
 			console.log(error);
