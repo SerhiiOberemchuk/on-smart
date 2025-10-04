@@ -15,7 +15,7 @@ export const POST: RequestHandler = async (event) => {
 		// 	subject: `Hello ${requestData.name}`
 		// });
 		// return json({ status: true, data: { response: sendEmail.response } });
-		return json({ status: true, data: { response: requestData } });
+		return json({ status: true, data: { ...requestData } });
 	} catch (error) {
 		return json({ status: false, data: error });
 	}
