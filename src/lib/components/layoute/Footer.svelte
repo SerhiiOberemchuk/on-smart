@@ -16,7 +16,10 @@
 					name,
 					email,
 					text
-				})
+				}),
+				headers: {
+					'x-sveltekit-action': 'true'
+				}
 				// headers: {
 				// 	'content-type': 'application/json'
 				// }
