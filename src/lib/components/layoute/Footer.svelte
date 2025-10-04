@@ -52,7 +52,7 @@
 			>
 		</div>
 	{:else}
-		<form onsubmit={submit} class=" flex flex-col gap-2 lg:max-w-2/3">
+		<form onsubmit={submit} class=" mx-auto flex w-2/3 flex-col gap-2">
 			<input
 				bind:value={name}
 				required
@@ -103,10 +103,13 @@
 <style>
 	.grid_container {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 		row-gap: 6rem;
 	}
 	@media (width >=768px) {
+		.grid_container {
+			grid-template-columns: repeat(auto-fit, minmax(40vw, 1fr));
+		}
 		.grid_container :nth-child(2) {
 			grid-column: 2;
 			justify-self: end;

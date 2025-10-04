@@ -28,7 +28,7 @@
 		</select>
 	{/if}
 
-	<div class=" mt-5 flex flex-col gap-3 md:flex-row md:justify-end">
+	<div class=" mt-5 flex flex-wrap justify-end gap-3">
 		<input
 			bind:value={qnt}
 			defaultValue={1}
@@ -36,7 +36,7 @@
 			min="1"
 			required
 			name="prod quantity"
-			class=" font-bold text-green-700"
+			class=" max-w-fit font-bold text-green-700"
 		/>
 		<button
 			disabled={qnt < 1}
@@ -50,6 +50,3 @@
 		>
 	</div>
 </article>
-
-<style>
-</style>

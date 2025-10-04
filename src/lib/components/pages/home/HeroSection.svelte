@@ -3,7 +3,9 @@
 </script>
 
 <section class="border-y-2 border-yellow-200 py-10">
-	<div class="  flex items-center justify-between gap-10 px-4 md:px-8 xl:px-10">
+	<div
+		class="  flex flex-col items-center justify-between gap-10 px-4 md:px-8 lg:flex-row xl:px-10"
+	>
 		<h1 class=" text-lg md:text-2xl">
 			<strong>La videosorveglianza</strong> è uno dei modi più affidabili per proteggere la tua
 			proprietà. Dopotutto, se non una registrazione video di tutto ciò che accade, se necessario,

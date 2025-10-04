@@ -7,7 +7,7 @@
 	let search = $state('');
 </script>
 
-<header class="container_custom flex max-w-[90rem] items-center justify-between gap-4 p-4">
+<header class="container_custom flex flex-wrap items-center justify-between gap-4 p-4 lg:flex-row">
 	<Logo />
 	{@render nav()}
 	{@render ricerca()}
@@ -59,3 +59,10 @@
 		<p class=" max-w-32 text-center text-2xl text-yellow-200 uppercase">SPEDIZIONE GRATUITA</p>
 	</div>
 {/snippet}
+
+<style>
+	/* header {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	} */
+</style>
