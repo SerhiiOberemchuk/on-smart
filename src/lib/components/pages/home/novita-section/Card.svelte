@@ -1,12 +1,12 @@
 <script lang="ts">
 	import clsx from 'clsx';
 	import { stateBascet } from '../../../../states/bascetState.svelte';
-	import type { ProductType } from '../../../../types';
 	import cardImage from '$lib/assets/images/cardimage.png';
+	import type { ProductType } from '$lib/types';
 
 	let qnt = $state<number>(1);
 	let price = $state(1);
-	$inspect(price);
+
 	const { id, title, variants, price: pr }: ProductType = $props();
 	$effect(() => {
 		if (variants) price = variants[0].price;

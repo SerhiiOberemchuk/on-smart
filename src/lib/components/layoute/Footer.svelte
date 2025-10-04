@@ -1,18 +1,33 @@
 <script lang="ts">
 	import clsx from 'clsx';
-
 	import Logo from '../common/Logo.svelte';
+
+	let name = $state();
+	let email = $state();
+	let text = $state();
+	$inspect({ name });
 	async function submit(e: SubmitEvent) {
 		e.preventDefault();
 
-		const form = new FormData(e.currentTarget as HTMLFormElement);
-		console.log({ form });
+		try {
+			const result = await fetch('/api/email', {
+				method: 'POST',
+				body: JSON.stringify({
+					name,
+					email,
+					text
+				}),
+				headers: {
+					'content-type': 'application/json'
+				}
+			});
+
+			console.log({ resultjson: await result.json() });
+		} catch (error) {
+			console.log(error);
+		}
 	}
 	let showMessage = $state<boolean>();
-	$effect(() => {
-		// showMessage = sendEmail.result?.status;
-	});
-	// $inspect(data, form);
 </script>
 
 <footer class="container_custom grid_container py-10">
@@ -33,8 +48,9 @@
 			>
 		</div>
 	{:else}
-		<!-- <form onsubmit={submit} class=" flex flex-col gap-2">
+		<form onsubmit={submit} class=" flex flex-col gap-2">
 			<input
+				bind:value={name}
 				required
 				type="text"
 				name="name"
@@ -44,6 +60,7 @@
 			<input
 				required
 				type="email"
+				bind:value={email}
 				name="email"
 				id="email_id"
 				placeholder="e-mail*"
@@ -51,24 +68,18 @@
 			/>
 			<textarea
 				required
+				bind:value={text}
 				name="text"
 				id="messagio_id"
 				placeholder="Messagio*"
 				class=" rounded-md bg-gray-400 font-medium text-black focus:border-2 focus:border-green-500 focus:bg-amber-200"
 			></textarea>
 			<button
-				disabled={sendEmail.pending ? true : false}
-				class={clsx(
-					'mx-auto rounded-xl px-10 py-2 font-bold text-white uppercase',
-					sendEmail.pending ? 'bg-green-300' : 'bg-green-700'
-				)}
-				>{#if sendEmail.pending}
-					<span class="">...load</span>
-				{:else}
-					<span>Inviare</span>
-				{/if}</button
+				class={clsx('mx-auto rounded-xl px-10 py-2 font-bold text-white uppercase', 'bg-green-700')}
 			>
-		</form> -->
+				<span>Inviare</span>
+			</button>
+		</form>
 	{/if}
 </footer>
 
