@@ -1,4 +1,4 @@
-import { transporter } from '$lib/utils/send-email';
+// import { transporter } from '$lib/utils/send-email';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -8,13 +8,14 @@ export const POST: RequestHandler = async (event) => {
 
 	if (!requestData) return json({ status: false, data: { response: 'Send data' } });
 	try {
-		const sendEmail = await transporter.sendMail({
-			from: 'Serhii',
-			to: requestData.email,
-			text: requestData.text,
-			subject: `Hello ${requestData.name}`
-		});
-		return json({ status: true, data: { response: sendEmail.response } });
+		// const sendEmail = await transporter.sendMail({
+		// 	from: 'Serhii',
+		// 	to: requestData.email,
+		// 	text: requestData.text,
+		// 	subject: `Hello ${requestData.name}`
+		// });
+		// return json({ status: true, data: { response: sendEmail.response } });
+		return json({ status: true, data: { response: requestData } });
 	} catch (error) {
 		return json({ status: false, data: { response: error } });
 	}
