@@ -2,13 +2,15 @@
 	import clsx from 'clsx';
 	import Logo from '../common/Logo.svelte';
 
-	let name = $state();
-	let email = $state();
-	let text = $state();
-	$inspect({ name });
+	let name = $state<string | null>(null);
+	let email = $state<string | null>(null);
+	let text = $state<string | null>(null);
+	let showMessage = $state<boolean>(false);
+	let loading = $state<boolean>(false);
+	let errorMsg = $state<string | null>(null);
 	async function submit(e: SubmitEvent) {
 		e.preventDefault();
-
+		loading = true;
 		try {
 			const result = await fetch('/api/email', {
 				method: 'POST',
@@ -16,22 +18,26 @@
 					name,
 					email,
 					text
-				}),
-				headers: {
-					'x-sveltekit-action': 'true'
-				}
+				})
+				// headers: {
+				// 	'x-sveltekit-action': 'true'
+				// }
 				// headers: {
 				// 	'content-type': 'application/json'
 				// }
 			});
 
-			console.log({ result });
-			console.log({ resultjson: await result.json() });
+			showMessage = true;
+			name = null;
+			email = null;
+			text = null;
 		} catch (error) {
-			console.log(error);
+			console.error(error);
+			errorMsg = 'Si è verificato un errore. Riprova più tardi.';
+		} finally {
+			loading = false;
 		}
 	}
-	let showMessage = $state<boolean>();
 </script>
 
 <footer class="container_custom grid_container py-10">
@@ -44,11 +50,15 @@
 	</address>
 	{#if showMessage}
 		<div>
-			<h2>Grazzie!!!!!</h2>
+			<h2>
+				Grazie per averci contattato! <br /> Il team On-Smart ha ricevuto il tuo messaggio e ti
+				risponderà al più presto. <br />Apprezziamo la tua fiducia e siamo sempre a disposizione per
+				offrirti assistenza e le migliori soluzioni tecnologiche.
+			</h2>
 			<button
 				type="button"
 				class=" rounded-xl bg-green-700 p-2 font-bold"
-				onclick={() => (showMessage = false)}>Invia nuovo message</button
+				onclick={() => (showMessage = false)}>Invia un nuovo message</button
 			>
 		</div>
 	{:else}
@@ -78,10 +88,13 @@
 				placeholder="Messagio*"
 				class=" rounded-md bg-gray-400 font-medium text-black focus:border-2 focus:border-green-500 focus:bg-amber-200"
 			></textarea>
+			{#if errorMsg}
+				<p class="font-medium text-red-700">{errorMsg}</p>
+			{/if}
 			<button
 				class={clsx('mx-auto rounded-xl px-10 py-2 font-bold text-white uppercase', 'bg-green-700')}
 			>
-				<span>Inviare</span>
+				{loading ? 'Invio...' : 'Inviare'}
 			</button>
 		</form>
 	{/if}
