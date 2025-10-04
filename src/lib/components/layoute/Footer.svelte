@@ -8,6 +8,7 @@
 	let showMessage = $state<boolean>(false);
 	let loading = $state<boolean>(false);
 	let errorMsg = $state<string | null>(null);
+
 	async function submit(e: SubmitEvent) {
 		e.preventDefault();
 		loading = true;
@@ -19,12 +20,6 @@
 					email,
 					text
 				})
-				// headers: {
-				// 	'x-sveltekit-action': 'true'
-				// }
-				// headers: {
-				// 	'content-type': 'application/json'
-				// }
 			});
 
 			showMessage = true;
@@ -42,14 +37,9 @@
 
 <footer class="container_custom grid_container py-10">
 	<Logo />
-	<address>
-		<h2>OLENA NUDZHEVSKA</h2>
-		<p>83100 Avellino</p>
-		<a href="tel:+393516930878">+393516930878</a>
-		<a href="mailto:info@on-smart.it">info@on-smart.it</a>
-	</address>
+
 	{#if showMessage}
-		<div>
+		<div class="lg:max-w-2/3">
 			<h2>
 				Grazie per averci contattato! <br /> Il team On-Smart ha ricevuto il tuo messaggio e ti
 				risponderà al più presto. <br />Apprezziamo la tua fiducia e siamo sempre a disposizione per
@@ -57,12 +47,12 @@
 			</h2>
 			<button
 				type="button"
-				class=" rounded-xl bg-green-700 p-2 font-bold"
+				class=" mx-auto rounded-xl bg-green-700 p-2 font-bold hover:bg-green-500"
 				onclick={() => (showMessage = false)}>Invia un nuovo message</button
 			>
 		</div>
 	{:else}
-		<form onsubmit={submit} class=" flex flex-col gap-2">
+		<form onsubmit={submit} class=" flex flex-col gap-2 lg:max-w-2/3">
 			<input
 				bind:value={name}
 				required
@@ -92,17 +82,34 @@
 				<p class="font-medium text-red-700">{errorMsg}</p>
 			{/if}
 			<button
-				class={clsx('mx-auto rounded-xl px-10 py-2 font-bold text-white uppercase', 'bg-green-700')}
+				disabled={loading}
+				class={clsx(
+					'mx-auto mt-5 rounded-xl px-10 py-2 font-bold text-white uppercase',
+					loading ? 'cursor-not-allowed bg-green-500' : 'bg-green-700 hover:bg-green-300'
+				)}
 			>
 				{loading ? 'Invio...' : 'Inviare'}
 			</button>
 		</form>
 	{/if}
+	<address class=" flex flex-col justify-start not-italic">
+		<h2>OLENA NUDZHEVSKA</h2>
+		<p>83100 Avellino</p>
+		<a class=" max-w-fit hover:text-green-300" href="tel:+393516930878">+393516930878</a>
+		<a class=" max-w-fit hover:text-green-300" href="mailto:info@on-smart.it">info@on-smart.it</a>
+	</address>
 </footer>
 
 <style>
 	.grid_container {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		row-gap: 6rem;
+	}
+	@media (width >=768px) {
+		.grid_container :nth-child(2) {
+			grid-column: 2;
+			justify-self: end;
+		}
 	}
 </style>
