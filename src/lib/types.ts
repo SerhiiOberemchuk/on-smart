@@ -5,7 +5,6 @@ export type ProductType = {
 	price: number;
 	variants?: { price: number; option: string }[];
 };
-
 export type Email = {
 	email: string;
 	name: string;
