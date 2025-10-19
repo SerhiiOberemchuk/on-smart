@@ -6,8 +6,13 @@ import "./globals.css";
 
 import Header from "@/layout/Header";
 import Footer from "@/layout/Footer";
+
+// export const dynamic = "force-static";
+
 const fixelFont = localFont({
   src: "../fonts/FixelVariable.woff2",
+  display: "auto",
+  preload: true,
 });
 
 export const metadata: Metadata = {

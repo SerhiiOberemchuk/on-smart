@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function HomePage({ children }: { children?: React.ReactNode }) {
   const [count, setCount] = useState(0);
-  useEffect(() => {
-    console.log("Render Home Page component");
-  });
+
   return (
     <div className="p-8">
       <h1>
