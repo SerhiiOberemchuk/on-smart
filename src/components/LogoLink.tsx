@@ -1,16 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
+import logo from "../../public/logo.svg";
 
 export default function LogoLink() {
   return (
     <Link href="/" className="flex w-fit m-0 p-0" aria-label="link a casa">
       <Image
-        className="h-auto"
-        src={"/logo.svg"}
+        className=""
+        src={logo}
         width={50}
-        height={34.7}
+        // style={{ height: "auto" }}
         alt="logo link"
-        priority
       />
     </Link>
   );
