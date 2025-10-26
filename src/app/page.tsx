@@ -1,10 +1,10 @@
-import Con from "@/components/IncreasComponent";
-import HomePage from "./HomePage";
+import HomePage from "@/pages/home-page/HomePage";
+import HeroSection from "@/pages/home-page/section/HeroSection";
 
 export default function Home() {
   return (
     <HomePage>
-      <Con />
+      <HeroSection />
     </HomePage>
   );
 }
