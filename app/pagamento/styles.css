@@ -1,0 +1,18 @@
+[data-sumup-id="widget__container"] {
+  background-color: var(--color-black);
+  color: white;
+  line-height: 18px;
+}
+[data-sumup-id="widget_header__icon"] {
+  margin-inline: auto;
+}
+[data-sumup-id="widget_header"] {
+  /* background-color: aqua; */
+}
+[data-sumup-id="widget_header__title"] {
+  color: white;
+}
+[data-testid="hostedfield--cardholder_name"] {
+  background-color: black;
+  color: brown;
+}

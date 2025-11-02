@@ -1,0 +1,23 @@
+@layer base {
+  .H1 {
+    font-weight: 500;
+    font-size: 54px;
+    line-height: 100%;
+    
+  }
+  .H2 {
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 100%;
+      }
+  .H5 {
+    font-weight: 500;
+    font-size: 1.25rem;
+    line-height: 100%;letter-spacing: 0;
+     }
+  .btn {
+    font-weight: 600;
+    font-size: clamp(1rem, calc(1rem + (0.25rem * ((100vw - 375px) / (1440px - 375px)))), 1.25rem);
+    line-height: 100%;
+  }
+}

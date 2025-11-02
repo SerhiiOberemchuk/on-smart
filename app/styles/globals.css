@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "./colors.css";
+@import "./root.css";
+@import "./typography.css";
+
+/* @media (prefers-color-scheme: dark) {
+  :root {
+    --background: #000000;
+    --foreground: #ededed;
+  }
+} */
