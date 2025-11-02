@@ -1,5 +1,3 @@
-import { ButtonArrow } from "../../../../components/ButtonArrows";
-
 export default function TopSalesSection() {
   const hand = () => {
     console.log("fsdfsd");
