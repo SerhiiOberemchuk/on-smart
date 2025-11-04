@@ -9,9 +9,13 @@ import { twMerge } from "tailwind-merge";
 export default function Navigation({
   className,
   onClick,
+  linkPY,
+  mobile = false,
 }: {
   className?: string;
   onClick?: () => void;
+  linkPY?: string;
+  mobile?: boolean;
 }) {
   const pathname = usePathname();
   return (
@@ -25,7 +29,12 @@ export default function Navigation({
           key={item.href}
           href={item.href}
           onClick={onClick}
-          className={clsx("H5", pathname === item.href && "text-yellow-600")}
+          className={clsx(
+            "H5 xl:hover:underline",
+            pathname === item.href && "text-yellow-600 underline",
+            mobile ? "w-full" : "p-3",
+            linkPY,
+          )}
         >
           {item.label}
         </Link>

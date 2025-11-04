@@ -1,23 +1,66 @@
 @layer base {
   .H1 {
     font-weight: 500;
-    font-size: 54px;
+    font-size: clamp(2rem, calc(2rem + (1.375rem * ((100vw - 375px) / 1065px))), 3.375rem);
     line-height: 100%;
-    
   }
+
   .H2 {
     font-weight: 600;
-    font-size: 36px;
+    font-size: clamp(
+      1.75rem,
+      calc(1.75rem + (0.25rem * ((100vw - 375px) / (1440px - 375px)))),
+      2.25rem
+    );
     line-height: 100%;
-      }
+  }
+  .H3 {
+    font-weight: 500;
+    font-size: clamp(
+      1.5rem,
+      calc(1.5rem + (0.25rem * ((100vw - 375px) / (1440px - 375px)))),
+      1.75rem
+    );
+    line-height: 100%;
+  }
   .H5 {
     font-weight: 500;
     font-size: 1.25rem;
-    line-height: 100%;letter-spacing: 0;
-     }
+    line-height: 100%;
+    letter-spacing: 0;
+  }
   .btn {
     font-weight: 600;
     font-size: clamp(1rem, calc(1rem + (0.25rem * ((100vw - 375px) / (1440px - 375px)))), 1.25rem);
     line-height: 100%;
+  }
+  .price_clossed {
+    font-weight: 400;
+    font-size: clamp(1rem, calc(1rem + (0.25rem * ((100vw - 375px) / (1440px - 375px)))), 1.5rem);
+    line-height: 120%;
+    text-decoration: line-through;
+    color: var(--text-grey);
+  }
+  .helper_XXS {
+    font-weight: 500;
+    font-size: 0.625rem;
+    line-height: 100%;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--white);
+  }
+  .body_R_20 {
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 120%;
+    color: var(--white);
+  }
+  @media (width >= 64rem) {
+    .helper_XXS {
+      font-size: 0.75rem;
+    }
+    .body_R_20 {
+      font-size: 1.25rem;
+    }
   }
 }

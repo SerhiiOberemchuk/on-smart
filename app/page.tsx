@@ -4,8 +4,8 @@ import TopSalesSection from "./(home-sections)/top-sales-section/TopSalesSection
 export default function Home() {
   return (
     <>
-      {/* <HeroSection /> */}
-      {/* <TopSalesSection /> */}
+      <HeroSection />
+      <TopSalesSection />
     </>
   );
 }

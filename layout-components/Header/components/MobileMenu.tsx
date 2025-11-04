@@ -28,10 +28,11 @@ export default function MobileMenu() {
       <dialog
         id="mobile"
         ref={dialog}
-        className="fixed top-0 bottom-0 left-0 min-h-dvh min-w-dvw bg-black/50"
+        className="fixed top-0 bottom-0 left-0 min-h-dvh min-w-dvw bg-black/50 xl:hidden"
         aria-modal="true"
+        onClick={handleCloseMenu}
       >
-        <div className="bg-black px-4 py-6">
+        <div className="bg-black px-4 py-6" onClick={(e) => e.stopPropagation()}>
           <button
             className="btn mr-0 ml-auto flex rounded-sm border border-amber-500 px-4 py-3 text-white"
             aria-label="Chiudi menu"
@@ -40,8 +41,10 @@ export default function MobileMenu() {
             Chiudi
           </button>
           <Navigation
+            linkPY="py-5"
+            mobile
             onClick={handleCloseMenu}
-            className="mt-8 ml-0 flex flex-col items-start gap-11 text-white xl:hidden"
+            className="mt-8 ml-0 flex max-w-full flex-col items-start pl-0 text-white xl:hidden"
           />
         </div>
       </dialog>

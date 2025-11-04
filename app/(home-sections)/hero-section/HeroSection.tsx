@@ -1,5 +1,5 @@
-import LinkCatalogo from "@/components/LinkCatalogo";
 import Carousel from "./carousel/Carousel";
+import { twMerge } from "tailwind-merge";
 // import dynamic from "next/dynamic";
 // import Image from "next/image";
 // const Carousel = dynamic(() => import("./carousel/Carousel"), {
@@ -22,14 +22,16 @@ import Carousel from "./carousel/Carousel";
 
 export default function HeroSection() {
   return (
-    <section id="hero" className="relative">
-      <div className="absolute top-[214px] left-0 z-10 pl-10">
-        <h1 className="H1 mb-6">
-          Proteggi ciò che ami <br /> con i nostri sistemi <br /> di videosorveglianza.
-        </h1>
-        <LinkCatalogo>Vai allo shop</LinkCatalogo>
+    <section id="hero" className="">
+      <div className={twMerge("container px-0")}>
+        {/* <div className="absolute top-[214px] left-0 z-10 pl-10">
+          <h1 className="H1 mb-6">
+            Proteggi ciò che ami <br /> con i nostri sistemi <br /> di videosorveglianza.
+          </h1>
+          <LinkCatalogo>Vai allo shop</LinkCatalogo>
+        </div> */}
+        <Carousel />
       </div>
-      <Carousel />
     </section>
   );
 }

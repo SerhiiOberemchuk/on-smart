@@ -1,0 +1,11 @@
+.top_products_list {
+  display: flex;
+  width: 100%;
+  max-width: 90rem;
+  overflow-x: scroll;
+  margin-inline: auto;
+  padding-left: clamp(1rem, calc(1rem + (1.5rem * ((100vw - 375px) / (1440px - 375px)))), 2.5rem);
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-grey-hover-stroke) transparent;
+}

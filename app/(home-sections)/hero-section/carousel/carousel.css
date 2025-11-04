@@ -1,13 +1,14 @@
-.hero_swiper .swiper-slide img {
-  /* display: block;
+/* .hero_swiper .swiper-slide img {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover; */
-}
+  object-fit: cover;
+} */
 
 .hero_swiper .autoplay-progress {
   position: absolute;
-  right: 16px;
+  right: auto;
+  left: 1rem;
   bottom: 16px;
   z-index: 10;
   /* background-color: aqua; */
@@ -16,7 +17,12 @@
   display: flex;
   align-items: center;
 }
-
+@media (width >=80rem) {
+  .hero_swiper .autoplay-progress {
+    right: 1rem;
+    left: auto;
+  }
+}
 .hero_swiper .circle_wrapper svg {
   left: 0;
   position: absolute;
@@ -49,4 +55,10 @@
 .hero_swiper .swiper-pagination-bullet-active {
   background-color: var(--color-green);
   width: 28px;
+}
+.title_home_carousel {
+  position: absolute;
+  left: 0;
+  z-index: 10;
+  top: clamp(13.375rem, calc(23.75rem - (10.375rem * ((100vw - 375px) / 1065px))), 23.75rem);
 }

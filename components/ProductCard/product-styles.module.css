@@ -1,0 +1,7 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: clamp(13rem, calc(13rem + (6rem * ((100vw - 375px) / 1065px))), 19rem);
+  background: linear-gradient(180deg, #4b4a4a 0%, #1a1919 100%);
+}
