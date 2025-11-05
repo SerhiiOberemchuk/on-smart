@@ -1,5 +1,6 @@
 import LinkYellow from "@/components/YellowLink";
 import ProductsList from "./ProductList/ProductsList";
+import ScrollButtons from "./ProductList/ScrollButtons";
 
 export default async function TopSalesSection() {
   return (
@@ -7,10 +8,7 @@ export default async function TopSalesSection() {
       <div className="bg-background">
         <div className="container flex items-center justify-between py-3">
           <h2 className="H2">Più venduto</h2>
-          <nav>
-            {/* <ButtonArrow direction="left"  /> */}
-            {/* <ButtonArrow direction="right"  /> */}
-          </nav>
+          <ScrollButtons />
         </div>
       </div>
       <ProductsList />

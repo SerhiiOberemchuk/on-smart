@@ -5,7 +5,11 @@
   overflow-x: scroll;
   margin-inline: auto;
   padding-left: clamp(1rem, calc(1rem + (1.5rem * ((100vw - 375px) / (1440px - 375px)))), 2.5rem);
-
+  scroll-snap-type: x mandatory;
   scrollbar-width: thin;
   scrollbar-color: var(--color-grey-hover-stroke) transparent;
+  scroll-behavior: smooth;
+  > li {
+    scroll-snap-align: center;
+  }
 }

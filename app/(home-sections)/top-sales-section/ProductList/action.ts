@@ -3,7 +3,7 @@
 import { Product } from "@/types/product.type";
 
 export async function getTopProducts(page?: number) {
-  console.log({ page });
+  console.log({ getTopProductsPage: page });
 
   // const res = await fetch(`${process.env.API_URL}/products?filter=top&page=${page}`, {
   //   headers: {
@@ -17,7 +17,7 @@ export async function getTopProducts(page?: number) {
   const products: Product[] = Array.from({ length: 20 }, (_, i) => {
     const product: Product = {
       id: `${i + 1}`,
-      name: `Distributore automatico di sapone ${i + 1 + 50000977951546454545 * i}`,
+      name: `Distributore automatico di sapone ${i + 1 + 5077951546454545 * i}`,
       category: "telecamere" + i,
       description: `Distributore automatico di sapone${i + 1}`,
       price: (i + 1) * 12.9,
