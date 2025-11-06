@@ -1,18 +1,58 @@
 import LinkYellow from "@/components/YellowLink";
 import ProductsList from "./ProductList/ProductsList";
 import ScrollButtons from "./ProductList/ScrollButtons";
+import { getTopProducts } from "./ProductList/action";
+import Script from "next/script";
 
 export default async function TopSalesSection() {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  const initialProducts = await getTopProducts(1);
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Più venduto - Prodotti più popolari",
+    description:
+      "Scopri i prodotti più venduti di OnSmart: sistemi di videosorveglianza, accessori e dispositivi smart per la sicurezza domestica.",
+    itemListOrder: "https://schema.org/ItemListOrderAscending",
+    numberOfItems: initialProducts.length,
+    itemListElement: initialProducts.map((p, i) => ({
+      "@type": "Product",
+      position: i + 1,
+      name: p.name,
+      image: p.imgSrc.startsWith("https") ? p.imgSrc : `${baseUrl}${p.imgSrc}`,
+      brand: {
+        "@type": "Brand",
+        name: p.brand ?? "OnSmart",
+      },
+      description: p.description,
+      offers: {
+        "@type": "Offer",
+        url: `${baseUrl}/catalogo/${encodeURIComponent(
+          p.category,
+        )}/${encodeURIComponent(p.brand)}/${p.id}`,
+        priceCurrency: "EUR",
+        price: p.price,
+        availability: "https://schema.org/InStock",
+      },
+    })),
+  };
   return (
-    <section id="top-sales-section" className="flex flex-col gap-6 py-16">
+    <section id="top-sales-section" className="flex flex-col gap-4 py-8 xl:gap-8 xl:py-16">
       <div className="bg-background">
         <div className="container flex items-center justify-between py-3">
           <h2 className="H2">Più venduto</h2>
           <ScrollButtons />
         </div>
       </div>
-      <ProductsList />
+      <ProductsList initialProducts={initialProducts} />
       <LinkYellow href="/catalogo" title="Vai allo shop" className="mx-auto flex w-fit" />
+      <Script
+        id="section-top-sales-products"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     </section>
   );
 }

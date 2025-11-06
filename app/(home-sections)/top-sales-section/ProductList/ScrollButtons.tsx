@@ -1,33 +1,24 @@
 "use client";
 
 import { ButtonArrow } from "@/components/ButtonArrows";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import type { Swiper as SwiperInstance } from "swiper";
+type SwiperHostElement = HTMLElement & { swiper: SwiperInstance };
 
 export default function ScrollButtons() {
-  const listItem = useRef<HTMLElement | null>(null);
-  const list = useRef<HTMLElement | null>(null);
-  const [scrollAmount, setScrollAmount] = useState(0);
+  const sliderRef = useRef<SwiperInstance | null>(null);
 
   useEffect(() => {
-    listItem.current = document.getElementById("top-products-item");
-    list.current = document.getElementById("top-products-list");
-    if (listItem.current && list.current) {
-      setScrollAmount(listItem.current.offsetWidth + 16);
+    const getSwiper = document.querySelector(".top_products_swiper") as SwiperHostElement | null;
+    if (getSwiper?.swiper) {
+      sliderRef.current = getSwiper.swiper;
     }
-  }, [listItem, list]);
-  const handleScroll = (direction: "left" | "right") => {
-    if (list.current) {
-      const scrollOptions: ScrollToOptions = {
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      };
-      list.current.scrollBy(scrollOptions);
-    }
-  };
+  }, []);
+
   return (
     <nav>
-      <ButtonArrow direction="left" onClick={() => handleScroll("left")} />
-      <ButtonArrow direction="right" onClick={() => handleScroll("right")} />
+      <ButtonArrow direction="left" onClick={() => sliderRef.current?.slidePrev()} />
+      <ButtonArrow direction="right" onClick={() => sliderRef.current?.slideNext()} />
     </nav>
   );
 }

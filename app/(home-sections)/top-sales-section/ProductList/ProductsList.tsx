@@ -1,22 +1,36 @@
-import CardProduct from "@/components/ProductCard/CardProduct";
-import { getTopProducts } from "./action";
-import styles from "./styles.module.css";
-import { clsx } from "clsx";
-import TriggerLoadMore from "./TriggerLoadMore";
+"use client";
 
-export default async function ProductsList() {
-  const products = await getTopProducts(1);
+import CardProduct from "@/components/ProductCard/CardProduct";
+import { useState } from "react";
+import { Product } from "@/types/product.type";
+import { SwiperSlide, Swiper } from "swiper/react";
+import { getTopProducts } from "./action";
+
+import "./styles.css";
+import "swiper/css";
+
+export default function ProductsList({ initialProducts }: { initialProducts: Product[] }) {
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [page, setPage] = useState(1);
+  const loadMoreProducts = async () => {
+    const newProducts = await getTopProducts(page + 1);
+    setProducts((prev) => [...prev, ...newProducts]);
+    setPage((prev) => prev + 1);
+  };
   return (
-    <ul
-      id="top-products-list"
-      className={clsx(styles.top_products_list, "gap-3 md:gap-4 xl:gap-5")}
+    <Swiper
+      slidesPerView={"auto"}
+      onReachEnd={() => {
+        loadMoreProducts();
+      }}
+      spaceBetween={20}
+      className="top_products_list top_products_swiper"
     >
-      {products.map((product) => (
-        <li id="top-products-item" key={product.id}>
+      {products.map((product, index) => (
+        <SwiperSlide id="top-products-item" className="" key={index}>
           <CardProduct {...product} />
-        </li>
+        </SwiperSlide>
       ))}
-      <TriggerLoadMore />
-    </ul>
+    </Swiper>
   );
 }

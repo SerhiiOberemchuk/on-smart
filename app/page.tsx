@@ -1,3 +1,4 @@
+import CategorySection from "./(home-sections)/categoty-section/CategorySection";
 import HeroSection from "./(home-sections)/hero-section/HeroSection";
 import TopSalesSection from "./(home-sections)/top-sales-section/TopSalesSection";
 
@@ -6,6 +7,7 @@ export default function Home() {
     <>
       <HeroSection />
       <TopSalesSection />
+      <CategorySection />
     </>
   );
 }

@@ -2,7 +2,7 @@
 
 import { Product } from "@/types/product.type";
 
-export async function getTopProducts(page?: number) {
+export async function getTopProducts(page: number) {
   console.log({ getTopProductsPage: page });
 
   // const res = await fetch(`${process.env.API_URL}/products?filter=top&page=${page}`, {
@@ -14,7 +14,7 @@ export async function getTopProducts(page?: number) {
 
   // if (!res.ok) throw new Error("Failed to load top products");
   // const products: { title: string; id: string; name: string }[] = await res.json();
-  const products: Product[] = Array.from({ length: 20 }, (_, i) => {
+  const products: Product[] = Array.from({ length: 10 + page }, (_, i) => {
     const product: Product = {
       id: `${i + 1}`,
       name: `Distributore automatico di sapone ${i + 1 + 5077951546454545 * i}`,
@@ -24,6 +24,7 @@ export async function getTopProducts(page?: number) {
       imgSrc: "/products/product.png",
       brand: "OnSmart" + i,
       quantity: 1 + i,
+      rating: Number((3).toFixed()),
     };
     if (i % 2 === 0) {
       product.oldPrice = 5 * i + 1;
