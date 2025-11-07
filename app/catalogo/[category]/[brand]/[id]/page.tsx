@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 export default async function CategoryBrandPage({
   params,
 }: {
@@ -8,7 +10,9 @@ export default async function CategoryBrandPage({
     <div>
       Product page:
       <br />
-      Category: {category}, Brand: {brand}, ID: {id}
+      <Suspense>
+        Category: {category}, Brand: {brand}, ID: {id}
+      </Suspense>
     </div>
   );
 }
