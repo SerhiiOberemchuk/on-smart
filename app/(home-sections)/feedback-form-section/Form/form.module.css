@@ -1,0 +1,9 @@
+.form input,
+.form textarea {
+  border-bottom: solid 1px var(--color-stroke-grey);
+  outline: none;
+  margin-top: 0.25rem;
+}
+.form input {
+  height: 2.75rem;
+}

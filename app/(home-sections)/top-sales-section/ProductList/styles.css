@@ -6,3 +6,6 @@
 .top_products_list .swiper-wrapper .swiper-slide {
   width: fit-content;
 }
+/* .top_products_list .swiper-wrapper .swiper-slide:hover {
+  transform: scale(1.05);
+} */

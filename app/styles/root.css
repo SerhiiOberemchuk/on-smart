@@ -1,10 +1,16 @@
+:root {
+  --padding-side-container: clamp(
+    1rem,
+    calc(1rem + (1.5rem * ((100vw - 375px) / (1440px - 375px)))),
+    2.5rem
+  );
+}
 @utility container {
   width: 100%;
   max-width: 90rem;
   margin: 0 auto;
-  padding-inline: clamp(1rem, calc(1rem + (1.5rem * ((100vw - 375px) / (1440px - 375px)))), 2.5rem);
+  padding-inline: var(--padding-side-container);
 }
-
 @layer base {
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
@@ -41,6 +47,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .button_yellow {
+    border-radius: 4px;
+    padding: 12px 16px;
+    background-color: var(--yellow-500);
+  }
 }
 @theme {
   --breakpoint-xs: 30rem;
@@ -53,3 +64,9 @@ html {
   background-color: var(--black);
   opacity: 0.75;
 }
+/* textarea:invalid {
+  border-color: red;
+}
+input:invalid {
+  border-color: red;
+} */

@@ -2,7 +2,7 @@
 
 import CardProduct from "@/components/ProductCard/CardProduct";
 import { useState } from "react";
-import { Product } from "@/types/product.type";
+import { Product } from "@/types/product.types";
 import { SwiperSlide, Swiper } from "swiper/react";
 import { getTopProducts } from "./action";
 
@@ -28,7 +28,7 @@ export default function ProductsList({ initialProducts }: { initialProducts: Pro
     >
       {products.map((product, index) => (
         <SwiperSlide id="top-products-item" className="" key={index}>
-          <CardProduct {...product} />
+          <CardProduct {...product} className="" />
         </SwiperSlide>
       ))}
     </Swiper>

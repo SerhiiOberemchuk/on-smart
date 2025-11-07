@@ -5,7 +5,7 @@
   --yellow-500: #ffb939;
   --yellow-600: #ffa339;
   --yellow-700: #e29b4a;
-  --green: #5c8d3c;
+
   --selected-green: #2e5217;
   --offerta-color: #e53945;
   --red: #d00;
@@ -18,7 +18,10 @@
   --background: #1a1919;
   --black: #121212;
   --blue: #2882b6;
-  --green: #269c1e;
+
+  --green-400: #4dbf03;
+  --green-500: #269c1e;
+  --green-600: #5c8d3c;
   /* --second-family: "Fixel Variable", sans-serif; */
 }
 

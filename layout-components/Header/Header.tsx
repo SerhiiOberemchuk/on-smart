@@ -1,5 +1,5 @@
 import LogoLink from "../../components/LogoLink";
-import Navigation from "./components/Navigation";
+import Navigation from "../../components/Navigation";
 import Search from "./components/Search";
 import Cart from "./components/Cart";
 import MobileMenu from "./components/MobileMenu";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import Navigation from "./Navigation";
+import Navigation from "../../../components/Navigation";
 
 export default function MobileMenu() {
   const dialog = useRef<HTMLDialogElement>(null);

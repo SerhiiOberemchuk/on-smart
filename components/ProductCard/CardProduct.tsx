@@ -1,10 +1,14 @@
-import { Product } from "@/types/product.type";
+import { Product } from "@/types/product.types";
 import Image from "next/image";
 import styles from "./product-styles.module.css";
 import ButtonComparison from "./ButtonComparison";
 import ButtonAddToCart from "./ButtonAddToCart";
 import Link from "next/link";
 import TitleTooltip from "./TitleTooltip";
+
+import clsx from "clsx";
+import starfull from "@/assets/icons/star-full.svg";
+import starempty from "@/assets/icons/star-empty.svg";
 
 export default function CardProduct({
   name,
@@ -15,9 +19,10 @@ export default function CardProduct({
   brand,
   oldPrice,
   rating,
-}: Product) {
+  className,
+}: Product & { className?: string }) {
   return (
-    <article className={styles.card}>
+    <article className={clsx(styles.card, className)}>
       <header className="absolute top-0 right-0 left-0 flex items-center px-1 md:px-2 xl:px-3">
         {oldPrice && <span className="helper_XXS mr-2 bg-offerta-color px-2 py-1">offerta</span>}
         <span className="helper_XXS bg-blue px-2 py-1">in arrivo</span>
@@ -43,42 +48,10 @@ export default function CardProduct({
           </h2>
           <TitleTooltip id="card-title-tooltip" />
           <h3 className="helper_text my-2 text-text-grey capitalize">{category}</h3>
-          <div className="flex gap-px">
-            {Array.from({ length: 5 }, (_, i) => {
-              console.log(rating);
-
-              return rating >= i + 1 ? (
-                <svg
-                  className="size-4 xl:size-6"
-                  key={i}
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M5.81475 22L7.45551 14.9732L2 10.249L9.18624 9.62738L12.0007 3L14.8151 9.62606L22 10.2477L16.5445 14.9719L18.1866 21.9987L12.0007 18.269L5.81475 22Z"
-                    fill="#FFB939"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="size-4 xl:size-6"
-                  key={i}
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M7.83262 19.2253L12.0007 16.7124L16.1687 19.2583L15.0771 14.4971L18.7489 11.3229L13.9193 10.8931L12.0007 6.39635L10.082 10.86L5.2524 11.2899L8.92425 14.4971L7.83262 19.2253ZM5.81475 22L7.45551 14.9732L2 10.249L9.18624 9.62738L12.0007 3L14.8151 9.62606L22 10.2477L16.5445 14.9719L18.1866 21.9987L12.0007 18.269L5.81475 22Z"
-                    fill="#FFB939"
-                  />
-                </svg>
-              );
-            })}
+          <div className="flex gap-1">
+            {Array.from({ length: 5 }, (_, i) => (
+              <Image src={rating >= i + 1 ? starfull : starempty} key={i} alt="Star " aria-hidden />
+            ))}
           </div>
         </figcaption>
       </figure>

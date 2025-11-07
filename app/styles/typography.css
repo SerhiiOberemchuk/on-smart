@@ -55,6 +55,16 @@
     line-height: 120%;
     color: var(--white);
   }
+  .input_R_18 {
+    font-weight: 400;
+    font-size: 1.125rem;
+    line-height: 120%;
+  }
+  .text_R {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 130%;
+  }
   @media (width >= 64rem) {
     .helper_XXS {
       font-size: 0.75rem;

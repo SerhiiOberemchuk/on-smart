@@ -49,7 +49,7 @@ export default async function TopSalesSection() {
       <ProductsList initialProducts={initialProducts} />
       <LinkYellow href="/catalogo" title="Vai allo shop" className="mx-auto flex w-fit" />
       <Script
-        id="section-top-sales-products"
+        id="top-sales-section-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />

@@ -1,9 +1,9 @@
 "use server";
 
-import { Product } from "@/types/product.type";
+import { Product } from "@/types/product.types";
 
 export async function getTopProducts(page: number) {
-  console.log({ getTopProductsPage: page });
+  // console.log({ getTopProductsPage: page });
 
   // const res = await fetch(`${process.env.API_URL}/products?filter=top&page=${page}`, {
   //   headers: {
