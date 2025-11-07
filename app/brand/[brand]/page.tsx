@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 type Props = { params: Promise<{ brand: string }> };
 
@@ -15,5 +16,11 @@ export default async function Page({ params }: Props) {
 
   const { brand } = await params;
 
-  return <section>page brand {JSON.stringify(brand)}</section>;
+  return (
+    <>
+      <Suspense>
+        <section>page brand {JSON.stringify(brand)}</section>
+      </Suspense>
+    </>
+  );
 }
