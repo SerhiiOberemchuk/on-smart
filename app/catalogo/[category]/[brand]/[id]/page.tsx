@@ -5,6 +5,7 @@ export default async function CategoryBrandPage({
 }: {
   params: Promise<{ category: string; brand: string; id: string }>;
 }) {
+  "use cache";
   const { category, brand, id } = await params;
   return (
     <div>

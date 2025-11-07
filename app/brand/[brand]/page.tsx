@@ -12,6 +12,7 @@ export async function generateMetadata(
 }
 
 export default async function Page({ params }: Props) {
+  "use cache";
   const { brand } = await params;
 
   return (
