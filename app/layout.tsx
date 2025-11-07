@@ -7,6 +7,7 @@ import "./styles/globals.css";
 import Header from "@/layout-components/Header/Header";
 import Footer from "@/layout-components/Footer";
 import Head from "next/head";
+import { Suspense } from "react";
 
 const fixelFont = localFont({
   src: "../fonts/FixelVariable.woff2",
@@ -51,7 +52,9 @@ export default function RootLayout({
       <body className={clsx(fixelFont.className, "flex min-h-svh flex-col")}>
         <Header />
         <main className="flex-1">{children}</main>
-        <Footer />
+        <Suspense>
+          <Footer />
+        </Suspense>
       </body>
     </html>
   );

@@ -3,11 +3,12 @@ import ProductsList from "./ProductList/ProductsList";
 import ScrollButtons from "./ProductList/ScrollButtons";
 import { getTopProducts } from "./ProductList/action";
 import Script from "next/script";
+import { baseUrl } from "@/types/baseUrl";
+import { Suspense } from "react";
 
 export default async function TopSalesSection() {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  "use cache";
+
   const initialProducts = await getTopProducts(1);
   const jsonLd = {
     "@context": "https://schema.org",
@@ -46,7 +47,9 @@ export default async function TopSalesSection() {
           <ScrollButtons />
         </div>
       </div>
-      <ProductsList initialProducts={initialProducts} />
+      <Suspense>
+        <ProductsList initialProducts={initialProducts} />
+      </Suspense>
       <LinkYellow href="/catalogo" title="Vai allo shop" className="mx-auto flex w-fit" />
       <Script
         id="top-sales-section-jsonld"

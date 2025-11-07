@@ -4,8 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { baseUrl } from "@/types/baseUrl";
 import Script from "next/script";
+import { Suspense } from "react";
 
 export default async function BrandSection() {
+  "use cache";
   const brands = await getBrands();
   const jsonLd = {
     "@context": "https://schema.org",
@@ -34,21 +36,24 @@ export default async function BrandSection() {
         </div>
       </header>
       <div className="container">
-        <ul className="flex flex-wrap items-center justify-center gap-px lg:gap-3">
-          {brands.map(({ id, brandName, imageUrl, brandType }) => (
-            <li key={id} className="transition-transform duration-300 hover:scale-105">
-              <Link className="flex p-5 md:p-7" href={`/brand/${brandType}`} title={brandName}>
-                <Image
-                  src={imageUrl}
-                  className="h-full w-auto object-contain object-center"
-                  alt={brandName}
-                  height={32}
-                  width={150}
-                />
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <Suspense>
+          {" "}
+          <ul className="flex flex-wrap items-center justify-center gap-px lg:gap-3">
+            {brands.map(({ id, brandName, imageUrl, brandType }) => (
+              <li key={id} className="transition-transform duration-300 hover:scale-105">
+                <Link className="flex p-5 md:p-7" href={`/brand/${brandType}`} title={brandName}>
+                  <Image
+                    src={imageUrl}
+                    className="h-full w-auto object-contain object-center"
+                    alt={brandName}
+                    height={32}
+                    width={150}
+                  />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Suspense>
       </div>
       <LinkYellow href="/catalogo" className="mx-auto flex md:hidden" title="Tutti i prodotti" />
       <Script

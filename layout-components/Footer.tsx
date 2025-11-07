@@ -2,7 +2,8 @@ import LogoLink from "@/components/LogoLink";
 import Navigation from "@/components/Navigation";
 import Link from "next/link";
 
-export default function Footer() {
+export default async function Footer() {
+  "use cache";
   return (
     <footer className="bg-header-footer py-4">
       <div className="container flex flex-col gap-11">

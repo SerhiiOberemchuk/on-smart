@@ -4,8 +4,12 @@ import Script from "next/script";
 import { getGoogleReviews } from "./ReviewList/action";
 import ReviewList from "./ReviewList/ReviewList";
 import { baseUrl } from "@/types/baseUrl";
+import { Suspense } from "react";
+// import { cacheTag } from "next/cache";
 
 export default async function GoogleReviewSection() {
+  "use cache";
+  // cacheTag("google-reviews");
   const reviews = await getGoogleReviews();
   const hasReviews = reviews.length > 0;
   const averageRating =
@@ -48,7 +52,10 @@ export default async function GoogleReviewSection() {
           <ScrollButtons />
         </div>
       </div>
-      <ReviewList reviews={reviews} />
+
+      <Suspense>
+        <ReviewList reviews={reviews} />
+      </Suspense>
       <LinkYellow
         target="_blank"
         rel="noopener noreferrer"

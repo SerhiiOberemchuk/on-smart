@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { Suspense, useRef } from "react";
 import Navigation from "../../../components/Navigation";
 
 export default function MobileMenu() {
@@ -40,12 +40,14 @@ export default function MobileMenu() {
           >
             Chiudi
           </button>
-          <Navigation
-            linkPY="py-5"
-            mobile
-            onClick={handleCloseMenu}
-            className="mt-8 ml-0 flex max-w-full flex-col items-start pl-0 text-white xl:hidden"
-          />
+          <Suspense>
+            <Navigation
+              linkPY="py-5"
+              mobile
+              onClick={handleCloseMenu}
+              className="mt-8 ml-0 flex max-w-full flex-col items-start pl-0 text-white xl:hidden"
+            />
+          </Suspense>
         </div>
       </dialog>
     </>
