@@ -37,7 +37,6 @@ export default async function BrandSection() {
       </header>
       <div className="container">
         <Suspense>
-          {" "}
           <ul className="flex flex-wrap items-center justify-center gap-px lg:gap-3">
             {brands.map(({ id, brandName, imageUrl, brandType }) => (
               <li key={id} className="transition-transform duration-300 hover:scale-105">
@@ -56,11 +55,13 @@ export default async function BrandSection() {
         </Suspense>
       </div>
       <LinkYellow href="/catalogo" className="mx-auto flex md:hidden" title="Tutti i prodotti" />
-      <Script
-        id="brand-section-jsonLd"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <Suspense>
+        <Script
+          id="brand-section-jsonLd"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </Suspense>
     </section>
   );
 }
