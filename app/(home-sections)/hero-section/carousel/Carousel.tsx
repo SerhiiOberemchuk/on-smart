@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useRef, useState } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { Suspense, useRef } from "react";
+import { Swiper, SwiperSlide, useSwiper } from "swiper/react";
 import type { Swiper as SwiperCore } from "swiper";
 
 import Image from "next/image";
@@ -15,7 +15,6 @@ const slides = ["/slider/slide1.webp", "/slider/slide2.webp", "/slider/slide3.we
 
 export default function Carousel() {
   const progressCircle = useRef<SVGSVGElement | null>(null);
-  const [swiperInstance, setSwiperInstance] = useState<SwiperCore | null>(null);
 
   const onAutoplayTimeLeft = (_: SwiperCore, __: number, progress: number) => {
     if (!progressCircle.current) return;
@@ -26,8 +25,8 @@ export default function Carousel() {
     <div className="relative">
       <Suspense>
         <Swiper
-          spaceBetween={30}
-          centeredSlides
+          slidesPerView={1}
+          spaceBetween={0}
           autoplay={{
             delay: 4000,
             disableOnInteraction: false,
@@ -35,11 +34,9 @@ export default function Carousel() {
           pagination={{
             clickable: true,
           }}
-          loop
-          effect="fade"
+          loop={true}
           modules={[Autoplay, Pagination]}
           onAutoplayTimeLeft={onAutoplayTimeLeft}
-          onSwiper={(swiper) => setSwiperInstance(swiper)}
           className="hero_swiper"
         >
           {slides.map((src, i) => (
@@ -73,13 +70,20 @@ export default function Carousel() {
               <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
             </div>
 
-            <div className="hidden items-center justify-between xl:flex">
-              <ButtonArrow direction="left" onClick={() => swiperInstance?.slidePrev()} />
-              <ButtonArrow direction="right" onClick={() => swiperInstance?.slideNext()} />
-            </div>
+            <SlideButtons />
           </div>
-        </Swiper>{" "}
+        </Swiper>
       </Suspense>
     </div>
   );
 }
+
+const SlideButtons = () => {
+  const swiper = useSwiper();
+  return (
+    <div className="hidden items-center justify-between xl:flex">
+      <ButtonArrow direction="left" onClick={() => swiper.slidePrev()} />
+      <ButtonArrow direction="right" onClick={() => swiper.slideNext()} />
+    </div>
+  );
+};
