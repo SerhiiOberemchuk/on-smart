@@ -7,8 +7,10 @@ import type { Swiper as SwiperCore } from "swiper";
 import Image from "next/image";
 import "swiper/css";
 import "swiper/css/pagination";
+import "swiper/css/effect-fade";
+
 import "./carousel.css";
-import { Autoplay, Pagination } from "swiper/modules";
+import { Autoplay, EffectFade, Pagination } from "swiper/modules";
 import { ButtonArrow } from "@/components/ButtonArrows";
 import LinkYellow from "@/components/YellowLink";
 const slides = ["/slider/slide1.webp", "/slider/slide2.webp", "/slider/slide3.webp"];
@@ -34,8 +36,9 @@ export default function Carousel() {
           pagination={{
             clickable: true,
           }}
+          effect={"fade"}
           loop={true}
-          modules={[Autoplay, Pagination]}
+          modules={[Autoplay, Pagination, EffectFade]}
           onAutoplayTimeLeft={onAutoplayTimeLeft}
           className="hero_swiper"
         >
