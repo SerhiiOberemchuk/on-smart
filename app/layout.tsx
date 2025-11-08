@@ -8,6 +8,7 @@ import Header from "@/layout-components/Header/Header";
 import Footer from "@/layout-components/Footer";
 import Head from "next/head";
 import { Suspense } from "react";
+import CardDialog from "@/components/ProductCard/card-dialog-components/CardDialog";
 
 const fixelFont = localFont({
   src: "../fonts/FixelVariable.woff2",
@@ -55,6 +56,7 @@ export default function RootLayout({
         <Suspense>
           <Footer />
         </Suspense>
+        <CardDialog />
       </body>
     </html>
   );

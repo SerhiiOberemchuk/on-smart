@@ -1,13 +1,13 @@
 import LinkYellow from "@/components/YellowLink";
 import ProductsList from "./ProductList/ProductsList";
-import ScrollButtons from "./ProductList/ScrollButtons";
 import { getTopProducts } from "./ProductList/action";
 import Script from "next/script";
 import { baseUrl } from "@/types/baseUrl";
 import { Suspense } from "react";
+import ButtonsScrollSwiper from "@/components/ButtonsScrollSwiper";
 
 export default async function TopSalesSection() {
-  const initialProducts = await getTopProducts(1);
+  const initialProducts = await getTopProducts();
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -42,7 +42,7 @@ export default async function TopSalesSection() {
       <div className="bg-background">
         <div className="container flex items-center justify-between py-3">
           <h2 className="H2">Più venduto</h2>
-          <ScrollButtons />
+          <ButtonsScrollSwiper id="top_products_list_slider" />
         </div>
       </div>
       <Suspense>

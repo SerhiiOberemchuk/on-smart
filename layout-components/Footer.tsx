@@ -1,6 +1,10 @@
 import LogoLink from "@/components/LogoLink";
 import Navigation from "@/components/Navigation";
 import Link from "next/link";
+import icon_location from "@/assets/icons/icon_location.svg";
+import icon_mail from "@/assets/icons/icon_mail.svg";
+import icon_phone from "@/assets/icons/icon_phone.svg";
+import Image from "next/image";
 
 export default async function Footer() {
   return (
@@ -15,9 +19,21 @@ export default async function Footer() {
             />
             <address className="text_R mx-auto flex max-w-fit min-w-fit flex-col items-start gap-2 not-italic">
               <p className="uppercase">OLENA NUDZHEVSKA</p>
-              <span className="decoration-0">83100 Avellino</span>
-              <a href="tel:+393516930878">+393516930878</a>
-              <a href="mailto:info@on-smart.it">info@on-smart.it</a>
+              <span className="flex items-center gap-1">
+                <Image src={icon_location} alt="indirizzo" aria-hidden />
+                <span>83100 Avellino</span>
+              </span>
+              <a className="flex items-center gap-1 xl:hover:scale-105" href="tel:+393516930878">
+                <Image src={icon_phone} alt="telefono" aria-hidden />
+                <span>+393516930878</span>
+              </a>
+              <a
+                className="flex items-center gap-1 xl:hover:scale-105"
+                href="mailto:info@on-smart.it"
+              >
+                <Image src={icon_mail} alt="email" aria-hidden />
+                <span>info@on-smart.it</span>
+              </a>
             </address>
           </div>
         </div>

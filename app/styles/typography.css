@@ -23,6 +23,15 @@
     );
     line-height: 100%;
   }
+  .H4 {
+    font-weight: 400;
+    font-size: clamp(
+      1.25rem,
+      calc(1.25rem + (0.25rem * ((100vw - 375px) / (1440px - 375px)))),
+      1.5rem
+    );
+    line-height: 110%;
+  }
   .H5 {
     font-weight: 500;
     font-size: 1.25rem;
@@ -59,6 +68,11 @@
     font-weight: 400;
     font-size: 1.125rem;
     line-height: 120%;
+  }
+  .input_M_18 {
+    font-weight: 600;
+    font-size: 1.125rem;
+    line-height: 100%;
   }
   .text_R {
     font-weight: 400;

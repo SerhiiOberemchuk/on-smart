@@ -1,10 +1,10 @@
 import LinkYellow from "@/components/YellowLink";
-import ScrollButtons from "./ReviewList/ScrollButtons";
 import Script from "next/script";
 import { getGoogleReviews } from "./ReviewList/action";
 import ReviewList from "./ReviewList/ReviewList";
 import { baseUrl } from "@/types/baseUrl";
 import { Suspense } from "react";
+import ButtonsScrollSwiper from "@/components/ButtonsScrollSwiper";
 
 export default async function GoogleReviewSection() {
   const reviews = await getGoogleReviews();
@@ -46,7 +46,7 @@ export default async function GoogleReviewSection() {
       <div className="bg-background">
         <div className="container flex items-center justify-between py-3">
           <h2 className="H2">Esperienze dei nostri clienti</h2>
-          <ScrollButtons />
+          <ButtonsScrollSwiper id="review_list_slider" />
         </div>
       </div>
 

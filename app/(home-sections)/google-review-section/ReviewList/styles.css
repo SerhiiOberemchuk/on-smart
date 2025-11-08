@@ -5,7 +5,6 @@
 }
 
 .review_list .swiper-wrapper {
-  /* gap: 20px; */
   padding-block: 1px;
   padding-bottom: 30px;
 }
@@ -15,18 +14,7 @@
 .review_list .swiper-pagination {
   bottom: 0px;
 }
-.review_list .swiper-pagination .swiper-pagination-bullet {
-  size: 6px;
-  border-radius: 6px;
-  opacity: 1;
-  background-color: var(--text-grey);
-  transition: all 0.3s ease;
-}
-.review_list .swiper-pagination .swiper-pagination-bullet-active {
-  background-color: var(--color-green-600);
 
-  width: 28px;
-}
 @media (width >= 64rem) {
   .review_list .swiper-wrapper {
     padding-bottom: 0;

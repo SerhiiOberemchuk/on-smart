@@ -1,14 +1,15 @@
 "use client";
 
 import { ButtonHTMLAttributes } from "react";
+import { twMerge } from "tailwind-merge";
 
 type ArrowButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   direction: "left" | "right";
 };
 
-export function ButtonArrow({ direction, ...rest }: ArrowButtonProps) {
+export function ButtonArrow({ direction, className, ...rest }: ArrowButtonProps) {
   return (
-    <button type="button" {...rest} className="h-12 w-12 cursor-pointer">
+    <button type="button" {...rest} className={twMerge("h-12 w-12 cursor-pointer", className)}>
       {direction === "left" ? (
         <svg
           width="48"
