@@ -1,5 +1,8 @@
 import { Metadata } from "next";
+import { cacheLife } from "next/cache";
 import { Suspense } from "react";
+import Section from "./Section";
+import { getBrand } from "./action";
 
 type Props = { params: Promise<{ brand: string }> };
 
@@ -8,18 +11,23 @@ export async function generateMetadata(
   //   parent: ResolvedMetadata,
 ): Promise<Metadata> {
   const { brand } = await params;
-  return { title: `Brand - ${brand}` };
+  const brandName = (await getBrand(brand)).brand;
+  return { title: `Brand - ${brandName}` };
 }
 
 export default async function Page({ params }: Props) {
-  "use cache";
   const { brand } = await params;
+
+  const brandName = (await getBrand(brand)).brand;
 
   return (
     <section>
-      <Suspense fallback={<p>Loading brand...</p>}>
-        <p> page brand {JSON.stringify(brand)}</p>
-      </Suspense>
+      {/* <Suspense fallback={<p>Loading brand...</p>}> */}
+      <p> page brand </p>
+      {/* <p>{brandName}</p> */}
+
+      {/* <Section title={brandName} /> */}
+      {/* </Suspense> */}
     </section>
   );
 }

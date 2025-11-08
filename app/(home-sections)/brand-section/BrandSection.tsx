@@ -7,7 +7,6 @@ import Script from "next/script";
 import { Suspense } from "react";
 
 export default async function BrandSection() {
-  "use cache";
   const brands = await getBrands();
   const jsonLd = {
     "@context": "https://schema.org",
@@ -55,13 +54,12 @@ export default async function BrandSection() {
         </Suspense>
       </div>
       <LinkYellow href="/catalogo" className="mx-auto flex md:hidden" title="Tutti i prodotti" />
-      <Suspense>
-        <Script
-          id="brand-section-jsonLd"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </Suspense>
+
+      <Script
+        id="brand-section-jsonLd"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     </section>
   );
 }

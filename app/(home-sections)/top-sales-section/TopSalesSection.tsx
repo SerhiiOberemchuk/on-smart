@@ -7,8 +7,6 @@ import { baseUrl } from "@/types/baseUrl";
 import { Suspense } from "react";
 
 export default async function TopSalesSection() {
-  "use cache";
-
   const initialProducts = await getTopProducts(1);
   const jsonLd = {
     "@context": "https://schema.org",
