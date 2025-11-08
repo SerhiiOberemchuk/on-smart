@@ -27,6 +27,7 @@ export async function getTopProducts() {
       rating: Number((5).toFixed()),
       inStock: i % 3 === 0 ? 0 : 10,
       images: ["/products/category1.avif", "/products/product.png"],
+      logo: "/products/logo-mach-power.svg",
     };
     if (i % 2 === 0) {
       product.oldPrice = 5 * i + 1;
