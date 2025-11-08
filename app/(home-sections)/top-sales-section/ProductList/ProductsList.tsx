@@ -4,12 +4,23 @@ import CardProduct from "@/components/ProductCard/CardProduct";
 import { Product } from "@/types/product.types";
 import { SwiperSlide, Swiper } from "swiper/react";
 
-import "./styles.css";
 import "swiper/css";
+import "./styles.css";
+import { Navigation } from "swiper/modules";
 
 export default function ProductsList({ initialProducts }: { initialProducts: Product[] }) {
   return (
-    <Swiper slidesPerView={"auto"} spaceBetween={20} id="top_products_list_slider" className="top_products_list">
+    <Swiper
+      slidesPerView={"auto"}
+      spaceBetween={20}
+      id="top_products_list_slider"
+      modules={[Navigation]}
+      navigation={{
+        nextEl: "#top_products_list_slider_next",
+        prevEl: "#top_products_list_slider_prev",
+      }}
+      className="top_products_list"
+    >
       {initialProducts.map((product, index) => (
         <SwiperSlide id="top-products-item" className="" key={index}>
           <CardProduct {...product} className="" />

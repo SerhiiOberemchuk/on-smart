@@ -46,7 +46,11 @@ export default async function GoogleReviewSection() {
       <div className="bg-background">
         <div className="container flex items-center justify-between py-3">
           <h2 className="H2">Esperienze dei nostri clienti</h2>
-          <ButtonsScrollSwiper id="review_list_slider" />
+          <ButtonsScrollSwiper
+            className="hidden sm:flex"
+            idNext="review_list_slider_next"
+            idPrev="review_list_slider_prev"
+          />
         </div>
       </div>
 

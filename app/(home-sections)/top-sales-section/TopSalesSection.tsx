@@ -42,7 +42,10 @@ export default async function TopSalesSection() {
       <div className="bg-background">
         <div className="container flex items-center justify-between py-3">
           <h2 className="H2">Più venduto</h2>
-          <ButtonsScrollSwiper id="top_products_list_slider" />
+          <ButtonsScrollSwiper
+            idNext="top_products_list_slider_next"
+            idPrev="top_products_list_slider_prev"
+          />
         </div>
       </div>
       <Suspense>

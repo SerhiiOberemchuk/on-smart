@@ -11,7 +11,7 @@ import "swiper/css/pagination";
 import "./styles.css";
 import { Tooltip } from "react-tooltip";
 import { formatDate } from "@/utils/formatter-data";
-import { Pagination } from "swiper/modules";
+import { Navigation, Pagination } from "swiper/modules";
 import StarsRating from "@/components/StarsRating";
 
 export default function ReviewList({ reviews }: { reviews: GoogleReview[] }) {
@@ -20,8 +20,9 @@ export default function ReviewList({ reviews }: { reviews: GoogleReview[] }) {
       id="review_list_slider"
       slidesPerView={"auto"}
       spaceBetween={20}
-      modules={[Pagination]}
+      modules={[Pagination, Navigation]}
       pagination={{ clickable: true }}
+      navigation={{ nextEl: "#review_list_slider_next", prevEl: "#review_list_slider_prev" }}
       className="review_list"
     >
       {reviews.map((item, index) => (
