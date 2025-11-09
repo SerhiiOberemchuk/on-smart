@@ -19,7 +19,7 @@ const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 export default function CardDialog() {
   const { isOpenDialog, product, closeDialog } = useCardDialogStore();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [supportProducts, setSupportProducts] = useState<Product[] | null>(null);
+  // const [supportProducts, setSupportProducts] = useState<Product[] | null>(null);
   const [variants, setVariants] = useState<Product[] | null>(null);
   const [variantsToShow, setVariantsToShow] = useState(NUMBER_OF_VARIANTS_TO_SHOW);
   const [productQuantityAddToCart, setProductQuantityAddToCart] = useState<number>(1);
@@ -69,7 +69,7 @@ export default function CardDialog() {
       <div className="fixed top-0 right-0 bottom-0 left-0 overflow-x-hidden" onClick={closeDialog}>
         <div
           className={clsx(
-            "ml-auto flex h-screen w-full max-w-[1110px] flex-col xl:max-h-[780px]",
+            "ml-auto flex h-svh w-full max-w-[1110px] flex-col xl:max-h-[780px]",
             styles.card_dialog_content,
           )}
           onClick={(e) => e.stopPropagation()}
