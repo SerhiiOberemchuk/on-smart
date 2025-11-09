@@ -17,7 +17,7 @@ export const DialogProductCard = ({
   name,
 }: Pick<Product, "inStock" | "oldPrice" | "images" | "price" | "logo" | "name">) => {
   return (
-    <div className="card_gradient sticky top-0 mx-auto max-h-[590px] min-h-fit w-full max-w-[446px]">
+    <div className="card_gradient top-0 mx-auto max-h-[590px] min-h-fit w-full max-w-[446px] xl:sticky">
       <HeaderProductCard
         id="dd"
         inStock={inStock}
