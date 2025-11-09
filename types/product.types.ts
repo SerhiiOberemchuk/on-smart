@@ -1,10 +1,10 @@
-export type Product = {
+type Prices = { price: number; oldPrice?: number | null };
+
+export type Product = Prices & {
   id: string;
   brand: string;
   name: string;
   description: string;
-  price: number;
-  oldPrice?: number | null;
   imgSrc: string;
   category: string;
   quantity: number;
@@ -12,4 +12,5 @@ export type Product = {
   inStock: number;
   images: string[];
   logo: string;
+  variants?: { id: string }[];
 };

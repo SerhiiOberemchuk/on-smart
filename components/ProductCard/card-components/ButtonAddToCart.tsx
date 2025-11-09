@@ -3,9 +3,10 @@
 import Image from "next/image";
 import icon from "@/assets/icons/carrello.svg";
 
-import { useCardDialogStore } from "../card-dialog-components/card-dialog-store";
+import { useCardDialogStore } from "../dialog-add-to-cart/store/card-dialog-store";
+import { Product } from "@/types/product.types";
 
-export default function ButtonAddToCart({ id }: { id: string }) {
+export default function ButtonAddToCart(product: Product) {
   const { openDialog } = useCardDialogStore();
   return (
     <>
@@ -13,7 +14,7 @@ export default function ButtonAddToCart({ id }: { id: string }) {
         type="button"
         aria-label="Aggiungi al carrello"
         className="flex size-12 items-center justify-center rounded-sm bg-green-600"
-        onClick={() => openDialog(id)}
+        onClick={() => openDialog(product)}
       >
         <Image src={icon} alt="Aggiungi al carrello" />
       </button>

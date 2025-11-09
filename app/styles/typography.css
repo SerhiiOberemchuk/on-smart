@@ -32,6 +32,11 @@
     );
     line-height: 110%;
   }
+  .H4M {
+    font-weight: 500;
+    font-size: 1.5rem;
+    line-height: 110%;
+  }
   .H5 {
     font-weight: 500;
     font-size: 1.25rem;
@@ -71,7 +76,7 @@
   }
   .input_M_18 {
     font-weight: 600;
-    font-size: 1.125rem;
+    font-size: 1rem;
     line-height: 100%;
   }
   .text_R {
@@ -85,6 +90,9 @@
     }
     .body_R_20 {
       font-size: 1.25rem;
+    }
+    .input_M_18 {
+      font-size: 1.125rem;
     }
   }
 }

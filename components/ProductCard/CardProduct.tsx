@@ -9,18 +9,8 @@ import PricesBox from "../PricesBox";
 import StarsRating from "../StarsRating";
 import styles from "./product-styles.module.css";
 
-export default function CardProduct({
-  name,
-  price,
-  imgSrc,
-  id,
-  category,
-  brand,
-  oldPrice,
-  rating,
-  className,
-  inStock,
-}: Product & { className?: string }) {
+export default function CardProduct({ className, ...product }: Product & { className?: string }) {
+  const { name, price, imgSrc, id, category, brand, oldPrice, rating, inStock } = product;
   return (
     <article className={clsx(styles.card, className)}>
       <HeaderProductCard oldPrice={oldPrice} inStock={inStock} id={id} />
@@ -50,7 +40,7 @@ export default function CardProduct({
       </figure>
       <div className="mt-auto flex items-start justify-between p-1 pt-0 md:p-2 xl:p-3">
         <PricesBox place="main-card-product" price={price} oldPrice={oldPrice} />
-        <ButtonAddToCart id={id} />
+        <ButtonAddToCart {...product} />
       </div>
     </article>
   );

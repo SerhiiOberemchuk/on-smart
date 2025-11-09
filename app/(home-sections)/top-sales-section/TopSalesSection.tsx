@@ -1,13 +1,13 @@
 import LinkYellow from "@/components/YellowLink";
 import ProductsList from "./ProductList/ProductsList";
-import { getTopProducts } from "./ProductList/action";
 import Script from "next/script";
 import { baseUrl } from "@/types/baseUrl";
 import { Suspense } from "react";
 import ButtonsScrollSwiper from "@/components/ButtonsScrollSwiper";
+import { getTopSalesProducts } from "@/app/actions/get-top-sales-products/action";
 
 export default async function TopSalesSection() {
-  const initialProducts = await getTopProducts();
+  const initialProducts = await getTopSalesProducts();
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",

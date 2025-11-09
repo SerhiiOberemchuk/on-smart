@@ -8,16 +8,16 @@ import { Product } from "@/types/product.types";
 import { ButtonArrow } from "@/components/ButtonArrows";
 import PricesBox from "@/components/PricesBox";
 
-export const ProductCardDialog = ({
+export const DialogProductCard = ({
   images,
   inStock,
   oldPrice,
   price,
   logo,
   name,
-}: Pick<Product, "id" | "inStock" | "oldPrice" | "images" | "price" | "logo" | "name">) => {
+}: Pick<Product, "inStock" | "oldPrice" | "images" | "price" | "logo" | "name">) => {
   return (
-    <div className="card_gradient mx-auto max-h-[590px] min-h-fit w-full max-w-[446px]">
+    <div className="card_gradient sticky top-0 mx-auto max-h-[590px] min-h-fit w-full max-w-[446px]">
       <HeaderProductCard
         id="dd"
         inStock={inStock}
@@ -43,8 +43,8 @@ export const ProductCardDialog = ({
             />
           </SwiperSlide>
         ))}
-        <SlideNextButton />
-        <SlidePrevButton />
+        {images.length > 1 && <SlideNextButton />}
+        {images.length > 1 && <SlidePrevButton />}
       </Swiper>
       <PricesBox oldPrice={oldPrice} place="dialog-cart-product-card" price={price} />
       <div className="mt-5 px-3 pb-3">
@@ -53,7 +53,7 @@ export const ProductCardDialog = ({
           width={428}
           height={24}
           alt="Product Image"
-          className="mx-auto aspect-auto h-6 object-contain object-center"
+          className="mx-auto h-6 object-contain object-center"
         />
         <h2 className="H4 mt-3 line-clamp-3 text-center text-white">{name}</h2>
       </div>

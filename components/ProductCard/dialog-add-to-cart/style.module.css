@@ -1,0 +1,24 @@
+.card_dialog_content {
+  box-shadow: -3px 3px 100px 0 rgba(111, 107, 107, 0.25);
+}
+.label_variant {
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  border: solid 1px;
+  border-radius: 4px;
+  align-items: center;
+  border-color: var(--stroke-grey);
+}
+.label_variant span {
+  pointer-events: none;
+}
+.label_variant:has(input:checked) {
+  border-color: var(--selected-green-700);
+  background-color: var(--header-footer);
+}
+.label_variant:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--header-footer);
+}

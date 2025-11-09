@@ -8,7 +8,7 @@ import Header from "@/layout-components/Header/Header";
 import Footer from "@/layout-components/Footer";
 import Head from "next/head";
 import { Suspense } from "react";
-import CardDialog from "@/components/ProductCard/card-dialog-components/CardDialog";
+import CardDialog from "@/components/ProductCard/dialog-add-to-cart/CardDialog";
 
 const fixelFont = localFont({
   src: "../fonts/FixelVariable.woff2",

@@ -60,9 +60,9 @@
 @theme {
   --breakpoint-xs: 30rem;
 }
-html {
+/* html {
   scrollbar-width: thin;
-}
+} */
 ::backdrop {
   background-color: var(--black);
   opacity: 0.75;
@@ -78,9 +78,13 @@ html {
   background-color: var(--color-green-600);
   width: 28px;
 }
-dialog {
+/* dialog {
   scrollbar-width: thin;
-}
+} */
 :has(dialog[open]) {
   overflow: hidden;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--stroke-grey) var(--text-grey);
 }
