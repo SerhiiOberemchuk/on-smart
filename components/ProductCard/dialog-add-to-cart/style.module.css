@@ -17,6 +17,18 @@
   border-color: var(--selected-green-700);
   background-color: var(--header-footer);
 }
+.checked {
+  display: none;
+}
+.check {
+  display: block;
+}
+.label_variant:has(input:checked) .checked {
+  display: block;
+}
+.label_variant:has(input:checked) .check {
+  display: none;
+}
 .label_variant:has(input:disabled) {
   opacity: 0.5;
   cursor: not-allowed;

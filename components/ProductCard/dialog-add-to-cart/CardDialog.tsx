@@ -13,19 +13,22 @@ import PricesBox from "@/components/PricesBox";
 import { Product } from "@/types/product.types";
 import { twMerge } from "tailwind-merge";
 import { getProductsByIds } from "@/app/actions/get-products-by-array-ids/action";
+import { getSupportProductById } from "@/app/actions/get-support-product-by-id/action";
+import checkboxIconChecked from "@/assets/icons/checkbox.svg";
+import checkboxIcon from "@/assets/icons/checkbox-non.svg";
 
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
 export default function CardDialog() {
   const { isOpenDialog, product, closeDialog } = useCardDialogStore();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  // const [supportProducts, setSupportProducts] = useState<Product[] | null>(null);
+  const [selectedSupportProducts, setSelectedSupportProducts] = useState<Product[] | null>(null);
+  const [supportProducts, setSupportProducts] = useState<Product[] | null>(null);
   const [variants, setVariants] = useState<Product[] | null>(null);
   const [variantsToShow, setVariantsToShow] = useState(NUMBER_OF_VARIANTS_TO_SHOW);
   const [productQuantityAddToCart, setProductQuantityAddToCart] = useState<number>(1);
 
   useEffect(() => {
-    // console.log("variants>>", product?.variants);
     queueMicrotask(() => setSelectedProduct(product));
     if (!product?.variants || product.variants.length === 0) {
       return;
@@ -45,6 +48,20 @@ export default function CardDialog() {
     };
     fetchVariants();
   }, [product]);
+  useEffect(() => {
+    const fetchSupportProducts = async () => {
+      try {
+        if (!product?.id) return;
+        const supportProductsData = await getSupportProductById(product.id);
+        if (supportProductsData && supportProductsData.length > 0) {
+          setSupportProducts(supportProductsData as Product[]);
+        }
+      } catch (error) {
+        console.error({ error });
+      }
+    };
+    fetchSupportProducts();
+  }, [product]);
 
   useEffect(() => {
     if (isOpenDialog) {
@@ -55,6 +72,7 @@ export default function CardDialog() {
         setVariants(null);
         setVariantsToShow(NUMBER_OF_VARIANTS_TO_SHOW);
         setProductQuantityAddToCart(1);
+        setSupportProducts(null);
         document.body.style.overflow = "auto";
       });
     }
@@ -64,7 +82,7 @@ export default function CardDialog() {
     <div
       aria-modal={isOpenDialog}
       className="fixed top-0 right-0 bottom-0 left-0 z-1000 bg-black/50"
-      id={"card-dialog-global"}
+      id={product?.id}
     >
       <div className="fixed top-0 right-0 bottom-0 left-0 overflow-x-hidden" onClick={closeDialog}>
         <div
@@ -118,20 +136,23 @@ export default function CardDialog() {
                             return (
                               <label
                                 key={variant.id}
-                                htmlFor={variant.id}
+                                // htmlFor={variant.id}
                                 className={twMerge(
                                   "body_R_20 ml-1 p-3 xl:ml-4",
                                   styles.label_variant,
                                 )}
+                                // onClick={() => console.log("variant", variant)}
                               >
                                 <input
                                   disabled={variant.inStock === 0}
                                   type="radio"
-                                  id={variant.id}
+                                  // id={variant.id}
                                   name="Product variant"
                                   value={variant.id}
                                   checked={selectedProduct?.id === variant.id}
-                                  onChange={() => setSelectedProduct(variant)}
+                                  onChange={() => {
+                                    setSelectedProduct(variant);
+                                  }}
                                   className="sr-only"
                                 />
                                 <Image
@@ -220,7 +241,72 @@ export default function CardDialog() {
                   </div>
                 </div>
               </div>
-              <div id="aquisti insieme"></div>
+              {supportProducts && (
+                <fieldset className="mt-4 flex flex-col gap-3">
+                  <legend className="input_M_18 mb-3 text-white">Acquistati insieme</legend>
+                  {supportProducts.map((supportProductItem) => (
+                    <label
+                      key={supportProductItem.id}
+                      // htmlFor={supportProductItem.id}
+                      className={twMerge("body_R_20 ml-1 p-3 xl:ml-4", styles.label_variant)}
+                    >
+                      <input
+                        disabled={supportProductItem.inStock === 0}
+                        type="checkbox"
+                        // id={supportProductItem.id}
+                        name={supportProductItem?.name}
+                        value={supportProductItem.id}
+                        // checked={selectedSupportProduct?.id === supportProductItem.id}
+                        onChange={() =>
+                          setSelectedSupportProducts((prev) => [
+                            ...(prev || []),
+                            supportProductItem,
+                          ])
+                        }
+                        // checked={
+                        //   selectedSupportProducts?.some((p) => p.id === supportProductItem.id) ||
+                        //   false
+                        // }
+                        className="sr-only"
+                      />
+                      <div className="mr-1 size-4 shrink-0">
+                        <Image
+                          src={checkboxIconChecked}
+                          className={styles.checked}
+                          alt="Checkbox icon"
+                          width={16}
+                          height={16}
+                        />
+                        <Image
+                          className={styles.check}
+                          src={checkboxIcon}
+                          alt="Checkbox icon"
+                          width={16}
+                          height={16}
+                        />
+                      </div>
+                      <Image
+                        src={
+                          supportProductItem.imgSrc || supportProductItem.images?.[0] || "/logo.svg"
+                        }
+                        alt={supportProductItem.name}
+                        width={80}
+                        height={80}
+                        className="h-10 w-10 object-contain object-center lg:h-20 lg:w-20"
+                      />
+                      <span className="pointer-events-none line-clamp-1">
+                        {supportProductItem.name}
+                      </span>
+                      <PricesBox
+                        oldPrice={supportProductItem.oldPrice}
+                        place="dialog-cart-product-variant"
+                        price={supportProductItem.price}
+                        className="pointer-events-none ml-auto flex-col"
+                      />
+                    </label>
+                  ))}
+                </fieldset>
+              )}
             </div>
           </div>
           <div className="bg-background p-4">

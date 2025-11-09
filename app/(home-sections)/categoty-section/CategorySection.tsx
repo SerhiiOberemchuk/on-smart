@@ -47,7 +47,7 @@ export default async function CategorySection() {
                   alt={categoryName}
                 />
               </Link>
-              <h2 className="H3 pointer-events-none absolute bottom-[8%] left-0 w-full text-center text-wrap">
+              <h2 className="H3 pointer-events-none absolute bottom-[8%] left-0 w-full px-2 text-center text-wrap">
                 {categoryName}
               </h2>
             </li>
