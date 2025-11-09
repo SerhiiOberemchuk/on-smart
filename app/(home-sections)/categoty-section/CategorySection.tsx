@@ -34,12 +34,11 @@ export default async function CategorySection() {
       <div className="container">
         <ul className={styles.list}>
           {categories.map(({ id, categoryName, imageUrl, categoryType }) => (
-            <li key={id} className="rounded-sm transition-transform duration-300 hover:scale-105">
-              <Link
-                className="relative"
-                href={`/catalogo?category=${categoryType}`}
-                title={categoryName}
-              >
+            <li
+              key={id}
+              className="relative rounded-sm transition-transform duration-300 hover:scale-105"
+            >
+              <Link href={`/catalogo?category=${categoryType}`} title={categoryName}>
                 <Image
                   src={imageUrl}
                   className="mx-auto aspect-square rounded-sm object-contain object-center opacity-50"
@@ -47,10 +46,10 @@ export default async function CategorySection() {
                   height={355}
                   alt={categoryName}
                 />
-                <h2 className="H3 absolute bottom-[8%] left-0 w-full text-center text-wrap">
-                  {categoryName}
-                </h2>
               </Link>
+              <h2 className="H3 pointer-events-none absolute bottom-[8%] left-0 w-full text-center text-wrap">
+                {categoryName}
+              </h2>
             </li>
           ))}
         </ul>
