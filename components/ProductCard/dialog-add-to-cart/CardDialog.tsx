@@ -417,7 +417,10 @@ export default function CardDialog() {
             </div>
           </div>
           <div className="flex bg-background p-4">
-            <InfoMessageAddedToBasket quantity={selectedProduct?.quantity || 0} />
+            <InfoMessageAddedToBasket
+              quantity={selectedProduct?.quantity || 0}
+              className="hidden xl:flex"
+            />
             <div className="ml-auto flex w-full max-w-[618px] justify-between">
               <PricesBox
                 totaleTitle={true}
