@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { SwiperSlide, Swiper, useSwiper } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
@@ -52,6 +54,7 @@ export const DialogProductCard = ({
           src={logo}
           width={428}
           height={24}
+          placeholder="empty"
           alt="Product Image"
           className="mx-auto h-6 object-contain object-center"
         />

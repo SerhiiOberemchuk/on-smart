@@ -3,7 +3,7 @@
 import Image from "next/image";
 import icon from "@/assets/icons/carrello.svg";
 
-import { useCardDialogStore } from "../dialog-add-to-cart/store/card-dialog-store";
+import { useCardDialogStore } from "../../../store/card-dialog-store";
 import { Product } from "@/types/product.types";
 
 export default function ButtonAddToCart(product: Product) {

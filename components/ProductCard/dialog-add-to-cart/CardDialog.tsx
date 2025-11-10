@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useCardDialogStore } from "./store/card-dialog-store";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import iconBack from "@/assets/icons/arrow_back.svg";
 import iconClose from "@/assets/icons/icon-close.svg";
@@ -16,20 +15,95 @@ import { getProductsByIds } from "@/app/actions/get-products-by-array-ids/action
 import { getSupportProductById } from "@/app/actions/get-support-product-by-id/action";
 import checkboxIconChecked from "@/assets/icons/checkbox.svg";
 import checkboxIcon from "@/assets/icons/checkbox-non.svg";
+import { useCardDialogStore } from "@/store/card-dialog-store";
+import { useBasketState } from "@/store/basket-store";
+import InfoMessageAddedToBasket from "./components/InfoMessageAddedToBasket";
 
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
 export default function CardDialog() {
   const { isOpenDialog, product, closeDialog } = useCardDialogStore();
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const { basket, removeAllBasket, updateBasket, removeFromBasketById } = useBasketState();
+
+  const [selectedProduct, setSelectedProduct] = useState<(Product & { qnt: number }) | null>(null);
   const [selectedSupportProducts, setSelectedSupportProducts] = useState<Product[] | null>(null);
+
   const [supportProducts, setSupportProducts] = useState<Product[] | null>(null);
-  const [variants, setVariants] = useState<Product[] | null>(null);
+  const [variantsOfProduct, setVariantsOfProduct] = useState<Product[] | null>(null);
+
   const [variantsToShow, setVariantsToShow] = useState(NUMBER_OF_VARIANTS_TO_SHOW);
-  const [productQuantityAddToCart, setProductQuantityAddToCart] = useState<number>(1);
+
+  const handleAddToCart = () => {
+    const bascet: { id: string; qnt: number }[] = [
+      ...(selectedProduct?.inStock ? [{ id: selectedProduct!.id, qnt: selectedProduct!.qnt }] : []),
+      ...(selectedSupportProducts
+        ? selectedSupportProducts.map((prod) => ({ id: prod.id, qnt: 1 }))
+        : []),
+    ];
+    updateBasket(bascet);
+    handleCloseDialog();
+  };
+  const totalPrice = useMemo(() => {
+    let newTotal = 0;
+
+    if (selectedProduct && selectedProduct.inStock) {
+      newTotal += selectedProduct.price * selectedProduct.qnt;
+    }
+
+    if (selectedSupportProducts?.length) {
+      selectedSupportProducts.forEach((prod) => {
+        newTotal += prod.price;
+      });
+    }
+
+    return newTotal;
+  }, [selectedProduct, selectedSupportProducts]);
+
+  const totalOldPrice = useMemo(() => {
+    let newTotalOld = 0;
+
+    if (selectedProduct && selectedProduct.inStock) {
+      newTotalOld += (selectedProduct.oldPrice || 0) * (selectedProduct.qnt || 1);
+    }
+
+    if (selectedSupportProducts?.length) {
+      selectedSupportProducts.forEach((prod) => {
+        newTotalOld += prod.oldPrice || 0;
+      });
+    }
+
+    return newTotalOld;
+  }, [selectedProduct, selectedSupportProducts]);
+
+  const handleOnChangeSupportProduct = (product: Product) => {
+    setSelectedSupportProducts((prev) => {
+      if (!prev) return [product];
+      const isAlreadySelected = prev.some((p) => p.id === product.id);
+      if (isAlreadySelected) {
+        const filtered = prev.filter((p) => p.id !== product.id);
+        if (filtered.length === 0) {
+          return null;
+        }
+        return filtered;
+      } else {
+        const productToAdd = supportProducts?.find((p) => p.id === product.id);
+        if (productToAdd) {
+          return [...prev, productToAdd];
+        }
+        return prev;
+      }
+    });
+  };
 
   useEffect(() => {
-    queueMicrotask(() => setSelectedProduct(product));
+    console.log({ selectedSupportProducts });
+  }, [selectedSupportProducts]);
+  // useEffect(() => {
+  //   console.log({ selectedProduct });
+  // }, [selectedProduct]);
+
+  useEffect(() => {
+    queueMicrotask(() => setSelectedProduct({ ...product, qnt: 1 } as Product & { qnt: number }));
     if (!product?.variants || product.variants.length === 0) {
       return;
     }
@@ -40,7 +114,7 @@ export default function CardDialog() {
           return;
         const variantsData = await getProductsByIds([{ id: product.id }, ...product.variants]);
         if (variantsData && variantsData.length > 0) {
-          setVariants(variantsData as Product[]);
+          setVariantsOfProduct(variantsData as Product[]);
         }
       } catch (error) {
         console.error({ error });
@@ -48,7 +122,9 @@ export default function CardDialog() {
     };
     fetchVariants();
   }, [product]);
+
   useEffect(() => {
+    queueMicrotask(() => setSupportProducts(null));
     const fetchSupportProducts = async () => {
       try {
         if (!product?.id) return;
@@ -67,24 +143,30 @@ export default function CardDialog() {
     if (isOpenDialog) {
       document.body.style.overflow = "hidden";
     } else {
-      queueMicrotask(() => {
-        setSelectedProduct(null);
-        setVariants(null);
-        setVariantsToShow(NUMBER_OF_VARIANTS_TO_SHOW);
-        setProductQuantityAddToCart(1);
-        setSupportProducts(null);
-        document.body.style.overflow = "auto";
-      });
+      document.body.style.overflow = "auto";
     }
   }, [isOpenDialog]);
+
   if (!isOpenDialog) return null;
+
+  const handleCloseDialog = () => {
+    closeDialog();
+    setSelectedProduct(null);
+    setSelectedSupportProducts(null);
+    setVariantsOfProduct(null);
+    setVariantsToShow(NUMBER_OF_VARIANTS_TO_SHOW);
+  };
+
   return (
     <div
       aria-modal={isOpenDialog}
       className="fixed top-0 right-0 bottom-0 left-0 z-1000 bg-black/50"
       id={product?.id}
     >
-      <div className="fixed top-0 right-0 bottom-0 left-0 overflow-x-hidden" onClick={closeDialog}>
+      <div
+        className="fixed top-0 right-0 bottom-0 left-0 overflow-x-hidden"
+        onClick={handleCloseDialog}
+      >
         <div
           className={clsx(
             "ml-auto flex h-svh w-full max-w-[1110px] flex-col xl:max-h-[780px]",
@@ -96,14 +178,14 @@ export default function CardDialog() {
             <button
               type="button"
               className="flex items-center gap-2.5 text-white"
-              onClick={closeDialog}
+              onClick={handleCloseDialog}
             >
               <Image src={iconBack} alt="Pulsante indietro" aria-hidden />
               <span className="H5">Indietro</span>
             </button>
             <button
               type="button"
-              onClick={closeDialog}
+              onClick={handleCloseDialog}
               className="rounded-sm border border-yellow-500 p-2.5 xl:hidden"
             >
               <Image src={iconClose} aria-hidden alt="Pulsante chiudre" />
@@ -126,35 +208,51 @@ export default function CardDialog() {
               <div id="product`s variants" className="mt-4 flex flex-col gap-3 xl:mt-6">
                 {product?.variants && product.variants.length > 0 && (
                   <>
-                    {variants && variants.length > 0 ? (
+                    {variantsOfProduct && variantsOfProduct.length > 0 ? (
                       <>
                         <fieldset className="flex flex-col gap-3">
                           <legend className="input_M_18 mb-3 text-white">
                             Scegli una versione
                           </legend>
-                          {variants?.slice(0, variantsToShow).map((variant) => {
+                          {variantsOfProduct?.slice(0, variantsToShow).map((variant) => {
                             return (
                               <label
                                 key={variant.id}
-                                // htmlFor={variant.id}
                                 className={twMerge(
                                   "body_R_20 ml-1 p-3 xl:ml-4",
                                   styles.label_variant,
                                 )}
-                                // onClick={() => console.log("variant", variant)}
                               >
                                 <input
                                   disabled={variant.inStock === 0}
                                   type="radio"
-                                  // id={variant.id}
                                   name="Product variant"
                                   value={variant.id}
                                   checked={selectedProduct?.id === variant.id}
                                   onChange={() => {
-                                    setSelectedProduct(variant);
+                                    setSelectedProduct({
+                                      ...variant,
+                                      qnt: 1,
+                                    } as Product & { qnt: number });
                                   }}
                                   className="sr-only"
                                 />
+                                <div className="mr-1 size-4 shrink-0">
+                                  <Image
+                                    src={checkboxIconChecked}
+                                    className={styles.checked}
+                                    alt="Checkbox icon"
+                                    width={16}
+                                    height={16}
+                                  />
+                                  <Image
+                                    className={styles.check}
+                                    src={checkboxIcon}
+                                    alt="Checkbox icon"
+                                    width={16}
+                                    height={16}
+                                  />
+                                </div>
                                 <Image
                                   src={variant.imgSrc || variant.images?.[0] || "/logo.svg"}
                                   alt={variant.name}
@@ -180,7 +278,7 @@ export default function CardDialog() {
                           aria-label="Apri altri versioni"
                           className={twMerge(
                             "input_M_18 ml-auto text-white underline",
-                            variantsToShow >= (variants?.length || 0) && "hidden",
+                            variantsToShow >= (variantsOfProduct?.length || 0) && "hidden",
                           )}
                           onClick={() =>
                             setVariantsToShow((prev) => prev + NUMBER_OF_VARIANTS_TO_SHOW)
@@ -201,23 +299,30 @@ export default function CardDialog() {
                   <div className="flex h-11 w-[132px] items-center rounded-sm border border-stroke-grey text-[20px]">
                     <button
                       type="button"
-                      disabled={productQuantityAddToCart <= 1}
+                      disabled={selectedProduct?.qnt ? selectedProduct.qnt <= 1 : true}
                       onClick={() => {
-                        setProductQuantityAddToCart((prev) => prev - 1);
+                        setSelectedProduct((prev) =>
+                          prev ? { ...prev, qnt: Math.max(1, prev.qnt - 1) } : prev,
+                        );
                       }}
                       className={twMerge(
                         "flex-1 text-white hover:scale-110",
-                        productQuantityAddToCart <= 1 && "cursor-not-allowed opacity-50",
+                        (selectedProduct?.qnt ? selectedProduct.qnt <= 1 : true) &&
+                          "cursor-not-allowed opacity-50",
                       )}
                     >
                       -
                     </button>
                     <input
                       type="number"
-                      value={productQuantityAddToCart}
+                      value={selectedProduct?.qnt || 1}
                       min={1}
                       max={selectedProduct?.inStock}
-                      onChange={(v) => setProductQuantityAddToCart(Number(v.target.value))}
+                      onChange={(v) =>
+                        setSelectedProduct((prev) =>
+                          prev ? { ...prev, qnt: Number(v.target.value) } : prev,
+                        )
+                      }
                       name="quantita"
                       width={44}
                       height={44}
@@ -228,12 +333,19 @@ export default function CardDialog() {
                       type="button"
                       className={twMerge(
                         "flex-1 text-white hover:scale-110",
-                        productQuantityAddToCart >= (selectedProduct?.inStock || 0) &&
-                          "cursor-not-allowed opacity-50",
+                        (selectedProduct?.qnt
+                          ? selectedProduct.qnt >= (selectedProduct?.inStock || 0)
+                          : true) && "cursor-not-allowed opacity-50",
                       )}
-                      disabled={productQuantityAddToCart >= (selectedProduct?.inStock || 0)}
+                      disabled={
+                        selectedProduct?.qnt
+                          ? selectedProduct.qnt >= (selectedProduct?.inStock || 0)
+                          : true
+                      }
                       onClick={() => {
-                        setProductQuantityAddToCart((prev) => prev + 1);
+                        setSelectedProduct((prev) =>
+                          prev ? { ...prev, qnt: prev.qnt + 1 } : prev,
+                        );
                       }}
                     >
                       +
@@ -247,22 +359,17 @@ export default function CardDialog() {
                   {supportProducts.map((supportProductItem) => (
                     <label
                       key={supportProductItem.id}
-                      // htmlFor={supportProductItem.id}
                       className={twMerge("body_R_20 ml-1 p-3 xl:ml-4", styles.label_variant)}
                     >
                       <input
                         disabled={supportProductItem.inStock === 0}
                         type="checkbox"
-                        // id={supportProductItem.id}
                         name={supportProductItem?.name}
                         value={supportProductItem.id}
                         // checked={selectedSupportProduct?.id === supportProductItem.id}
-                        onChange={() =>
-                          setSelectedSupportProducts((prev) => [
-                            ...(prev || []),
-                            supportProductItem,
-                          ])
-                        }
+                        onChange={() => {
+                          handleOnChangeSupportProduct(supportProductItem);
+                        }}
                         // checked={
                         //   selectedSupportProducts?.some((p) => p.id === supportProductItem.id) ||
                         //   false
@@ -309,28 +416,25 @@ export default function CardDialog() {
               )}
             </div>
           </div>
-          <div className="bg-background p-4">
+          <div className="flex bg-background p-4">
+            <InfoMessageAddedToBasket quantity={selectedProduct?.quantity || 0} />
             <div className="ml-auto flex w-full max-w-[618px] justify-between">
               <PricesBox
                 totaleTitle={true}
                 place="dialog-cart-product-footer"
-                price={
-                  selectedProduct?.price ? selectedProduct.price * productQuantityAddToCart : 0
-                }
-                oldPrice={
-                  selectedProduct?.oldPrice
-                    ? selectedProduct.oldPrice * productQuantityAddToCart
-                    : 0
-                }
+                price={totalPrice}
+                oldPrice={totalOldPrice}
               />
               <button
                 type="button"
-                disabled={!selectedProduct?.inStock}
+                disabled={!selectedProduct?.inStock && !selectedSupportProducts}
                 className={twMerge(
                   "btn flex items-center gap-2 rounded-sm bg-green px-4 py-3 text-white",
-                  !selectedProduct?.inStock && "cursor-not-allowed opacity-50",
+                  !selectedProduct?.inStock &&
+                    !selectedSupportProducts &&
+                    "cursor-not-allowed opacity-50",
                 )}
-                onClick={() => console.log({ product })}
+                onClick={handleAddToCart}
               >
                 <Image src={iconCart} alt="Pulsante aggiungi" />
                 <span>Aggiungi</span>

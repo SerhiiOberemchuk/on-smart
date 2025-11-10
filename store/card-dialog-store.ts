@@ -10,7 +10,6 @@ type CardDialogStore = {
 
 export const useCardDialogStore = create<CardDialogStore>((set) => ({
   isOpenDialog: false,
-
   product: null,
   openDialog: (product: Product) => set({ isOpenDialog: true, product }),
   closeDialog: () => set({ isOpenDialog: false, product: null }),
