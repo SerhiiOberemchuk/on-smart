@@ -36,7 +36,7 @@ export default function Navigation({
             onClick={onClick}
             className={clsx(
               twMerge(
-                "H5 xl:hover:underline",
+                "H5 text-nowrap xl:hover:underline",
                 pathname === item.href && "text-yellow-600 underline",
                 mobile ? "w-full" : "p-3",
                 footer &&

@@ -8,7 +8,13 @@ import "swiper/css";
 import "./styles.css";
 import { Navigation } from "swiper/modules";
 
-export default function ProductsList({ initialProducts }: { initialProducts: Product[] }) {
+export default function ProductsList({
+  initialProducts,
+  idSection,
+}: {
+  initialProducts: Product[];
+  idSection: string;
+}) {
   return (
     <Swiper
       slidesPerView={"auto"}
@@ -16,8 +22,8 @@ export default function ProductsList({ initialProducts }: { initialProducts: Pro
       id="top_products_list_slider"
       modules={[Navigation]}
       navigation={{
-        nextEl: "#top_products_list_slider_next",
-        prevEl: "#top_products_list_slider_prev",
+        nextEl: `#${idSection}_slider_next`,
+        prevEl: `#${idSection}_slider_prev`,
       }}
       className="top_products_list"
     >

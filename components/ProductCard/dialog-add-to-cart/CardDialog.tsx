@@ -23,7 +23,7 @@ const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
 export default function CardDialog() {
   const { isOpenDialog, product, closeDialog } = useCardDialogStore();
-  const { basket, removeAllBasket, updateBasket, removeFromBasketById } = useBasketState();
+  const { updateBasket } = useBasketState();
 
   const [selectedProduct, setSelectedProduct] = useState<(Product & { qnt: number }) | null>(null);
   const [selectedSupportProducts, setSelectedSupportProducts] = useState<Product[] | null>(null);
@@ -192,16 +192,7 @@ export default function CardDialog() {
             </button>
           </div>
           <div className="flex flex-1 flex-col gap-2 overflow-y-scroll bg-black py-3 lg:p-5 xl:max-h-[680px] xl:flex-row">
-            {product && (
-              <DialogProductCard
-                logo={product.logo || "/logo.svg"}
-                price={product.price}
-                images={product.images || []}
-                inStock={product.inStock}
-                oldPrice={product.oldPrice}
-                name={product.name}
-              />
-            )}
+            {product && <DialogProductCard {...product} place="dialog-cart-product-card" />}
 
             <div className="min-h-fit flex-1 bg-background px-4 py-3 xl:px-3">
               <h2 className="H3 text-white">{selectedProduct?.name}</h2>

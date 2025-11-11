@@ -1,14 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { SwiperSlide, Swiper, useSwiper } from "swiper/react";
+import { SwiperSlide, Swiper } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import HeaderProductCard from "@/components/HeaderProductCard";
 import { Product } from "@/types/product.types";
-import { ButtonArrow } from "@/components/ButtonArrows";
 import PricesBox from "@/components/PricesBox";
+import { twMerge } from "tailwind-merge";
+import { SlideNextButton, SlidePrevButton } from "@/components/SwiperButtonsReacr";
 
 export const DialogProductCard = ({
   images,
@@ -17,11 +18,40 @@ export const DialogProductCard = ({
   price,
   logo,
   name,
-}: Pick<Product, "inStock" | "oldPrice" | "images" | "price" | "logo" | "name">) => {
+  place,
+  category,
+  id,
+}: Pick<
+  Product,
+  "inStock" | "oldPrice" | "images" | "price" | "logo" | "name" | "category" | "id"
+> & {
+  place?: "dialog-cart-product-card" | "product-page";
+}) => {
   return (
-    <div className="card_gradient top-0 mx-auto max-h-[590px] min-h-fit w-full max-w-[446px] xl:sticky">
+    <div
+      className={twMerge(
+        "card_gradient top-0 mx-auto max-h-[590px] min-h-fit w-full max-w-[446px] xl:sticky",
+        place === "product-page" && "grid grid-flow-col grid-rows-3",
+        place === "dialog-cart-product-card" && "",
+      )}
+    >
+      {place === "product-page" && (
+        <ul className="hidden w-fit flex-col gap-3.5 bg-background md:flex">
+          {images.map((image) => (
+            <li key={image} className="w-fit">
+              <Image
+                src={image}
+                width={96}
+                height={96}
+                alt={name}
+                className="mx-auto aspect-auto h-24 object-contain object-center"
+              />
+            </li>
+          ))}
+        </ul>
+      )}
       <HeaderProductCard
-        id="dd"
+        id={id}
         inStock={inStock}
         oldPrice={oldPrice}
         className="static pr-0 pl-4 md:pr-2 md:pl-5 lg:pr-0 xl:pr-0"
@@ -31,7 +61,7 @@ export const DialogProductCard = ({
         slidesPerView={1}
         spaceBetween={0}
         modules={[Pagination, Navigation]}
-        pagination={{ clickable: true }}
+        {...(place === "dialog-cart-product-card" ? { pagination: { clickable: true } } : {})}
         className="relative pb-5"
       >
         {images?.map((image) => (
@@ -45,11 +75,27 @@ export const DialogProductCard = ({
             />
           </SwiperSlide>
         ))}
-        {images.length > 1 && <SlideNextButton />}
-        {images.length > 1 && <SlidePrevButton />}
+        {images.length > 1 && (
+          <div className={twMerge(place === "dialog-cart-product-card" && "hidden xl:block")}>
+            <SlideNextButton />
+          </div>
+        )}
+        {images.length > 1 && (
+          <div className={twMerge(place === "dialog-cart-product-card" && "hidden xl:block")}>
+            <SlidePrevButton />
+          </div>
+        )}
       </Swiper>
-      <PricesBox oldPrice={oldPrice} place="dialog-cart-product-card" price={price} />
-      <div className="mt-5 px-3 pb-3">
+      {place === "dialog-cart-product-card" && (
+        <PricesBox oldPrice={oldPrice} place="dialog-cart-product-card" price={price} />
+      )}
+      <div
+        className={twMerge(
+          "mt-5 flex flex-col gap-1 px-3 pb-3 xl:gap-2",
+
+          place === "product-page" && "bg-background pt-5",
+        )}
+      >
         <Image
           src={logo}
           width={428}
@@ -58,29 +104,11 @@ export const DialogProductCard = ({
           alt="Product Image"
           className="mx-auto h-6 object-contain object-center"
         />
-        <h2 className="H4 mt-3 line-clamp-3 text-center text-white">{name}</h2>
+        {place === "product-page" && (
+          <span className="helper_text text-center text-text-grey capitalize">{category}</span>
+        )}
+        <h2 className="H4 line-clamp-3 text-center text-white">{name}</h2>
       </div>
     </div>
   );
 };
-function SlidePrevButton() {
-  const swiper = useSwiper();
-
-  return (
-    <ButtonArrow
-      direction="left"
-      onClick={() => swiper.slidePrev()}
-      className="absolute top-1/2 left-0 z-50 -translate-y-1/2"
-    />
-  );
-}
-function SlideNextButton() {
-  const swiper = useSwiper();
-  return (
-    <ButtonArrow
-      direction="right"
-      onClick={() => swiper.slideNext()}
-      className="absolute top-1/2 right-0 z-50 -translate-y-1/2"
-    />
-  );
-}

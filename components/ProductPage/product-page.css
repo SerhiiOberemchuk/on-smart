@@ -1,0 +1,20 @@
+.product_vertical_slider {
+  display: none;
+  margin-inline: 0;
+}
+
+.product_vertical_slider .swiper-wrapper {
+  gap: 0.875rem;
+  margin-bottom: auto;
+}
+.product_vertical_slider .swiper-wrapper .swiper-slide {
+  overflow: hidden;
+}
+.product_vertical_slider .swiper-wrapper .swiper-slide-thumb-active {
+  border: 1px solid var(--selected-green-700);
+}
+@media (min-width: 768px) {
+  .product_vertical_slider {
+    display: block;
+  }
+}

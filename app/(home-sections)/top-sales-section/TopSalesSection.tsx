@@ -1,10 +1,8 @@
-import LinkYellow from "@/components/YellowLink";
-import ProductsList from "./ProductList/ProductsList";
 import Script from "next/script";
 import { baseUrl } from "@/types/baseUrl";
-import { Suspense } from "react";
-import ButtonsScrollSwiper from "@/components/ButtonsScrollSwiper";
+
 import { getTopSalesProducts } from "@/app/actions/get-top-sales-products/action";
+import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
 
 export default async function TopSalesSection() {
   const initialProducts = await getTopSalesProducts();
@@ -38,25 +36,19 @@ export default async function TopSalesSection() {
     })),
   };
   return (
-    <section id="top-sales-section" className="flex flex-col gap-4 py-8 xl:gap-8 xl:py-16">
-      <div className="bg-background">
-        <div className="container flex items-center justify-between py-3">
-          <h2 className="H2">Più venduto</h2>
-          <ButtonsScrollSwiper
-            idNext="top_products_list_slider_next"
-            idPrev="top_products_list_slider_prev"
-          />
-        </div>
-      </div>
-      <Suspense>
-        <ProductsList initialProducts={initialProducts} />
-      </Suspense>
-      <LinkYellow href="/catalogo" title="Vai allo shop" className="mx-auto flex w-fit" />
+    <>
+      <ProductRowListSection
+        title="Più venduto"
+        productsList={initialProducts}
+        idSection="top_sales_section"
+        isBottomLink={true}
+      />
+
       <Script
         id="top-sales-section-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-    </section>
+    </>
   );
 }

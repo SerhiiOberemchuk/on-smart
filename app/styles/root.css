@@ -59,6 +59,7 @@
 }
 @theme {
   --breakpoint-xs: 30rem;
+  --breakpoint-mob: 23rem;
 }
 /* html {
   scrollbar-width: thin;

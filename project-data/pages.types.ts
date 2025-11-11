@@ -1,7 +1,7 @@
 export type Pages =
   | "/home"
   | "/catalogo"
-  | "/ci-siamo"
+  | "/chi-siamo"
   | "/pagamento"
   | "/spedizione"
   | "/garanzia";
@@ -11,7 +11,7 @@ export const list_nav: {
   label: string;
 }[] = [
   { href: "/catalogo", label: "Catalogo" },
-  { href: "/ci-siamo", label: "Ci siamo" },
+  { href: "/chi-siamo", label: "Chi siamo" },
   { href: "/pagamento", label: "Pagamento" },
   { href: "/spedizione", label: "Spedizione" },
   { href: "/garanzia", label: "Garanzia" },

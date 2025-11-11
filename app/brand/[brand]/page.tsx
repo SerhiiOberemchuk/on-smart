@@ -1,6 +1,9 @@
 import { Metadata } from "next";
 
 import { getBrand } from "./action";
+import { getAllProducts } from "@/app/actions/get-all-products/action";
+
+import BrandPage from "@/components/BrandPage";
 
 type Props = { params: Promise<{ brand: string }> };
 
@@ -13,12 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function Page({ params }: Props) {
   const { brand } = await params;
 
-  const brandName = (await getBrand(brand)).brand;
+  const products = await getAllProducts();
 
-  return (
-    <section>
-      <p> page brand </p>
-      <p>{brandName}</p>
-    </section>
-  );
+  return <BrandPage products={products} brand={brand} />;
 }
