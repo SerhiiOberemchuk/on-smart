@@ -45,7 +45,7 @@ export default function Carousel() {
           {slides.map((src, i) => (
             <SwiperSlide key={i} className="relative">
               <div className="title_home_carousel w-dvw px-4 md:pl-10">
-                <h1 className="H1 mb-6">
+                <h1 className="H1 mb-6 text-black">
                   Proteggi ciò che ami <br /> con i nostri sistemi <br /> di videosorveglianza.
                 </h1>
                 <LinkYellow href="/catalogo" title="Vai allo shop" />
