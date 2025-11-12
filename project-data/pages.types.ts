@@ -4,7 +4,10 @@ export type Pages =
   | "/chi-siamo"
   | "/pagamento"
   | "/spedizione"
-  | "/garanzia";
+  | "/garanzia"
+  | "/informativa-sulla-privacy"
+  | "/cookies"
+  | "/termini-e-condizioni";
 
 export const list_nav: {
   href: Pages;
@@ -15,4 +18,14 @@ export const list_nav: {
   { href: "/pagamento", label: "Pagamento" },
   { href: "/spedizione", label: "Spedizione" },
   { href: "/garanzia", label: "Garanzia" },
+];
+export const privacy_nav_links: {
+  href: Pages;
+  label: string;
+}[] = [
+  { href: "/informativa-sulla-privacy", label: "Informativa sulla privacy" },
+  { href: "/cookies", label: "Cookies" },
+  { href: "/garanzia", label: "Garanzia" },
+  { href: "/pagamento", label: "Pagamento" },
+  { href: "/spedizione", label: "Spedizione e consegna" },
 ];
