@@ -45,6 +45,7 @@ export default async function CategorySection() {
                   width={355}
                   height={355}
                   alt={categoryName}
+                  loading="eager"
                 />
               </Link>
               <h2 className="H3 pointer-events-none absolute bottom-[8%] left-0 w-full px-2 text-center text-wrap">

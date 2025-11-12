@@ -42,7 +42,7 @@ export default async function BrandSection() {
                 <Link className="flex p-5 md:p-7" href={`/brand/${brandType}`} title={brandName}>
                   <Image
                     src={imageUrl}
-                    className="h-full w-auto object-contain object-center"
+                    className="h-auto w-fit object-contain object-center"
                     alt={brandName}
                     height={32}
                     width={150}

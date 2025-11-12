@@ -13,7 +13,12 @@ import "./carousel.css";
 import { Autoplay, EffectFade, Pagination } from "swiper/modules";
 import { ButtonArrow } from "@/components/ButtonArrows";
 import LinkYellow from "@/components/YellowLink";
-const slides = ["/slider/slide1.webp", "/slider/slide2.webp", "/slider/slide3.webp"];
+const slides = [
+  "/hero-baner/Baner 1 Antifurto.png",
+  "/hero-baner/Baner 2 Videosorveglianza.png",
+  "/hero-baner/Baner 3 Gruppi di Continuità.png",
+  "/hero-baner/Baner 4 Cavetteria e accessori.png",
+];
 
 export default function Carousel() {
   const progressCircle = useRef<SVGSVGElement | null>(null);
@@ -56,8 +61,9 @@ export default function Carousel() {
                 height={677}
                 alt={`slide-${i + 1}`}
                 priority={i === 0}
+                quality={100}
                 loading={i === 0 ? "eager" : "lazy"}
-                className="mx-auto h-[677px] object-cover object-center"
+                className="mx-auto object-cover object-right md:object-center"
               />
             </SwiperSlide>
           ))}
