@@ -10,6 +10,7 @@ import Head from "next/head";
 import { Suspense } from "react";
 import CardDialog from "@/components/ProductCard/dialog-add-to-cart/CardDialog";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { Analytics } from "@vercel/analytics/vue";
 
 const fixelFont = localFont({
   src: "../fonts/FixelVariable.woff2",
@@ -59,6 +60,7 @@ export default function RootLayout({
           <Footer />
         </Suspense>
         <CardDialog />
+        <Analytics />
       </body>
     </html>
   );
