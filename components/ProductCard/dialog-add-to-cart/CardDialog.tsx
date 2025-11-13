@@ -154,7 +154,7 @@ export default function CardDialog() {
       >
         <div
           className={clsx(
-            "ml-auto flex h-svh w-full max-w-[1110px] flex-col xl:max-h-[780px]",
+            "ml-auto flex max-h-dvh min-h-svh w-full max-w-[1110px] flex-col xl:max-h-[780px]",
             styles.card_dialog_content,
           )}
           onClick={(e) => e.stopPropagation()}
