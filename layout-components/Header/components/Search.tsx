@@ -1,11 +1,12 @@
 export default function Search() {
   const action = async (formData: FormData) => {
     "use server";
-
-    console.log(formData.get("search"));
   };
   return (
-    <form action={action} className="relative md:mx-6 hidden sm:flex sm:mx-4 flex-1 w-auto max-w-[440px]">
+    <form
+      action={action}
+      className="relative hidden w-auto max-w-[440px] flex-1 sm:mx-4 sm:flex md:mx-6"
+    >
       <button className="absolute top-1/2 left-5 -translate-y-1/2 cursor-pointer">
         <svg
           width="24"

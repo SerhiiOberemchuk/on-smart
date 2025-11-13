@@ -3,10 +3,10 @@
 import Image from "next/image";
 import icon from "@/assets/icons/carrello.svg";
 
-import { useCardDialogStore } from "../../../store/card-dialog-store";
+import { useCardDialogStore } from "../store/card-dialog-store";
 import { Product } from "@/types/product.types";
 
-export default function ButtonAddToCart(product: Product) {
+export default function ButtonOpenDialogAddToCart(product: Product) {
   const { openDialog } = useCardDialogStore();
   return (
     <>

@@ -1,189 +1,50 @@
-"use client";
-// import { useState } from "react";
-// import { createCheckout } from "../actions/sumup/action";
-import "./styles.css";
-// import Script from "next/script";
-// import type { CardFieldsOnApproveData } from "@paypal/paypal-js";
-
-// import {
-//   PayPalScriptProvider,
-//   ReactPayPalScriptOptions,
-//   PayPalCardFieldsProvider,
-//   PayPalCardFieldsForm,
-//   usePayPalCardFields,
-// } from "@paypal/react-paypal-js";
-// import { useState } from "react";
 export default function CarrelloPage() {
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [isPaying, setIsPaying] = useState(false);
-
-  // const initialOptions: ReactPayPalScriptOptions = {
-  //   // clientId: "AeD8gpqQhvgAEyIcZWxE0jyzwepZ92hlSD3etxkW0wci1avOUNiwH_08JJARKsgC88TuciU7P1ZVuvi9",
-  //   clientId: "AduyjUJ0A7urUcWtGCTjanhRBSzOSn9_GKUzxWDnf51YaV1eZNA0ZAFhebIV_Eq-daemeI7dH05KjLWm",
-  //   components: "card-fields",
-  //   // Add other options as needed
-  // };
-  // async function createOrder() {
-  //   return fetch("https://react-paypal-js-storybook.fly.dev/api/paypal/create-order", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({
-  //       cart: [
-  //         {
-  //           sku: "1blwyeo8",
-  //           quantity: 2,
-  //         },
-  //       ],
-  //     }),
-  //   })
-  //     .then((response) => response.json())
-  //     .then((order) => {
-  //       return order.id;
-  //     })
-  //     .catch((err) => {
-  //       console.error(err);
-  //     });
-  // }
-  // function onApprove(data: CardFieldsOnApproveData) {
-  //   fetch("https://react-paypal-js-storybook.fly.dev/api/paypal/capture-order", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({ orderID: data.orderID }),
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       console.log({ data });
-
-  //       setIsPaying(false);
-  //     })
-  //     .catch((err) => {
-  //       console.error(err);
-  //     });
-  // }
-  // useEffect(() => {
-  //   const script = document.createElement("script");
-  //   script.src = "https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js";
-  //   script.async = true;
-  //   document.body.appendChild(script);
-  // }, []);
-
-  // async function handlePay() {
-  //   try {
-  //     setIsLoading(true);
-
-  //     const checkoutId = await createCheckout({ amount: 1, checkout_reference: "order_123" });
-  //     if (!checkoutId?.id) return;
-
-  //     SumUpCard.mount({
-  //       id: "sumup-card",
-  //       checkoutId: checkoutId.id,
-  //       showAmount: true,
-  //       // methods: ["card", "applepay", "googlepay"],
-
-  //       currency: "EUR",
-  //       locale: "it-IT",
-  //       onResponse: function (type, body) {
-  //         console.log("Type", type);
-  //         console.log("Body", body);
-  //       },
-  //     });
-
-  //     setIsLoading(false);
-  //   } catch (err) {
-  //     console.error("Payment error:", err);
-  //     alert("Сталася помилка при створенні платежу");
-  //     setIsLoading(false);
-  //   }
-  // }
-
   return (
-    <section>page pagamento</section>
-    // <section className="p-8">
-    //   <h1 className="mb-4 text-2xl">Pagamento</h1>
-
-    //   {/* <button
-    //     type="button"
-    //     disabled={isLoading}
-    //     className="cursor-pointer rounded bg-amber-300 p-3 disabled:opacity-50"
-    //     // onClick={handlePay}
-    //   >
-    //     {isLoading ? "Creazione checkout..." : "Paga con SumUp"}
-    //   </button> */}
-
-    //   <Script
-    //     src="https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js"
-    //     strategy="afterInteractive"
-    //   />
-    //   <div id="sumup-card" className="mt-6" style={{ minHeight: 300 }} />
-
-    //   <div className="p-10">
-    //     <PayPalScriptProvider options={initialOptions}>
-    //       {/* <PayPalButtons /> */}
-    //       <PayPalCardFieldsProvider
-    //         createOrder={createOrder}
-    //         onApprove={onApprove}
-    //         onError={(err) => {
-    //           console.log(err);
-    //         }}
-    //       >
-    //         <PayPalCardFieldsForm />
-    //         {/* <PayPalHostedField
-    //           id="card-number"
-    //           hostedFieldType="number"
-    //           options={{ selector: "#card-number" }}
-    //         />
-    //         <PayPalHostedField id="cvv" hostedFieldType="cvv" options={{ selector: "#cvv" }} />
-    //         <PayPalHostedField
-    //           id="expiration-date"
-    //           hostedFieldType="expirationDate"
-    //           options={{ selector: "#expiration-date" }}
-    //         />
-    //         <button type="submit">Paga con carta</button> */}
-    //         <SubmitPayment isPaying={isPaying} setIsPaying={setIsPaying} />
-    //       </PayPalCardFieldsProvider>
-    //     </PayPalScriptProvider>
-    //   </div>
-    // </section>
+    <div>
+      Modalità di pagamento disponibili On Smart mette a disposizione diverse modalità di pagamento
+      sicure e certificate, progettate per garantire affidabilità, chiarezza e trasparenza in ogni
+      transazione. Tutti i pagamenti vengono elaborati tramite connessioni protette e sistemi
+      conformi agli standard internazionali di sicurezza. Carta di credito (SumUp) Il pagamento può
+      essere effettuato con le principali carte di credito e debito (Visa, Mastercard, Maestro,
+      American Express) tramite la piattaforma SumUp. L`addebito viene eseguito al momento della
+      conferma dell`ordine. I dati della carta non vengono memorizzati da On Smart e sono trattati
+      esclusivamente dal sistema di pagamento certificato, nel rispetto degli standard PCI DSS.
+      Bonifico bancario anticipato È prevista la possibilità di effettuare il pagamento tramite
+      bonifico bancario. L `elaborazione dell`ordine avviene esclusivamente dopo la verifica dell
+      `accredito dell `importo sul conto. La ricevuta del pagamento deve essere inviata via e-mail
+      all `indirizzo assistenza@on-smart.it per consentire la registrazione e la spedizione del
+      materiale ordinato. 📌 Il bonifico deve riportare nella causale il numero d`ordine o il nome
+      dell`acquirente. Dati per il bonifico Intestatario: Olena Nudzhevska IBAN:
+      IT49C0326815100052125108060 BIC: SELBIT2BXXX Banca: Banca Sella S.p.A. Causale: Numero ordine
+      o nome dell `acquirente PayPal È disponibile il pagamento tramite conto PayPal, che consente
+      transazioni rapide e sicure senza la necessità di condividere i dati bancari. L`addebito dell
+      `importo avviene al momento della conferma dell `ordine. PayPal garantisce la protezione
+      dell`acquirente secondo le proprie condizioni di utilizzo, consultabili sul sito ufficiale
+      www.paypal.com/it. PayPal - Pagamento in 3 rate Il servizio PayPal “Paga in 3 rate” consente
+      di suddividere l`importo totale dell `acquisto in tre rate mensili senza interessi. Il primo
+      addebito viene effettuato al momento dell`acquisto, mentre i successivi due avvengono con
+      cadenza mensile automatica. L`opzione è disponibile direttamente durante la procedura di
+      checkout ed è soggetta all `approvazione da parte di PayPal. Ulteriori informazioni e
+      condizioni sono disponibili nella sezione dedicata del sito ufficiale:
+      https://www.paypal.com/it/webapps/mpp/pay-in-3 Klarna - Pagamento a rate È disponibile anche
+      il pagamento rateale tramite Klarna, che offre la possibilità di pagare immediatamente,
+      differire il pagamento o suddividere l `importo in tre rate senza interessi. La gestione del
+      pagamento e l`approvazione vengono effettuate direttamente sulla piattaforma Klarna, in base
+      ai propri termini e condizioni. Ulteriori informazioni sono disponibili su www.klarna.com/it.
+      Sicurezza dei pagamenti Tutte le transazioni su www.on-smart.it sono protette da certificato
+      SSL e protocolli di crittografia avanzata. I sistemi di pagamento utilizzati sono conformi
+      agli standard di sicurezza PCI DSS. Nessun dato sensibile relativo ai pagamenti viene
+      archiviato o condiviso con terzi non autorizzati. Fatturazione La richiesta di fattura può
+      essere effettuata durante la procedura di acquisto, inserendo i propri dati fiscali (Partita
+      IVA o Codice Fiscale) nei campi dedicati. In alternativa, la fattura può essere richiesta
+      entro 10 giorni di calendario dalla data dell`ordine, inviando una e-mail all `indirizzo
+      assistenza@on-smart.it con i dati necessari per l`emissione. La fattura elettronica viene
+      inviata all`indirizzo e-mail indicato al momento della richiesta. È responsabilità dell
+      `acquirente fornire dati corretti e completi ai fini fiscali. Tempi di elaborazione Pagamenti
+      tramite Carta di credito, PayPal e Klarna: elaborazione immediata. Pagamenti tramite Bonifico
+      bancario: elaborazione dopo la conferma dell`accredito (1-2 giorni lavorativi). In presenza di
+      anomalie o ritardi, l`elaborazione dell `ordine viene sospesa fino alla risoluzione del
+      problema.
+    </div>
   );
 }
-// const SubmitPayment: React.FC<{
-//   setIsPaying: React.Dispatch<React.SetStateAction<boolean>>;
-//   isPaying: boolean;
-// }> = ({ isPaying, setIsPaying }) => {
-//   const { cardFieldsForm, fields } = usePayPalCardFields();
-//   console.log(fields);
-
-//   const handleClick = async () => {
-//     if (!cardFieldsForm) {
-//       const childErrorMessage =
-//         "Unable to find any child components in the <PayPalCardFieldsProvider />";
-
-//       throw new Error(childErrorMessage);
-//     }
-//     const formState = await cardFieldsForm.getState();
-
-//     if (!formState.isFormValid) {
-//       return alert("The payment form is invalid");
-//     }
-//     setIsPaying(true);
-
-//     cardFieldsForm.submit().catch((err) => {
-//       console.error("Card Fields submit error:", err);
-//       setIsPaying(false);
-//     });
-//   };
-
-//   return (
-//     <button
-//       className={isPaying ? "btn" : "btn btn-primary"}
-//       style={{ float: "right" }}
-//       onClick={handleClick}
-//     >
-//       {isPaying ? <div className="spinner tiny" /> : "Pay"}
-//     </button>
-//   );
-// };

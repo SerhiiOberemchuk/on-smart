@@ -4,7 +4,6 @@ import { recomedProducts } from "@/app/actions/products";
 
 export async function getSupportProductById(productId: string) {
   const products = recomedProducts;
-  console.log({ productId });
 
   return products.slice(0, 4);
 }

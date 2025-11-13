@@ -63,7 +63,7 @@ export default function Carousel() {
                 priority={i === 0}
                 quality={100}
                 loading={i === 0 ? "eager" : "lazy"}
-                className="mx-auto object-cover object-right md:object-center"
+                className="mx-auto h-[677px] object-cover object-center"
               />
             </SwiperSlide>
           ))}

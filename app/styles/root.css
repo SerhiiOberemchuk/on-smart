@@ -10,6 +10,7 @@
   max-width: 90rem;
   margin: 0 auto;
   padding-inline: var(--padding-side-container);
+  overflow-x: hidden;
 }
 @layer base {
   input:-webkit-autofill,

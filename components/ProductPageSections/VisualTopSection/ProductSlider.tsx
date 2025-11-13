@@ -11,15 +11,16 @@ import { Thumbs } from "swiper/modules";
 import { useState } from "react";
 import { Product } from "@/types/product.types";
 import Image from "next/image";
-import { SlideNextButton, SlidePrevButton } from "../SwiperButtonsReacr";
-import HeaderProductCard from "../HeaderProductCard";
+
 import { Swiper as SwiperTypes } from "swiper/types";
+import HeaderProductCard from "@/components/HeaderProductCard";
+import { SlideNextButton, SlidePrevButton } from "@/components/SwiperButtonsReacr";
 
 export default function ProductSlider({ product }: { product: Product }) {
   const { id, inStock, oldPrice, images, logo, category, name } = product;
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperTypes | null>(null);
   return (
-    <div className="flex w-full justify-around gap-6 rounded-sm bg-background p-3 xl:flex-1 xl:justify-between">
+    <div className="flex w-full max-w-[670px] justify-around gap-6 rounded-sm bg-background p-3 xl:flex-1 xl:justify-between">
       <Swiper
         direction={"vertical"}
         onSwiper={setThumbsSwiper}
@@ -43,7 +44,7 @@ export default function ProductSlider({ product }: { product: Product }) {
           </SwiperSlide>
         ))}
       </Swiper>
-      <div>
+      <div className="max-w-full">
         <div className="card_gradient relative rounded-sm">
           <HeaderProductCard
             id={id}
@@ -58,7 +59,7 @@ export default function ProductSlider({ product }: { product: Product }) {
             // navigation={true}
             thumbs={{ swiper: thumbsSwiper }}
             modules={[Thumbs]}
-            className="relative ml-5 w-[226px] mob:w-[326px] sm:w-[530px]"
+            className="relative ml-5 max-w-[532px]"
           >
             {product.images.map((image, index) => (
               <SwiperSlide key={index}>
@@ -67,7 +68,7 @@ export default function ProductSlider({ product }: { product: Product }) {
                   alt={`Product image ${index + 1}`}
                   width={532}
                   height={532}
-                  className="mx-auto aspect-square object-contain object-center px-1 xs:w-[530px]"
+                  className="mx-auto aspect-square object-contain object-center px-1"
                 />
               </SwiperSlide>
             ))}

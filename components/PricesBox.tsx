@@ -32,15 +32,15 @@ export default function PricesBox({
       >
         <span
           className={twMerge(
-            "H3 text-white",
+            "H3 text-nowrap text-white",
             oldPrice && "text-red",
             place === "dialog-cart-product-variant" && "H4M",
           )}
         >
-          {price.toFixed(2)}€
+          {price.toFixed(2)} €
         </span>
         {oldPrice && oldPrice > 0 ? (
-          <span className="text-text-grey line-through">{oldPrice.toFixed(2)}€</span>
+          <span className="text-nowrap text-text-grey line-through">{oldPrice.toFixed(2)} €</span>
         ) : null}
       </div>
     </div>

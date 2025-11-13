@@ -2,12 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
 import TitleTooltip from "./card-components/TitleTooltip";
-import ButtonAddToCart from "./card-components/ButtonAddToCart";
 import { Product } from "@/types/product.types";
 import HeaderProductCard from "../HeaderProductCard";
 import PricesBox from "../PricesBox";
 import StarsRating from "../StarsRating";
 import styles from "./product-styles.module.css";
+import ButtonOpenDialogAddToCart from "../ButtonOpenDialogAddToCart";
 
 export default function CardProduct({ className, ...product }: Product & { className?: string }) {
   const { name, price, imgSrc, id, category, brand, oldPrice, rating, inStock } = product;
@@ -40,7 +40,7 @@ export default function CardProduct({ className, ...product }: Product & { class
       </figure>
       <div className="mt-auto flex items-start justify-between p-1 pt-0 md:p-2 xl:p-3">
         <PricesBox place="main-card-product" price={price} oldPrice={oldPrice} />
-        <ButtonAddToCart {...product} />
+        <ButtonOpenDialogAddToCart {...product} />
       </div>
     </article>
   );

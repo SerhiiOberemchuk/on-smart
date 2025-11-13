@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import iconBack from "@/assets/icons/arrow_back.svg";
 import iconClose from "@/assets/icons/icon-close.svg";
-import iconCart from "@/assets/icons/carrello.svg";
 import styles from "./style.module.css";
 import clsx from "clsx";
 import { DialogProductCard } from "./components/DialogProductCard";
@@ -16,14 +15,17 @@ import { getSupportProductById } from "@/app/actions/get-support-product-by-id/a
 import checkboxIconChecked from "@/assets/icons/checkbox.svg";
 import checkboxIcon from "@/assets/icons/checkbox-non.svg";
 import { useCardDialogStore } from "@/store/card-dialog-store";
-import { useBasketState } from "@/store/basket-store";
-import InfoMessageAddedToBasket from "./components/InfoMessageAddedToBasket";
+import { useBasketStore } from "@/store/basket-store";
+import ProductQuantityInputButtons from "@/components/ProductQuantityInputButtons";
+import { useCalcTotalSum } from "@/utils/useCalcTotalSum";
+import ButtonAddToBasket from "@/components/ButtonAddToBasket";
+import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
 
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
 export default function CardDialog() {
   const { isOpenDialog, product, closeDialog } = useCardDialogStore();
-  const { updateBasket } = useBasketState();
+  const { updateBasket, showPopup } = useBasketStore();
 
   const [selectedProduct, setSelectedProduct] = useState<(Product & { qnt: number }) | null>(null);
   const [selectedSupportProducts, setSelectedSupportProducts] = useState<Product[] | null>(null);
@@ -41,23 +43,13 @@ export default function CardDialog() {
         : []),
     ];
     updateBasket(bascet);
-    handleCloseDialog();
+    showPopup((selectedProduct?.qnt || 0) + (selectedSupportProducts?.length || 0));
+    // handleCloseDialog();
   };
-  const totalPrice = useMemo(() => {
-    let newTotal = 0;
-
-    if (selectedProduct && selectedProduct.inStock) {
-      newTotal += selectedProduct.price * selectedProduct.qnt;
-    }
-
-    if (selectedSupportProducts?.length) {
-      selectedSupportProducts.forEach((prod) => {
-        newTotal += prod.price;
-      });
-    }
-
-    return newTotal;
-  }, [selectedProduct, selectedSupportProducts]);
+  const totalPrice = useCalcTotalSum([
+    { qnt: selectedProduct?.qnt || 1, price: selectedProduct?.price || 0 },
+    ...(selectedSupportProducts?.map((prod) => ({ qnt: 1, price: prod.price })) || []),
+  ]);
 
   const totalOldPrice = useMemo(() => {
     let newTotalOld = 0;
@@ -94,13 +86,6 @@ export default function CardDialog() {
       }
     });
   };
-
-  useEffect(() => {
-    console.log({ selectedSupportProducts });
-  }, [selectedSupportProducts]);
-  // useEffect(() => {
-  //   console.log({ selectedProduct });
-  // }, [selectedProduct]);
 
   useEffect(() => {
     queueMicrotask(() => setSelectedProduct({ ...product, qnt: 1 } as Product & { qnt: number }));
@@ -285,64 +270,12 @@ export default function CardDialog() {
                     )}
                   </>
                 )}
-                <div className={twMerge("flex flex-col justify-start gap-3")}>
-                  <span className="input_M_18 text-white">Quantita</span>
-                  <div className="flex h-11 w-[132px] items-center rounded-sm border border-stroke-grey text-[20px]">
-                    <button
-                      type="button"
-                      disabled={selectedProduct?.qnt ? selectedProduct.qnt <= 1 : true}
-                      onClick={() => {
-                        setSelectedProduct((prev) =>
-                          prev ? { ...prev, qnt: Math.max(1, prev.qnt - 1) } : prev,
-                        );
-                      }}
-                      className={twMerge(
-                        "flex-1 text-white hover:scale-110",
-                        (selectedProduct?.qnt ? selectedProduct.qnt <= 1 : true) &&
-                          "cursor-not-allowed opacity-50",
-                      )}
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      value={selectedProduct?.qnt || 1}
-                      min={1}
-                      max={selectedProduct?.inStock}
-                      onChange={(v) =>
-                        setSelectedProduct((prev) =>
-                          prev ? { ...prev, qnt: Number(v.target.value) } : prev,
-                        )
-                      }
-                      name="quantita"
-                      width={44}
-                      height={44}
-                      className="input_M_18 h-11 w-11 text-center text-white"
-                    />
-
-                    <button
-                      type="button"
-                      className={twMerge(
-                        "flex-1 text-white hover:scale-110",
-                        (selectedProduct?.qnt
-                          ? selectedProduct.qnt >= (selectedProduct?.inStock || 0)
-                          : true) && "cursor-not-allowed opacity-50",
-                      )}
-                      disabled={
-                        selectedProduct?.qnt
-                          ? selectedProduct.qnt >= (selectedProduct?.inStock || 0)
-                          : true
-                      }
-                      onClick={() => {
-                        setSelectedProduct((prev) =>
-                          prev ? { ...prev, qnt: prev.qnt + 1 } : prev,
-                        );
-                      }}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
+                {selectedProduct && (
+                  <ProductQuantityInputButtons
+                    selectedProduct={selectedProduct}
+                    setSelectedProduct={setSelectedProduct}
+                  />
+                )}
               </div>
               {supportProducts && (
                 <fieldset className="mt-4 flex flex-col gap-3">
@@ -408,10 +341,7 @@ export default function CardDialog() {
             </div>
           </div>
           <div className="flex bg-background p-4">
-            <InfoMessageAddedToBasket
-              quantity={selectedProduct?.quantity || 0}
-              className="hidden xl:flex"
-            />
+            <InfoPopupAddedToBasket className="fixed top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 xl:static xl:top-0 xl:left-0 xl:translate-0" />
             <div className="ml-auto flex w-full max-w-[618px] justify-between">
               <PricesBox
                 totaleTitle={true}
@@ -419,20 +349,10 @@ export default function CardDialog() {
                 price={totalPrice}
                 oldPrice={totalOldPrice}
               />
-              <button
-                type="button"
+              <ButtonAddToBasket
                 disabled={!selectedProduct?.inStock && !selectedSupportProducts}
-                className={twMerge(
-                  "btn flex items-center gap-2 rounded-sm bg-green px-4 py-3 text-white",
-                  !selectedProduct?.inStock &&
-                    !selectedSupportProducts &&
-                    "cursor-not-allowed opacity-50",
-                )}
                 onClick={handleAddToCart}
-              >
-                <Image src={iconCart} alt="Pulsante aggiungi" />
-                <span>Aggiungi</span>
-              </button>
+              />
             </div>
           </div>
         </div>

@@ -10,7 +10,7 @@ export default function ButtonComparison({ id }: { id: string }) {
         src={icon}
         alt="Confronta"
         onClick={() => {
-          console.log({ productId: id });
+          // console.log({ productId: id });
         }}
       />
     </button>

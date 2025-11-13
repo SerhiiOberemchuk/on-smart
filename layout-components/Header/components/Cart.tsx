@@ -3,10 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import carello from "@/assets/icons/carrello.svg";
-import { useBasketState } from "@/store/basket-store";
+import { useBasketStore } from "@/store/basket-store";
 
 export default function Cart() {
-  const { basket } = useBasketState();
+  const { basket } = useBasketStore();
   const qnt = () => {
     if (basket.length === 0) return 0;
     return basket.reduce((acc, item) => acc + item.qnt, 0);
