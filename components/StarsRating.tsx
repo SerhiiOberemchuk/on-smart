@@ -3,8 +3,7 @@ import starfull from "@/assets/icons/star-full.svg";
 import starempty from "@/assets/icons/star-empty.svg";
 import { Product } from "@/types/product.types";
 import { twMerge } from "tailwind-merge";
-
-const MAX_RATING = 5;
+import { MAX_RATING } from "@/constans";
 
 export default function StarsRating({
   rating,

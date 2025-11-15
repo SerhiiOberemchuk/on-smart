@@ -5,7 +5,7 @@ import {
   TABS_CHARACTERISTICS,
   TabTypeCaracteristics,
 } from "@/types/product-cararteristics.types";
-import { Product_Details } from "@/types/product.types";
+import { Product, Product_Details } from "@/types/product.types";
 import { useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -19,8 +19,10 @@ const calcCurrentIndex = (prevTab: TabTypeCaracteristics) =>
 
 export default function ProductCharacteristicsSection({
   productDetail,
+  product,
 }: {
   productDetail: Product_Details;
+  product: Product;
 }) {
   const {
     characteristics_descrizione,
@@ -34,16 +36,22 @@ export default function ProductCharacteristicsSection({
   useEffect(() => {
     let hammer: HammerManager | null = null;
     import("hammerjs").then((Hammer) => {
+      const shouldIgnore = (ev: HammerInput) => {
+        return (ev.target as HTMLElement)?.closest(".swiper-stop");
+      };
       if (!swipeWrapperRef.current) return;
       hammer = new Hammer.default(swipeWrapperRef.current);
-      hammer.on("swipeleft", () => {
+
+      hammer.on("swipeleft", (ev) => {
+        if (shouldIgnore(ev)) return;
         setCurrentTab((prev) => {
           if (calcCurrentIndex(prev) >= TABS_CHARACTERISTICS.length - 1) return prev;
           return TABS_CHARACTERISTICS[calcCurrentIndex(prev) + 1].searchParam;
         });
       });
 
-      hammer.on("swiperight", () => {
+      hammer.on("swiperight", (ev) => {
+        if (shouldIgnore(ev)) return;
         setCurrentTab((prev) => {
           if (calcCurrentIndex(prev) <= 0) return prev;
           return TABS_CHARACTERISTICS[calcCurrentIndex(prev) - 1].searchParam;
@@ -88,7 +96,11 @@ export default function ProductCharacteristicsSection({
             <Descrizione data={characteristics_descrizione} className={"flex-1 shrink-0"} />
             <Specifiche data={characteristics_specifiche} className={"flex-1 shrink-0"} />
             <Documenti data={characteristics_documenti} className={"flex-1 shrink-0"} />
-            <Valutazione data={characteristics_valutazione} className={"flex-1 shrink-0"} />
+            <Valutazione
+              data={characteristics_valutazione}
+              product={product}
+              className={"flex-1 shrink-0"}
+            />
           </div>
         </div>
       </div>

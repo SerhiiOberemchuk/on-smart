@@ -1,4 +1,4 @@
-import FormFeedback from "./Form/FormFeedback";
+import FormFeedback from "@/components/Form/FormFeedback";
 
 export default function FeedbackFormSection() {
   return (
@@ -13,7 +13,7 @@ export default function FeedbackFormSection() {
               Contattami tramite questo modulo.
             </p>
           </header>
-          <FormFeedback />
+          <FormFeedback type="general-feedback" />
         </div>
       </div>
     </section>

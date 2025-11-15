@@ -36,7 +36,7 @@ export default async function BrandSection() {
       </header>
       <div className="container">
         <Suspense>
-          <ul className="flex flex-wrap items-center justify-center gap-px lg:gap-3">
+          <ul className="flex flex-wrap items-center justify-center gap-px py-2 lg:gap-3">
             {brands.map(({ id, brandName, imageUrl, brandType }) => (
               <li key={id} className="transition-transform duration-300 hover:scale-105">
                 <Link className="flex p-5 md:p-7" href={`/brand/${brandType}`} title={brandName}>

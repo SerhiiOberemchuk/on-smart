@@ -1,7 +1,18 @@
-export default function CarrelloPage() {
+import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
+import { getAllProducts } from "../actions/product/get-all-products";
+import CardSection from "./components/CardSection";
+
+export default async function CarrelloPage() {
+  const products = await getAllProducts();
   return (
-    <section>
-      <h1>Carrello</h1>
-    </section>
+    <>
+      <CardSection />
+      <ProductRowListSection
+        title="Acquistati insieme"
+        productsList={products}
+        idSection="page_product_insieme"
+        isBottomLink={false}
+      />
+    </>
   );
 }

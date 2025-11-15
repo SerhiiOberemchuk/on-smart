@@ -1,37 +1,50 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-
-export default function Breadcrumbs() {
-  const pathname = usePathname();
-  if (pathname === "/") return null;
-
-  const segments = pathname.split("/").filter(Boolean);
-  const paths = segments.map((_, i) => "/" + segments.slice(0, i + 1).join("/"));
-
+type Props = { category?: string; brand?: string; productName?: string; carello?: string };
+export default function Breadcrumbs({ category, brand, productName, carello }: Props) {
   return (
     <nav className="py-3 text-sm text-text-grey">
-      <ul className="text_R container flex flex-wrap gap-1">
+      <ul className="text_R container flex flex-wrap gap-1 capitalize">
         <li>
           <Link href="/" className="hover:text-white">
             Home
           </Link>{" "}
-          /
         </li>
-        {segments.map((seg, i) => (
-          <li key={i}>
-            {i === segments.length - 1 ? (
-              <span className="text-white capitalize underline">{decodeURIComponent(seg)}</span>
-            ) : (
-              <>
-                <Link href={paths[i]} className="capitalize hover:text-white">
-                  {decodeURIComponent(seg)}
-                </Link>{" "}
-                /
-              </>
-            )}
+        <li>
+          /{" "}
+          <Link href="/catalogo" className="hover:text-white">
+            Catalogo
+          </Link>
+        </li>
+        {category && (
+          <li>
+            /{" "}
+            <Link href={`/catalogo?category=${category}`} className="hover:text-white">
+              {category}
+            </Link>
           </li>
-        ))}
+        )}
+        {brand && (
+          <li>
+            /{" "}
+            <Link
+              href={`/catalogo?category=${category}&brand=${brand}`}
+              className="hover:text-white"
+            >
+              {brand}
+            </Link>
+          </li>
+        )}
+        {productName && (
+          <li>
+            / <span className="text-white underline">{productName}</span>{" "}
+          </li>
+        )}
+        {carello && (
+          <li>
+            / <span className="text-white underline">{carello}</span>{" "}
+          </li>
+        )}
       </ul>
     </nav>
   );

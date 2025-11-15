@@ -7,7 +7,7 @@ import "swiper/css";
 // import "swiper/css/navigation";
 import "swiper/css/thumbs";
 import "./product-page.css";
-import { Thumbs } from "swiper/modules";
+import { Autoplay, Thumbs } from "swiper/modules";
 import { useState } from "react";
 import { Product } from "@/types/product.types";
 import Image from "next/image";
@@ -29,7 +29,11 @@ export default function ProductSlider({ product }: { product: Product }) {
         slidesPerView={7}
         // freeMode={true}
         watchSlidesProgress={true}
-        modules={[Thumbs]}
+        autoplay={{
+          delay: 3000,
+          disableOnInteraction: false,
+        }}
+        modules={[Thumbs, Autoplay]}
         className="product_vertical_slider hidden w-24 md:block"
       >
         {images.map((image, index) => (
@@ -57,8 +61,12 @@ export default function ProductSlider({ product }: { product: Product }) {
             spaceBetween={0}
             slidesPerView={1}
             // navigation={true}
+            autoplay={{
+              delay: 4000,
+              disableOnInteraction: false,
+            }}
             thumbs={{ swiper: thumbsSwiper }}
-            modules={[Thumbs]}
+            modules={[Thumbs, Autoplay]}
             className="relative ml-5 max-w-[532px]"
           >
             {product.images.map((image, index) => (

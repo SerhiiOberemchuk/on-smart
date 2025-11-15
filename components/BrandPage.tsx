@@ -2,6 +2,7 @@ import ProductRowListSection from "@/components/ProductRowListSection/ProductRow
 import Image from "next/image";
 import LinkYellow from "@/components/YellowLink";
 import { Product } from "@/types/product.types";
+import Breadcrumbs from "./Breadcrumbs";
 
 type Props = { brand: string; products: Product[] };
 
@@ -18,6 +19,7 @@ export default function BrandPage({ brand, products }: Props) {
 
   return (
     <>
+      <Breadcrumbs />
       <section className="bg-background">
         <div className="container">
           <h1 className="H2 py-3 text-left uppercase">{brandInfo.brandName}</h1>
@@ -36,7 +38,11 @@ export default function BrandPage({ brand, products }: Props) {
                   <p className="text_R"> {desc}</p>
                 </li>
               ))}
-              <LinkYellow title="Mostra tutto" href="/catalogo" className="mr-auto flex" />
+              <LinkYellow
+                title="Mostra tutto"
+                href={`/catalogo?brand=${brand}`}
+                className="mr-auto flex"
+              />
             </ul>
           </div>
         </div>

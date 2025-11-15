@@ -10,7 +10,7 @@ export default function LinkYellow({
   rel,
 }: {
   title: string;
-  href: "/catalogo" | "https://g.page/r/CRhuErfSy0siEAE/review";
+  href: "/catalogo" | "https://g.page/r/CRhuErfSy0siEAE/review" | string;
   ariaLabel?: string;
   className?: string;
   target?: string;

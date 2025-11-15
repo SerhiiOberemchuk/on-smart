@@ -7,3 +7,13 @@
 .form input {
   height: 2.75rem;
 }
+/* .rating :has(input:checked) .full {
+  display: block;
+}
+
+.rating input:checked ~ label img.empty {
+  display: none;
+}
+.full {
+  display: none;
+} */

@@ -9,7 +9,6 @@ import Footer from "@/layout-components/Footer";
 import Head from "next/head";
 import { Suspense } from "react";
 import CardDialog from "@/components/ProductCard/dialog-add-to-cart/CardDialog";
-import Breadcrumbs from "@/components/Breadcrumbs";
 import { Analytics } from "@vercel/analytics/next";
 
 const fixelFont = localFont({
@@ -54,7 +53,7 @@ export default function RootLayout({
       </Head>
       <body className={clsx(fixelFont.className, "flex min-h-svh flex-col")}>
         <Header />
-        <Breadcrumbs />
+
         <main className="flex-1">{children}</main>
         <Suspense>
           <Footer />

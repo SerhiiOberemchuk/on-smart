@@ -25,16 +25,18 @@ export const useBasketStore = create<BasketState, [["zustand/persist", BasketSta
           basket: state.basket.filter((item) => item.id !== id),
         })),
       updateBasket: (newBasket) =>
-        set((state) => {
-          return { basket: [...state.basket, ...newBasket] };
-        }),
+        set((state) => ({
+          basket: Object.values(
+            Object.fromEntries([...state.basket, ...newBasket].map((obj) => [obj.id, obj])),
+          ),
+        })),
       showPopup: (quantity: number) => set({ isPopupOpen: true, qntToShow: quantity }),
       hidePopup: () => set({ isPopupOpen: false, qntToShow: 0 }),
     }),
     {
       name: "carello",
-      storage: createJSONStorage(() => localStorage),
       version: 1,
+      storage: createJSONStorage(() => localStorage),
     },
   ),
 );

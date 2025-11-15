@@ -8,14 +8,18 @@ import PricesBox from "../PricesBox";
 import StarsRating from "../StarsRating";
 import styles from "./product-styles.module.css";
 import ButtonOpenDialogAddToCart from "../ButtonOpenDialogAddToCart";
+import { toSlug } from "@/utils/slug";
 
 export default function CardProduct({ className, ...product }: Product & { className?: string }) {
   const { name, price, imgSrc, id, category, brand, oldPrice, rating, inStock } = product;
+  const slagId = toSlug(name);
+  const slugBrand = toSlug(brand);
+  const slugCategory = toSlug(category);
   return (
     <article className={clsx(styles.card, className)}>
       <HeaderProductCard oldPrice={oldPrice} inStock={inStock} id={id} />
       <figure className="">
-        <Link href={`/catalogo/${category}/${brand}/${id}`} aria-label={name}>
+        <Link href={`/catalogo/${slugCategory}/${slugBrand}/${slagId}-${id}`} aria-label={name}>
           <Image
             src={imgSrc}
             className="aspect-square object-contain object-center p-1 md:p-2 xl:p-3"
