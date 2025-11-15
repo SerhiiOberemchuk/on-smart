@@ -1,26 +1,24 @@
-import { getAllProducts } from "@/app/actions/get-all-products/action";
-import { getProductById } from "@/app/actions/get-product-by-id/action";
+import { getAllProducts } from "@/app/actions/product/get-all-products";
+import { getProductById } from "@/app/actions/product/get-product-by-id";
+import { getProductDetailsById } from "@/app/actions/product/get-product-details-by-Id";
 import ProductCharacteristicsSection from "@/components/ProductPageSections/ProductCharacteristicsSection/ProductCharacteristacSection";
 import VisualProductSection from "@/components/ProductPageSections/VisualTopSection/VisualProductSection";
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
 
 export default async function CategoryBrandPage({
   params,
-  searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
   params: Promise<{ category: string; brand: string; id: string }>;
 }) {
   const { id } = await params;
   const product = await getProductById(id);
   const products = await getAllProducts();
-  const tab = (await searchParams).tab;
-  console.log({ tab });
+  const productDetails = await getProductDetailsById(id);
 
   return (
     <>
       {product && <VisualProductSection product={product} />}
-      {product && <ProductCharacteristicsSection product={product} />}
+      {productDetails && <ProductCharacteristicsSection productDetail={productDetails} />}
       <ProductRowListSection
         title="Acquistati insieme"
         productsList={products}

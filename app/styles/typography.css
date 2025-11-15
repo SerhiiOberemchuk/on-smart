@@ -34,7 +34,11 @@
   }
   .H4M {
     font-weight: 500;
-    font-size: 1.5rem;
+    font-size: clamp(
+      1.25rem,
+      calc(1.25rem + (0.25rem * ((100vw - 375px) / (1440px - 375px)))),
+      1.5rem
+    );
     line-height: 110%;
   }
   .H5 {

@@ -1,4 +1,4 @@
-import { getAllProducts } from "@/app/actions/get-all-products/action";
+import { getAllProducts } from "@/app/actions/product/get-all-products";
 import BrandPage from "@/components/BrandPage";
 
 export default async function CategoryBrandPage({

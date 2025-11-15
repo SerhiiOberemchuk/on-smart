@@ -1,7 +1,7 @@
 import Script from "next/script";
 import { baseUrl } from "@/types/baseUrl";
 
-import { getTopSalesProducts } from "@/app/actions/get-top-sales-products/action";
+import { getTopSalesProducts } from "@/app/actions/product/get-top-sales-products";
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
 
 export default async function TopSalesSection() {

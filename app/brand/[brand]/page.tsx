@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 import { getBrand } from "./action";
-import { getAllProducts } from "@/app/actions/get-all-products/action";
+import { getAllProducts } from "@/app/actions/product/get-all-products";
 
 import BrandPage from "@/components/BrandPage";
 

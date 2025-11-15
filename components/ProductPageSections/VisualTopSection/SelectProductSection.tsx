@@ -3,7 +3,6 @@
 import { Product } from "@/types/product.types";
 import StarsRating from "../../StarsRating";
 import { useEffect, useState } from "react";
-import { getProductsByIds } from "@/app/actions/get-products-by-array-ids/action";
 import { twMerge } from "tailwind-merge";
 import styles from "./style.module.css";
 import Image from "next/image";
@@ -15,6 +14,7 @@ import { useCalcTotalSum } from "@/utils/useCalcTotalSum";
 import ButtonAddToBasket from "../../ButtonAddToBasket";
 import { useBasketStore } from "@/store/basket-store";
 import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
+import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
 export default function SelectProductSection({ product }: { product: Product }) {

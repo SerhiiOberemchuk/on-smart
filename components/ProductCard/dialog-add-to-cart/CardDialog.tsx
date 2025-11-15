@@ -10,8 +10,7 @@ import { DialogProductCard } from "./components/DialogProductCard";
 import PricesBox from "@/components/PricesBox";
 import { Product } from "@/types/product.types";
 import { twMerge } from "tailwind-merge";
-import { getProductsByIds } from "@/app/actions/get-products-by-array-ids/action";
-import { getSupportProductById } from "@/app/actions/get-support-product-by-id/action";
+import { getSupportProductById } from "@/app/actions/product/get-support-product-by-id";
 import checkboxIconChecked from "@/assets/icons/checkbox.svg";
 import checkboxIcon from "@/assets/icons/checkbox-non.svg";
 import { useCardDialogStore } from "@/store/card-dialog-store";
@@ -20,6 +19,7 @@ import ProductQuantityInputButtons from "@/components/ProductQuantityInputButton
 import { useCalcTotalSum } from "@/utils/useCalcTotalSum";
 import ButtonAddToBasket from "@/components/ButtonAddToBasket";
 import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
+import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
 
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
