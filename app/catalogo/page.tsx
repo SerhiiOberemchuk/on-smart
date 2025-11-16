@@ -3,6 +3,7 @@
 import ListFiltereOptions from "@/components/PageCatalogComponents/FiltersSection/ListFilterOptions";
 import MobileFilterSection from "@/components/PageCatalogComponents/FiltersSection/MobileFilterSection";
 import CatalogProductSection from "@/components/PageCatalogComponents/ProductSection/CatalogProductSection";
+import { Suspense } from "react";
 
 export default function CatalogoPage() {
   return (
@@ -26,10 +27,16 @@ export default function CatalogoPage() {
         </div>
       </header>
       <div className="xl:bg-background">
-        <MobileFilterSection />
+        <Suspense>
+          <MobileFilterSection />
+        </Suspense>
         <div className="container flex flex-col gap-5 lg:flex-row">
-          <ListFiltereOptions className="hidden lg:flex" />
-          <CatalogProductSection />
+          <Suspense>
+            <ListFiltereOptions className="hidden lg:flex" />
+          </Suspense>
+          <Suspense>
+            <CatalogProductSection />
+          </Suspense>
         </div>
       </div>
     </section>
