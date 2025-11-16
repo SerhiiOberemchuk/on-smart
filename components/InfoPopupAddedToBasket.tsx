@@ -13,7 +13,7 @@ export default function InfoPopupAddedToBasket({ className }: { className?: stri
       if (isPopupOpen) {
         hidePopup();
       }
-    }, 3000);
+    }, 1500);
     return () => clearTimeout(timer);
   }, [isPopupOpen, hidePopup]);
 

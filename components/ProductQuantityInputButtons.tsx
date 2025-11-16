@@ -35,19 +35,21 @@ export default function ProductQuantityInputButtons({
         >
           -
         </button>
-        <input
-          type="number"
-          value={selectedProduct?.qnt || 1}
-          min={1}
-          max={selectedProduct?.inStock}
-          onChange={(v) =>
-            setSelectedProduct((prev) => (prev ? { ...prev, qnt: Number(v.target.value) } : prev))
-          }
-          name="quantita"
-          width={44}
-          height={44}
-          className="input_M_18 h-11 w-11 text-center text-white"
-        />
+        <span
+          // type="number"
+          // value={selectedProduct?.qnt || 1}
+          // min={1}
+          // max={selectedProduct?.inStock}
+          // onChange={(v) =>
+          //   setSelectedProduct((prev) => (prev ? { ...prev, qnt: Number(v.target.value) } : prev))
+          // }
+          // name="quantita"
+          // width={44}
+          // height={44}
+          className="input_M_18 flex h-11 w-11 items-center justify-center text-white"
+        >
+          {selectedProduct?.qnt || 0}
+        </span>
 
         <button
           type="button"

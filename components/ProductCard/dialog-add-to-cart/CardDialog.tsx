@@ -26,7 +26,7 @@ const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 export default function CardDialog() {
   const { isOpenDialog, product, closeDialog } = useCardDialogStore();
   const { updateBasket, showPopup } = useBasketStore();
-
+  const [isDisabled, setIsDisabled] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<(Product & { qnt: number }) | null>(null);
   const [selectedSupportProducts, setSelectedSupportProducts] = useState<Product[] | null>(null);
 
@@ -36,6 +36,7 @@ export default function CardDialog() {
   const [variantsToShow, setVariantsToShow] = useState(NUMBER_OF_VARIANTS_TO_SHOW);
 
   const handleAddToCart = () => {
+    setIsDisabled(true);
     const bascet: { id: string; qnt: number }[] = [
       ...(selectedProduct?.inStock ? [{ id: selectedProduct!.id, qnt: selectedProduct!.qnt }] : []),
       ...(selectedSupportProducts
@@ -44,7 +45,10 @@ export default function CardDialog() {
     ];
     updateBasket(bascet);
     showPopup((selectedProduct?.qnt || 0) + (selectedSupportProducts?.length || 0));
-    // handleCloseDialog();
+    setTimeout(() => {
+      handleCloseDialog();
+      setIsDisabled(false);
+    }, 2000);
   };
   const totalPrice = useCalcTotalSum([
     { qnt: selectedProduct?.qnt || 1, price: selectedProduct?.price || 0 },
@@ -88,7 +92,10 @@ export default function CardDialog() {
   };
 
   useEffect(() => {
-    queueMicrotask(() => setSelectedProduct({ ...product, qnt: 1 } as Product & { qnt: number }));
+    const setPreselectedProduct = () => {
+      if (product?.inStock) setSelectedProduct({ ...product, qnt: 1 } as Product & { qnt: number });
+    };
+    setPreselectedProduct();
     if (!product?.variants || product.variants.length === 0) {
       return;
     }
@@ -154,7 +161,7 @@ export default function CardDialog() {
       >
         <div
           className={clsx(
-            "ml-auto flex max-h-dvh min-h-svh w-full max-w-[1110px] flex-col xl:max-h-[780px]",
+            "ml-auto flex h-svh max-h-dvh min-h-svh w-full max-w-[1110px] flex-col xl:max-h-[780px] xl:min-h-auto",
             styles.card_dialog_content,
           )}
           onClick={(e) => e.stopPropagation()}
@@ -350,7 +357,7 @@ export default function CardDialog() {
                 oldPrice={totalOldPrice}
               />
               <ButtonAddToBasket
-                disabled={!selectedProduct?.inStock && !selectedSupportProducts}
+                disabled={(!selectedProduct?.inStock && !selectedSupportProducts) || isDisabled}
                 onClick={handleAddToCart}
               />
             </div>
