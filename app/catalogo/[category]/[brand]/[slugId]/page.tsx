@@ -20,7 +20,7 @@ export default async function CategoryBrandPage({
     return;
   }
   const product = await getProductById(id);
-  const products = await getAllProducts();
+  const products = await getAllProducts({});
   const productDetails = await getProductDetailsById(id);
 
   return (

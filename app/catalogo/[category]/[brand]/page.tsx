@@ -7,7 +7,7 @@ export default async function CategoryBrandPage({
   params: Promise<{ category: string; brand: string }>;
 }) {
   const { brand } = await params;
-  const productsBrand = await getAllProducts();
+  const productsBrand = await getAllProducts({});
 
   return <BrandPage products={productsBrand} brand={brand} />;
 }

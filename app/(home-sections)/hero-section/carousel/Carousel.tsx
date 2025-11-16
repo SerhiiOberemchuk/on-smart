@@ -14,10 +14,22 @@ import { Autoplay, EffectFade, Pagination } from "swiper/modules";
 import { ButtonArrow } from "@/components/ButtonArrows";
 import LinkYellow from "@/components/YellowLink";
 const slides = [
-  "/hero-baner/Baner 1 Antifurto.png",
-  "/hero-baner/Baner 2 Videosorveglianza.png",
-  "/hero-baner/Baner 3 Gruppi di Continuità.png",
-  "/hero-baner/Baner 4 Cavetteria e accessori.png",
+  {
+    title: "AJAX: la difesa perfetta per ogni ambiente.",
+    src: "/hero-baner/Baner 1 Antifurto.png",
+  },
+  {
+    title: "Ogni dettaglio sotto controllo. Sempre.",
+    src: "/hero-baner/Baner 2 Videosorveglianza.png",
+  },
+  {
+    title: "La forza dell’energia, la certezza della protezione.",
+    src: "/hero-baner/Baner 3 Gruppi di Continuità.png",
+  },
+  {
+    title: "Cavi, alimentatori e accessori per ogni installazione.",
+    src: "/hero-baner/Baner 4 Cavetteria e accessori.png",
+  },
 ];
 
 export default function Carousel() {
@@ -47,16 +59,15 @@ export default function Carousel() {
           onAutoplayTimeLeft={onAutoplayTimeLeft}
           className="hero_swiper"
         >
-          {slides.map((src, i) => (
+          {slides.map((baner, i) => (
             <SwiperSlide key={i} className="relative">
-              <div className="title_home_carousel w-dvw px-4 md:pl-10">
-                <h1 className="H1 mb-6 text-black">
-                  Proteggi ciò che ami <br /> con i nostri sistemi <br /> di videosorveglianza.
-                </h1>
+              <div className="title_home_carousel px-4 md:max-w-[60%] md:pl-10">
+                <h1 className="H1 mb-6 text-pretty text-white">{baner.title}</h1>
                 <LinkYellow href="/catalogo" title="Vai allo shop" />
               </div>
+              <div className="absolute top-0 right-0 bottom-0 left-0 bg-black/50"></div>
               <Image
-                src={src}
+                src={baner.src}
                 width={1440}
                 height={677}
                 alt={`slide-${i + 1}`}

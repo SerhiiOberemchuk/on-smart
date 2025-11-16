@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function Page({ params }: Props) {
   const { brand } = await params;
 
-  const products = await getAllProducts();
+  const products = await getAllProducts({});
 
   return <BrandPage products={products} brand={brand} />;
 }

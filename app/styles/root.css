@@ -90,3 +90,11 @@
   scrollbar-width: thin;
   scrollbar-color: var(--stroke-grey) var(--text-grey);
 }
+label {
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+}
+legend {
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+}
