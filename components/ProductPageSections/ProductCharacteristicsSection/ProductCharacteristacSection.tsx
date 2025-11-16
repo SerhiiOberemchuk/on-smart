@@ -68,7 +68,7 @@ export default function ProductCharacteristicsSection({
   return (
     <section className="pt-3 pb-6 xl:pb-3">
       <div className="container">
-        <nav className="flex gap-5 overflow-x-hidden border-b-2 border-stroke-grey">
+        <nav className="flex gap-5 overflow-x-auto border-b-2 border-stroke-grey">
           {TABS_CHARACTERISTICS.map((section) => (
             <button
               type="button"
