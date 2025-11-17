@@ -2,11 +2,18 @@
 
 import Image from "next/image";
 import icon_filter from "@/assets/icons/icon_filter.svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ListFiltereOptions from "./ListFilterOptions";
 
 export default function MobileFilterSection() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  useEffect(() => {
+    if (isFilterOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [isFilterOpen]);
   return (
     <div className="container py-2 lg:hidden">
       <button

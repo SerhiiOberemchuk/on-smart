@@ -72,7 +72,7 @@ export default function Carousel() {
                 height={677}
                 alt={`slide-${i + 1}`}
                 priority={i === 0}
-                quality={100}
+                // quality={[100,75]}
                 loading={i === 0 ? "eager" : "lazy"}
                 className="mx-auto h-[677px] object-cover object-center"
               />

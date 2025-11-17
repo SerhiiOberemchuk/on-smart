@@ -9,6 +9,8 @@ import Footer from "@/layout-components/Footer";
 import Head from "next/head";
 import { Suspense } from "react";
 import CardDialog from "@/components/ProductCard/dialog-add-to-cart/CardDialog";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+
 import { Analytics } from "@vercel/analytics/next";
 
 const fixelFont = localFont({
@@ -51,15 +53,18 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="ON SMART" />
         <link rel="manifest" href="/site.webmanifest" />
       </Head>
-      <body className={clsx(fixelFont.className, "flex min-h-svh flex-col")}>
-        <Header />
 
-        <main className="flex-1">{children}</main>
-        <Suspense>
-          <Footer />
-        </Suspense>
-        <CardDialog />
-        <Analytics />
+      <body className={clsx(fixelFont.className, "flex min-h-svh flex-col")}>
+        <NuqsAdapter>
+          <Header />
+
+          <main className="flex-1">{children}</main>
+          <Suspense>
+            <Footer />
+          </Suspense>
+          <CardDialog />
+          <Analytics />
+        </NuqsAdapter>
       </body>
     </html>
   );

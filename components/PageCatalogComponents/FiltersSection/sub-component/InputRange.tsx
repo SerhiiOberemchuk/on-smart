@@ -4,36 +4,37 @@ import { FilterGroup } from "@/types/catalog-filter-options.types";
 import { Range } from "react-range";
 
 import { useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  //  debounce,
+  parseAsArrayOf,
+  parseAsInteger,
+  useQueryState,
+} from "nuqs";
 
 export function InputRange({
   min = 0,
   max = 100,
   param,
 }: Pick<FilterGroup, "min" | "max"> & Pick<FilterGroup, "param">) {
-  const [values, setValues] = useState([min, max]);
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [range, setRange] = useQueryState(
+    param,
+    parseAsArrayOf(parseAsInteger).withDefault([min, max]),
+  );
+
+  const [values, setValues] = useState(range);
+
   useEffect(() => {
-    const checkedInitially = () => {
-      const params = new URLSearchParams(searchParams.toString());
-      const current = params.get(param)?.split("-").filter(Boolean) || [];
-      if (current && current.length === 0) {
-        setValues([min, max]);
-        return;
-      }
-      setValues([Number(current[0]), Number(current[1])]);
+    const update = () => {
+      if (range && range.length === 2) setValues(range);
     };
-    checkedInitially();
-  }, [param, searchParams, min, max]);
+    update();
+  }, [range]);
 
-  const updateUrl = (v: number[]) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set(param, `${v[0]}-${v[1]}`);
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  const update = (v: number[]) => {
+    setValues(v);
+    // setRange(v, { limitUrlUpdates: debounce(1000) });
+    setRange(v);
   };
-
   return (
     <div className="flex flex-col gap-3 overflow-x-visible pb-2">
       <div className="flex items-center justify-between">
@@ -41,12 +42,7 @@ export function InputRange({
           type="number"
           value={values[0]}
           className="h-11 w-24 rounded-sm border border-text-grey"
-          onChange={(e) => {
-            const newMin = +e.target.value;
-            const newVals = [newMin, values[1]];
-            setValues(newVals);
-            updateUrl(newVals);
-          }}
+          onChange={(e) => update([+e.target.value, values[1]])}
           max={max}
         />
         <span>{" - "}</span>
@@ -55,12 +51,7 @@ export function InputRange({
           type="number"
           value={values[1]}
           max={max}
-          onChange={(e) => {
-            const newMax = +e.target.value;
-            const newVals = [values[0], newMax];
-            setValues(newVals);
-            updateUrl(newVals);
-          }}
+          onChange={(e) => update([values[0], +e.target.value])}
         />
       </div>
       <Range
@@ -68,12 +59,8 @@ export function InputRange({
         min={min}
         max={max}
         values={values}
-        onFinalChange={(v) => {
-          updateUrl(v);
-        }}
-        onChange={(v) => {
-          setValues(v);
-        }}
+        onChange={(v) => setValues(v)}
+        onFinalChange={(v) => update(v)}
         renderTrack={({ props, children }) => (
           <div
             {...props}

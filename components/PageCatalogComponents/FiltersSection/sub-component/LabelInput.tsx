@@ -1,50 +1,35 @@
 "use client";
 
+import {
+  //  debounce,
+  parseAsArrayOf,
+  parseAsString,
+  useQueryState,
+} from "nuqs";
 import { FilterGroup, FilterOption } from "@/types/catalog-filter-options.types";
 import Image from "next/image";
 
 import icon_checkbox from "@/assets/icons/checkbox-non.svg";
 import icon_checked from "@/assets/icons/checkbox.svg";
-import { useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-export function LabelInput(option: FilterOption & Pick<FilterGroup, "param">) {
-  const [checked, setChecked] = useState(false);
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const checkedInitially = () => {
-      const params = new URLSearchParams(searchParams.toString());
-      const paramName = option.param;
-      const current = params.get(paramName)?.split(",").filter(Boolean) || [];
-      setChecked(current.includes(option.value));
-    };
-    checkedInitially();
-  }, [option.value, searchParams, option.param]);
+export function LabelInput(option: FilterOption & Pick<FilterGroup, "param">) {
+  const [sortParam, setSortParam] = useQueryState(
+    option.param,
+    parseAsArrayOf(parseAsString).withDefault([]),
+  );
+
+  const checked = sortParam?.includes(option.value);
 
   const handleChange = () => {
-    setChecked((prev) => !prev);
-    const params = new URLSearchParams(searchParams.toString());
-    const paramName = option.param;
-    const current = params.get(paramName)?.split(",").filter(Boolean) || [];
-
-    let updated: string[];
-
-    if (!checked) {
-      updated = [...current, option.value];
-    } else {
-      updated = current.filter((v) => v !== option.value);
-    }
-
-    if (updated.length > 0) {
-      params.set(paramName, updated.join(","));
-    } else {
-      params.delete(paramName);
-    }
-
-    router.push(pathname + "?" + params.toString(), { scroll: false });
+    const updatedSortParam = checked
+      ? sortParam.filter((v) => v !== option.value)
+      : [...(sortParam || []), option.value];
+    setSortParam(
+      updatedSortParam.length > 0 ? updatedSortParam : null,
+      //  {      limitUrlUpdates: debounce(1000),    }
+    );
   };
+
   return (
     <label
       htmlFor={option.value}

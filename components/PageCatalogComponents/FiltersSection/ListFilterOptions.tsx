@@ -1,6 +1,6 @@
 "use client";
 
-import { CATALOG_FILTERS, FilterGroup } from "@/types/catalog-filter-options.types";
+import { CATALOG_FILTERS_PARAMS, FilterGroup } from "@/types/catalog-filter-options.types";
 import Image from "next/image";
 import { twMerge } from "tailwind-merge";
 import icon_arrow_top from "@/assets/icons/arrow-top.svg";
@@ -14,7 +14,7 @@ export default function ListFiltereOptions({ className }: { className?: string }
   const pathname = usePathname();
   return (
     <ul className={twMerge("flex w-full max-w-[264px] flex-col", className)}>
-      {CATALOG_FILTERS.map((filter) => (
+      {CATALOG_FILTERS_PARAMS.map((filter) => (
         <li key={filter.param}>
           <ItemFilteredOptions {...filter} />
         </li>
@@ -54,7 +54,7 @@ export function ItemFilteredOptions(props: FilterGroup) {
         <Image
           src={icon_arrow_top}
           alt="arrow top"
-          className={twMerge("transition-all duration-300", isOpen ? "rotate-x-180" : "rotate-x-0")}
+          className={twMerge("transition-all duration-300", isOpen ? "rotate-x-0" : "rotate-x-180")}
           width={24}
           height={24}
           aria-label="arrow top"

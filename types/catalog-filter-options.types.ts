@@ -12,7 +12,7 @@ export type FilterGroup = {
   max?: number;
 };
 
-export const CATALOG_FILTERS: FilterGroup[] = [
+export const CATALOG_FILTERS_PARAMS: FilterGroup[] = [
   {
     param: "category",
     title: "Categoria",
@@ -51,3 +51,16 @@ export const CATALOG_FILTERS: FilterGroup[] = [
     ],
   },
 ];
+
+const SORT_OPTIONS = [
+  { value: "new", label: "Novita" },
+  { value: "price-asc", label: "Prezzo più alto" },
+  { value: "price-desc", label: "Prezzo più basso" },
+] as const;
+
+export type SortOptionValues = (typeof SORT_OPTIONS)[number]["value"];
+
+export const SORT_OPTIONS_PARAMS = {
+  PARAM_NAME: "sort",
+  options: SORT_OPTIONS,
+} as const;

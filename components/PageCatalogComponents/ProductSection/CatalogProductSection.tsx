@@ -6,13 +6,18 @@ import { Product } from "@/types/product.types";
 import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import styles from "./product.module.css";
+import { SORT_OPTIONS_PARAMS } from "@/types/catalog-filter-options.types";
+import { useQueryState } from "nuqs";
 
 export default function CatalogProductSection({ className }: { className?: string }) {
   const [products, setProducts] = useState<Product[] | null>(null);
+  const [sortParam] = useQueryState(SORT_OPTIONS_PARAMS.PARAM_NAME);
   const [activePage, setActivePage] = useState(1);
   const maxPages = 5;
 
   useEffect(() => {
+    console.log({ sortParam });
+
     const fetchProducts = async () => {
       const response = await getAllProducts();
       if (response) {
@@ -24,7 +29,7 @@ export default function CatalogProductSection({ className }: { className?: strin
       }
     };
     fetchProducts();
-  }, []);
+  }, [sortParam]);
 
   return (
     <section className={twMerge("flex-1", className)}>
