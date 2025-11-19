@@ -13,23 +13,11 @@ export default function FormClientData() {
         <h3 className="input_R_18">Ordini come:</h3>
         <fieldset className="flex">
           <label className="text_R mr-4 flex shrink-0 items-center gap-2 hover:text-yellow-600">
-            <input
-              type="radio"
-              name="client_type"
-              required
-              value="individual"
-              className="input_radio_round"
-            />
+            <input type="radio" name="client_type" required value="individual" />
             Persona fisica
           </label>
           <label className="body_R_2 flex shrink-0 items-center gap-2 hover:text-yellow-600">
-            <input
-              type="radio"
-              name="client_type"
-              required
-              value="business"
-              className="input_radio_round"
-            />
+            <input type="radio" name="client_type" required value="business" />
             Azienda
           </label>
         </fieldset>
@@ -58,10 +46,17 @@ export default function FormClientData() {
         <InputBlock title="Regione*" required type="text" className="min-w-[200px] flex-1" />{" "}
       </div>
 
-      <p className="text-text-grey">
+      <p className="fixel_display text-text-grey">
         Proseguendo, confermo di aver letto e compreso i Termini e condizioni e l’Informativa sulla
         privacy, e acconsento a ricevere notizie e offerte esclusive.
       </p>
+      <label
+        htmlFor="request_invoice"
+        className="fixel_display flex items-center gap-2 text-text-grey hover:text-yellow-600"
+      >
+        <input type="checkbox" name="request_invoice " id="request_invoice" />
+        Richiedi Fattura
+      </label>
     </form>
   );
 }

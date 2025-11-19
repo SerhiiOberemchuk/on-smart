@@ -67,6 +67,11 @@
     text-align: center;
     color: var(--white);
   }
+  .fixel_display {
+    font-weight: 400;
+    font-size: 0.625rem;
+    line-height: 120%;
+  }
   .body_R_20 {
     font-weight: 400;
     font-size: 18px;

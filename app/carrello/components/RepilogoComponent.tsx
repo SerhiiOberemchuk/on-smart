@@ -1,8 +1,9 @@
+"use client";
 import clsx from "clsx";
 
 import InputSconto from "./InputSconto";
 import { useCheckoutStore } from "@/store/checkout-store";
-import { redirect } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
 
 export default function RepilogoComponent({
   totalPrice,
@@ -12,7 +13,7 @@ export default function RepilogoComponent({
   basket: { id: string; qnt: number }[];
 }) {
   const { setCheckoutData, setStep, step } = useCheckoutStore();
-
+  const path = usePathname();
   const handleProceedToOrder = () => {
     if (basket.length === 0) {
       alert("Il carrello è vuoto");
@@ -24,7 +25,7 @@ export default function RepilogoComponent({
   };
 
   return (
-    <div className="w-full xl:max-w-[426px]">
+    <div className="sticky top-5 w-full xl:max-w-[426px]">
       <div className="sticky top-5 flex w-full flex-col gap-6 rounded-sm bg-background p-3">
         <h3 className="H4M">Riepilogo Ordine</h3>
         <ul className="flex flex-col gap-3">
@@ -52,7 +53,7 @@ export default function RepilogoComponent({
           <span className="H4M">{totalPrice.toFixed(2)} €</span>
         </div>
         <InputSconto />
-        {step === 0 && (
+        {path === "/carrello" && (
           <button
             type="button"
             onClick={handleProceedToOrder}
