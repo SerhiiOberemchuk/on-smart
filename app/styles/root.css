@@ -98,3 +98,41 @@ legend {
   transition: all 0.3s ease-in-out;
   cursor: pointer;
 }
+input {
+  transition: all 0.3s ease-in-out;
+}
+.input_radio_round[type="radio"] {
+  cursor: pointer;
+  appearance: none;
+  position: relative;
+  padding-right: 24px;
+}
+.input_radio_round[type="radio"]::before {
+  transition: all 0.3s ease-in-out;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateY(-50%);
+  content: "";
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--stroke-grey);
+  border-radius: 50%;
+}
+.input_radio_round[type="radio"]::after {
+  transition: all 0.3s ease-in-out;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(50%, -50%);
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.input_radio_round[type="radio"]:checked::after {
+  background-color: var(--green-600);
+}
+.input_radio_round[type="radio"]:checked::before {
+  border-color: var(--green-600);
+}

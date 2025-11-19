@@ -10,6 +10,9 @@ import icon_dell from "@/assets/icons/icon_delete.svg";
 import clsx from "clsx";
 import { useBasketStore } from "@/store/basket-store";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
+import RepilogoComponent from "./RepilogoComponent";
+import HeaderCart from "./HeaderCart";
+
 export default function CardSection() {
   const [fetchedBasketProducts, setFetchedBasketProducts] = useState<Product[]>([]);
   const { basket, removeFromBasketById, updateBasket } = useBasketStore();
@@ -71,11 +74,7 @@ export default function CardSection() {
   return (
     <section>
       <Breadcrumbs carello="Carello" />
-      <header className="bg-background">
-        <div className="container py-3">
-          <h1 className="H2">Carrello ({fetchedBasketProducts.length} art.)</h1>
-        </div>
-      </header>
+      <HeaderCart />
       <div className="container">
         <div className="relative flex flex-col gap-4 xl:mt-5 xl:flex-row xl:gap-5">
           <ul className="mx-auto flex w-full max-w-[916px] flex-col gap-6 rounded-sm bg-background p-3 xl:mx-0">
@@ -146,38 +145,7 @@ export default function CardSection() {
               );
             })}
           </ul>
-          <div className="w-full xl:max-w-[426px]">
-            <div className="sticky top-5 flex w-full flex-col gap-6 rounded-sm bg-background p-3">
-              <h3 className="H4M">Riepilogo Ordine</h3>
-              <ul className="flex flex-col gap-3">
-                {[
-                  { title: "articolo (li)", price: calcTotalePrice() },
-                  { title: "IVA (inclusa)", price: 2 },
-                  { title: "Spedizione", price: 0 },
-                ].map((i, index) => (
-                  <li key={index} className="flex items-center justify-between">
-                    <span className="text_R">
-                      <span className={clsx(index !== 0 && "hidden")}>
-                        {" "}
-                        {basket.reduce((acc, item) => {
-                          return acc + item.qnt;
-                        }, 0)}
-                      </span>{" "}
-                      {i.title}
-                    </span>
-                    <span className="input_R_18">{i.price.toFixed(2)} €</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex items-center justify-between">
-                <h4 className="H3">Totale</h4>
-                <span className="H4M">{calcTotalePrice().toFixed(2)} €</span>
-              </div>
-              <button type="button" className="btn rounded-sm bg-yellow-500 p-3 text-black">
-                Procedi all’ordine
-              </button>
-            </div>
-          </div>
+          <RepilogoComponent totalPrice={calcTotalePrice()} basket={basket} />
         </div>
       </div>
     </section>
