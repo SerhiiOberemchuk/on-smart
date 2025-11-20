@@ -15,3 +15,17 @@ export type InputsCheckoutStep1 = {
   partita_iva: string;
   request_invoice?: boolean;
 };
+export type InputsCheckoutStep2Consegna = {
+  deliveryMethod: "consegna_corriere" | "ritiro_negozio";
+  sameAsBilling: boolean;
+} & Pick<
+  InputsCheckoutStep1,
+  | "referente_contatto"
+  | "ragione_sociale"
+  | "partita_iva"
+  | "indirizzo"
+  | "città"
+  | "cap"
+  | "nazione"
+  | "provincia_regione"
+>;

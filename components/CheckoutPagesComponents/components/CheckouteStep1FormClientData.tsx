@@ -9,10 +9,14 @@ import Link from "next/link";
 import { InputsCheckoutStep1 } from "@/types/checkout-steps.types";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useRouter } from "next/navigation";
+import { InputBlock } from "@/components/InputBloc";
 
-export default function FormClientData() {
-  const [isCodiceFiscaleRequired, setIsCodiceFiscaleRequired] = useState(false);
-  const { setDataFirstStepCheckout, setStep, dataFirstStep } = useCheckoutStore();
+export default function CheckouteStep1FormClientData() {
+  const { setDataFirstStepCheckout, setStep, dataFirstStep, resetRequestCodiceFiscale } =
+    useCheckoutStore();
+  const [isCodiceFiscaleRequired, setIsCodiceFiscaleRequired] = useState(
+    dataFirstStep?.request_invoice || false,
+  );
   const { register, handleSubmit, resetField } = useForm<InputsCheckoutStep1>({
     defaultValues: dataFirstStep,
   });
@@ -240,6 +244,7 @@ export default function FormClientData() {
                   setIsCodiceFiscaleRequired((prev) => !prev);
                   if (isCodiceFiscaleRequired === true) {
                     resetField("codice_fiscale");
+                    resetRequestCodiceFiscale();
                   }
                 }}
               />
@@ -269,18 +274,5 @@ export default function FormClientData() {
         </ButtonYellow>
       </form>
     </>
-  );
-}
-
-function InputBlock({
-  title,
-  className,
-  ...rest
-}: { title: string; className?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <label className={twMerge("helper_text flex flex-col gap-1", className)}>
-      {title}
-      <input {...rest} className="border-b border-stroke-grey text-text-grey outline-0" />
-    </label>
   );
 }

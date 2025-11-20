@@ -6,9 +6,9 @@ import { redirect } from "next/navigation";
 export default function PageCheckoutConsegna() {
   const { step } = useCheckoutStore();
 
-  if (step !== 2) {
+  if (step < 2) {
     redirect("/checkout");
   }
 
-  return <PageLayoutCheckout />;
+  return <PageLayoutCheckout page="consegna" />;
 }

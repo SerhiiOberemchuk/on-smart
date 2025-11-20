@@ -99,6 +99,7 @@ legend {
   cursor: pointer;
 }
 input {
+  flex-shrink: 0;
   transition: all 0.3s ease-in-out;
 }
 input[type="radio"] {

@@ -7,5 +7,5 @@ import { redirect } from "next/navigation";
 export default function PageCheckout() {
   const { step } = useCheckoutStore();
   if (step === 0) redirect("/carrello");
-  return <PageLayoutCheckout />;
+  return <PageLayoutCheckout page="client-data" />;
 }
