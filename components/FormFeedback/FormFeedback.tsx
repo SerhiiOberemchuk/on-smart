@@ -1,3 +1,5 @@
+"use client";
+
 import Form from "next/form";
 
 import styles from "./form.module.css";
@@ -10,6 +12,7 @@ import {
 import { twMerge } from "tailwind-merge";
 import Link from "next/link";
 import InputsRating from "./InputsRating";
+import { useActionState, useEffect, useState } from "react";
 
 export default function FormFeedback({
   productId,
@@ -22,9 +25,29 @@ export default function FormFeedback({
   type: "general-feedback" | "product-review";
 }) {
   const action = type === "product-review" ? submitProductFeedback : submitGeneralFeedback;
+  const [state, formAction] = useActionState(action, {
+    success: false,
+    messaggio: "",
+  });
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!state.success) return;
+
+    const updateShowSuccess = async () => {
+      setShowSuccess(true);
+
+      const timeout = setTimeout(() => {
+        setShowSuccess(false);
+      }, 3000);
+
+      return () => clearTimeout(timeout);
+    };
+    updateShowSuccess();
+  }, [state.success]);
   return (
     <Form
-      action={action}
+      action={formAction}
       className={twMerge(
         styles.form,
         "flexflex-col mx-auto p-3",
@@ -58,6 +81,7 @@ export default function FormFeedback({
         </Link>
         , e acconsento a ricevere notizie e offerte esclusive.
       </p>
+      {showSuccess && <p className="text-green-600">Grazie! Recensione inviata.</p>}
       <SendButton />
     </Form>
   );
