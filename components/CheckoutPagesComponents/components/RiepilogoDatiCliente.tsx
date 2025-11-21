@@ -1,3 +1,5 @@
+"use client";
+
 import icon_email_confirmed from "@/assets/icons/icon_email_confirm.svg";
 import icon_pencil from "@/assets/icons/icon_add_review.svg";
 import Image from "next/image";
@@ -17,7 +19,7 @@ export default function RiepilogoDatiCliente() {
         />
         <h3 className="H5">I tuoi dati</h3>
         <Link
-          href="/checkout"
+          href="/checkout/informazioni"
           className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
         >
           <Image src={icon_pencil} alt="icon pencil" aria-label="icon pencil" /> Modifica

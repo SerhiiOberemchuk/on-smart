@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PricesBox from "@/components/PricesBox";
-// import ProductQuantityInputButtons from "@/components/ProductQuantityInputButtons";
 import { Product } from "@/types/product.types";
 import icon_dell from "@/assets/icons/icon_delete.svg";
 import clsx from "clsx";
@@ -12,12 +11,15 @@ import { useBasketStore } from "@/store/basket-store";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
 import RepilogoComponent from "./RepilogoComponent";
 import HeaderCart from "./HeaderCart";
+import Link from "next/link";
 
 export default function CardSection() {
   const [fetchedBasketProducts, setFetchedBasketProducts] = useState<Product[]>([]);
   const { basket, removeFromBasketById, updateBasket } = useBasketStore();
 
   useEffect(() => {
+    if (basket.length === 0) return;
+
     const fetchBasketProducts = async () => {
       try {
         const ids = basket.map((item) => ({ id: item.id }));
@@ -144,6 +146,14 @@ export default function CardSection() {
                 </li>
               );
             })}
+            {basket.length === 0 && (
+              <li className="text-center">
+                Il carrello è vuoto{" "}
+                <Link href="/catalogo" className="underline">
+                  Vai al catalogo
+                </Link>
+              </li>
+            )}
           </ul>
           <RepilogoComponent totalPrice={calcTotalePrice()} basket={basket} />
         </div>

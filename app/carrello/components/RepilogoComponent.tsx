@@ -4,13 +4,16 @@ import clsx from "clsx";
 import InputSconto from "./InputSconto";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { redirect, usePathname } from "next/navigation";
+import ButtonYellow from "@/components/BattonYellow";
 
 export default function RepilogoComponent({
   totalPrice,
   basket,
+  isInputSconto = true,
 }: {
   totalPrice: number;
   basket: { id: string; qnt: number }[];
+  isInputSconto?: boolean;
 }) {
   const { setCheckoutData, setStep, step } = useCheckoutStore();
   const path = usePathname();
@@ -19,9 +22,11 @@ export default function RepilogoComponent({
       alert("Il carrello è vuoto");
       return;
     }
-    setStep(1);
+    if (!step) {
+      setStep(1);
+    }
     setCheckoutData({ totalPrice, basket });
-    redirect("/checkout");
+    redirect("/checkout/informazioni");
   };
 
   return (
@@ -52,15 +57,16 @@ export default function RepilogoComponent({
           <h4 className="H3">Totale</h4>
           <span className="H4M">{totalPrice.toFixed(2)} €</span>
         </div>
-        <InputSconto />
+        {isInputSconto && <InputSconto />}
         {path === "/carrello" && (
-          <button
+          <ButtonYellow
             type="button"
+            disabled={basket.length === 0}
             onClick={handleProceedToOrder}
-            className="btn rounded-sm bg-yellow-500 p-3 text-black"
+            // className="btn rounded-sm bg-yellow-500 p-3 text-black"
           >
             Procedi all’ordine
-          </button>
+          </ButtonYellow>
         )}
       </div>
     </div>

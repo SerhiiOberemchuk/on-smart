@@ -10,6 +10,7 @@ import Head from "next/head";
 import { Suspense } from "react";
 import CardDialog from "@/components/ProductCard/dialog-add-to-cart/CardDialog";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { ToastContainer } from "react-toastify";
 
 import { Analytics } from "@vercel/analytics/next";
 
@@ -65,6 +66,7 @@ export default function RootLayout({
           <CardDialog />
           <Analytics />
         </NuqsAdapter>
+        <ToastContainer />
       </body>
     </html>
   );

@@ -6,9 +6,10 @@ import { usePathname } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 
 export const checkoutSteps = [
-  { label: "I tuoi dati", href: "/checkout", checkoutStep: 1 },
+  { label: "I tuoi dati", href: "/checkout/informazioni", checkoutStep: 1 },
   { label: "Consegna", href: "/checkout/consegna", checkoutStep: 2 },
   { label: "Pagamento", href: "/checkout/pagamento", checkoutStep: 3 },
+  { label: "Riepilogo", href: "/checkout/riepilogo", checkoutStep: 4 },
 ];
 
 export default function CheckoutStepsLinks() {

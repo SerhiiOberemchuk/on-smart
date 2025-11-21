@@ -2,6 +2,7 @@
 @import "./colors.css";
 @import "./root.css";
 @import "./typography.css";
+@import "./toastify.css";
 
 /* @media (prefers-color-scheme: dark) {
   :root {

@@ -9,7 +9,7 @@ import { useState } from "react";
 import { InputsCheckoutStep2Consegna } from "@/types/checkout-steps.types";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useRouter } from "next/navigation";
-import RiepilogoDatiCliente from "./RepilogoDatiCliente";
+import RiepilogoDatiCliente from "./RiepilogoDatiCliente";
 
 export default function CheckouteStep2ConsegnaDati() {
   const {

@@ -1,3 +1,5 @@
+"use client";
+
 import icon_delivery_success from "@/assets/icons/icon_delivery_success.svg";
 import icon_pencil from "@/assets/icons/icon_add_review.svg";
 import Image from "next/image";
@@ -35,8 +37,8 @@ export default function RiepilogoDatiConsegna() {
       </div>
 
       <div className="text_R mt-3 pl-8 text-text-grey">
-        {deliveryMethod === "consegna_corriere" && <p>Metodo corriere</p>}
-        {deliveryMethod === "ritiro_negozio" && <p>Metodo ritiro in negozio</p>}
+        {deliveryMethod === "consegna_corriere" && <p>Corriere</p>}
+        {deliveryMethod === "ritiro_negozio" && <p>Ritiro in negozio</p>}
         {deliveryMethod === "consegna_corriere" && (
           <>
             {sameAsBilling ? (
@@ -52,7 +54,6 @@ export default function RiepilogoDatiConsegna() {
               </>
             ) : (
               <>
-                {" "}
                 <p className="">{numeroTelefono}</p>
                 <p className="">{email}</p>
                 <p className="">{referente_contatto}</p>

@@ -4,8 +4,11 @@ import PageLayoutCheckout from "@/components/CheckoutPagesComponents/PageLayoutC
 import { useCheckoutStore } from "@/store/checkout-store";
 import { redirect } from "next/navigation";
 
-export default function PageCheckout() {
+export default function RepilogoDatiConsegna() {
   const { step } = useCheckoutStore();
-  if (step === 0) redirect("/carrello");
-  return <PageLayoutCheckout page="client-data" />;
+
+  if (step < 4) {
+    redirect("/checkout/pagamento");
+  }
+  return <PageLayoutCheckout page="riepilogo" />;
 }

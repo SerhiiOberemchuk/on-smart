@@ -1,0 +1,39 @@
+"use client";
+
+import icon_card_success from "@/assets/icons/icon_card_success.svg";
+import icon_pencil from "@/assets/icons/icon_add_review.svg";
+import Image from "next/image";
+import Link from "next/link";
+import { useCheckoutStore } from "@/store/checkout-store";
+import BonificoDati from "./BonificoDati";
+
+export default function RiepilogoDatiPagamento() {
+  const { dataCheckoutStepPagamento } = useCheckoutStore();
+
+  return (
+    <div>
+      <div className="flex items-center gap-2">
+        <Image
+          src={icon_card_success}
+          alt="icon email confirmed"
+          aria-label="icon email confirmed"
+        />
+        <h3 className="H5">Metodo di pagamento</h3>
+        <Link
+          href="/checkout/pagamento"
+          className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
+        >
+          <Image src={icon_pencil} alt="icon pencil" aria-label="icon pencil" /> Modifica
+        </Link>
+      </div>
+
+      <div className="text_R mt-3">
+        {dataCheckoutStepPagamento?.paymentMethod === "bonifico" ? (
+          <BonificoDati />
+        ) : (
+          <p className="pl-8 text-text-grey">{dataCheckoutStepPagamento?.title}</p>
+        )}
+      </div>
+    </div>
+  );
+}
