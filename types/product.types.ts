@@ -8,7 +8,7 @@ export type Product = Prices & {
   imgSrc: string;
   category: string;
   quantity: number;
-  rating: 0 | 1 | 2 | 3 | 4 | 5;
+  rating: number;
   inStock: number;
   images: string[];
   logo: string;

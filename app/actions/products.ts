@@ -226,7 +226,7 @@ export const otherProducts: Product[] = allProducts.map((p, i) => ({
 export const recomedProducts: Product[] = allProducts.map((p, i) => ({
   ...p,
   id: `r${i + 1}`,
-  rating: Math.min(5, Math.round(p.rating + 0.5)) as 1 | 2 | 3 | 4 | 5,
+  rating: Math.min(5, p.rating + 0.5),
   oldPrice: p.price + 20,
   price: p.price + 10,
   name: `${p.name} – Reccomended`,
