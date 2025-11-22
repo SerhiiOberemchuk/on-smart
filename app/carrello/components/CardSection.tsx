@@ -18,7 +18,7 @@ export default function CardSection() {
   const { basket, removeFromBasketById, updateBasket } = useBasketStore();
 
   useEffect(() => {
-    if (basket.length === 0) return;
+    // if (basket.length === 0) return;
 
     const fetchBasketProducts = async () => {
       try {
@@ -77,9 +77,9 @@ export default function CardSection() {
     <section>
       <Breadcrumbs carello="Carello" />
       <HeaderCart />
-      <div className="container">
+      <div className="container bg-background xl:bg-transparent">
         <div className="relative flex flex-col gap-4 xl:mt-5 xl:flex-row xl:gap-5">
-          <ul className="mx-auto flex w-full max-w-[916px] flex-col gap-6 rounded-sm bg-background p-3 xl:mx-0">
+          <ul className="mx-auto flex w-full max-w-[916px] flex-col justify-center gap-6 rounded-sm bg-background p-3 xl:mx-0">
             {fetchedBasketProducts.map((prod, index) => {
               return (
                 <li

@@ -57,7 +57,7 @@ export default function RepilogoComponent({
           <h4 className="H3">Totale</h4>
           <span className="H4M">{totalPrice.toFixed(2)} €</span>
         </div>
-        {isInputSconto && <InputSconto />}
+        {isInputSconto && totalPrice > 0 && <InputSconto />}
         {path === "/carrello" && (
           <ButtonYellow
             type="button"
