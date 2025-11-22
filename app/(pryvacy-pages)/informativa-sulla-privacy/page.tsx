@@ -1,3 +1,15 @@
+import { Metadata } from "next";
+import Script from "next/script";
+
+export const metadata: Metadata = {
+  title: "Informativa sulla Privacy | OnSmart",
+  description:
+    "Scopri come OnSmart raccoglie, utilizza e protegge i dati personali conforme al GDPR.",
+  alternates: {
+    canonical: "https://www.on-smart.it/informativa-sulla-privacy",
+  },
+};
+
 export default function InformativaSullaPrivacy() {
   return (
     <div>
@@ -36,7 +48,6 @@ export default function InformativaSullaPrivacy() {
           </p>
         </li>
         <li>
-          <h2></h2>
           <h2> 4. Base giuridica del trattamento </h2>
           <p>
             Il trattamento dei dati si basa su: Esecuzione di un contratto o di misure
@@ -108,6 +119,114 @@ export default function InformativaSullaPrivacy() {
           </p>
         </li>
       </ol>
+      <Script
+        id="garanzia-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            name: "Garanzia e Diritto di Recesso",
+            url: "https://on-smart.it/garanzia",
+            description:
+              "Informazioni complete sulla garanzia legale, sui prodotti ricondizionati, limitazioni, diritto di recesso e procedure di reso per i prodotti acquistati su OnSmart.",
+            breadcrumb: {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Home",
+                  item: "https://on-smart.it/",
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: "Garanzia",
+                  item: "https://on-smart.it/garanzia",
+                },
+              ],
+            },
+          }),
+        }}
+      />
+
+      <Script
+        id="garanzia-faq-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "Qual è la durata della garanzia per i consumatori privati?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Per i consumatori privati, la garanzia legale è di 24 mesi dalla data di consegna del prodotto.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Qual è la durata della garanzia con fattura e partita IVA?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Per gli acquisti con fattura intestata a partita IVA, la garanzia è di 12 mesi.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "È possibile richiedere una fattura e mantenere la garanzia di 24 mesi?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Sì. Se la fattura è intestata a una persona senza partita IVA, la garanzia rimane di 24 mesi.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Qual è la garanzia sui prodotti ricondizionati?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "I prodotti ricondizionati venduti da On Smart hanno una garanzia di 12 mesi.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Cosa non è coperto dalla garanzia?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "La garanzia non copre danni estetici, utilizzo improprio, installazione errata, manomissioni, danni elettrici o accidentali, e componenti soggetti a normale usura.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Come funziona il diritto di recesso?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Il consumatore privato può esercitare il diritto di recesso entro 14 giorni dal ricevimento del prodotto, senza penalità e senza dover fornire una motivazione.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Quali sono le condizioni per esercitare il recesso?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Il prodotto deve essere integro, non utilizzato, restituito nella confezione originale con tutti gli accessori e documentazione.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Entro quanto tempo avviene il rimborso?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Il rimborso viene effettuato entro 14 giorni dal ricevimento del prodotto reso.",
+                },
+              },
+            ],
+          }),
+        }}
+      />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import BrandPage from "@/components/BrandPage";
 import { Metadata } from "next";
 
-// import { Suspense } from "react";
 import { getBrand } from "./action";
 import { baseUrl } from "@/types/baseUrl";
 
@@ -9,12 +8,45 @@ type Props = { params: Promise<{ brand: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { brand } = await params;
-  const brandName = (await getBrand(brand)).brand;
+  const brandInfo = await getBrand(brand);
+
+  if (!brandInfo) {
+    return {
+      title: "Brand non trovato",
+      robots: "noindex",
+    };
+  }
+
+  const canonical = `${baseUrl}/brand/${brand}`;
+  const title = `${brandInfo.brand} – Prodotti ufficiali OnSmart`;
+  const description = `Scopri i migliori prodotti del brand ${brandInfo.brand}: videosorveglianza, accessori e soluzioni professionali disponibili su OnSmart.`;
+
   return {
-    title: `Brand - ${brandName}`,
-    description: `Scopri i prodotti del brand ${brandName} su OnSmart.`,
+    title,
+    description,
     alternates: {
-      canonical: baseUrl + `/brand/${brand}`,
+      canonical,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      siteName: "OnSmart",
+      images: [
+        {
+          url: brandInfo.logo,
+          width: 600,
+          height: 400,
+          alt: `${brandInfo.brand} Logo`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [brandInfo.logo],
     },
   };
 }

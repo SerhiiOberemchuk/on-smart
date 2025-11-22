@@ -4,10 +4,46 @@ import LinkYellow from "@/components/YellowLink";
 import Breadcrumbs from "./Breadcrumbs";
 import { getBrandInfo } from "@/app/actions/product/get-brand-info";
 import { getAllProducts } from "@/app/actions/product/get-all-products";
+import { baseUrl } from "@/types/baseUrl";
+import Script from "next/script";
 
 export default async function BrandPage({ brand }: { brand: string }) {
   const products = await getAllProducts({ brand });
   const brandInfo = await getBrandInfo(brand);
+  const brandJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Brand",
+    name: brandInfo.brandName,
+    logo: brandInfo.logo,
+    url: `${baseUrl}/brand/${brand}`,
+    description: brandInfo.description.join(" "),
+  };
+
+  const productsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `Prodotti del brand ${brandInfo.brandName}`,
+    itemListOrder: "https://schema.org/ItemListOrderAscending",
+    numberOfItems: products.length,
+    itemListElement: products.map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Product",
+        name: p.name,
+        image: p.imgSrc,
+        brand: p.brand,
+        description: p.description,
+        offers: {
+          "@type": "Offer",
+          priceCurrency: "EUR",
+          price: p.price,
+          url: `${baseUrl}/catalogo/${p.category}/${p.brand}/${p.id}`,
+          availability: "https://schema.org/InStock",
+        },
+      },
+    })),
+  };
   return (
     <>
       <Breadcrumbs />
@@ -43,6 +79,16 @@ export default async function BrandPage({ brand }: { brand: string }) {
         title="I best seller del marchio"
         idSection="brand_best_sellers"
         isBottomLink={true}
+      />
+      <Script
+        id="brand-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(brandJsonLd) }}
+      />
+      <Script
+        id="brand-products-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productsJsonLd) }}
       />
     </>
   );

@@ -5,14 +5,37 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import ProductCharacteristicsSection from "@/components/ProductPageSections/ProductCharacteristicsSection/ProductCharacteristacSection";
 import VisualProductSection from "@/components/ProductPageSections/VisualTopSection/VisualProductSection";
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
-// import { connection } from "next/server";
+import { baseUrl } from "@/types/baseUrl";
+import Script from "next/script";
 
 export default async function PageSlugId({ id }: { id: string }) {
-  // await connection();
-
   const product = await getProductById(id);
   const products = await getAllProducts({});
   const productDetails = await getProductDetailsById(id);
+
+  if (!product) return <h1>Prodotto non trovato</h1>;
+
+  const productUrl = `${baseUrl}/catalogo/${product.category}/${product.brand}/${product.name}-${id}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: product.images,
+    description: product.description,
+    sku: product.id,
+    brand: {
+      "@type": "Brand",
+      name: product.brand,
+    },
+    offers: {
+      "@type": "Offer",
+      url: productUrl,
+      priceCurrency: "EUR",
+      price: product.price,
+      availability: "https://schema.org/InStock",
+    },
+  };
   return (
     <>
       <Breadcrumbs
@@ -29,6 +52,13 @@ export default async function PageSlugId({ id }: { id: string }) {
         productsList={products}
         idSection="page_product_insieme"
         isBottomLink={false}
+      />
+      <Script
+        id="product-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd),
+        }}
       />
     </>
   );

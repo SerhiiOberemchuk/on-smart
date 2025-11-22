@@ -9,17 +9,20 @@ import ButtonsScrollSwiper from "@/components/ButtonsScrollSwiper";
 export default async function GoogleReviewSection() {
   const reviews = await getGoogleReviews();
   const hasReviews = reviews.length > 0;
-  const averageRating =
-    hasReviews && reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+  const averageRating = hasReviews
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    : 5;
   const jsonLd = hasReviews
     ? {
         "@context": "https://schema.org",
-        "@type": "LocalBusiness",
+        "@type": "ElectronicsStore",
         name: "OnSmart",
         url: baseUrl,
+        image: `${baseUrl}/logo.png`,
+        priceRange: "€€",
         aggregateRating: {
           "@type": "AggregateRating",
-          ratingValue: averageRating,
+          ratingValue: averageRating.toFixed(1),
           reviewCount: reviews.length,
           bestRating: 5,
           worstRating: 1,
@@ -38,15 +41,22 @@ export default async function GoogleReviewSection() {
             bestRating: 5,
             worstRating: 1,
           },
+          reviewAspect: "customer service",
         })),
       }
     : null;
+
   return (
-    <section id="top-sales-section" className="flex flex-col gap-4 py-8 lg:gap-[52px] xl:py-16">
+    <section id="review-section" className="flex flex-col gap-4 py-8 lg:gap-[52px] xl:py-16">
       <div className="bg-background">
         <div className="container flex items-center justify-between py-3">
           <h2 className="H2">Esperienze dei nostri clienti</h2>
+          <p className="sr-only">
+            Recensioni reali dei clienti OnSmart, valutazioni Google e opinioni verificate sul
+            servizio.
+          </p>
           <ButtonsScrollSwiper
+            aria-label="Scorri le recensioni"
             className="hidden sm:flex"
             idNext="review_list_slider_next"
             idPrev="review_list_slider_prev"

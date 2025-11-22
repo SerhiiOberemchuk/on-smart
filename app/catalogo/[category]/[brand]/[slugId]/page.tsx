@@ -1,23 +1,56 @@
 import { parseSlugWithId } from "@/utils/parse-slug-with-Id";
 import PageSlugId from "./PageSlugId";
-import { Suspense } from "react";
+import { Metadata } from "next";
+import { getProductById } from "@/app/actions/product/get-product-by-id";
+import { baseUrl } from "@/types/baseUrl";
 
-export default async function CategoryBrandPage({
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string; brand: string; slugId: string }>;
+}): Promise<Metadata> {
+  const { slugId } = await params;
+  const { id } = parseSlugWithId(slugId);
+
+  const product = await getProductById(id || "");
+
+  if (!product)
+    return {
+      title: "Prodotto non trovato",
+    };
+
+  return {
+    title: `${product.name} | ${product.brand}`,
+    description: product.description ?? "",
+    alternates: {
+      canonical: `${baseUrl}/catalogo/${product.category}/${product.brand}/${slugId}`,
+    },
+    openGraph: {
+      title: product.name,
+      description: product.description,
+      url: `${baseUrl}/catalogo/${product.category}/${product.brand}/${slugId}`,
+      images: [
+        {
+          url: product.imgSrc.startsWith("http") ? product.imgSrc : baseUrl + product.imgSrc,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+  };
+}
+
+export default async function CategoryBrandSlugIdPage({
   params,
 }: {
   params: Promise<{ category: string; brand: string; slugId: string }>;
 }) {
   const { slugId } = await params;
   const { id } = parseSlugWithId(slugId);
-  console.log({ id });
 
   if (!id) {
     return;
   }
 
-  return (
-    <Suspense>
-      <PageSlugId id={id} />
-    </Suspense>
-  );
+  return <PageSlugId id={id} />;
 }

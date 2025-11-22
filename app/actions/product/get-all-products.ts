@@ -7,6 +7,7 @@ type Props = {
   page?: number;
   limit?: number;
   brand?: string;
+  category?: string;
 };
 
 export async function getAllProducts(props: Props = {}) {

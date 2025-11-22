@@ -1,5 +1,6 @@
 "use server";
 
 export async function getBrand(brand: string) {
-  return { success: true, brand };
+  const logo = "/brands/longse.png";
+  return { success: true, brand, logo };
 }

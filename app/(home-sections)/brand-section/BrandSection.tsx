@@ -21,6 +21,7 @@ export default async function BrandSection() {
       item: {
         "@type": "Brand",
         name: b.brandName,
+        logo: b.imageUrl.startsWith("http") ? b.imageUrl : `${baseUrl}${b.imageUrl}`,
         image: b.imageUrl.startsWith("http") ? b.imageUrl : `${baseUrl}${b.imageUrl}`,
         url: `${baseUrl}/brand/${encodeURIComponent(b.brandType)}`,
       },
@@ -31,6 +32,10 @@ export default async function BrandSection() {
       <header className="bg-background">
         <div className="container flex items-center justify-between py-4">
           <h2 className="H2">I brand che trattiamo</h2>
+          <p className="sr-only">
+            Scopri i marchi leader nella videosorveglianza e sicurezza trattati da OnSmart: Ajax,
+            Dahua, Uniview, Ezviz, Hilook e molti altri.
+          </p>
           <LinkYellow href="/catalogo" className="hidden md:flex" title="Tutti i prodotti" />
         </div>
       </header>
@@ -43,9 +48,10 @@ export default async function BrandSection() {
                   <Image
                     src={imageUrl}
                     className="h-auto w-fit object-contain object-center"
-                    alt={brandName}
+                    alt={`Logo del brand ${brandName}`}
                     height={32}
                     width={150}
+                    loading="lazy"
                   />
                 </Link>
               </li>

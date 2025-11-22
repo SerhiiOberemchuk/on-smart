@@ -18,6 +18,7 @@ export default async function TopSalesSection() {
       "@type": "Product",
       position: i + 1,
       name: p.name,
+      sku: p.id,
       image: p.imgSrc.startsWith("https") ? p.imgSrc : `${baseUrl}${p.imgSrc}`,
       brand: {
         "@type": "Brand",

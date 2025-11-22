@@ -53,6 +53,8 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-title" content="ON SMART" />
         <link rel="manifest" href="/site.webmanifest" />
+        <link rel="preload" as="image" property="high" href="/hero-baner/Baner 1 Antifurto.png" />
+        <link rel="preload" as="image" href="/brands/ajax.png" />
       </Head>
 
       <body className={clsx(fixelFont.className, "flex min-h-svh flex-col")}>

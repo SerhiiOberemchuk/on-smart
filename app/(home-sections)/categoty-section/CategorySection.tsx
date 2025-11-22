@@ -18,9 +18,12 @@ export default async function CategorySection() {
     itemListElement: categories.map((cat, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      name: cat.categoryName,
-      image: cat.imageUrl.startsWith("http") ? cat.imageUrl : `${baseUrl}${cat.imageUrl}`,
-      url: `${baseUrl}/catalogo?category=${encodeURIComponent(cat.categoryType)}`,
+      item: {
+        "@type": "Thing",
+        name: cat.categoryName,
+        image: cat.imageUrl.startsWith("http") ? cat.imageUrl : `${baseUrl}${cat.imageUrl}`,
+        url: `${baseUrl}/catalogo?category=${encodeURIComponent(cat.categoryType)}`,
+      },
     })),
   };
   return (
@@ -30,10 +33,14 @@ export default async function CategorySection() {
           <h2 className="H2">Esplora per Categoria</h2>
           <LinkYellow href="/catalogo" className="hidden md:flex" title="Tutti i prodotti" />
         </div>
+        <p className="sr-only">
+          Esplora le categorie principali dei nostri prodotti di sicurezza, videosorveglianza e
+          smart home.
+        </p>
       </header>
       <div className="container">
         <ul className={styles.list}>
-          {categories.map(({ id, categoryName, imageUrl, categoryType }) => (
+          {categories.map(({ id, categoryName, imageUrl, categoryType }, i) => (
             <li
               key={id}
               className="relative rounded-sm transition-transform duration-300 hover:scale-105"
@@ -44,13 +51,13 @@ export default async function CategorySection() {
                   className="mx-auto aspect-square rounded-sm object-contain object-center opacity-50"
                   width={355}
                   height={355}
-                  alt={categoryName}
-                  loading="eager"
+                  alt={`Categoria: ${categoryName}`}
+                  loading={i === 0 ? "eager" : "lazy"}
                 />
               </Link>
-              <h2 className="H3 pointer-events-none absolute bottom-[8%] left-0 w-full px-2 text-center text-wrap">
+              <h3 className="H3 pointer-events-none absolute bottom-[8%] left-0 w-full px-2 text-center text-wrap">
                 {categoryName}
-              </h2>
+              </h3>
             </li>
           ))}
         </ul>
