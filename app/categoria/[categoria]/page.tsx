@@ -6,7 +6,7 @@ export default async function PageCategoria({
   const { categoria } = await params;
   return (
     <section>
-      <h1>{categoria}</h1>
+      <h1>Categoria: {categoria}</h1>
     </section>
   );
 }

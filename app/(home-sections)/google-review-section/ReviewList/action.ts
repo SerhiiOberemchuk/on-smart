@@ -3,6 +3,7 @@
 import { GoogleReview } from "@/types/google-reviews.types";
 
 export async function getGoogleReviews() {
+  "use cache";
   // const res = await fetch(`${process.env.API_URL}/products?filter=top&page=${page}`, {
   //   headers: {
   //     Authorization: `Bearer ${process.env.API_TOKEN}`,

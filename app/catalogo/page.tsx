@@ -1,5 +1,4 @@
 // import Breadcrumbs from "@/components/Breadcrumbs";
-
 import ListFiltereOptions from "@/components/PageCatalogComponents/FiltersSection/ListFilterOptions";
 import MobileFilterSection from "@/components/PageCatalogComponents/FiltersSection/MobileFilterSection";
 import HeaderCatalogo from "@/components/PageCatalogComponents/HeaderCatalogo";
@@ -13,21 +12,24 @@ export const metadata: Metadata = {
     canonical: baseUrl + "/catalogo",
   },
 };
-export default function CatalogoPage() {
+export default async function CatalogoPage() {
   return (
     <section className="pb-5 lg:pb-16">
       {/* <Breadcrumbs /> */}
       <Suspense>
         <HeaderCatalogo />
       </Suspense>
+
       <div className="xl:bg-background">
         <Suspense>
           <MobileFilterSection />
         </Suspense>
+
         <div className="container flex flex-col gap-5 lg:flex-row">
           <Suspense>
             <ListFiltereOptions className="hidden lg:flex" />
           </Suspense>
+
           <Suspense>
             <CatalogProductSection />
           </Suspense>

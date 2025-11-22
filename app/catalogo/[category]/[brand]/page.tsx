@@ -1,5 +1,5 @@
-import { getAllProducts } from "@/app/actions/product/get-all-products";
 import BrandPage from "@/components/BrandPage";
+import { Suspense } from "react";
 
 export default async function CategoryBrandPage({
   params,
@@ -7,7 +7,10 @@ export default async function CategoryBrandPage({
   params: Promise<{ category: string; brand: string }>;
 }) {
   const { brand } = await params;
-  const productsBrand = await getAllProducts({});
 
-  return <BrandPage products={productsBrand} brand={brand} />;
+  return (
+    <Suspense>
+      <BrandPage brand={brand} />;
+    </Suspense>
+  );
 }

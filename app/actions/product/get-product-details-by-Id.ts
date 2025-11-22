@@ -1,3 +1,4 @@
+"use server";
 import { Product_Details } from "@/types/product.types";
 
 export async function getProductDetailsById(id: string): Promise<Product_Details> {

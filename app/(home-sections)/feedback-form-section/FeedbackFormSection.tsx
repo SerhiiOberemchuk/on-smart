@@ -1,4 +1,5 @@
 import FormFeedback from "@/components/FormFeedback/FormFeedback";
+import { Suspense } from "react";
 
 export default function FeedbackFormSection() {
   return (
@@ -13,7 +14,9 @@ export default function FeedbackFormSection() {
               Contattami tramite questo modulo.
             </p>
           </header>
-          <FormFeedback type="general-feedback" />
+          <Suspense>
+            <FormFeedback type="general-feedback" />
+          </Suspense>
         </div>
       </div>
     </section>

@@ -1,22 +1,13 @@
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
 import Image from "next/image";
 import LinkYellow from "@/components/YellowLink";
-import { Product } from "@/types/product.types";
 import Breadcrumbs from "./Breadcrumbs";
+import { getBrandInfo } from "@/app/actions/product/get-brand-info";
+import { getAllProducts } from "@/app/actions/product/get-all-products";
 
-type Props = { brand: string; products: Product[] };
-
-export default function BrandPage({ brand, products }: Props) {
-  const brandInfo = {
-    logo: "/brands/njoi.png",
-    brandName: brand,
-    descriptins: [
-      "Il marchio NJOY propone soluzioni innovative per la sicurezza domestica e professionale.Dalle telecamere di videosorveglianza ai sistemi di allarme e ai dispositivi smart, ogni prodotto NJOY è progettato per offrire massima affidabilità, facilità d`uso e tecnologia all`avanguardia.",
-      "Grazie a NJOY puoi monitorare, proteggere e gestire i tuoi spazi in modo intelligente, migliorando la sicurezza e il comfort della tua casa o del tuo ufficio. Scegli NJOY — la tecnologia che rende la tua vita più sicura e connessa.",
-      "Grazie a NJOY puoi monitorare, proteggere e gestire i tuoi spazi in modo intelligente, migliorando la sicurezza e il comfort della tua casa o del tuo ufficio. Scegli NJOY — la tecnologia che rende la tua vita più sicura e connessa.",
-    ],
-  };
-
+export default async function BrandPage({ brand }: { brand: string }) {
+  const products = await getAllProducts({ brand });
+  const brandInfo = await getBrandInfo(brand);
   return (
     <>
       <Breadcrumbs />
@@ -33,14 +24,14 @@ export default function BrandPage({ brand, products }: Props) {
               className="h-[270px] w-[492px] object-contain object-center xl:px-6"
             />
             <ul className="flex flex-col gap-3">
-              {brandInfo.descriptins.map((desc, index) => (
+              {brandInfo.description.map((desc, index) => (
                 <li key={index}>
                   <p className="text_R"> {desc}</p>
                 </li>
               ))}
               <LinkYellow
                 title="Mostra tutto"
-                href={`/catalogo?brand=${brand}`}
+                href={`/catalogo?brand=${brandInfo.brandName}`}
                 className="mr-auto flex"
               />
             </ul>

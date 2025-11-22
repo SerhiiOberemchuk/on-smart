@@ -59,7 +59,9 @@ export default function RootLayout({
         <NuqsAdapter>
           <Header />
 
-          <main className="flex-1">{children}</main>
+          <main className="flex-1">
+            <Suspense>{children}</Suspense>
+          </main>
           <Suspense>
             <Footer />
           </Suspense>

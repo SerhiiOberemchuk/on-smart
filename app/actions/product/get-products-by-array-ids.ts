@@ -1,6 +1,5 @@
 "use server";
 
-// import { setTimeout } from "node:timers/promises";
 import { allProducts, otherProducts, recomedProducts } from "../products";
 
 export async function getProductsByIds(ids: { id: string }[]) {

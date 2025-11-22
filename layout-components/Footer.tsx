@@ -7,6 +7,7 @@ import icon_phone from "@/assets/icons/icon_phone.svg";
 import Image from "next/image";
 
 export default async function Footer() {
+  "use cache";
   return (
     <footer className="bg-header-footer py-4">
       <div className="container flex flex-col gap-11">
