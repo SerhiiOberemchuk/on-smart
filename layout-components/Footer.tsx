@@ -43,7 +43,7 @@ export default async function Footer() {
           <p className="">&copy; {new Date().getFullYear()} OnSmart. Tutti i diritti riservati.</p>
           <div>
             <Link href="/informativa-sulla-privacy">Informativa sulla privacy</Link> |
-            <Link href="/termini-e-condizioni">Termini e condizioni</Link>
+            <Link href="/informativa-sulla-privacy">Termini e condizioni</Link>
           </div>
         </div>
       </div>

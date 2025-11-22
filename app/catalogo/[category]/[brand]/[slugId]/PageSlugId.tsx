@@ -35,6 +35,15 @@ export default async function PageSlugId({ id }: { id: string }) {
       price: product.price,
       availability: "https://schema.org/InStock",
     },
+    ...(product.rating
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: product.rating,
+            reviewCount: productDetails.characteristics_valutazione.recensioni.length,
+          },
+        }
+      : {}),
   };
   return (
     <>
