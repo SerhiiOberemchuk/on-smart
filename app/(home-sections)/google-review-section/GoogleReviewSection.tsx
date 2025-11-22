@@ -5,6 +5,8 @@ import ReviewList from "./ReviewList/ReviewList";
 import { baseUrl } from "@/types/baseUrl";
 import { Suspense } from "react";
 import ButtonsScrollSwiper from "@/components/ButtonsScrollSwiper";
+import { address } from "@/json/adress";
+import { telephone } from "@/json/telephone";
 
 export default async function GoogleReviewSection() {
   const reviews = await getGoogleReviews();
@@ -20,6 +22,8 @@ export default async function GoogleReviewSection() {
         url: baseUrl,
         image: `${baseUrl}/logo.png`,
         priceRange: "€€",
+        telephone,
+        address,
         aggregateRating: {
           "@type": "AggregateRating",
           ratingValue: averageRating.toFixed(1),
