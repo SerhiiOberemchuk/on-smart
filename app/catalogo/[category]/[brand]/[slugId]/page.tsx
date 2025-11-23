@@ -3,6 +3,7 @@ import PageSlugId from "./PageSlugId";
 import { Metadata } from "next";
 import { getProductById } from "@/app/actions/product/get-product-by-id";
 import { baseUrl } from "@/types/baseUrl";
+import { notFound } from "next/navigation";
 
 export async function generateMetadata({
   params,
@@ -14,10 +15,9 @@ export async function generateMetadata({
 
   const product = await getProductById(id || "");
 
-  if (!product)
-    return {
-      title: "Prodotto non trovato",
-    };
+  if (!product) {
+    notFound();
+  }
 
   return {
     title: `${product.name} | ${product.brand}`,

@@ -17,11 +17,11 @@ export default async function PageSlugId({ id }: { id: string }) {
 
   const productUrl = `${baseUrl}/catalogo/${product.category}/${product.brand}/${product.name}-${id}`;
 
-  const jsonLd = {
+  const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    image: product.images,
+    image: product.images.map((img) => (img.startsWith("http") ? img : baseUrl + img)),
     description: product.description,
     sku: product.id,
     brand: {
@@ -33,18 +33,62 @@ export default async function PageSlugId({ id }: { id: string }) {
       url: productUrl,
       priceCurrency: "EUR",
       price: product.price,
-      availability: "https://schema.org/InStock",
+      availability:
+        product.inStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
     },
-    ...(product.rating
-      ? {
-          aggregateRating: {
-            "@type": "AggregateRating",
-            ratingValue: product.rating,
-            reviewCount: productDetails.characteristics_valutazione.recensioni.length,
-          },
-        }
-      : {}),
+
+    ...(product.rating && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: product.rating,
+        reviewCount: productDetails?.characteristics_valutazione?.recensioni.length ?? 0,
+      },
+    }),
+
+    review:
+      productDetails?.characteristics_valutazione?.recensioni?.map((r) => ({
+        "@type": "Review",
+        author: r.clientName,
+        reviewBody: r.comment,
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: r.rating,
+          bestRating: 5,
+        },
+      })) || [],
   };
+
+  const breadcrumbsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Catalogo",
+        item: `${baseUrl}/catalogo`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: product.category,
+        item: `${baseUrl}/catalogo/${product.category}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.brand,
+        item: `${baseUrl}/catalogo/${product.category}/${product.brand}-${id}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: product.name,
+        item: productUrl,
+      },
+    ],
+  };
+
   return (
     <>
       <Breadcrumbs
@@ -66,7 +110,14 @@ export default async function PageSlugId({ id }: { id: string }) {
         id="product-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd),
+          __html: JSON.stringify(productJsonLd),
+        }}
+      />
+      <Script
+        id="product-breadcrumbs-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbsJsonLd),
         }}
       />
     </>
