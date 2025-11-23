@@ -81,7 +81,7 @@ export default function SelectProductSection({ product }: { product: Product }) 
                         type="radio"
                         name="Product variant"
                         value={variant.id}
-                        checked={selectedProduct?.id === variant.id}
+                        // checked={selectedProduct?.id === variant.id}
                         onChange={() => {
                           setSelectedProduct({
                             ...variant,

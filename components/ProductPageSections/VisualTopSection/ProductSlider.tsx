@@ -56,33 +56,35 @@ export default function ProductSlider({ product }: { product: Product }) {
             oldPrice={oldPrice}
             className="absolute top-0 left-0 pr-0 pl-4 md:pr-2 md:pl-5 lg:pr-0 xl:pr-0"
           />
-          <Swiper
-            loop={true}
-            spaceBetween={0}
-            slidesPerView={1}
-            // navigation={true}
-            autoplay={{
-              delay: 4000,
-              disableOnInteraction: false,
-            }}
-            thumbs={{ swiper: thumbsSwiper }}
-            modules={[Thumbs, Autoplay]}
-            className="relative ml-5 max-w-[532px]"
-          >
-            {product.images.map((image, index) => (
-              <SwiperSlide key={index}>
-                <Image
-                  src={image}
-                  alt={`Product image ${index + 1}`}
-                  width={532}
-                  height={532}
-                  className="mx-auto aspect-square object-contain object-center px-1"
-                />
-              </SwiperSlide>
-            ))}
-            <SlideNextButton />
-            <SlidePrevButton />
-          </Swiper>
+          {thumbsSwiper && (
+            <Swiper
+              loop={true}
+              spaceBetween={0}
+              slidesPerView={1}
+              // navigation={true}
+              autoplay={{
+                delay: 4000,
+                disableOnInteraction: false,
+              }}
+              thumbs={{ swiper: thumbsSwiper }}
+              modules={[Thumbs, Autoplay]}
+              className="relative ml-5 max-w-[532px]"
+            >
+              {product.images.map((image, index) => (
+                <SwiperSlide key={index}>
+                  <Image
+                    src={image}
+                    alt={`Product image ${index + 1}`}
+                    width={532}
+                    height={532}
+                    className="mx-auto aspect-square object-contain object-center px-1"
+                  />
+                </SwiperSlide>
+              ))}
+              <SlideNextButton />
+              <SlidePrevButton />
+            </Swiper>
+          )}
         </div>
         <Image
           src={logo}
