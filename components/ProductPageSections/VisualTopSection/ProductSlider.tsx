@@ -8,7 +8,7 @@ import "swiper/css";
 import "swiper/css/thumbs";
 import "./product-page.css";
 import { Autoplay, Thumbs } from "swiper/modules";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Product } from "@/types/product.types";
 import Image from "next/image";
 
@@ -19,6 +19,12 @@ import { SlideNextButton, SlidePrevButton } from "@/components/SwiperButtonsReac
 export default function ProductSlider({ product }: { product: Product }) {
   const { id, inStock, oldPrice, images, logo, category, name } = product;
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperTypes | null>(null);
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    const setClient = () => setIsClient(true);
+    setClient();
+  }, []);
+  if (!isClient) return null;
   return (
     <div className="flex w-full max-w-[670px] justify-around gap-6 rounded-sm bg-background p-3 xl:flex-1 xl:justify-between">
       <Swiper
