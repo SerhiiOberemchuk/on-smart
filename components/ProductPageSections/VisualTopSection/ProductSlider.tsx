@@ -62,9 +62,9 @@ export default function ProductSlider({ product }: { product: Product }) {
             oldPrice={oldPrice}
             className="absolute top-0 left-0 pr-0 pl-4 md:pr-2 md:pl-5 lg:pr-0 xl:pr-0"
           />
-          {thumbsSwiper && (
+          {thumbsSwiper && !thumbsSwiper.destroyed && (
             <Swiper
-              loop={true}
+              // loop={true}
               spaceBetween={0}
               slidesPerView={1}
               // navigation={true}
@@ -72,7 +72,7 @@ export default function ProductSlider({ product }: { product: Product }) {
                 delay: 4000,
                 disableOnInteraction: false,
               }}
-              thumbs={{ swiper: thumbsSwiper }}
+              thumbs={{ swiper: thumbsSwiper ?? undefined }}
               modules={[Thumbs, Autoplay]}
               className="relative ml-5 max-w-[532px]"
             >
