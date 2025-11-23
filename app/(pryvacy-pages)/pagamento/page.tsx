@@ -23,7 +23,7 @@ export default function PagamentoPage() {
           protette e sistemi conformi agli standard internazionali di sicurezza.
         </p>
 
-        <h2 className="H3 mt-6">Carta di credito (SumUp)</h2>
+        <h2 className="H3 mt-6 text-white">Carta di credito (SumUp)</h2>
         <p>
           Il pagamento può essere effettuato con le principali carte di credito e debito (Visa,
           Mastercard, Maestro, American Express) tramite la piattaforma SumUp. L`addebito viene
@@ -32,7 +32,7 @@ export default function PagamentoPage() {
           rispetto degli standard PCI DSS.
         </p>
 
-        <h2 className="H3 mt-6">Bonifico bancario anticipato</h2>
+        <h2 className="H3 mt-6 text-white">Bonifico bancario anticipato</h2>
         <p>
           È prevista la possibilità di effettuare il pagamento tramite bonifico bancario. L
           `elaborazione dell`ordine avviene esclusivamente dopo la verifica dell`accredito dell
@@ -45,7 +45,7 @@ export default function PagamentoPage() {
         </p>
 
         <div className="rounded-sm bg-background p-4">
-          <h3 className="mb-1 font-semibold">Dati per il bonifico</h3>
+          <h3 className="mb-1 font-semibold text-white">Dati per il bonifico</h3>
           <p>Intestatario: Olena Nudzhevska</p>
           <p>IBAN: IT49C0326815100052125108060</p>
           <p>BIC: SELBIT2BXXX</p>
@@ -53,7 +53,7 @@ export default function PagamentoPage() {
           <p>Causale: Numero ordine o nome dell`acquirente</p>
         </div>
 
-        <h2 className="H3 mt-6">PayPal</h2>
+        <h2 className="H3 mt-6 text-white">PayPal</h2>
         <p>
           È disponibile il pagamento tramite conto PayPal, che consente transazioni rapide e sicure
           senza la necessità di condividere i dati bancari. L`addebito dell`importo avviene al
@@ -61,21 +61,21 @@ export default function PagamentoPage() {
           secondo le proprie condizioni di utilizzo.
         </p>
 
-        <h2 className="H3 mt-6">PayPal – Pagamento in 3 rate</h2>
+        <h2 className="H3 mt-6 text-white">PayPal – Pagamento in 3 rate</h2>
         <p>
           Il servizio PayPal “Paga in 3 rate” consente di suddividere l`importo totale dell`acquisto
           in tre rate mensili senza interessi. L`opzione è disponibile durante il checkout ed è
           soggetta all`approvazione PayPal.
         </p>
 
-        <h2 className="H3 mt-6">Klarna - Pagamento a rate</h2>
+        <h2 className="H3 mt-6 text-white">Klarna - Pagamento a rate</h2>
         <p>
           Klarna permette di pagare subito, posticipare il pagamento o suddividere l`importo in tre
           rate senza interessi. L`approvazione e la gestione del pagamento avvengono direttamente su
           Klarna.
         </p>
 
-        <h2 className="H3 mt-6">Sicurezza dei pagamenti</h2>
+        <h2 className="H3 mt-6 text-white">Sicurezza dei pagamenti</h2>
         <p>
           Tutte le transazioni su www.on-smart.it sono protette da certificato SSL e protocolli di
           crittografia avanzata. I sistemi di pagamento utilizzati sono conformi agli standard di
@@ -83,14 +83,14 @@ export default function PagamentoPage() {
           condiviso con terzi non autorizzati.
         </p>
 
-        <h2 className="H3 mt-6">Fatturazione</h2>
+        <h2 className="H3 mt-6 text-white">Fatturazione</h2>
         <p>
           La richiesta di fattura può essere effettuata durante la procedura di acquisto. In
           alternativa, può essere richiesta entro 10 giorni inviando e-mail a
           assistenza@on-smart.it.
         </p>
 
-        <h2 className="H3 mt-6">Tempi di elaborazione</h2>
+        <h2 className="H3 mt-6 text-white">Tempi di elaborazione</h2>
         <ul className="list-disc pl-6">
           <li>Carte, PayPal e Klarna: elaborazione immediata</li>
           <li>Bonifico bancario: 1–2 giorni lavorativi dopo accredito</li>

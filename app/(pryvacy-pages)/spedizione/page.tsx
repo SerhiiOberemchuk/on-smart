@@ -46,7 +46,7 @@ export default function SpedizionePage() {
           assistenza@on-smart.it.
         </p>
 
-        <h2 className="H3 pt-4">Modalità di consegna</h2>
+        <h2 className="H3 pt-4 text-white">Modalità di consegna</h2>
         <p>
           Il corriere è un vettore che effettua due tentativi di consegna all`indirizzo indicato dal
           cliente in fase di compilazione del proprio ordine. Qualora il tentativo di consegna non
@@ -56,7 +56,7 @@ export default function SpedizionePage() {
           saranno a carico del cliente.
         </p>
 
-        <h2 className="H3 pt-4">Costi di spedizione</h2>
+        <h2 className="H3 pt-4 text-white">Costi di spedizione</h2>
         <p>
           L`ammontare dei costi di spedizione a carico del cliente per i servizi del corriere è
           calcolato in base all`indirizzo di spedizione indicato al momento dell`ordine, alle
@@ -69,7 +69,7 @@ export default function SpedizionePage() {
           su appuntamento; Spese di deposito per destinatario assente.
         </p>
 
-        <h2 className="H3 pt-4">Come comportarsi al ricevimento del pacco</h2>
+        <h2 className="H3 pt-4 text-white">Come comportarsi al ricevimento del pacco</h2>
         <p>Quando il corriere effettuerà la consegna il cliente dovrà verificare:</p>
 
         <ul className="list-disc space-y-2 pl-6">
@@ -85,7 +85,7 @@ export default function SpedizionePage() {
           queste, il prodotto si considera consegnato correttamente.
         </p>
 
-        <h3 className="H4 pt-4">In caso di pacco danneggiato o manomesso</h3>
+        <h3 className="H4 pt-4 text-white">In caso di pacco danneggiato o manomesso</h3>
         <p>Occorre:</p>
 
         <ul className="list-disc space-y-2 pl-6">

@@ -7,8 +7,8 @@ import { twMerge } from "tailwind-merge";
 import styles from "./style.module.css";
 import Image from "next/image";
 import PricesBox from "../../PricesBox";
-import checkboxIconChecked from "@/assets/icons/checkbox.svg";
-import checkboxIcon from "@/assets/icons/checkbox-non.svg";
+// import checkboxIconChecked from "@/assets/icons/checkbox.svg";
+// import checkboxIcon from "@/assets/icons/checkbox-non.svg";
 import ProductQuantityInputButtons from "../../ProductQuantityInputButtons";
 import { useCalcTotalSum } from "@/utils/useCalcTotalSum";
 import ButtonAddToBasket from "../../ButtonAddToBasket";
@@ -88,9 +88,9 @@ export default function SelectProductSection({ product }: { product: Product }) 
                             qnt: 1,
                           } as Product & { qnt: number });
                         }}
-                        className="sr-only"
+                        // className="sr-only"
                       />
-                      <div className="mr-1 size-4 shrink-0">
+                      {/* <div className="mr-1 size-4 shrink-0">
                         <Image
                           src={checkboxIconChecked}
                           className={styles.checked}
@@ -105,7 +105,7 @@ export default function SelectProductSection({ product }: { product: Product }) 
                           width={16}
                           height={16}
                         />
-                      </div>
+                      </div> */}
                       <Image
                         src={variant.imgSrc || variant.images?.[0] || "/logo.svg"}
                         alt={variant.name}

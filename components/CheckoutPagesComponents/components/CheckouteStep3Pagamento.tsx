@@ -13,11 +13,14 @@ import RiepilogoDatiConsegna from "./RepilogoDatiConsegna";
 
 export default function CheckouteStep3Pagamento() {
   const { setDataCheckoutStepPagamento, setStep, dataCheckoutStepPagamento } = useCheckoutStore();
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+
   const [paymentMethod, setPaymentMethod] = useState<MetodsPayment["paymentMethod"] | undefined>(
     dataCheckoutStepPagamento?.paymentMethod,
   );
   const handleSubmit = () => {
     if (!paymentMethod) return;
+    setIsButtonDisabled(true);
     setDataCheckoutStepPagamento(PAYMENT_METHODS.find((m) => m.paymentMethod === paymentMethod)!);
     setStep(4);
     redirect("/checkout/riepilogo");
@@ -52,7 +55,7 @@ export default function CheckouteStep3Pagamento() {
       </div>
       <ButtonYellow
         className="ml-auto"
-        disabled={!paymentMethod}
+        disabled={!paymentMethod || isButtonDisabled}
         type="button"
         onClick={handleSubmit}
       >

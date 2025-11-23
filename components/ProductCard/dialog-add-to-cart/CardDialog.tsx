@@ -20,7 +20,6 @@ import { useCalcTotalSum } from "@/utils/useCalcTotalSum";
 import ButtonAddToBasket from "@/components/ButtonAddToBasket";
 import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
-import { motion, AnimatePresence } from "framer-motion";
 
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
@@ -149,27 +148,20 @@ export default function CardDialog() {
   };
 
   return (
-    <AnimatePresence>
+    <>
       {isOpenDialog && (
-        <motion.div
+        <div
           aria-modal={isOpenDialog}
           role="dialog"
           className={twMerge(
-            "fixed top-0 right-0 bottom-0 left-0 z-1000 overflow-x-hidden bg-black/70",
+            "fixed top-0 right-0 left-0 z-1000 h-full max-h-dvh min-h-svh overflow-x-hidden bg-black/70",
           )}
           id={product?.id}
           onClick={handleCloseDialog}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
         >
-          <motion.div
-            initial={{ x: "100%", opacity: 0 }}
-            animate={{ x: "0%", opacity: 1 }}
-            exit={{ x: "100%", opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
+          <div
             className={clsx(
-              "ml-auto flex h-svh max-h-dvh min-h-svh w-full max-w-[1110px] flex-col xl:max-h-[780px] xl:min-h-auto",
+              "ml-auto flex h-full max-h-dvh min-h-svh w-full max-w-[1110px] flex-col xl:max-h-[780px] xl:min-h-auto",
               styles.card_dialog_content,
             )}
             onClick={(e) => e.stopPropagation()}
@@ -357,9 +349,9 @@ export default function CardDialog() {
                 />
               </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
-    </AnimatePresence>
+    </>
   );
 }

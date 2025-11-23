@@ -14,6 +14,7 @@ import { InputBlock } from "@/components/InputBloc";
 export default function CheckouteStep1FormClientData() {
   const { setDataFirstStepCheckout, setStep, dataFirstStep, resetRequestCodiceFiscale } =
     useCheckoutStore();
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [isCodiceFiscaleRequired, setIsCodiceFiscaleRequired] = useState(
     dataFirstStep?.request_invoice || false,
   );
@@ -41,6 +42,7 @@ export default function CheckouteStep1FormClientData() {
   }, [clientType, resetField]);
 
   const onSubmit: SubmitHandler<InputsCheckoutStep1> = (data) => {
+    setIsButtonDisabled(true);
     let cleaned: Partial<InputsCheckoutStep1>;
 
     if (data.client_type === "privato") {
@@ -269,7 +271,7 @@ export default function CheckouteStep1FormClientData() {
             </div>
           </>
         )}
-        <ButtonYellow type="submit" className="ml-auto">
+        <ButtonYellow type="submit" disabled={isButtonDisabled} className="ml-auto">
           Vai avanti
         </ButtonYellow>
       </form>

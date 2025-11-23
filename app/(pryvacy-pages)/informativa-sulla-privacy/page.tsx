@@ -14,12 +14,14 @@ export default function InformativaSullaPrivacy() {
   return (
     <div>
       <h1 className="H2 mb-6 text-white">Informativa sulla Privacy</h1>
-      <ol className="text_R gap-3 text-text-grey">
+      <ol className="text_R flex flex-col gap-3 text-text-grey [&>li>h2]:mb-1 [&>li>h2]:text-white [&>li>p>strong]:text-white">
         <li>
           <h2> 1. Titolare del trattamento </h2>
           <p>
-            Il Titolare del trattamento dei dati personali è:ON-SMART di Olena Nudzhevska Partita
-            IVA: 03168860645 E-mail di contatto per la privacy: assistenza@on-smart.it
+            Il Titolare del trattamento dei dati personali è: <br />
+            <strong>ON-SMART di Olena Nudzhevska</strong> <br /> Partita IVA:{" "}
+            <strong>03168860645</strong> <br />
+            E-mail di contatto per la privacy: <strong>assistenza@on-smart.it</strong>
           </p>
         </li>
         <li>
@@ -87,11 +89,14 @@ export default function InformativaSullaPrivacy() {
         <li>
           <h2> 8. Diritti dell`interessato </h2>
           <p>
-            L`utente ha il diritto di: Accedere ai propri dati personali; Chiederne la rettifica o
-            la cancellazione (“diritto all`oblio”); Limitare o opporsi al trattamento; Richiedere la
-            portabilità dei dati; Revocare il consenso in qualsiasi momento; Presentare reclamo al ≠
-            per la Protezione dei Dati Personali (www.garanteprivacy.it). Le richieste possono
-            essere inviate a assistenza@on-smart.it.
+            L`utente ha il diritto di: <br /> Accedere ai propri dati personali;
+            <br /> Chiederne la rettifica o la cancellazione (“diritto all`oblio”); <br /> Limitare
+            o opporsi al trattamento;
+            <br /> Richiedere la portabilità dei dati; <br />
+            Revocare il consenso in qualsiasi momento;
+            <br /> Presentare reclamo al ≠ per la Protezione dei Dati Personali
+            (www.garanteprivacy.it). <br />
+            Le richieste possono essere inviate a assistenza@on-smart.it.
           </p>
         </li>
         <li>

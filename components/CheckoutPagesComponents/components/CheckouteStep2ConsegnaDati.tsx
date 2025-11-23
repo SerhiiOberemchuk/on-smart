@@ -24,7 +24,7 @@ export default function CheckouteStep2ConsegnaDati() {
   const [isIndirizzoSame, setIsIndirizzoSame] = useState<boolean>(
     dataCheckoutStepConsegna?.sameAsBilling || false,
   );
-  console.log({ isIndirizzoSame });
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   const [deliveryMethod, setDeliveryMethod] = useState<
     InputsCheckoutStep2Consegna["deliveryMethod"]
@@ -32,6 +32,7 @@ export default function CheckouteStep2ConsegnaDati() {
   const router = useRouter();
 
   const onSubmit: SubmitHandler<InputsCheckoutStep2Consegna> = (data) => {
+    setIsButtonDisabled(true);
     let cleaned: Partial<InputsCheckoutStep2Consegna>;
     if (deliveryMethod === "ritiro_negozio") {
       setDataCheckoutStepConsegna({ deliveryMethod: "ritiro_negozio" });
@@ -191,7 +192,7 @@ export default function CheckouteStep2ConsegnaDati() {
           />
           Ritiro in negozio presso OnSmart - Via Milano 45, 83100 Avellino (AV)
         </label>
-        <ButtonYellow className="ml-auto" type="submit">
+        <ButtonYellow className="ml-auto" disabled={isButtonDisabled} type="submit">
           Vai avanti
         </ButtonYellow>
       </form>

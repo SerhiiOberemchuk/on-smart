@@ -5,8 +5,10 @@ import { Product } from "@/types/product.types";
 import { SwiperSlide, Swiper } from "swiper/react";
 
 import "swiper/css";
+import "swiper/css/free-mode";
+
 import "./styles.css";
-import { Navigation } from "swiper/modules";
+import { FreeMode, Navigation } from "swiper/modules";
 
 export default function ProductsList({
   initialProducts,
@@ -20,7 +22,8 @@ export default function ProductsList({
       slidesPerView={"auto"}
       spaceBetween={20}
       id="top_products_list_slider"
-      modules={[Navigation]}
+      freeMode={true}
+      modules={[Navigation, FreeMode]}
       navigation={{
         nextEl: `#${idSection}_slider_next`,
         prevEl: `#${idSection}_slider_prev`,
