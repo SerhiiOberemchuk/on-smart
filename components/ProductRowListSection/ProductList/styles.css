@@ -2,10 +2,13 @@
   display: flex;
   width: 100%;
   padding-left: clamp(1rem, calc(1rem + (1.5rem * ((100vw - 375px) / (1440px - 375px)))), 2.5rem);
+  padding-block: 0.75rem;
 }
-.top_products_list .swiper-wrapper .swiper-slide {
+.top_products_list .swiper-slide {
   width: fit-content;
+  transition: all 0.3s ease;
 }
-/* .top_products_list .swiper-wrapper .swiper-slide:hover {
-  transform: scale(1.05);
-} */
+
+.top_products_list .swiper-slide:hover {
+  transform: scale(1.03);
+}

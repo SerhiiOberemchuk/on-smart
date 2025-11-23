@@ -13,7 +13,7 @@ export default function ButtonOpenDialogAddToCart(product: Product) {
       <button
         type="button"
         aria-label="Aggiungi al carrello"
-        className="flex size-12 items-center justify-center rounded-sm bg-green-600"
+        className="flex size-12 items-center justify-center rounded-sm bg-green-600 hover:bg-green-700"
         onClick={() => openDialog(product)}
       >
         <Image src={icon} alt="Aggiungi al carrello" />

@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import clsx from "clsx";
 import TitleTooltip from "./card-components/TitleTooltip";
 import { Product } from "@/types/product.types";
 import HeaderProductCard from "../HeaderProductCard";
@@ -9,6 +8,7 @@ import StarsRating from "../StarsRating";
 import styles from "./product-styles.module.css";
 import ButtonOpenDialogAddToCart from "../ButtonOpenDialogAddToCart";
 import { toSlug } from "@/utils/slug";
+import { twMerge } from "tailwind-merge";
 
 export default function CardProduct({ className, ...product }: Product & { className?: string }) {
   const { name, price, imgSrc, id, category, brand, oldPrice, rating, inStock } = product;
@@ -16,7 +16,7 @@ export default function CardProduct({ className, ...product }: Product & { class
   const slugBrand = toSlug(brand);
   const slugCategory = toSlug(category);
   return (
-    <article className={clsx(styles.card, className)}>
+    <article className={twMerge(styles.card, className)}>
       <HeaderProductCard oldPrice={oldPrice} inStock={inStock} id={id} />
       <figure className="">
         <Link href={`/catalogo/${slugCategory}/${slugBrand}/${slagId}-${id}`} aria-label={name}>

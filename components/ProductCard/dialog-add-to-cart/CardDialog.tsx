@@ -11,8 +11,8 @@ import PricesBox from "@/components/PricesBox";
 import { Product } from "@/types/product.types";
 import { twMerge } from "tailwind-merge";
 import { getSupportProductById } from "@/app/actions/product/get-support-product-by-id";
-import checkboxIconChecked from "@/assets/icons/checkbox.svg";
-import checkboxIcon from "@/assets/icons/checkbox-non.svg";
+// import checkboxIconChecked from "@/assets/icons/checkbox.svg";
+// import checkboxIcon from "@/assets/icons/checkbox-non.svg";
 import { useCardDialogStore } from "@/store/card-dialog-store";
 import { useBasketStore } from "@/store/basket-store";
 import ProductQuantityInputButtons from "@/components/ProductQuantityInputButtons";
@@ -20,6 +20,7 @@ import { useCalcTotalSum } from "@/utils/useCalcTotalSum";
 import ButtonAddToBasket from "@/components/ButtonAddToBasket";
 import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
+import { motion, AnimatePresence } from "framer-motion";
 
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
@@ -139,8 +140,6 @@ export default function CardDialog() {
     }
   }, [isOpenDialog]);
 
-  if (!isOpenDialog) return null;
-
   const handleCloseDialog = () => {
     closeDialog();
     setSelectedProduct(null);
@@ -150,220 +149,217 @@ export default function CardDialog() {
   };
 
   return (
-    <div
-      aria-modal={isOpenDialog}
-      className="fixed top-0 right-0 bottom-0 left-0 z-1000 bg-black/50"
-      id={product?.id}
-    >
-      <div
-        className="fixed top-0 right-0 bottom-0 left-0 overflow-x-hidden"
-        onClick={handleCloseDialog}
-      >
-        <div
-          className={clsx(
-            "ml-auto flex h-svh max-h-dvh min-h-svh w-full max-w-[1110px] flex-col xl:max-h-[780px] xl:min-h-auto",
-            styles.card_dialog_content,
+    <AnimatePresence>
+      {isOpenDialog && (
+        <motion.div
+          aria-modal={isOpenDialog}
+          role="dialog"
+          className={twMerge(
+            "fixed top-0 right-0 bottom-0 left-0 z-1000 overflow-x-hidden bg-black/70",
           )}
-          onClick={(e) => e.stopPropagation()}
+          id={product?.id}
+          onClick={handleCloseDialog}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         >
-          <div className="flex justify-between bg-background px-4 py-5 lg:px-10">
-            <button
-              type="button"
-              className="flex items-center gap-2.5 text-white"
-              onClick={handleCloseDialog}
-            >
-              <Image src={iconBack} alt="Pulsante indietro" aria-hidden />
-              <span className="H5">Indietro</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleCloseDialog}
-              className="rounded-sm border border-yellow-500 p-2.5 xl:hidden"
-            >
-              <Image src={iconClose} aria-hidden alt="Pulsante chiudre" />
-            </button>
-          </div>
-          <div className="flex flex-1 flex-col gap-2 overflow-y-scroll bg-black py-3 lg:p-5 xl:max-h-[680px] xl:flex-row">
-            {product && <DialogProductCard {...product} place="dialog-cart-product-card" />}
+          <motion.div
+            initial={{ x: "100%", opacity: 0 }}
+            animate={{ x: "0%", opacity: 1 }}
+            exit={{ x: "100%", opacity: 0 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className={clsx(
+              "ml-auto flex h-svh max-h-dvh min-h-svh w-full max-w-[1110px] flex-col xl:max-h-[780px] xl:min-h-auto",
+              styles.card_dialog_content,
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between border-b-12 border-black bg-background px-4 py-5 lg:border-b-20 lg:px-10">
+              <button
+                type="button"
+                className="flex items-center gap-2.5 text-white"
+                onClick={handleCloseDialog}
+              >
+                <Image src={iconBack} alt="Pulsante indietro" aria-hidden />
+                <span className="H5">Indietro</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleCloseDialog}
+                className="rounded-sm border border-yellow-500 p-2.5 xl:hidden"
+              >
+                <Image src={iconClose} aria-hidden alt="Pulsante chiudre" />
+              </button>
+            </div>
+            <div className="flex flex-1 flex-col gap-2 overflow-y-scroll bg-black px-3 lg:px-5 xl:max-h-[680px] xl:flex-row">
+              {product && <DialogProductCard {...product} place="dialog-cart-product-card" />}
 
-            <div className="min-h-fit flex-1 bg-background px-4 py-3 xl:px-3">
-              <h2 className="H3 text-white">{selectedProduct?.name}</h2>
-              <div id="product`s variants" className="mt-4 flex flex-col gap-3 xl:mt-6">
-                {product?.variants && product.variants.length > 0 && (
-                  <>
-                    {variantsOfProduct && variantsOfProduct.length > 0 ? (
-                      <>
-                        <fieldset className="flex flex-col gap-3">
-                          <legend className="input_M_18 mb-3 text-white">
-                            Scegli una versione
-                          </legend>
-                          {variantsOfProduct?.slice(0, variantsToShow).map((variant) => {
-                            return (
-                              <label
-                                key={variant.id}
-                                className={twMerge(
-                                  "body_R_20 ml-1 p-3 xl:ml-4",
-                                  styles.label_variant,
-                                )}
-                              >
-                                <input
-                                  disabled={variant.inStock === 0}
-                                  type="radio"
-                                  name="Product variant"
-                                  value={variant.id}
-                                  checked={selectedProduct?.id === variant.id}
-                                  onChange={() => {
-                                    setSelectedProduct({
-                                      ...variant,
-                                      qnt: 1,
-                                    } as Product & { qnt: number });
-                                  }}
-                                  className="sr-only"
-                                />
-                                <div className="mr-1 size-4 shrink-0">
-                                  <Image
-                                    src={checkboxIconChecked}
-                                    className={styles.checked}
-                                    alt="Checkbox icon"
-                                    width={16}
-                                    height={16}
+              <div className="min-h-fit flex-1 rounded-sm bg-background px-4 py-3 xl:px-3">
+                <h2 className="H3 text-white">{selectedProduct?.name}</h2>
+                <div id="product`s variants" className="mt-4 flex flex-col gap-3 xl:mt-6">
+                  {product?.variants && product.variants.length > 0 && (
+                    <>
+                      {variantsOfProduct && variantsOfProduct.length > 0 ? (
+                        <>
+                          <fieldset className="flex flex-col gap-3">
+                            <legend className="input_M_18 mb-3 text-white">
+                              Scegli una versione
+                            </legend>
+                            {variantsOfProduct?.slice(0, variantsToShow).map((variant) => {
+                              return (
+                                <label
+                                  key={variant.id}
+                                  className={twMerge(
+                                    "body_R_20 ml-1 p-3 xl:ml-4",
+                                    styles.label_variant,
+                                  )}
+                                >
+                                  <input
+                                    disabled={variant.inStock === 0}
+                                    type="radio"
+                                    name="Product variant"
+                                    value={variant.id}
+                                    checked={selectedProduct?.id === variant.id}
+                                    onChange={() => {
+                                      setSelectedProduct({
+                                        ...variant,
+                                        qnt: 1,
+                                      } as Product & { qnt: number });
+                                    }}
+                                    // className="sr-only"
                                   />
+                                  {/* <div className="mr-1 size-4 shrink-0">
+                                    <Image
+                                      src={checkboxIconChecked}
+                                      className={styles.checked}
+                                      alt="Checkbox icon"
+                                      width={16}
+                                      height={16}
+                                    />
+                                    <Image
+                                      className={styles.check}
+                                      src={checkboxIcon}
+                                      alt="Checkbox icon"
+                                      width={16}
+                                      height={16}
+                                    />
+                                  </div> */}
                                   <Image
-                                    className={styles.check}
-                                    src={checkboxIcon}
-                                    alt="Checkbox icon"
-                                    width={16}
-                                    height={16}
+                                    src={variant.imgSrc || variant.images?.[0] || "/logo.svg"}
+                                    alt={variant.name}
+                                    width={80}
+                                    height={80}
+                                    className="h-10 w-10 object-contain object-center lg:h-20 lg:w-20"
                                   />
-                                </div>
-                                <Image
-                                  src={variant.imgSrc || variant.images?.[0] || "/logo.svg"}
-                                  alt={variant.name}
-                                  width={80}
-                                  height={80}
-                                  className="h-10 w-10 object-contain object-center lg:h-20 lg:w-20"
-                                />
-                                <span className="pointer-events-none line-clamp-1">
-                                  {variant.name}
-                                </span>
-                                <PricesBox
-                                  oldPrice={variant.oldPrice}
-                                  place="dialog-cart-product-variant"
-                                  price={variant.price}
-                                  className="pointer-events-none ml-auto flex-col"
-                                />
-                              </label>
-                            );
-                          })}
-                        </fieldset>
-                        <button
-                          type="button"
-                          aria-label="Apri altri versioni"
-                          className={twMerge(
-                            "input_M_18 ml-auto text-white underline",
-                            variantsToShow >= (variantsOfProduct?.length || 0) && "hidden",
-                          )}
-                          onClick={() =>
-                            setVariantsToShow((prev) => prev + NUMBER_OF_VARIANTS_TO_SHOW)
+                                  <span className="pointer-events-none line-clamp-1">
+                                    {variant.name}
+                                  </span>
+                                  <PricesBox
+                                    oldPrice={variant.oldPrice}
+                                    place="dialog-cart-product-variant"
+                                    price={variant.price}
+                                    className="pointer-events-none ml-auto flex-col"
+                                  />
+                                </label>
+                              );
+                            })}
+                          </fieldset>
+                          <button
+                            type="button"
+                            aria-label="Apri altri versioni"
+                            className={twMerge(
+                              "input_M_18 ml-auto text-white underline",
+                              variantsToShow >= (variantsOfProduct?.length || 0) && "hidden",
+                            )}
+                            onClick={() =>
+                              setVariantsToShow((prev) => prev + NUMBER_OF_VARIANTS_TO_SHOW)
+                            }
+                          >
+                            Apri piu
+                          </button>
+                        </>
+                      ) : (
+                        <div className="h-auto w-full animate-pulse bg-stroke-grey">
+                          Caricamento versioni...
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {selectedProduct && (
+                    <ProductQuantityInputButtons
+                      selectedProduct={selectedProduct}
+                      setSelectedProduct={setSelectedProduct}
+                    />
+                  )}
+                </div>
+                {supportProducts && (
+                  <fieldset className="mt-4 flex flex-col gap-3">
+                    <legend className="input_M_18 mb-3 text-white">Acquistati insieme</legend>
+                    {supportProducts.map((supportProductItem) => (
+                      <label
+                        key={supportProductItem.id}
+                        className={twMerge("body_R_20 ml-1 p-3 xl:ml-4", styles.label_variant)}
+                      >
+                        <input
+                          disabled={supportProductItem.inStock === 0}
+                          type="checkbox"
+                          name={supportProductItem?.name}
+                          value={supportProductItem.id}
+                          // checked={selectedSupportProduct?.id === supportProductItem.id}
+                          onChange={() => {
+                            handleOnChangeSupportProduct(supportProductItem);
+                          }}
+                          // checked={
+                          //   selectedSupportProducts?.some((p) => p.id === supportProductItem.id) ||
+                          //   false
+                          // }
+                          // className="sr-only"
+                        />
+
+                        <Image
+                          src={
+                            supportProductItem.imgSrc ||
+                            supportProductItem.images?.[0] ||
+                            "/logo.svg"
                           }
-                        >
-                          Apri piu
-                        </button>
-                      </>
-                    ) : (
-                      <div className="h-auto w-full animate-pulse bg-stroke-grey">
-                        Caricamento versioni...
-                      </div>
-                    )}
-                  </>
-                )}
-                {selectedProduct && (
-                  <ProductQuantityInputButtons
-                    selectedProduct={selectedProduct}
-                    setSelectedProduct={setSelectedProduct}
-                  />
+                          alt={supportProductItem.name}
+                          width={80}
+                          height={80}
+                          className="h-10 w-10 object-contain object-center lg:h-20 lg:w-20"
+                        />
+                        <span className="pointer-events-none line-clamp-1">
+                          {supportProductItem.name}
+                        </span>
+                        <PricesBox
+                          oldPrice={supportProductItem.oldPrice}
+                          place="dialog-cart-product-variant"
+                          price={supportProductItem.price}
+                          className="pointer-events-none ml-auto flex-col"
+                        />
+                      </label>
+                    ))}
+                  </fieldset>
                 )}
               </div>
-              {supportProducts && (
-                <fieldset className="mt-4 flex flex-col gap-3">
-                  <legend className="input_M_18 mb-3 text-white">Acquistati insieme</legend>
-                  {supportProducts.map((supportProductItem) => (
-                    <label
-                      key={supportProductItem.id}
-                      className={twMerge("body_R_20 ml-1 p-3 xl:ml-4", styles.label_variant)}
-                    >
-                      <input
-                        disabled={supportProductItem.inStock === 0}
-                        type="checkbox"
-                        name={supportProductItem?.name}
-                        value={supportProductItem.id}
-                        // checked={selectedSupportProduct?.id === supportProductItem.id}
-                        onChange={() => {
-                          handleOnChangeSupportProduct(supportProductItem);
-                        }}
-                        // checked={
-                        //   selectedSupportProducts?.some((p) => p.id === supportProductItem.id) ||
-                        //   false
-                        // }
-                        className="sr-only"
-                      />
-                      <div className="mr-1 size-4 shrink-0">
-                        <Image
-                          src={checkboxIconChecked}
-                          className={styles.checked}
-                          alt="Checkbox icon"
-                          width={16}
-                          height={16}
-                        />
-                        <Image
-                          className={styles.check}
-                          src={checkboxIcon}
-                          alt="Checkbox icon"
-                          width={16}
-                          height={16}
-                        />
-                      </div>
-                      <Image
-                        src={
-                          supportProductItem.imgSrc || supportProductItem.images?.[0] || "/logo.svg"
-                        }
-                        alt={supportProductItem.name}
-                        width={80}
-                        height={80}
-                        className="h-10 w-10 object-contain object-center lg:h-20 lg:w-20"
-                      />
-                      <span className="pointer-events-none line-clamp-1">
-                        {supportProductItem.name}
-                      </span>
-                      <PricesBox
-                        oldPrice={supportProductItem.oldPrice}
-                        place="dialog-cart-product-variant"
-                        price={supportProductItem.price}
-                        className="pointer-events-none ml-auto flex-col"
-                      />
-                    </label>
-                  ))}
-                </fieldset>
-              )}
             </div>
-          </div>
-          <div className="flex bg-background p-4">
-            <InfoPopupAddedToBasket className="fixed top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 xl:static xl:top-0 xl:left-0 xl:translate-0" />
-            <div className="ml-auto flex w-full max-w-[618px] justify-between">
-              <PricesBox
-                totaleTitle={true}
-                place="dialog-cart-product-footer"
-                price={totalPrice}
-                oldPrice={totalOldPrice}
-              />
-              <ButtonAddToBasket
-                disabled={(!selectedProduct?.inStock && !selectedSupportProducts) || isDisabled}
-                onClick={handleAddToCart}
-              />
+            <div className="flex border-t-12 border-black bg-background p-4 lg:border-t-20">
+              <InfoPopupAddedToBasket className="fixed top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 xl:static xl:top-0 xl:left-0 xl:translate-0" />
+              <div className="ml-auto flex w-full max-w-[618px] justify-between">
+                <PricesBox
+                  totaleTitle={true}
+                  place="dialog-cart-product-footer"
+                  price={totalPrice}
+                  oldPrice={totalOldPrice}
+                />
+                <ButtonAddToBasket
+                  disabled={(!selectedProduct?.inStock && !selectedSupportProducts) || isDisabled}
+                  onClick={handleAddToCart}
+                />
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

@@ -28,7 +28,11 @@ export default function ProductsList({
       className="top_products_list"
     >
       {initialProducts.map((product, index) => (
-        <SwiperSlide id="top-products-item" className="" key={index}>
+        <SwiperSlide
+          id="top-products-item"
+          // className="transition-all duration-300 hover:scale-105"
+          key={index}
+        >
           <CardProduct {...product} className="" />
         </SwiperSlide>
       ))}

@@ -30,7 +30,7 @@ export const DialogProductCard = ({
   return (
     <div
       className={twMerge(
-        "card_gradient top-0 mx-auto max-h-[590px] min-h-fit w-full max-w-[446px] xl:sticky",
+        "card_gradient top-0 mx-auto max-h-[590px] min-h-fit w-full max-w-[446px] rounded-sm xl:sticky",
         place === "product-page" && "grid grid-flow-col grid-rows-3",
         place === "dialog-cart-product-card" && "",
       )}

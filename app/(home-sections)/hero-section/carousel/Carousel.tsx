@@ -55,7 +55,7 @@ export default function Carousel() {
                 height={677}
                 alt={baner.title}
                 priority={i === 0}
-                // quality={[100,75]}
+                fetchPriority={i === 0 ? "high" : "auto"}
                 loading={i === 0 ? "eager" : "lazy"}
                 className="mx-auto h-[677px] object-cover object-center"
               />

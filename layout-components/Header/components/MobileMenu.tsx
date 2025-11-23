@@ -1,19 +1,19 @@
 "use client";
 
-import { Suspense, useRef } from "react";
+import { Suspense, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
 import Navigation from "../../../components/Navigation";
 
 export default function MobileMenu() {
-  const dialog = useRef<HTMLDialogElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const handleOpenMenu = () => {
-    if (dialog.current) {
-      dialog.current.showModal();
-    }
+    document.body.style.overflow = "hidden";
+    setIsOpen(true);
   };
   const handleCloseMenu = () => {
-    if (dialog.current) {
-      dialog.current.close();
-    }
+    document.body.style.overflow = "auto";
+    setIsOpen(false);
   };
   return (
     <>
@@ -25,31 +25,46 @@ export default function MobileMenu() {
       >
         Menu
       </button>
-      <dialog
-        id="mobile"
-        ref={dialog}
-        className="fixed top-0 bottom-0 left-0 min-h-dvh min-w-dvw bg-black/50 xl:hidden"
-        aria-modal="true"
-        onClick={handleCloseMenu}
-      >
-        <div className="bg-black px-4 py-6" onClick={(e) => e.stopPropagation()}>
-          <button
-            className="btn mr-0 ml-auto flex rounded-sm border border-amber-500 px-4 py-3 text-white"
-            aria-label="Chiudi menu"
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            id="mobile"
+            // ref={dialog}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-1000 bg-black/50 xl:hidden"
+            //min-h-dvh min-w-dvw
+            aria-modal="true"
             onClick={handleCloseMenu}
           >
-            Chiudi
-          </button>
-          <Suspense>
-            <Navigation
-              linkPY="py-5"
-              mobile
-              onClick={handleCloseMenu}
-              className="mt-8 ml-0 flex max-w-full flex-col items-start pl-0 text-white xl:hidden"
-            />
-          </Suspense>
-        </div>
-      </dialog>
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="bg-black px-4 py-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                className="btn mr-0 ml-auto flex rounded-sm border border-amber-500 px-4 py-3 text-white"
+                aria-label="Chiudi menu"
+                onClick={handleCloseMenu}
+              >
+                Chiudi
+              </button>
+              <Suspense>
+                <Navigation
+                  linkPY="py-5"
+                  mobile
+                  onClick={handleCloseMenu}
+                  className="mt-8 ml-0 flex max-w-full flex-col items-start pl-0 text-white xl:hidden"
+                />
+              </Suspense>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
