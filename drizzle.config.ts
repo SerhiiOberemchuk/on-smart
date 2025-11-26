@@ -6,10 +6,10 @@ export default defineConfig({
   schema: ["./auth-schema.ts", "./db/schemas"],
   dialect: "mysql",
   dbCredentials: {
-    host: "31.11.38.12",
-    user: "Sql1902646",
-    database: "Sql1902646_1",
-    password: ".9KcyuMKx!pi8TN",
+    host: process.env.DATABASE_HOST!,
+    user: process.env.DATABASE_USER!,
+    database: process.env.DATABASE_NAME!,
+    password: process.env.DATABASE_PASSWORD!,
     // url: process.env.DATABASE_URL!,
   },
 });
