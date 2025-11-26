@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import clsx from "clsx";
 
-import "./styles/globals.css";
+import "../styles/globals.css";
 
 import Header from "@/layout-components/Header/Header";
 import Footer from "@/layout-components/Footer";
@@ -15,7 +15,7 @@ import { ToastContainer } from "react-toastify";
 import { Analytics } from "@vercel/analytics/next";
 
 const fixelFont = localFont({
-  src: "../fonts/FixelVariable.woff2",
+  src: "../../fonts/FixelVariable.woff2",
   display: "swap",
   // preload: true,
   fallback: ["system-ui", "Segoe UI", "Arial"],

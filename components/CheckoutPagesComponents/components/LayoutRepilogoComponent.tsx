@@ -1,6 +1,6 @@
 "use client";
 
-import RepilogoComponent from "@/app/carrello/components/RepilogoComponent";
+import RepilogoComponent from "@/app/(client)/carrello/components/RepilogoComponent";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { usePathname } from "next/navigation";
 import { twMerge } from "tailwind-merge";

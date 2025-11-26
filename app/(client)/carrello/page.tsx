@@ -1,5 +1,5 @@
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
-import { getAllProducts } from "../actions/product/get-all-products";
+import { getAllProducts } from "@/app/actions/product/get-all-products";
 import CardSection from "./components/CardSection";
 
 export default async function CarrelloPage() {
