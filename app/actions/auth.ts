@@ -8,7 +8,8 @@ export async function signUpUser(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const name = formData.get("name") as string;
-  await auth.api.signUpEmail({ body: { email, password, name } });
+  const role = formData.get("role") as "user" | "admin" | undefined;
+  await auth.api.createUser({ body: { email, password, name, role: role || "user" } });
   redirect("/admin");
 }
 

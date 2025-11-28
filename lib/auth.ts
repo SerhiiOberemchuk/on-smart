@@ -2,6 +2,7 @@ import { account, session, user, verification } from "@/auth-schema";
 import { db } from "@/db/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { admin } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 
 export const auth = betterAuth({
@@ -10,6 +11,9 @@ export const auth = betterAuth({
     schema: { user, account, session, verification },
   }),
 
-  emailAndPassword: { enabled: true },
-  plugins: [nextCookies()],
+  emailAndPassword: {
+    enabled: true,
+    //  requireEmailVerification: true
+  },
+  plugins: [nextCookies(), admin()],
 });

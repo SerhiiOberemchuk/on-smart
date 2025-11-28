@@ -28,7 +28,7 @@ export default function AdminAuthPage() {
 
         <div className="rounded-2xl border border-slate-800 bg-slate-900/80 shadow-xl shadow-black/40 backdrop-blur-md">
           <div className="flex p-1">
-            {/* <button
+            <button
               type="button"
               onClick={() => setMode("login")}
               className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium transition ${
@@ -38,8 +38,8 @@ export default function AdminAuthPage() {
               }`}
             >
               Увійти
-            </button> */}
-            {/* <button
+            </button>
+            <button
               type="button"
               onClick={() => setMode("register")}
               className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium transition ${
@@ -49,12 +49,16 @@ export default function AdminAuthPage() {
               }`}
             >
               Зареєструвати
-            </button> */}
+            </button>
           </div>
 
           <div className="border-t border-slate-800" />
 
           <form action={mode === "login" ? signInUser : signUpUser} className="space-y-4 p-6">
+            <label htmlFor="role" className="">
+              Is Admin
+              <input type="checkbox" name="role" id="role" value="admin" defaultChecked={true} />
+            </label>
             {mode === "register" && (
               <>
                 <div className="space-y-1.5">
@@ -126,7 +130,7 @@ export default function AdminAuthPage() {
                   />
                 </div>
 
-                {/* <div className="space-y-1.5">
+                <div className="space-y-1.5">
                   <label htmlFor="adminCode" className="block text-sm font-medium text-slate-100">
                     Код доступу адміністратора
                   </label>
@@ -142,11 +146,11 @@ export default function AdminAuthPage() {
                     Для безпеки нових адміністраторів реєструють лише за запитом та з використанням
                     секретного коду.
                   </p>
-                </div> */}
+                </div>
               </>
             )}
 
-            {/* {mode === "login" && (
+            {mode === "login" && (
               <div className="flex items-center justify-between pt-1">
                 <label className="flex items-center gap-2 text-xs text-slate-300">
                   <input
@@ -163,7 +167,7 @@ export default function AdminAuthPage() {
                   Забули пароль?
                 </button>
               </div>
-            )} */}
+            )}
 
             <button
               type="submit"
@@ -179,7 +183,7 @@ export default function AdminAuthPage() {
                   : "Створити обліковий запис"}
             </button>
 
-            {/* <p className="pt-1 text-center text-xs text-slate-500">
+            <p className="pt-1 text-center text-xs text-slate-500">
               {mode === "login"
                 ? "Немає акаунта адміністратора?"
                 : "Вже маєте акаунт адміністратора?"}{" "}
@@ -190,7 +194,7 @@ export default function AdminAuthPage() {
               >
                 {mode === "login" ? "Зареєструватися" : "Увійти"}
               </button>
-            </p> */}
+            </p>
           </form>
         </div>
 

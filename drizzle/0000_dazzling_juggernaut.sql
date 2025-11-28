@@ -24,6 +24,7 @@ CREATE TABLE `session` (
 	`ip_address` text,
 	`user_agent` text,
 	`user_id` varchar(36) NOT NULL,
+	`impersonated_by` text,
 	CONSTRAINT `session_id` PRIMARY KEY(`id`),
 	CONSTRAINT `session_token_unique` UNIQUE(`token`)
 );
@@ -36,6 +37,10 @@ CREATE TABLE `user` (
 	`image` text,
 	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
 	`updated_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`role` text,
+	`banned` boolean DEFAULT false,
+	`ban_reason` text,
+	`ban_expires` timestamp(3),
 	CONSTRAINT `user_id` PRIMARY KEY(`id`),
 	CONSTRAINT `user_email_unique` UNIQUE(`email`)
 );
@@ -48,6 +53,24 @@ CREATE TABLE `verification` (
 	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
 	`updated_at` timestamp(3) NOT NULL DEFAULT (now()),
 	CONSTRAINT `verification_id` PRIMARY KEY(`id`)
+);
+--> statement-breakpoint
+CREATE TABLE `products` (
+	`id` serial AUTO_INCREMENT NOT NULL,
+	`brand` varchar(255) NOT NULL,
+	`name` varchar(255) NOT NULL,
+	`description` text NOT NULL,
+	`category` varchar(255) NOT NULL,
+	`price` int NOT NULL,
+	`old_price` int,
+	`quantity` int DEFAULT 0,
+	`rating` decimal(2,1) DEFAULT '0.0',
+	`in_stock` int NOT NULL DEFAULT 0,
+	`img_src` text NOT NULL,
+	`images` json,
+	`logo` text,
+	`variants` json,
+	CONSTRAINT `products_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
 ALTER TABLE `account` ADD CONSTRAINT `account_user_id_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

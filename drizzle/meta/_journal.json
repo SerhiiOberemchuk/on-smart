@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1764100351902,
-      "tag": "0000_handy_purple_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1764111565197,
-      "tag": "0001_concerned_invisible_woman",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1764112635899,
-      "tag": "0002_reflective_the_fallen",
+      "when": 1764280694368,
+      "tag": "0000_dazzling_juggernaut",
       "breakpoints": true
     }
   ]
