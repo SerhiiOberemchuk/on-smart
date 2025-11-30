@@ -19,7 +19,7 @@ export default function Breadcrumbs({ category, brand, productName, carello }: P
         {category && (
           <li>
             /{" "}
-            <Link href={`/catalogo?category=${category}`} className="hover:text-white">
+            <Link href={`/catalogo?categoria=${category}`} className="hover:text-white">
               {category}
             </Link>
           </li>
@@ -28,7 +28,7 @@ export default function Breadcrumbs({ category, brand, productName, carello }: P
           <li>
             /{" "}
             <Link
-              href={`/catalogo?category=${category}&brand=${brand}`}
+              href={`/catalogo?categoria=${category}&brand=${brand}`}
               className="hover:text-white"
             >
               {brand}

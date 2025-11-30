@@ -60,13 +60,10 @@ export default function RootLayout({
       <body className={clsx(fixelFont.className, "flex min-h-svh flex-col")}>
         <NuqsAdapter>
           <Header />
-
           <main className="flex-1">
             <Suspense>{children}</Suspense>
           </main>
-          <Suspense>
-            <Footer />
-          </Suspense>
+          <Footer />
           <CardDialog />
           <Analytics />
         </NuqsAdapter>

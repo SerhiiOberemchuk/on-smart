@@ -11,6 +11,5 @@ export default defineConfig({
     user: process.env.DATABASE_USER!,
     database: process.env.DATABASE_NAME!,
     password: process.env.DATABASE_PASSWORD!,
-    // url: process.env.DATABASE_URL!,
   },
 });

@@ -3,19 +3,29 @@ import { getAllProducts } from "@/app/actions/product/get-all-products";
 import Script from "next/script";
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
 import { baseUrl } from "@/types/baseUrl";
-import Breadcrumbs from "@/components/Breadcrumbs";
-import { getCategoryInfo } from "@/app/actions/category/get-category-info";
+import { getCategoryBySlug } from "@/app/actions/category/category-actions";
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import LinkYellow from "@/components/YellowLink";
 
 type Props = { params: Promise<{ categoria: string }> };
 
-// SEO Metadata
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { categoria } = await params;
-  const categoryInfo = await getCategoryInfo(categoria);
+  const categoryInfo = await getCategoryBySlug(categoria);
+
+  if (!categoryInfo.success || !categoryInfo.data) {
+    return {
+      title: "Categoria non trovata",
+      robots: "noindex",
+    };
+  }
 
   return {
-    title: `Categoria ${categoryInfo.name} | OnSmart`,
-    description: categoryInfo.descriptionSeo ?? `Prodotti della categoria ${categoryInfo.name}.`,
+    title: `Categoria ${categoryInfo.data?.title_full} | OnSmart`,
+    description:
+      categoryInfo.data?.description ?? `Prodotti della categoria ${categoryInfo.data?.name}.`,
     alternates: {
       canonical: `${baseUrl}/categoria/${categoria}`,
     },
@@ -25,15 +35,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PageCategoria({ params }: Props) {
   const { categoria } = await params;
 
-  const categoryInfo = await getCategoryInfo(categoria);
+  const { success, data } = await getCategoryBySlug(categoria);
+
+  if (!success || !data) {
+    notFound();
+  }
   const products = await getAllProducts({ category: categoria });
 
-  // JSON-LD
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: `Categoria ${categoryInfo.name}`,
-    description: categoryInfo.descriptionSeo,
+    name: `Categoria ${data?.name}`,
+    description: data?.description,
     url: `${baseUrl}/categoria/${categoria}`,
     hasPart: {
       "@type": "ItemList",
@@ -59,20 +72,50 @@ export default async function PageCategoria({ params }: Props) {
 
   return (
     <>
-      <Breadcrumbs category={categoryInfo.name} />
-
+      <nav className="py-3 text-sm text-text-grey">
+        <ul className="text_R container flex flex-wrap gap-1 capitalize">
+          <li>
+            <Link href="/" className="hover:text-white">
+              Home
+            </Link>
+          </li>
+          <li>
+            /<span className="text-white"> {data.name}</span>
+          </li>
+        </ul>
+      </nav>
       <section className="bg-background">
-        <div className="container py-6">
-          <h1 className="H2 uppercase">{categoryInfo.name}</h1>
-
-          {categoryInfo.description && <p className="text_R mt-3">{categoryInfo.description}</p>}
+        <div className="container">
+          <h1 className="H2 py-3 text-left uppercase">{data.name}</h1>
+          <div className="flex flex-col gap-5 py-3 xl:flex-row">
+            <Image
+              src={data.image}
+              width={492}
+              height={270}
+              alt={data.name + "- Logo"}
+              quality={100}
+              className="h-[270px] w-[492px] object-contain object-center xl:px-6"
+            />
+            <ul className="flex flex-col gap-3">
+              {data.description.split("|").map((desc, index) => (
+                <li key={index}>
+                  <p className="text_R"> {desc}</p>
+                </li>
+              ))}
+              <LinkYellow
+                title="Mostra tutto"
+                href={`/catalogo?categoria=${data.category_slug}`}
+                className="mr-auto flex"
+              />
+            </ul>
+          </div>
         </div>
       </section>
 
       <ProductRowListSection
         productsList={products}
         idSection="categoria_section"
-        title={`Prodotti della categoria ${categoryInfo.name}`}
+        title={`Prodotti della categoria ${data?.name}`}
         isBottomLink={false}
       />
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { addNewProduct } from "@/app/actions/product/add-new-product";
-import { deleteFileFromS3, uploadFileAction } from "@/app/actions/uploadFile";
+import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
 import ButtonYellow from "@/components/BattonYellow";
 import { InputBlock } from "@/components/InputBloc";
 import { useState } from "react";
@@ -32,9 +32,9 @@ export default function NewProductPage() {
   const [imageLink, setImageLink] = useState<string | null>(null);
   //   const [state, formAction, pending] = useActionState(addNewProduct, { ldfd: "dfd" });
   const handleUpload = async (formData: FormData) => {
-    const result = await uploadFileAction(formData, { sub_bucket: "products" });
-    if (result.url) {
-      setImageLink(result.url);
+    const result = await uploadFile({ file: formData.get("file") as File, sub_bucket: "products" });
+    if (result.fileUrl) {
+      setImageLink(result.fileUrl);
     }
     console.log(result);
   };

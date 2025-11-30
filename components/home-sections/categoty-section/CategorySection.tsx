@@ -1,31 +1,32 @@
 import LinkYellow from "@/components/YellowLink";
-import { getCategories } from "./action";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./category.module.css";
 import { baseUrl } from "@/types/baseUrl";
 import Script from "next/script";
+import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
 
 export default async function CategorySection() {
-  const categories = await getCategories();
+  const { success, data } = await getAllCategoryProducts();
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: "Categorie di prodotti",
     description:
       "Esplora le categorie di prodotti OnSmart: sistemi di videosorveglianza, sensori, sirene e dispositivi smart per la sicurezza della casa.",
-    numberOfItems: categories.length,
-    itemListElement: categories.map((cat, i) => ({
+    numberOfItems: data.length,
+    itemListElement: data.map((cat, i) => ({
       "@type": "ListItem",
       position: i + 1,
       item: {
         "@type": "Thing",
-        name: cat.categoryName,
-        image: cat.imageUrl.startsWith("http") ? cat.imageUrl : `${baseUrl}${cat.imageUrl}`,
-        url: `${baseUrl}/catalogo?category=${encodeURIComponent(cat.categoryType)}`,
+        name: cat.name,
+        image: cat.image.startsWith("http") ? cat.image : `${baseUrl}${cat.image}`,
+        url: `${baseUrl}/catalogo?category=${encodeURIComponent(cat.category_slug)}`,
       },
     })),
   };
+  if (!success) return null;
   return (
     <section id="category-section" className="flex flex-col gap-4 py-8 xl:gap-8 xl:py-16">
       <header className="bg-background">
@@ -40,23 +41,27 @@ export default async function CategorySection() {
       </header>
       <div className="container">
         <ul className={styles.list}>
-          {categories.map(({ id, categoryName, imageUrl, categoryType }, i) => (
+          {data.map(({ id, name, image, category_slug }, i) => (
             <li
               key={id}
               className="relative rounded-sm transition-transform duration-300 hover:scale-105"
             >
-              <Link href={`/catalogo?category=${categoryType}`} title={categoryName}>
+              <Link
+                //  href={`/catalogo?category=${category_slug}`}
+                href={"/categoria/" + category_slug}
+                title={name}
+              >
                 <Image
-                  src={imageUrl}
+                  src={image}
                   className="mx-auto aspect-square rounded-sm object-contain object-center opacity-50"
                   width={355}
                   height={355}
-                  alt={`Categoria: ${categoryName}`}
+                  alt={`Categoria: ${name}`}
                   loading={i === 0 ? "eager" : "lazy"}
                 />
               </Link>
               <h3 className="H3 pointer-events-none absolute bottom-[8%] left-0 w-full px-2 text-center text-wrap">
-                {categoryName}
+                {name}
               </h3>
             </li>
           ))}

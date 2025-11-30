@@ -1,10 +1,10 @@
 import { Metadata } from "next";
-import BrandSection from "./brand-section/BrandSection";
-import CategorySection from "./(home-sections)/categoty-section/CategorySection";
-import FeedbackFormSection from "./(home-sections)/feedback-form-section/FeedbackFormSection";
-import GoogleReviewSection from "./(home-sections)/google-review-section/GoogleReviewSection";
-import HeroSection from "./(home-sections)/hero-section/HeroSection";
-import TopSalesSection from "./(home-sections)/top-sales-section/TopSalesSection";
+import BrandSection from "@/components/home-sections/BrandSection";
+import CategorySection from "@/components/home-sections/categoty-section/CategorySection";
+import FeedbackFormSection from "@/components/home-sections/feedback-form-section/FeedbackFormSection";
+import GoogleReviewSection from "@/components/home-sections/google-review-section/GoogleReviewSection";
+import HeroSection from "@/components/home-sections/hero-section/HeroSection";
+import TopSalesSection from "@/components/home-sections/top-sales-section/TopSalesSection";
 import Script from "next/script";
 
 export const metadata: Metadata = {

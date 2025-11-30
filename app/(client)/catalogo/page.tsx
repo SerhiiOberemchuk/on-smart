@@ -3,6 +3,7 @@ import ListFiltereOptions from "@/components/PageCatalogComponents/FiltersSectio
 import MobileFilterSection from "@/components/PageCatalogComponents/FiltersSection/MobileFilterSection";
 import HeaderCatalogo from "@/components/PageCatalogComponents/HeaderCatalogo";
 import CatalogProductSection from "@/components/PageCatalogComponents/ProductSection/CatalogProductSection";
+import { getCatalogFilters } from "@/lib/get-catalog-filters";
 import { baseUrl } from "@/types/baseUrl";
 import Script from "next/script";
 import { Metadata } from "next/types";
@@ -67,6 +68,7 @@ export default async function CatalogoPage() {
       },
     ],
   };
+  const filters = await getCatalogFilters();
   return (
     <section className="pb-5 lg:pb-16">
       {/* <Breadcrumbs /> */}
@@ -75,12 +77,12 @@ export default async function CatalogoPage() {
       </Suspense>
       <div className="xl:bg-background">
         <Suspense>
-          <MobileFilterSection />
+          <MobileFilterSection filters={filters} />
         </Suspense>
 
         <div className="container flex flex-col gap-5 lg:flex-row">
           <Suspense>
-            <ListFiltereOptions className="hidden lg:flex" />
+            <ListFiltereOptions className="hidden lg:flex" filters={filters} />
           </Suspense>
 
           <Suspense>

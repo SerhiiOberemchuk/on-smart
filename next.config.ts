@@ -4,6 +4,19 @@ const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
   reactCompiler: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "on-smart.r3-it.storage.cloud.it",
+      },
+    ],
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "2mb",
+    },
+  },
   // async redirects() {
   //   return [
   //     {

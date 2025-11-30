@@ -1,6 +1,3 @@
-export type Category = {
-  id: number;
-  categoryType: string;
-  categoryName: string;
-  imageUrl: string;
-};
+import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
+
+export type CategoryTypes = typeof categoryProductsSchema.$inferInsert;

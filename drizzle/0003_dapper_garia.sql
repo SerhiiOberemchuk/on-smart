@@ -1,0 +1,1 @@
+ALTER TABLE `brands_products` RENAME COLUMN `category_slug` TO `brand_slug`;

@@ -1,28 +1,35 @@
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
 import Image from "next/image";
 import LinkYellow from "@/components/YellowLink";
-import Breadcrumbs from "./Breadcrumbs";
-import { getBrandInfo } from "@/app/actions/product/get-brand-info";
 import { getAllProducts } from "@/app/actions/product/get-all-products";
 import { baseUrl } from "@/types/baseUrl";
 import Script from "next/script";
+import { BrandTypes } from "@/types/brands.types";
+import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
-export default async function BrandPage({ brand }: { brand: string }) {
-  const products = await getAllProducts({ brand });
-  const brandInfo = await getBrandInfo(brand);
+export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes["brand_slug"] }) {
+  console.log({ brand_slug });
+
+  const products = await getAllProducts({ brand_slug });
+  const { success, data } = await getBrandBySlug(brand_slug);
+  if (!success || !data) {
+    notFound();
+  }
   const brandJsonLd = {
     "@context": "https://schema.org",
     "@type": "Brand",
-    name: brandInfo.brandName,
-    logo: brandInfo.logo,
-    url: `${baseUrl}/brand/${brand}`,
-    description: brandInfo.description.join(" "),
+    name: data.name,
+    logo: data.image,
+    url: `${baseUrl}/brand/${brand_slug}`,
+    description: data.description,
   };
 
   const productsJsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `Prodotti del brand ${brandInfo.brandName}`,
+    name: `Prodotti del brand ${data.name}`,
     itemListOrder: "https://schema.org/ItemListOrderAscending",
     numberOfItems: products.length,
     itemListElement: products.map((p, i) => ({
@@ -46,28 +53,39 @@ export default async function BrandPage({ brand }: { brand: string }) {
   };
   return (
     <>
-      <Breadcrumbs />
+      <nav className="py-3 text-sm text-text-grey">
+        <ul className="text_R container flex flex-wrap gap-1 capitalize">
+          <li>
+            <Link href="/" className="hover:text-white">
+              Home
+            </Link>
+          </li>
+          <li>
+            /<span className="text-white"> {data.name}</span>
+          </li>
+        </ul>
+      </nav>
       <section className="bg-background">
         <div className="container">
-          <h1 className="H2 py-3 text-left uppercase">{brandInfo.brandName}</h1>
+          <h1 className="H2 py-3 text-left uppercase">{data.name}</h1>
           <div className="flex flex-col gap-5 py-3 xl:flex-row">
             <Image
-              src={brandInfo.logo}
+              src={data.image}
               width={492}
               height={270}
-              alt={brandInfo.brandName + "- Logo"}
+              alt={data.name + "- Logo"}
               quality={100}
               className="h-[270px] w-[492px] object-contain object-center xl:px-6"
             />
             <ul className="flex flex-col gap-3">
-              {brandInfo.description.map((desc, index) => (
+              {data.description.split("|").map((desc, index) => (
                 <li key={index}>
                   <p className="text_R"> {desc}</p>
                 </li>
               ))}
               <LinkYellow
                 title="Mostra tutto"
-                href={`/catalogo?brand=${brandInfo.brandName}`}
+                href={`/catalogo?brand=${data.brand_slug}`}
                 className="mr-auto flex"
               />
             </ul>

@@ -55,6 +55,16 @@ CREATE TABLE `verification` (
 	CONSTRAINT `verification_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
+CREATE TABLE `categories_products` (
+	`id` serial AUTO_INCREMENT NOT NULL,
+	`name` varchar(255) NOT NULL,
+	`title_full` varchar(255) NOT NULL,
+	`description` varchar(1024) NOT NULL,
+	`image` varchar(1024) NOT NULL,
+	`category_slug` varchar(255) NOT NULL,
+	CONSTRAINT `categories_products_id` PRIMARY KEY(`id`)
+);
+--> statement-breakpoint
 CREATE TABLE `products` (
 	`id` serial AUTO_INCREMENT NOT NULL,
 	`brand` varchar(255) NOT NULL,

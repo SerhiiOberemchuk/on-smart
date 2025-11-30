@@ -1,6 +1,5 @@
 "use client";
 
-import { CATALOG_FILTERS_PARAMS, FilterGroup } from "@/types/catalog-filter-options.types";
 import Image from "next/image";
 import { twMerge } from "tailwind-merge";
 import icon_arrow_top from "@/assets/icons/arrow-top.svg";
@@ -8,13 +7,21 @@ import { useEffect, useRef, useState } from "react";
 import { LabelInput } from "./sub-component/LabelInput";
 import { InputRange } from "./sub-component/InputRange";
 import { usePathname, useRouter } from "next/navigation";
+import { FilterGroup } from "@/types/catalog-filter-options.types";
 
-export default function ListFiltereOptions({ className }: { className?: string }) {
+export default function ListFiltereOptions({
+  className,
+  filters,
+}: {
+  className?: string;
+  filters: FilterGroup[];
+}) {
   const router = useRouter();
   const pathname = usePathname();
+
   return (
     <ul className={twMerge("flex w-full max-w-[264px] flex-col", className)}>
-      {CATALOG_FILTERS_PARAMS.map((filter) => (
+      {filters.map((filter) => (
         <li key={filter.param}>
           <ItemFilteredOptions {...filter} />
         </li>

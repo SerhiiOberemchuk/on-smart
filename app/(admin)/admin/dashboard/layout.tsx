@@ -6,12 +6,12 @@ import { usePathname } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 
 const dashboardLinks = [
-  { href: "/admin/dashboard/products", title: "Товари" },
-  { href: "/admin/dashboard/brands", title: "Бренди" },
-  { href: "/admin/dashboard/categories", title: "Категорії" },
-  { href: "/admin/dashboard/orders", title: "Замовлення" },
-  { href: "/admin/dashboard/customers", title: "Клієнти" },
-  { href: "/admin/dashboard/stock", title: "Склад" },
+  { href: "/admin/dashboard/products", title: "Товари", active: true },
+  { href: "/admin/dashboard/brands", title: "Бренди", active: true },
+  { href: "/admin/dashboard/categories", title: "Категорії", active: true },
+  { href: "/admin/dashboard/orders", title: "Замовлення", active: false },
+  { href: "/admin/dashboard/customers", title: "Клієнти", active: false },
+  { href: "/admin/dashboard/stock", title: "Склад", active: false },
 ];
 
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
@@ -29,18 +29,24 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
         </form>
       </header>
       <div className="flex flex-1">
-        <aside className="flex flex-col gap-4 overflow-y-scroll bg-background p-6 text-sm font-medium [&>a:hover]:text-amber-600">
-          {dashboardLinks.map((link) => (
-            <Link
-              className={twMerge(path.includes(link.href) && "text-yellow-400 underline")}
-              key={link.href}
-              href={link.href}
-            >
-              {link.title}
-            </Link>
-          ))}
+        <aside className="flex min-w-fit flex-col gap-4 overflow-y-scroll bg-background p-6 text-sm font-medium [&>a:hover]:text-amber-600">
+          {dashboardLinks.map((link) => {
+            return link.active ? (
+              <Link
+                className={twMerge(path.includes(link.href) && "text-yellow-400 underline")}
+                key={link.href}
+                href={link.href}
+              >
+                {link.title}
+              </Link>
+            ) : (
+              <span key={link.href} className="text-gray-600">
+                {link.title}
+              </span>
+            );
+          })}
         </aside>
-        <div className="flex flex-1">{children}</div>
+        <div className="flex-1">{children}</div>
       </div>
     </div>
   );

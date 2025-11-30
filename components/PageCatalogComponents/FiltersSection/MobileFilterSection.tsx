@@ -4,8 +4,9 @@ import Image from "next/image";
 import icon_filter from "@/assets/icons/icon_filter.svg";
 import { useEffect, useState } from "react";
 import ListFiltereOptions from "./ListFilterOptions";
+import { FilterGroup } from "@/types/catalog-filter-options.types";
 
-export default function MobileFilterSection() {
+export default function MobileFilterSection({ filters }: { filters: FilterGroup[] }) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   useEffect(() => {
     if (isFilterOpen) {
@@ -36,7 +37,7 @@ export default function MobileFilterSection() {
             </button>
           </header>
           <main className="flex-1 overflow-y-scroll">
-            <ListFiltereOptions className="w-full max-w-full" />
+            <ListFiltereOptions filters={filters} className="w-full max-w-full" />
           </main>
           <footer className="py-6">
             <button

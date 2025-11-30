@@ -1,4 +1,4 @@
-import BrandPage from "@/components/BrandPage";
+import BrandPage from "@/app/(client)/brand/[brand_slug]/components/BrandPage";
 import { Suspense } from "react";
 
 export default async function CategoryBrandPage({
@@ -10,7 +10,7 @@ export default async function CategoryBrandPage({
 
   return (
     <Suspense>
-      <BrandPage brand={brand} />;
+      <BrandPage brand_slug={brand} />;
     </Suspense>
   );
 }

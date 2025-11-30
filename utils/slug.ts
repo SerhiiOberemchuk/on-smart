@@ -1,10 +1,7 @@
-import slugify from "slugify";
+import slugify from "@sindresorhus/slugify";
 
 export function toSlug(str: string) {
   return slugify(str, {
-    lower: true,
-    strict: true,
     locale: "it",
-    trim: true,
   });
 }

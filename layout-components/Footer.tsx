@@ -5,19 +5,22 @@ import icon_location from "@/assets/icons/icon_location.svg";
 import icon_mail from "@/assets/icons/icon_mail.svg";
 import icon_phone from "@/assets/icons/icon_phone.svg";
 import Image from "next/image";
+import { cacheLife, cacheTag } from "next/cache";
+import { Suspense } from "react";
 
 export default async function Footer() {
-  "use cache";
   return (
     <footer className="bg-header-footer py-4">
       <div className="container flex flex-col gap-11">
         <div className="md:flex md:h-60 md:justify-between">
           <LogoLink />
           <div className="flex flex-col gap-8 pt-6 md:max-w-[526px] md:flex-row md:gap-20 md:pt-0 lg:pt-0">
-            <Navigation
-              footer
-              className="flex max-w-full flex-col p-0 md:mb-auto md:grid md:grid-cols-2 md:items-start md:justify-start md:gap-x-20 md:gap-y-6 xl:grid"
-            />
+            <Suspense>
+              <Navigation
+                footer
+                className="flex max-w-full flex-col p-0 md:mb-auto md:grid md:grid-cols-2 md:items-start md:justify-start md:gap-x-20 md:gap-y-6 xl:grid"
+              />
+            </Suspense>
             <address className="text_R mx-auto flex max-w-fit min-w-fit flex-col items-start gap-2 not-italic">
               <p className="uppercase">OLENA NUDZHEVSKA</p>
               <span className="flex items-center gap-1">
@@ -40,7 +43,9 @@ export default async function Footer() {
         </div>
 
         <div className="helper_text flex flex-col items-center gap-3 border-t border-stroke-grey py-3 text-white lg:flex-row lg:justify-between lg:p-0 lg:pt-6">
-          <p className="">&copy; {new Date().getFullYear()} OnSmart. Tutti i diritti riservati.</p>
+          <Suspense>
+            <CopyElement />
+          </Suspense>
           <div>
             <Link href="/informativa-sulla-privacy">Informativa sulla privacy</Link> |
             <Link href="/informativa-sulla-privacy">Termini e condizioni</Link>
@@ -49,4 +54,11 @@ export default async function Footer() {
       </div>
     </footer>
   );
+}
+
+async function CopyElement() {
+  "use cache";
+  cacheTag("footer_copy_element");
+  cacheLife({ expire: 60 * 60 * 24 * 30 }); // 30 days
+  return <p className="">&copy; {new Date().getFullYear()} OnSmart. Tutti i diritti riservati.</p>;
 }
