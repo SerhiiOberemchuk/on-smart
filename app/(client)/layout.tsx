@@ -12,8 +12,6 @@ import CardDialog from "@/components/ProductCard/dialog-add-to-cart/CardDialog";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ToastContainer } from "react-toastify";
 
-import { Analytics } from "@vercel/analytics/next";
-
 const fixelFont = localFont({
   src: "../../fonts/FixelVariable.woff2",
   display: "swap",
@@ -52,7 +50,7 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-title" content="ON SMART" />
-        <link rel="manifest" href="/site.webmanifest" />
+        {/* <link rel="manifest" href="/site.webmanifest" /> */}
         <link rel="preload" as="image" property="high" href="/hero-baner/Baner 1 Antifurto.png" />
         <link rel="preload" as="image" href="/brands/ajax.png" />
       </Head>
@@ -65,7 +63,6 @@ export default function RootLayout({
           </main>
           <Footer />
           <CardDialog />
-          <Analytics />
         </NuqsAdapter>
         <ToastContainer />
       </body>
