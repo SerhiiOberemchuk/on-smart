@@ -20,9 +20,9 @@ export async function createBrand(brand: BrandTypes) {
 }
 
 export async function getAllBrands() {
-  "use cache";
-  cacheTag("all_brands");
-  cacheLife({ expire: 60 * 60 * 24 });
+  // "use cache";
+  // cacheTag("all_brands");
+  // cacheLife({ expire: 60 * 60 * 24 });
   try {
     const result = await db.select().from(brandProductsSchema);
     return {
@@ -84,9 +84,9 @@ export async function updateBrandById(brandData: Partial<BrandTypes> & { id: Bra
 }
 
 export async function getBrandBySlug(brand_slug: BrandTypes["brand_slug"]) {
-  "use cache";
-  cacheTag("brand_" + brand_slug);
-  cacheLife({ expire: 60 * 60 * 24 });
+  // "use cache";
+  // cacheTag("brand_" + brand_slug);
+  // cacheLife({ expire: 60 * 60 * 24 });
   try {
     const fetchBrand = await db
       .select()

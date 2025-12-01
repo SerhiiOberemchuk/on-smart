@@ -59,6 +59,6 @@ export default async function Footer() {
 async function CopyElement() {
   "use cache";
   cacheTag("footer_copy_element");
-  cacheLife({ expire: 60 * 60 * 24 * 30 }); // 30 days
+  cacheLife({ expire: 3600 }); // 1 hour
   return <p className="">&copy; {new Date().getFullYear()} OnSmart. Tutti i diritti riservati.</p>;
 }
