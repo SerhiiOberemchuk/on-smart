@@ -3,6 +3,7 @@
 import { signOutUser } from "@/app/actions/auth";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 import { twMerge } from "tailwind-merge";
 
 const dashboardLinks = [
@@ -46,7 +47,9 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
             );
           })}
         </aside>
-        <div className="flex-1">{children}</div>
+        <div className="flex-1">
+          <Suspense>{children}</Suspense>
+        </div>
       </div>
     </div>
   );
