@@ -4,10 +4,25 @@ import Image from "next/image";
 import styles from "./category.module.css";
 import { baseUrl } from "@/types/baseUrl";
 import Script from "next/script";
-import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
+import { CategoryTypes } from "@/types/category.types";
+// import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
 
 export default async function CategorySection() {
-  const { success, data } = await getAllCategoryProducts();
+  let data: CategoryTypes[] = [];
+  let success = false;
+  try {
+    const dataFetch = await fetch(`${baseUrl}/api/categories`, {
+      cache: "force-cache",
+      next: { revalidate: 7200, tags: ["all_categories"] },
+    });
+    const dataJSON: { success: boolean; data: CategoryTypes[]; error: Error } =
+      await dataFetch.json();
+    success = dataJSON.success;
+    data = dataJSON.data;
+  } catch (error) {
+    console.error(error);
+  }
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -26,7 +41,9 @@ export default async function CategorySection() {
       },
     })),
   };
-  if (!success) return null;
+  if (!success) {
+    return null;
+  }
   return (
     <section id="category-section" className="flex flex-col gap-4 py-8 xl:gap-8 xl:py-16">
       <header className="bg-background">

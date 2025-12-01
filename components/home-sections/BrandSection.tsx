@@ -4,18 +4,36 @@ import Image from "next/image";
 import { baseUrl } from "@/types/baseUrl";
 import Script from "next/script";
 import { Suspense } from "react";
-import { getAllBrands } from "@/app/actions/brands/brand-actions";
+// import { getAllBrands } from "@/app/actions/brands/brand-actions";
+import { BrandTypes } from "@/types/brands.types";
 
 export default async function BrandSection() {
-  const brands = await getAllBrands();
+  // const brands = await getAllBrands();
+
+  let data: BrandTypes[] = [];
+  let success = false;
+  try {
+    const dataFetch = await fetch(`${baseUrl}/api/brands`, {
+      cache: "force-cache",
+      next: { revalidate: 7200, tags: ["all_brands"] },
+    });
+    const dataJSON: { success: boolean; data: BrandTypes[]; error: Error } = await dataFetch.json();
+    success = dataJSON.success;
+    data = dataJSON.data;
+  } catch (error) {
+    console.error(error);
+  }
+  if (!success) {
+    return null;
+  }
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: "I brand che trattiamo",
     description:
       "Scopri i marchi di prodotti trattati da OnSmart: brand leader nella videosorveglianza e nella sicurezza come Ajax, Uniview, Dahua e molti altri.",
-    numberOfItems: brands.data.length,
-    itemListElement: brands.data.map((b, i) => ({
+    numberOfItems: data.length,
+    itemListElement: data.map((b, i) => ({
       "@type": "ListItem",
       position: i + 1,
       item: {
@@ -42,7 +60,7 @@ export default async function BrandSection() {
       <div className="container">
         <Suspense>
           <ul className="flex flex-wrap items-center justify-center gap-px py-2 lg:gap-3">
-            {brands.data.map(({ id, name, image, brand_slug }) => (
+            {data.map(({ id, name, image, brand_slug }) => (
               <li key={id} className="transition-transform duration-300 hover:scale-105">
                 <Link className="flex p-5 md:p-7" href={`/brand/${brand_slug}`} title={name}>
                   <Image
