@@ -4,24 +4,26 @@ import Image from "next/image";
 import styles from "./category.module.css";
 import { baseUrl } from "@/types/baseUrl";
 import Script from "next/script";
-import { CategoryTypes } from "@/types/category.types";
+import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
+// import { CategoryTypes } from "@/types/category.types";
 // import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
 
 export default async function CategorySection() {
-  let data: CategoryTypes[] = [];
-  let success = false;
-  try {
-    const dataFetch = await fetch(`${baseUrl}/api/categories`, {
-      cache: "force-cache",
-      next: { revalidate: 7200, tags: ["all_categories"] },
-    });
-    const dataJSON: { success: boolean; data: CategoryTypes[]; error: Error } =
-      await dataFetch.json();
-    success = dataJSON.success;
-    data = dataJSON.data;
-  } catch (error) {
-    console.error(error);
-  }
+  const { success, data } = await getAllCategoryProducts();
+  // let data: CategoryTypes[] = [];
+  // let success = false;
+  // try {
+  //   const dataFetch = await fetch(`${baseUrl}/api/categories`, {
+  //     cache: "force-cache",
+  //     next: { revalidate: 7200, tags: ["all_categories"] },
+  //   });
+  //   const dataJSON: { success: boolean; data: CategoryTypes[]; error: Error } =
+  //     await dataFetch.json();
+  //   success = dataJSON.success;
+  //   data = dataJSON.data;
+  // } catch (error) {
+  //   console.error(error);
+  // }
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -36,8 +38,8 @@ export default async function CategorySection() {
       item: {
         "@type": "Thing",
         name: cat.name,
-        image: cat.image.startsWith("http") ? cat.image : `${baseUrl}${cat.image}`,
-        url: `${baseUrl}/catalogo?category=${encodeURIComponent(cat.category_slug)}`,
+        image: cat.image,
+        url: `${baseUrl}/categoria/${cat.category_slug}`,
       },
     })),
   };
