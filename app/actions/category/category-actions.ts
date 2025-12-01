@@ -4,7 +4,7 @@ import { db } from "@/db/db";
 import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
 import { CategoryTypes } from "@/types/category.types";
 import { eq } from "drizzle-orm";
-// import { cacheLife, cacheTag } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 
 export async function createCategoryProducts(category: CategoryTypes) {
   try {
@@ -19,9 +19,9 @@ export async function createCategoryProducts(category: CategoryTypes) {
 }
 
 export async function getAllCategoryProducts() {
-  // "use cache";
-  // cacheTag("all_categories");
-  // cacheLife({ expire: 7200 });
+  "use cache";
+  cacheTag("all_categories");
+  cacheLife({ expire: 7200 });
   try {
     const result = await db.select().from(categoryProductsSchema);
     return {
@@ -85,9 +85,9 @@ export async function updateCategoryProductsById(categoryData: Partial<CategoryT
 }
 
 export async function getCategoryBySlug(category_slug: CategoryTypes["category_slug"]) {
-  // "use cache";
-  // cacheTag(`category_${category_slug}`);
-  // cacheLife({ expire: 7200 }); // 2 hours
+  "use cache";
+  cacheTag(`category_${category_slug}`);
+  cacheLife({ expire: 7200 }); // 2 hours
   try {
     const fetchCategory = await db
       .select()
