@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 // import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function effrfefefer(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const session = await auth.api.getSession({
     headers: request.headers,
   });
@@ -18,6 +18,6 @@ export async function effrfefefer(request: NextRequest) {
   return NextResponse.next();
 }
 
-export const efewfew = {
+export const config = {
   matcher: ["/admin/:path*"],
 };
