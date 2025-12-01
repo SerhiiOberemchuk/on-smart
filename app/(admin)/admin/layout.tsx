@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   appleWebApp: { title: "ON-SMART" },
-  manifest: "/site.webmanifest",
+  // manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
