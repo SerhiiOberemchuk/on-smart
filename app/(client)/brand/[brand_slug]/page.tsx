@@ -1,9 +1,9 @@
 import BrandPage from "@/app/(client)/brand/[brand_slug]/components/BrandPage";
 import { Metadata } from "next";
 
-import { baseUrl } from "@/types/baseUrl";
 import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
 import { notFound } from "next/navigation";
+import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 
 type Props = { params: Promise<{ brand_slug: string }> };
 
@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     notFound();
   }
 
-  const canonical = `${baseUrl}/brand/${brand_slug}`;
+  const canonical = `${CONTACTS_ADDRESS.BASE_URL}/brand/${brand_slug}`;
   const title = `${data.name} – Prodotti ufficiali OnSmart`;
   const description = `Scopri i migliori prodotti del brand ${data.name}: videosorveglianza, accessori e soluzioni professionali disponibili su OnSmart.`;
 

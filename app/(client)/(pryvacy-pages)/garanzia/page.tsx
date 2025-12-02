@@ -1,3 +1,4 @@
+import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import { Metadata } from "next";
 import Script from "next/script";
 
@@ -6,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Informazioni complete sulla garanzia legale, sui resi e sul diritto di recesso per i prodotti acquistati su OnSmart. Durata della garanzia, condizioni, limitazioni e procedure ufficiali.",
   alternates: {
-    canonical: "https://on-smart.it/garanzia",
+    canonical: `${CONTACTS_ADDRESS.BASE_URL}/garanzia`,
   },
 };
 
@@ -119,7 +120,7 @@ export default function Garanzia() {
             "@context": "https://schema.org",
             "@type": "WebPage",
             name: "Garanzia",
-            url: "https://on-smart.it/garanzia",
+            url: `${CONTACTS_ADDRESS.BASE_URL}/garanzia`,
             description:
               "Dettagli completi sulla garanzia dei prodotti venduti da OnSmart, durata, condizioni, limitazioni, resi e diritto di recesso.",
           }),
@@ -137,13 +138,13 @@ export default function Garanzia() {
                 "@type": "ListItem",
                 position: 1,
                 name: "Home",
-                item: "https://on-smart.it/",
+                item: `${CONTACTS_ADDRESS.BASE_URL}/`,
               },
               {
                 "@type": "ListItem",
                 position: 2,
                 name: "Garanzia",
-                item: "https://on-smart.it/garanzia",
+                item: `${CONTACTS_ADDRESS.BASE_URL}/garanzia`,
               },
             ],
           }),

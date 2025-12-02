@@ -1,3 +1,4 @@
+import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import { Metadata } from "next";
 import Script from "next/script";
 
@@ -6,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Scopri come OnSmart raccoglie, utilizza e protegge i dati personali conforme al GDPR.",
   alternates: {
-    canonical: "https://www.on-smart.it/informativa-sulla-privacy",
+    canonical: `${CONTACTS_ADDRESS.BASE_URL}/informativa-sulla-privacy`,
   },
 };
 
@@ -19,9 +20,11 @@ export default function InformativaSullaPrivacy() {
           <h2> 1. Titolare del trattamento </h2>
           <p>
             Il Titolare del trattamento dei dati personali è: <br />
-            <strong>ON-SMART di Olena Nudzhevska</strong> <br /> Partita IVA:{" "}
-            <strong>03168860645</strong> <br />
-            E-mail di contatto per la privacy: <strong>assistenza@on-smart.it</strong>
+            <strong>
+              ON-SMART di {CONTACTS_ADDRESS.OWNER.NAME} {CONTACTS_ADDRESS.OWNER.SURNAME}
+            </strong>{" "}
+            <br /> Partita IVA: <strong>{CONTACTS_ADDRESS.OWNER.VAT_NUMBER}</strong> <br />
+            E-mail di contatto per la privacy: <strong>{CONTACTS_ADDRESS.EMAIL}</strong>
           </p>
         </li>
         <li>
@@ -120,7 +123,7 @@ export default function InformativaSullaPrivacy() {
           <p>
             Il Titolare si riserva il diritto di modificare in qualsiasi momento la presente
             informativa. Le modifiche saranno pubblicate su questa pagina con indicazione della data
-            di aggiornamento. Ultimo aggiornamento: [aggiungi data di pubblicazione].
+            di aggiornamento. Ultimo aggiornamento: 01.01.2026.
           </p>
         </li>
       </ol>
@@ -132,7 +135,7 @@ export default function InformativaSullaPrivacy() {
             "@context": "https://schema.org",
             "@type": "WebPage",
             name: "Garanzia e Diritto di Recesso",
-            url: "https://on-smart.it/garanzia",
+            url: `${CONTACTS_ADDRESS.BASE_URL}/garanzia`,
             description:
               "Informazioni complete sulla garanzia legale, sui prodotti ricondizionati, limitazioni, diritto di recesso e procedure di reso per i prodotti acquistati su OnSmart.",
             breadcrumb: {
@@ -142,13 +145,13 @@ export default function InformativaSullaPrivacy() {
                   "@type": "ListItem",
                   position: 1,
                   name: "Home",
-                  item: "https://on-smart.it/",
+                  item: `${CONTACTS_ADDRESS.BASE_URL}/`,
                 },
                 {
                   "@type": "ListItem",
                   position: 2,
                   name: "Garanzia",
-                  item: "https://on-smart.it/garanzia",
+                  item: `${CONTACTS_ADDRESS.BASE_URL}/garanzia`,
                 },
               ],
             },

@@ -6,6 +6,7 @@ import GoogleReviewSection from "@/components/home-sections/google-review-sectio
 import HeroSection from "@/components/home-sections/hero-section/HeroSection";
 import TopSalesSection from "@/components/home-sections/top-sales-section/TopSalesSection";
 import Script from "next/script";
+import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 
 export const metadata: Metadata = {
   title: "OnSmart — Elettronica, Videosorveglianza, Smart Home al miglior prezzo",
@@ -22,17 +23,17 @@ export const metadata: Metadata = {
     "on-smart",
   ],
   alternates: {
-    canonical: "https://www.on-smart.it/",
+    canonical: `${CONTACTS_ADDRESS.BASE_URL}`,
   },
   openGraph: {
     title: "OnSmart — Elettronica & Sicurezza per la tua casa",
     description:
       "Camere di sicurezza, sistemi smart home, accessori e molto altro. I migliori prezzi e spedizione rapida.",
-    url: "https://www.on-smart.it/",
+    url: CONTACTS_ADDRESS.BASE_URL,
     siteName: "OnSmart",
     images: [
       {
-        url: "https://www.on-smart.it/og-image.png",
+        url: `${CONTACTS_ADDRESS.BASE_URL}/og-image.png`,
         width: 1200,
         height: 630,
         alt: "OnSmart - Electronics and Security",
@@ -60,20 +61,20 @@ export default async function Home() {
             "@context": "https://schema.org",
             "@type": "Organization",
             name: "OnSmart",
-            legalName: "OnSmart S.r.l.s.",
-            url: "https://www.on-smart.it/",
-            logo: "https://www.on-smart.it/logo.png",
+            legalName: CONTACTS_ADDRESS.OWNER.COMPANY_NAME,
+            url: CONTACTS_ADDRESS.BASE_URL,
+            logo: `${CONTACTS_ADDRESS.BASE_URL}/logo.png`,
             sameAs: ["https://www.facebook.com/onsmart", "https://www.instagram.com/onsmart"],
             address: {
               "@type": "PostalAddress",
-              addressLocality: "Avellino",
-              addressRegion: "AV",
-              postalCode: "83100",
-              addressCountry: "IT",
+              addressLocality: CONTACTS_ADDRESS.ADDRESS.CITY,
+              addressRegion: CONTACTS_ADDRESS.ADDRESS.REGION,
+              postalCode: CONTACTS_ADDRESS.ADDRESS.POSTAL_CODE,
+              addressCountry: CONTACTS_ADDRESS.ADDRESS.COUNTRY,
             },
             contactPoint: {
               "@type": "ContactPoint",
-              telephone: "+39 348 123 4567",
+              telephone: CONTACTS_ADDRESS.PHONE_NUMBER,
               contactType: "customer service",
               availableLanguage: "Italian",
             },

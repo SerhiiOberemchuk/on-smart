@@ -1,3 +1,4 @@
+import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import type { Metadata } from "next";
 import Script from "next/script";
 
@@ -6,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Informazioni complete sulla spedizione: tempistiche, corrieri, costi, giacenza, verifiche alla consegna e procedure in caso di pacco danneggiato.",
   alternates: {
-    canonical: "https://www.on-smart.it/spedizione",
+    canonical: `${CONTACTS_ADDRESS.BASE_URL}/spedizione`,
   },
 };
 
@@ -113,7 +114,7 @@ export default function SpedizionePage() {
             "@context": "https://schema.org",
             "@type": "WebPage",
             name: "Spedizione e Consegna",
-            url: "https://www.on-smart.it/spedizione",
+            url: `${CONTACTS_ADDRESS.BASE_URL}/spedizione`,
             description:
               "Informazioni sulle spedizioni: corrieri, tempistiche, giacenza, costi, controllo pacco e procedure in caso di danni.",
           }),
@@ -132,13 +133,13 @@ export default function SpedizionePage() {
                 "@type": "ListItem",
                 position: 1,
                 name: "Home",
-                item: "https://www.on-smart.it/",
+                item: `${CONTACTS_ADDRESS.BASE_URL}/`,
               },
               {
                 "@type": "ListItem",
                 position: 2,
                 name: "Spedizione e Consegna",
-                item: "https://www.on-smart.it/spedizione",
+                item: `${CONTACTS_ADDRESS.BASE_URL}/spedizione`,
               },
             ],
           }),

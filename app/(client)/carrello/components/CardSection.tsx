@@ -25,7 +25,6 @@ export default function CardSection() {
         const ids = basket.map((item) => ({ id: item.id }));
         const products = await getProductsByIds(ids);
         setFetchedBasketProducts(products as Product[]);
-        console.log({ products });
       } catch (error) {
         console.error("Error fetching basket products:", error);
       }

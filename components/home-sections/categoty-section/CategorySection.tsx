@@ -5,25 +5,9 @@ import styles from "./category.module.css";
 import { baseUrl } from "@/types/baseUrl";
 import Script from "next/script";
 import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
-// import { CategoryTypes } from "@/types/category.types";
-// import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
 
 export default async function CategorySection() {
   const { success, data } = await getAllCategoryProducts();
-  // let data: CategoryTypes[] = [];
-  // let success = false;
-  // try {
-  //   const dataFetch = await fetch(`${baseUrl}/api/categories`, {
-  //     cache: "force-cache",
-  //     next: { revalidate: 7200, tags: ["all_categories"] },
-  //   });
-  //   const dataJSON: { success: boolean; data: CategoryTypes[]; error: Error } =
-  //     await dataFetch.json();
-  //   success = dataJSON.success;
-  //   data = dataJSON.data;
-  // } catch (error) {
-  //   console.error(error);
-  // }
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -60,7 +44,7 @@ export default async function CategorySection() {
       </header>
       <div className="container">
         <ul className={styles.list}>
-          {data.map(({ id, name, image, category_slug }, i) => (
+          {data.map(({ id, name, image, category_slug }) => (
             <li
               key={id}
               className="relative rounded-sm transition-transform duration-300 hover:scale-105"
@@ -72,11 +56,10 @@ export default async function CategorySection() {
               >
                 <Image
                   src={image}
-                  className="mx-auto aspect-square rounded-sm object-contain object-center opacity-50"
+                  className="mx-auto rounded-sm opacity-50"
                   width={355}
                   height={355}
                   alt={`Categoria: ${name}`}
-                  loading={i === 0 ? "eager" : "lazy"}
                 />
               </Link>
               <h3 className="H3 pointer-events-none absolute bottom-[8%] left-0 w-full px-2 text-center text-wrap">

@@ -93,7 +93,8 @@ export default function CategoriesClientPage({ initialData }: { initialData: Cat
                     alt={cat.name}
                     width={80}
                     height={80}
-                    className="h-20 w-20 rounded object-cover"
+                    loading="eager"
+                    className="h-auto w-fit rounded object-contain object-center"
                   />
                 </Link>
               </div>

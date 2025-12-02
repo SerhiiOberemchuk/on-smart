@@ -1,6 +1,32 @@
+import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
+import { Metadata } from "next";
+import Script from "next/script";
+
+export const metadata: Metadata = {
+  title: "Cookie Policy | On Smart – Utilizzo dei Cookie e Preferenze",
+  description:
+    "Cookie Policy di On Smart: informazioni sull’uso dei cookie tecnici, analitici, di terze parti e di profilazione. Scopri come gestire le preferenze e come trattiamo i dati di navigazione.",
+  alternates: {
+    canonical: `${CONTACTS_ADDRESS.BASE_URL}/cookies`,
+  },
+  openGraph: {
+    title: "Cookie Policy | On Smart",
+    description:
+      "Informazioni dettagliate sull’uso dei cookie, tipologie utilizzate, durata, gestione delle preferenze e servizi di terze parti.",
+    url: `${CONTACTS_ADDRESS.BASE_URL}/cookies`,
+    siteName: "On Smart",
+    locale: "it_IT",
+    type: "article",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
 export default function InformativaSullaPrivacy() {
   return (
-    <div>
+    <section>
       <h1 className="H2 mb-6 text-white">Cookie Policy</h1>
       <ul className="flex flex-col gap-6 [&>li>h2]:mb-1 [&>li>p]:text-text-grey">
         <li>
@@ -65,10 +91,75 @@ export default function InformativaSullaPrivacy() {
           <p>
             La presente Cookie Policy può essere aggiornata in qualsiasi momento. Le modifiche
             entreranno in vigore al momento della pubblicazione sul sito. Ultimo aggiornamento:
-            [aggiungi data].
+            01.01.2026.
           </p>
         </li>
       </ul>
-    </div>
+      <Script
+        id="json-ld-cookie-policy"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            name: "Cookie Policy",
+            description:
+              "Informazioni sull'uso dei cookie su on-smart.it: cookie tecnici, analitici, di terze parti e di profilazione. Dettagli sulla gestione delle preferenze e durata dei cookie.",
+            url: `${CONTACTS_ADDRESS.BASE_URL}/cookie-policy`,
+            publisher: {
+              "@type": "Organization",
+              name: "On Smart",
+              url: `${CONTACTS_ADDRESS.BASE_URL}`,
+              logo: {
+                "@type": "ImageObject",
+                url: `${CONTACTS_ADDRESS.BASE_URL}/logo.png`,
+              },
+            },
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "Cosa sono i cookie?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "I cookie sono piccoli file di testo che vengono memorizzati nel dispositivo dell’utente per migliorare la navigazione e fornire funzionalità avanzate.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Quali cookie utilizza on-smart.it?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Il sito utilizza cookie tecnici, analitici, di terze parti e cookie di profilazione attivi solo previo consenso.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Come posso gestire i cookie?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "È possibile accettare, rifiutare o personalizzare i cookie tramite il banner iniziale o le impostazioni del browser.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Quali servizi di terze parti utilizzano cookie?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Servizi come Google Analytics e PayPal possono impostare cookie per analisi e pagamenti.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Qual è la durata dei cookie?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Alcuni cookie durano solo fino alla chiusura del browser, mentre altri persistono per più tempo fino alla scadenza.",
+                },
+              },
+            ],
+          }),
+        }}
+      />
+    </section>
   );
 }

@@ -1,12 +1,13 @@
 import Script from "next/script";
 import type { Metadata } from "next";
+import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 
 export const metadata: Metadata = {
   title: "Modalità di Pagamento | OnSmart",
   description:
     "Scopri tutte le modalità di pagamento disponibili su OnSmart: carta di credito SumUp, bonifico bancario, PayPal, PayPal in 3 rate, Klarna e sistemi sicuri certificati.",
   alternates: {
-    canonical: "https://www.on-smart.it/pagamento",
+    canonical: `${CONTACTS_ADDRESS.BASE_URL}/pagamento`,
   },
 };
 
@@ -46,10 +47,12 @@ export default function PagamentoPage() {
 
         <div className="rounded-sm bg-background p-4">
           <h3 className="mb-1 font-semibold text-white">Dati per il bonifico</h3>
-          <p>Intestatario: Olena Nudzhevska</p>
-          <p>IBAN: IT49C0326815100052125108060</p>
-          <p>BIC: SELBIT2BXXX</p>
-          <p>Banca: Banca Sella S.p.A.</p>
+          <p>
+            Intestatario:{CONTACTS_ADDRESS.OWNER.NAME} {CONTACTS_ADDRESS.OWNER.SURNAME}
+          </p>
+          <p>IBAN: {CONTACTS_ADDRESS.BANC_DETAILS.IBAN}</p>
+          <p>BIC: {CONTACTS_ADDRESS.BANC_DETAILS.BIC}</p>
+          <p>Banca: {CONTACTS_ADDRESS.BANC_DETAILS.BANK_NAME}</p>
           <p>Causale: Numero ordine o nome dell`acquirente</p>
         </div>
 
@@ -105,7 +108,7 @@ export default function PagamentoPage() {
             "@context": "https://schema.org",
             "@type": "WebPage",
             name: "Modalità di Pagamento",
-            url: "https://www.on-smart.it/pagamento",
+            url: `${CONTACTS_ADDRESS.BASE_URL}/pagamento`,
             description:
               "Informazioni dettagliate sulle modalità di pagamento accettate da OnSmart: carta, bonifico, PayPal, PayPal in 3 rate, Klarna e sistemi sicuri.",
           }),
@@ -124,13 +127,13 @@ export default function PagamentoPage() {
                 "@type": "ListItem",
                 position: 1,
                 name: "Home",
-                item: "https://www.on-smart.it/",
+                item: `${CONTACTS_ADDRESS.BASE_URL}/`,
               },
               {
                 "@type": "ListItem",
                 position: 2,
                 name: "Pagamenti",
-                item: "https://www.on-smart.it/pagamento",
+                item: `${CONTACTS_ADDRESS.BASE_URL}/pagamento`,
               },
             ],
           }),

@@ -7,6 +7,7 @@ import icon_phone from "@/assets/icons/icon_phone.svg";
 import Image from "next/image";
 import { cacheLife, cacheTag } from "next/cache";
 import { Suspense } from "react";
+import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 
 export default async function Footer() {
   return (
@@ -22,21 +23,28 @@ export default async function Footer() {
               />
             </Suspense>
             <address className="text_R mx-auto flex max-w-fit min-w-fit flex-col items-start gap-2 not-italic">
-              <p className="uppercase">OLENA NUDZHEVSKA</p>
+              <p className="uppercase">
+                {CONTACTS_ADDRESS.OWNER.NAME} {CONTACTS_ADDRESS.OWNER.SURNAME}
+              </p>
               <span className="flex items-center gap-1">
                 <Image src={icon_location} alt="indirizzo" aria-hidden />
-                <span>83100 Avellino</span>
+                <span>
+                  {CONTACTS_ADDRESS.ADDRESS.POSTAL_CODE} {CONTACTS_ADDRESS.ADDRESS.CITY}
+                </span>
               </span>
-              <a className="flex items-center gap-1 xl:hover:scale-105" href="tel:+393516930878">
+              <a
+                className="flex items-center gap-1 xl:hover:scale-105"
+                href={`tel:${CONTACTS_ADDRESS.PHONE_NUMBER}`}
+              >
                 <Image src={icon_phone} alt="telefono" aria-hidden />
-                <span>+393516930878</span>
+                <span>{CONTACTS_ADDRESS.PHONE_NUMBER}</span>
               </a>
               <a
                 className="flex items-center gap-1 xl:hover:scale-105"
-                href="mailto:info@on-smart.it"
+                href={`mailto:${CONTACTS_ADDRESS.EMAIL}`}
               >
                 <Image src={icon_mail} alt="email" aria-hidden />
-                <span>info@on-smart.it</span>
+                <span>{CONTACTS_ADDRESS.EMAIL}</span>
               </a>
             </address>
           </div>

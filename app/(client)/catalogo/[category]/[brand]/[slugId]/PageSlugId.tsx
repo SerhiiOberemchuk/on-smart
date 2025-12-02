@@ -21,7 +21,7 @@ export default async function PageSlugId({ id }: { id: string }) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    image: product.images.map((img) => (img.startsWith("http") ? img : baseUrl + img)),
+    image: product.images[0],
     description: product.description,
     sku: product.id,
     brand: {

@@ -1,1 +1,3 @@
-export const telephone = "+39 351 599 63 72";
+import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
+
+export const telephone = CONTACTS_ADDRESS.PHONE_NUMBER;

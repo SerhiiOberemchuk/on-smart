@@ -5,24 +5,10 @@ import { baseUrl } from "@/types/baseUrl";
 import Script from "next/script";
 import { Suspense } from "react";
 import { getAllBrands } from "@/app/actions/brands/brand-actions";
-// import { BrandTypes } from "@/types/brands.types";
 
 export default async function BrandSection() {
   const { success, data } = await getAllBrands();
 
-  // let data: BrandTypes[] = [];
-  // let success = false;
-  // try {
-  //   const dataFetch = await fetch(`${baseUrl}/api/brands`, {
-  //     cache: "force-cache",
-  //     next: { revalidate: 7200, tags: ["all_brands"] },
-  //   });
-  //   const dataJSON: { success: boolean; data: BrandTypes[]; error: Error } = await dataFetch.json();
-  //   success = dataJSON.success;
-  //   data = dataJSON.data;
-  // } catch (error) {
-  //   console.error(error);
-  // }
   if (!success) {
     return null;
   }

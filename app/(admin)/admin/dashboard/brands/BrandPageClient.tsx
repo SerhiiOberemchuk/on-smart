@@ -93,7 +93,7 @@ export default function BrandsPageClient({ brandsData }: { brandsData: BrandType
                     alt={brand.name}
                     width={80}
                     height={80}
-                    className="h-auto w-20"
+                    className="h-auto w-fit object-contain object-center p-2"
                   />
                 </Link>
               </div>

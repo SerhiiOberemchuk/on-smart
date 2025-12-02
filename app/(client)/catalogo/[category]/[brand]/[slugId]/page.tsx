@@ -31,7 +31,7 @@ export async function generateMetadata({
       url: `${baseUrl}/catalogo/${product.category}/${product.brand}/${slugId}`,
       images: [
         {
-          url: product.imgSrc.startsWith("http") ? product.imgSrc : baseUrl + product.imgSrc,
+          url: product.imgSrc,
           width: 1200,
           height: 630,
         },
@@ -49,7 +49,7 @@ export default async function CategoryBrandSlugIdPage({
   const { id } = parseSlugWithId(slugId);
 
   if (!id) {
-    return;
+    notFound();
   }
 
   return <PageSlugId id={id} />;

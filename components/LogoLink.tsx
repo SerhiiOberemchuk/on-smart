@@ -10,6 +10,7 @@ export default function LogoLink() {
         width={108}
         height={74}
         alt="logo link"
+        loading="eager"
       />
     </Link>
   );

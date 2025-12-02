@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 export default function HeaderCart() {
   const { basket } = useBasketStore();
   const path = usePathname();
-  console.log({ path });
 
   if (path.includes("completato")) {
     return null;

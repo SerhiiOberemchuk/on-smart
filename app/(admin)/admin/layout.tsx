@@ -11,25 +11,20 @@ import { ToastContainer } from "react-toastify";
 const fixelFont = localFont({
   src: "../../../fonts/FixelVariable.woff2",
   display: "swap",
-  // preload: true,
+  preload: false,
   fallback: ["system-ui", "Segoe UI", "Arial"],
   adjustFontFallback: "Arial",
   weight: "100 900",
 });
 
 export const metadata: Metadata = {
-  title: { default: "OnSmart", template: "%s | OnSmart" },
-  description: "La videosorveglianza è uno dei modi più affidabili per proteggere la tua proprietà",
-  icons: {
-    icon: [
-      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
-    ],
-    shortcut: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+  title: "OnSmart Admin",
+  description: "Pannello di amministrazione OnSmart",
+
+  robots: {
+    index: false,
+    follow: false,
   },
-  appleWebApp: { title: "ON-SMART" },
-  // manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({

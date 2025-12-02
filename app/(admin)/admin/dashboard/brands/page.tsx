@@ -8,7 +8,7 @@ export default async function BrandsPage() {
 
   return (
     <Suspense>
-      <BrandsPageClient brandsData={res.data} />;
+      <BrandsPageClient brandsData={res.data} />
     </Suspense>
   );
 }

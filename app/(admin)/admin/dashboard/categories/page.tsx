@@ -8,7 +8,7 @@ export default async function CategoriesPage() {
 
   return (
     <Suspense>
-      <CategoriesClientPage initialData={res.data} />;
+      <CategoriesClientPage initialData={res.data} />
     </Suspense>
   );
 }
