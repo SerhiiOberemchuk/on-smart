@@ -1,35 +1,37 @@
 import LinkYellow from "@/components/YellowLink";
-import Link from "next/link";
-import Image from "next/image";
-import styles from "./category.module.css";
-import { baseUrl } from "@/types/baseUrl";
-import Script from "next/script";
+// import Link from "next/link";
+// import Image from "next/image";
+// import styles from "./category.module.css";
+// import { baseUrl } from "@/types/baseUrl";
+// import Script from "next/script";
 import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
+import ListCategories from "./ListCategories";
+import { Suspense } from "react";
 
-export default async function CategorySection() {
-  const { success, data } = await getAllCategoryProducts();
+export default function CategorySection() {
+  const categories = getAllCategoryProducts();
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: "Categorie di prodotti",
-    description:
-      "Esplora le categorie di prodotti OnSmart: sistemi di videosorveglianza, sensori, sirene e dispositivi smart per la sicurezza della casa.",
-    numberOfItems: data.length,
-    itemListElement: data.map((cat, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      item: {
-        "@type": "Thing",
-        name: cat.name,
-        image: cat.image,
-        url: `${baseUrl}/categoria/${cat.category_slug}`,
-      },
-    })),
-  };
-  if (!success) {
-    return null;
-  }
+  // const jsonLd = {
+  //   "@context": "https://schema.org",
+  //   "@type": "ItemList",
+  //   name: "Categorie di prodotti",
+  //   description:
+  //     "Esplora le categorie di prodotti OnSmart: sistemi di videosorveglianza, sensori, sirene e dispositivi smart per la sicurezza della casa.",
+  //   numberOfItems: data.length,
+  //   itemListElement: data.map((cat, i) => ({
+  //     "@type": "ListItem",
+  //     position: i + 1,
+  //     item: {
+  //       "@type": "Thing",
+  //       name: cat.name,
+  //       image: cat.image,
+  //       url: `${baseUrl}/categoria/${cat.category_slug}`,
+  //     },
+  //   })),
+  // };
+  // if (!success) {
+  //   return null;
+  // }
   return (
     <section id="category-section" className="flex flex-col gap-4 py-8 xl:gap-8 xl:py-16">
       <header className="bg-background">
@@ -43,17 +45,13 @@ export default async function CategorySection() {
         </p>
       </header>
       <div className="container">
-        <ul className={styles.list}>
+        {/* <ul className={styles.list}>
           {data.map(({ id, name, image, category_slug }) => (
             <li
               key={id}
               className="relative rounded-sm transition-transform duration-300 hover:scale-105"
             >
-              <Link
-                //  href={`/catalogo?category=${category_slug}`}
-                href={"/categoria/" + category_slug}
-                title={name}
-              >
+              <Link href={"/categoria/" + category_slug} title={name}>
                 <Image
                   src={image}
                   className="mx-auto rounded-sm opacity-50"
@@ -67,14 +65,17 @@ export default async function CategorySection() {
               </h3>
             </li>
           ))}
-        </ul>
+        </ul> */}
+        <Suspense>
+          <ListCategories categories={categories} />
+        </Suspense>
       </div>
       <LinkYellow href="/catalogo" className="mx-auto flex md:hidden" title="Tutti i prodotti" />
-      <Script
+      {/* <Script
         id="category-section-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      /> */}
     </section>
   );
 }

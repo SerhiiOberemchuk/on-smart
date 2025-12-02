@@ -21,7 +21,7 @@ export async function createCategoryProducts(category: CategoryTypes) {
 export async function getAllCategoryProducts() {
   "use cache";
   cacheTag("all_categories");
-  cacheLife({ expire: 7200 });
+  cacheLife({ expire: 7200 }); // 2 hours
   try {
     const result = await db.select().from(categoryProductsSchema);
     return {
