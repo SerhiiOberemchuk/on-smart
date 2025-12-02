@@ -4,12 +4,12 @@ import LinkYellow from "@/components/YellowLink";
 // import styles from "./category.module.css";
 // import { baseUrl } from "@/types/baseUrl";
 // import Script from "next/script";
-import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
+// import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
 import ListCategories from "./ListCategories";
 import { Suspense } from "react";
 
 export default function CategorySection() {
-  const categories = getAllCategoryProducts();
+  // const categories = getAllCategoryProducts();
 
   // const jsonLd = {
   //   "@context": "https://schema.org",
@@ -67,7 +67,9 @@ export default function CategorySection() {
           ))}
         </ul> */}
         <Suspense>
-          <ListCategories categories={categories} />
+          <ListCategories
+          // categories={categories}
+          />
         </Suspense>
       </div>
       <LinkYellow href="/catalogo" className="mx-auto flex md:hidden" title="Tutti i prodotti" />

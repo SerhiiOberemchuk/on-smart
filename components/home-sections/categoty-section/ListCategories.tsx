@@ -2,37 +2,38 @@
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./category.module.css";
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import { CategoryTypes } from "@/types/category.types";
 import { baseUrl } from "@/types/baseUrl";
 import Script from "next/script";
 
-export default function ListCategories({
-  categories,
-}: {
-  categories: Promise<{ success: boolean; data: CategoryTypes[] }>;
-}) {
-  const { data } = use(categories);
-  //   const [data, setData] = useState<CategoryTypes[]>([]);
-  //   useEffect(() => {
-  //     console.log("start fetch category");
+export default function ListCategories() {
+//     {
+//   categories,
+// }: {
+//   categories: Promise<{ success: boolean; data: CategoryTypes[] }>;
+// }
+  //   const { data } = use(categories);
+  const [data, setData] = useState<CategoryTypes[]>([]);
+  useEffect(() => {
+    console.log("start fetch category");
 
-  //     const fetchCategories = async () => {
-  //       try {
-  //         const response = await fetch("/api/categories", {
-  //           cache: "no-store",
-  //         });
-  //         const result = await response.json();
-  //         if (result.success) {
-  //           setData(result.data);
-  //         }
-  //         console.log(result);
-  //       } catch (error) {
-  //         console.error("Error fetching categories:", error);
-  //       }
-  //     };
-  //     fetchCategories();
-  //   }, []);
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/categories", {
+          cache: "no-store",
+        });
+        const result = await response.json();
+        if (result.success) {
+          setData(result.data);
+        }
+        console.log(result);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const jsonLd = {
     "@context": "https://schema.org",
