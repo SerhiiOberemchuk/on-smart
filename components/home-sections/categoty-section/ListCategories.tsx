@@ -8,16 +8,15 @@ import { baseUrl } from "@/types/baseUrl";
 import Script from "next/script";
 
 export default function ListCategories() {
-//     {
-//   categories,
-// }: {
-//   categories: Promise<{ success: boolean; data: CategoryTypes[] }>;
-// }
+  //     {
+  //   categories,
+  // }: {
+  //   categories: Promise<{ success: boolean; data: CategoryTypes[] }>;
+  // }
   //   const { data } = use(categories);
   const [data, setData] = useState<CategoryTypes[]>([]);
   useEffect(() => {
     console.log("start fetch category");
-
     const fetchCategories = async () => {
       try {
         const response = await fetch("/api/categories", {
