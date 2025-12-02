@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import BrandSection from "@/components/home-sections/BrandSection";
+import BrandSection from "@/components/home-sections/brand-section/BrandSection";
 import CategorySection from "@/components/home-sections/categoty-section/CategorySection";
 import FeedbackFormSection from "@/components/home-sections/feedback-form-section/FeedbackFormSection";
 import GoogleReviewSection from "@/components/home-sections/google-review-section/GoogleReviewSection";
