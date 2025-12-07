@@ -1,10 +1,34 @@
 "use server";
 
 import { Product } from "@/types/product.types";
-import { allProducts } from "../products";
+import { db } from "@/db/db";
+import { productsSchema } from "@/db/schemas/product-schema";
+import { eq } from "drizzle-orm";
 
-export async function getProductById(id: string): Promise<Product | undefined> {
-  const findProductById = allProducts.find((product) => product.id === id);
+export async function getProductById(id: Product["id"]) {
+  try {
+    const rows = await db.select().from(productsSchema).where(eq(productsSchema.id, id));
 
-  return findProductById;
+    const product = rows[0] ?? null;
+
+    if (!product) {
+      return {
+        success: false,
+        data: null,
+        error: "Товар не знайдено",
+      };
+    }
+
+    return {
+      success: true,
+      data: product,
+      error: null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      error,
+    };
+  }
 }

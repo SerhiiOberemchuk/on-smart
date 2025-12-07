@@ -15,7 +15,8 @@ export async function uploadFile({
   const arrayBuffer = await file.arrayBuffer();
   let buffer: Buffer = Buffer.from(arrayBuffer);
   let ext: string = "webp";
-  if (sub_bucket === "categories") {
+  // ext = file.name.split(".").pop()!;
+  if (sub_bucket === "categories" || sub_bucket === "products") {
     buffer = await sharp(buffer)
       .resize({ width: 326, height: 326, fit: "cover", position: "center" })
       .webp({ quality: 100 })

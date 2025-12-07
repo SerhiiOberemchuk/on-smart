@@ -1,26 +1,42 @@
-import { mysqlTable, varchar, text, int, json, decimal, serial } from "drizzle-orm/mysql-core";
+import {
+  mysqlTable,
+  varchar,
+  int,
+  json,
+  decimal,
+  index,
+  uniqueIndex,
+  boolean,
+} from "drizzle-orm/mysql-core";
+import { ulid } from "ulid";
 
-export const productsSchema = mysqlTable("products", {
-  id: serial("id").primaryKey(),
+export const productsSchema = mysqlTable(
+  "products",
+  {
+    id: varchar("id", { length: 36 })
+      .primaryKey()
+      .notNull()
+      .$defaultFn(() => ulid()),
+    slug: varchar("slug", { length: 255 }).notNull(),
+    brand_slug: varchar("brand_slug", { length: 255 }).notNull(),
+    category_slug: varchar("category_slug", { length: 255 }).notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    nameFull: varchar("name_full", { length: 255 }).notNull(),
+    price: int("price").notNull(),
+    oldPrice: int("old_price"),
+    rating: decimal("rating", { precision: 2, scale: 1 }).default("5.0"),
+    inStock: boolean("in_stock").default(true).notNull(),
+    toOrder: boolean("to_order").default(false).notNull(),
+    imgSrc: json("imgSrc").$type<string>().notNull(),
+    hasVariants: boolean("has_variants").default(false).notNull(),
+    variants: json("variants").$type<string[]>(),
+    parent_product_id: varchar("parent_product_id", { length: 36 }),
+  },
+  (table) => [
+    uniqueIndex("product_slug_unique").on(table.slug),
+    index("slug_category").on(table.category_slug),
+    index("slug_brand").on(table.brand_slug),
+  ],
+);
 
-  brand: varchar("brand", { length: 255 }).notNull(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description").notNull(),
-  category: varchar("category", { length: 255 }).notNull(),
-
-  price: int("price").notNull(),
-  oldPrice: int("old_price"),
-
-  quantity: int("quantity").default(0),
-  rating: decimal("rating", { precision: 2, scale: 1 }).default("0.0"),
-  inStock: int("in_stock").default(0).notNull(),
-
-  imgSrc: text("img_src").notNull(),
-  images: json("images").$type<string[]>(),
-  logo: text("logo"),
-
-  variants: json("variants").$type<{ id: string }[]>(),
-});
-
-export type Product = typeof productsSchema.$inferSelect;
-export type NewProduct = typeof productsSchema.$inferInsert;
+export type Product = typeof productsSchema.$inferInsert;

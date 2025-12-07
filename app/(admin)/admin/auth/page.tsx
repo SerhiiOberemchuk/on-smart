@@ -1,10 +1,13 @@
 "use client";
 
-import { signInUser, signUpUser } from "@/app/actions/auth";
+import { signInUser } from "@/app/actions/auth";
 import { useFormStatus } from "react-dom";
+// import { useForm } from "react-hook-form";
 
 export default function AdminAuthPage() {
   const { pending } = useFormStatus();
+  // const { register } = useForm<{ email: string; password: string }>();
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
       <div className="w-full max-w-md">
