@@ -1,4 +1,4 @@
-import { Product } from "@/types/product.types";
+import { Product } from "@/db/schemas/product-schema";
 import { create } from "zustand";
 type CardDialogStore = {
   isOpenDialog: boolean;

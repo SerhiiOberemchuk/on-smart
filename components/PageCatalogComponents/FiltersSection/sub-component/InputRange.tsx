@@ -16,9 +16,12 @@ export function InputRange({
   max = 100,
   param,
 }: Pick<FilterGroup, "min" | "max"> & Pick<FilterGroup, "param">) {
+  const safeMin = min ?? 0;
+  const safeMax = max ?? 999999;
+
   const [range, setRange] = useQueryState(
     param,
-    parseAsArrayOf(parseAsInteger).withDefault([min, max]),
+    parseAsArrayOf(parseAsInteger).withDefault([safeMin, safeMax]),
   );
 
   const [values, setValues] = useState(range);
@@ -43,21 +46,21 @@ export function InputRange({
           value={values[0]}
           className="h-11 w-24 rounded-sm border border-text-grey"
           onChange={(e) => update([+e.target.value, values[1]])}
-          max={max}
+          max={safeMax}
         />
         <span>{" - "}</span>
         <input
           className="h-11 w-24 rounded-sm border border-text-grey"
           type="number"
           value={values[1]}
-          max={max}
+          max={safeMin}
           onChange={(e) => update([values[0], +e.target.value])}
         />
       </div>
       <Range
         step={1}
-        min={min}
-        max={max}
+        min={safeMin}
+        max={safeMax}
         values={values}
         onChange={(v) => setValues(v)}
         onFinalChange={(v) => update(v)}
@@ -72,8 +75,8 @@ export function InputRange({
                 height: "100%",
                 background: "#00a63e",
                 borderRadius: "inherit",
-                left: `${((values[0] - min) / (max - min)) * 100}%`,
-                width: `${((values[1] - values[0]) / (max - min)) * 100}%`,
+                left: `${((values[0] - safeMin) / (safeMax - safeMin)) * 100}%`,
+                width: `${((values[1] - values[0]) / (safeMax - safeMin)) * 100}%`,
               }}
             />
             {children}

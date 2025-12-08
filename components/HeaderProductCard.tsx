@@ -1,4 +1,4 @@
-import { Product } from "@/types/product.types";
+import { Product } from "@/db/schemas/product-schema";
 import ButtonComparison from "./ProductCard/card-components/ButtonComparison";
 import { twMerge } from "tailwind-merge";
 
@@ -16,7 +16,7 @@ export default function HeaderProductCard({
       )}
     >
       {oldPrice && <span className="helper_XXS mr-2 bg-offerta-color px-2 py-1">offerta</span>}
-      {inStock === 0 && <span className="helper_XXS bg-blue px-2 py-1">in arrivo</span>}
+      {!inStock && <span className="helper_XXS bg-blue px-2 py-1">in arrivo</span>}
       <ButtonComparison id={id} />
     </header>
   );

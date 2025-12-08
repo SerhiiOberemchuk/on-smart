@@ -41,7 +41,9 @@ export default async function PageCategoria({ params }: Props) {
     notFound();
   }
   const products = await getAllProducts({ category: categoria });
-
+  if (!products.data) {
+    return;
+  }
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -50,20 +52,20 @@ export default async function PageCategoria({ params }: Props) {
     url: `${baseUrl}/categoria/${categoria}`,
     hasPart: {
       "@type": "ItemList",
-      itemListElement: products.map((p, i) => ({
+      itemListElement: products.data?.map((p, i) => ({
         "@type": "ListItem",
         position: i + 1,
         item: {
           "@type": "Product",
           name: p.name,
           image: p.imgSrc,
-          brand: p.brand,
+          brand: p.brand_slug,
           offers: {
             "@type": "Offer",
             priceCurrency: "EUR",
             price: p.price,
             availability: "https://schema.org/InStock",
-            url: `${baseUrl}/catalogo/${p.category}/${p.brand}/${p.id}`,
+            url: `${baseUrl}/catalogo/${p.category_slug}/${p.brand_slug}/${p.slug}`,
           },
         },
       })),
@@ -113,7 +115,7 @@ export default async function PageCategoria({ params }: Props) {
       </section>
 
       <ProductRowListSection
-        productsList={products}
+        productsList={products.data}
         idSection="categoria_section"
         title={`Prodotti della categoria ${data?.name}`}
         isBottomLink={false}

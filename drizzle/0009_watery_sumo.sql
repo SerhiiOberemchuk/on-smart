@@ -1,0 +1,1 @@
+ALTER TABLE `products` ADD `max_qnt_order` int NOT NULL;

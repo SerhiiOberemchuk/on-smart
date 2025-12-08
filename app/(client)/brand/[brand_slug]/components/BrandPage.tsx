@@ -14,7 +14,7 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
 
   const products = await getAllProducts({ brand_slug });
   const { success, data } = await getBrandBySlug(brand_slug);
-  if (!success || !data) {
+  if (!success || !data || !products.data) {
     notFound();
   }
   const brandJsonLd = {
@@ -31,21 +31,21 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
     "@type": "ItemList",
     name: `Prodotti del brand ${data.name}`,
     itemListOrder: "https://schema.org/ItemListOrderAscending",
-    numberOfItems: products.length,
-    itemListElement: products.map((p, i) => ({
+    numberOfItems: products.data?.length,
+    itemListElement: products.data?.map((p, i) => ({
       "@type": "ListItem",
       position: i + 1,
       item: {
         "@type": "Product",
         name: p.name,
         image: p.imgSrc,
-        brand: p.brand,
-        description: p.description,
+        brand: p.brand_slug,
+        description: p.nameFull,
         offers: {
           "@type": "Offer",
           priceCurrency: "EUR",
           price: p.price,
-          url: `${baseUrl}/catalogo/${p.category}/${p.brand}/${p.id}`,
+          url: `${baseUrl}/catalogo/${p.category_slug}/${p.brand_slug}/${p.id}`,
           availability: "https://schema.org/InStock",
         },
       },
@@ -93,7 +93,7 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
         </div>
       </section>
       <ProductRowListSection
-        productsList={products}
+        productsList={products.data}
         title="I best seller del marchio"
         idSection="brand_best_sellers"
         isBottomLink={true}

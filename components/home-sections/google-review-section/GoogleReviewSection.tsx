@@ -12,7 +12,7 @@ export default async function GoogleReviewSection() {
   const reviews = await getGoogleReviews();
   const hasReviews = reviews.length > 0;
   const averageRating = hasReviews
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    ? reviews.reduce((sum, r) => sum + Number(r.rating), 0) / reviews.length
     : 5;
   const jsonLd = hasReviews
     ? {

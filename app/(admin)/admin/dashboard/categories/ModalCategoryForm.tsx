@@ -26,7 +26,7 @@ interface Props {
   onUpdate: (data: CategoryTypes) => void;
 }
 
-const FILE_MAX_SIZE = 2 * 1024 * 1024; // 2 MB
+export const FILE_MAX_SIZE = 2 * 1024 * 1024; // 2 MB
 
 export default function ModalCategoryForm({
   isOpen,

@@ -1,16 +1,11 @@
+import { filtersSchema } from "@/db/schemas/filters-schema";
+
 export type FilterOption = {
   value: string;
   label: string;
 };
 
-export type FilterGroup = {
-  param: string;
-  title: string;
-  type: "checkbox" | "range";
-  options?: FilterOption[];
-  min?: number;
-  max?: number;
-};
+export type FilterGroup = typeof filtersSchema.$inferInsert;
 
 const SORT_OPTIONS = [
   { value: "new", label: "Novita" },

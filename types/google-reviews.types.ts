@@ -1,7 +1,9 @@
+import { Product } from "@/db/schemas/product-schema";
+
 export type GoogleReview = {
   id: string;
   clientName: string;
   reviewText: string;
-  rating: 1 | 2 | 3 | 4 | 5;
+  rating: Product["rating"];
   date: string;
 };

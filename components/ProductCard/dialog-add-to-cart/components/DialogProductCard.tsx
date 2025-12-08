@@ -6,27 +6,71 @@ import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import HeaderProductCard from "@/components/HeaderProductCard";
-import { Product } from "@/types/product.types";
 import PricesBox from "@/components/PricesBox";
 import { twMerge } from "tailwind-merge";
 import { SlideNextButton, SlidePrevButton } from "@/components/SwiperButtonsReacr";
+import { Product } from "@/db/schemas/product-schema";
+import { useEffect, useState } from "react";
+import { getFotoFromGallery } from "@/app/actions/foto-galery/get-foto-from-gallery";
+import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
 
 export const DialogProductCard = ({
-  images,
   inStock,
   oldPrice,
   price,
-  logo,
-  name,
+  brand_slug,
   place,
-  category,
+  nameFull,
+  category_slug,
   id,
+  parent_product_id,
+  imgSrc,
 }: Pick<
   Product,
-  "inStock" | "oldPrice" | "images" | "price" | "logo" | "name" | "category" | "id"
+  | "inStock"
+  | "oldPrice"
+  | "price"
+  | "nameFull"
+  | "category_slug"
+  | "brand_slug"
+  | "id"
+  | "parent_product_id"
+  | "imgSrc"
 > & {
   place?: "dialog-cart-product-card" | "product-page";
 }) => {
+  const [images, setImages] = useState<string[]>([]);
+  const [brandLogo, setBrandLogo] = useState<string>("/logo.png");
+  useEffect(() => {
+    const fetchImages = async () => {
+      const idToFetchFoto = parent_product_id ? parent_product_id : id;
+      try {
+        const resp = await getFotoFromGallery({ parent_product_id: idToFetchFoto });
+        if (resp.data && resp.data.images.length > 0) {
+          setImages([...resp.data.images, imgSrc]);
+        } else if (resp.data?.images.length === 0) {
+          setImages([imgSrc]);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchImages();
+  }, [id, parent_product_id, imgSrc]);
+
+  useEffect(() => {
+    const fetchLogoBrand = async () => {
+      try {
+        const resp = await getBrandBySlug(brand_slug);
+        if (resp.success && resp.data) {
+          setBrandLogo(resp.data?.image);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchLogoBrand();
+  }, [brand_slug]);
   return (
     <div
       className={twMerge(
@@ -43,7 +87,7 @@ export const DialogProductCard = ({
                 src={image}
                 width={96}
                 height={96}
-                alt={name}
+                alt={image}
                 className="mx-auto aspect-auto h-24 object-contain object-center"
               />
             </li>
@@ -97,7 +141,7 @@ export const DialogProductCard = ({
         )}
       >
         <Image
-          src={logo}
+          src={brandLogo}
           width={428}
           height={24}
           placeholder="empty"
@@ -105,9 +149,9 @@ export const DialogProductCard = ({
           className="mx-auto h-6 object-contain object-center"
         />
         {place === "product-page" && (
-          <span className="helper_text text-center text-text-grey capitalize">{category}</span>
+          <span className="helper_text text-center text-text-grey capitalize">{category_slug}</span>
         )}
-        <h2 className="H4 line-clamp-3 text-center text-white">{name}</h2>
+        <h2 className="H4 line-clamp-3 text-center text-white">{nameFull}</h2>
       </div>
     </div>
   );

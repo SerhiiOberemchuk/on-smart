@@ -1,4 +1,4 @@
-import { Product } from "@/types/product.types";
+import { Product } from "@/db/schemas/product-schema";
 import ProductSlider from "./ProductSlider";
 import SelectProductSection from "./SelectProductSection";
 

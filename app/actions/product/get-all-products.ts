@@ -1,6 +1,8 @@
 "use server";
 
 import { allProducts } from "@/app/actions/products";
+import { db } from "@/db/db";
+import { productsSchema } from "@/db/schemas/product-schema";
 import { cacheLife, cacheTag } from "next/cache";
 
 type Props = {
@@ -15,7 +17,14 @@ export async function getAllProducts(props: Props = {}) {
   cacheTag("all-products");
   cacheLife({ expire: 600 });
   const { page = 1, limit = 20, brand_slug } = props;
-  const products = allProducts;
+  try {
+    const response = await db.select().from(productsSchema);
+    return { success: true, data: response, error: null };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error, data: null };
+  }
+  // const products = allProducts;
 
-  return products;
+  // return products;
 }

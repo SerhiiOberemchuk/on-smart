@@ -1,6 +1,5 @@
 "use client";
 
-import { Product } from "@/types/product.types";
 import StarsRating from "../../StarsRating";
 import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
@@ -15,6 +14,7 @@ import ButtonAddToBasket from "../../ButtonAddToBasket";
 import { useBasketStore } from "@/store/basket-store";
 import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
+import { Product } from "@/db/schemas/product-schema";
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
 export default function SelectProductSection({ product }: { product: Product }) {
@@ -28,16 +28,16 @@ export default function SelectProductSection({ product }: { product: Product }) 
   const { updateBasket, showPopup } = useBasketStore();
 
   const handleAddToCart = () => {
-    if (!selectedProduct) return;
+    if (!selectedProduct || !selectedProduct.id) return;
     updateBasket([{ id: selectedProduct.id, qnt: selectedProduct.qnt }]);
     showPopup(selectedProduct.qnt);
   };
 
   const totalPrice = useCalcTotalSum([
-    { qnt: selectedProduct?.qnt || 1, price: selectedProduct?.price || 0 },
+    { qnt: selectedProduct?.qnt || 1, price: selectedProduct?.price || "0" },
   ]);
   const totalOldPrice = useCalcTotalSum([
-    { qnt: selectedProduct?.qnt || 1, price: selectedProduct?.oldPrice || 0 },
+    { qnt: selectedProduct?.qnt || 1, price: selectedProduct?.oldPrice || "0" },
   ]);
 
   useEffect(() => {
@@ -48,8 +48,8 @@ export default function SelectProductSection({ product }: { product: Product }) 
       }
       try {
         const res = await getProductsByIds(product.variants!);
-        if (res && res.length > 0) {
-          setVariantsProduct(res as Product[]);
+        if (res.data && res.data.length > 0) {
+          setVariantsProduct(res.data as Product[]);
         }
       } catch (error) {
         console.error("Error fetching variant products:", error);
@@ -77,7 +77,7 @@ export default function SelectProductSection({ product }: { product: Product }) 
                       className={twMerge("body_R_20 p-3", styles.label_variant)}
                     >
                       <input
-                        disabled={variant.inStock === 0}
+                        // disabled={variant.inStock === 0}
                         type="radio"
                         name="Product variant"
                         value={variant.id}
@@ -107,7 +107,11 @@ export default function SelectProductSection({ product }: { product: Product }) 
                         />
                       </div> */}
                       <Image
-                        src={variant.imgSrc || variant.images?.[0] || "/logo.svg"}
+                        src={
+                          variant.imgSrc ||
+                          // || variant.images?.[0]
+                          "/logo.svg"
+                        }
                         alt={variant.name}
                         width={80}
                         height={80}

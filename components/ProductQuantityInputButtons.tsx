@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/types/product.types";
+import { Product } from "@/db/schemas/product-schema";
 import { HTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -55,13 +55,10 @@ export default function ProductQuantityInputButtons({
           type="button"
           className={twMerge(
             "flex-1 text-white hover:scale-110",
-            (selectedProduct?.qnt
-              ? selectedProduct.qnt >= (selectedProduct?.inStock || 0)
-              : true) && "cursor-not-allowed opacity-50",
+            (selectedProduct?.qnt ? selectedProduct.qnt >= selectedProduct?.inStock : true) &&
+              "cursor-not-allowed opacity-50",
           )}
-          disabled={
-            selectedProduct?.qnt ? selectedProduct.qnt >= (selectedProduct?.inStock || 0) : true
-          }
+          disabled={selectedProduct?.qnt ? selectedProduct.qnt >= selectedProduct.inStock : true}
           onClick={() => {
             setSelectedProduct((prev) => (prev ? { ...prev, qnt: prev.qnt + 1 } : prev));
           }}

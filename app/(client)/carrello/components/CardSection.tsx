@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PricesBox from "@/components/PricesBox";
-import { Product } from "@/types/product.types";
 import icon_dell from "@/assets/icons/icon_delete.svg";
 import clsx from "clsx";
 import { useBasketStore } from "@/store/basket-store";
@@ -12,6 +11,7 @@ import { getProductsByIds } from "@/app/actions/product/get-products-by-array-id
 import RepilogoComponent from "./RepilogoComponent";
 import HeaderCart from "./HeaderCart";
 import Link from "next/link";
+import { Product } from "@/db/schemas/product-schema";
 
 export default function CardSection() {
   const [fetchedBasketProducts, setFetchedBasketProducts] = useState<Product[]>([]);
@@ -22,9 +22,9 @@ export default function CardSection() {
 
     const fetchBasketProducts = async () => {
       try {
-        const ids = basket.map((item) => ({ id: item.id }));
+        const ids = basket.map((item) => item.id);
         const products = await getProductsByIds(ids);
-        setFetchedBasketProducts(products as Product[]);
+        setFetchedBasketProducts(products.data as Product[]);
       } catch (error) {
         console.error("Error fetching basket products:", error);
       }
@@ -32,19 +32,21 @@ export default function CardSection() {
     fetchBasketProducts();
   }, [basket]);
 
-  const calcProductPrice = useCallback(
-    (id: string) => {
-      const productInBasket = basket.find((item) => item.id === id);
-      const productDetails = fetchedBasketProducts.find((prod) => prod.id === id);
-      if (productInBasket && productDetails) {
-        return {
-          oldPrice: productInBasket.qnt * (productDetails?.oldPrice ?? 0),
-          price: productInBasket.qnt * productDetails.price,
-        };
-      }
-    },
-    [basket, fetchedBasketProducts],
-  );
+  const calcProductPrice = (id: string) => {
+    const productInBasket = basket.find((item) => item.id === id);
+    const productDetails = fetchedBasketProducts.find((prod) => prod.id === id);
+    if (productInBasket && productDetails) {
+      return {
+        oldPrice: (productInBasket.qnt * (Number(productDetails?.oldPrice) ?? 0)).toString(),
+        price: (productInBasket.qnt * Number(productDetails.price)).toString(),
+      };
+    } else {
+      return {
+        oldPrice: null,
+        price: "0",
+      };
+    }
+  };
 
   const incrementProductQuantity = (id: string) => {
     const productInBasket = basket.find((item) => item.id === id);
@@ -67,7 +69,7 @@ export default function CardSection() {
     return fetchedBasketProducts.reduce((acc, prod) => {
       const productInBasket = basket.find((item) => item.id === prod.id);
       if (productInBasket) {
-        return acc + productInBasket.qnt * prod.price;
+        return acc + productInBasket.qnt * Number(prod.price);
       }
       return acc;
     }, 0);
@@ -91,7 +93,7 @@ export default function CardSection() {
                 >
                   <button
                     type="button"
-                    onClick={() => removeFromBasketById(prod.id)}
+                    onClick={() => removeFromBasketById(prod.id as string)}
                     className="absolute top-0 right-0"
                   >
                     <Image src={icon_dell} alt="cestino" />
@@ -106,7 +108,7 @@ export default function CardSection() {
                   <div className="flex w-full flex-col justify-between">
                     <div>
                       <Image
-                        src={prod.logo}
+                        src={prod.imgSrc}
                         width={142}
                         height={24}
                         className="h-6"
@@ -119,7 +121,7 @@ export default function CardSection() {
                         <button
                           type="button"
                           className="size-11"
-                          onClick={() => decrementProductQuantity(prod.id)}
+                          onClick={() => decrementProductQuantity(prod.id as string)}
                         >
                           -
                         </button>
@@ -137,7 +139,7 @@ export default function CardSection() {
 
                       <PricesBox
                         oldPrice={calcProductPrice(prod.id)?.oldPrice}
-                        price={calcProductPrice(prod.id)?.price || 0}
+                        price={calcProductPrice(prod.id)?.price}
                         place="main-card-product"
                       />
                     </div>

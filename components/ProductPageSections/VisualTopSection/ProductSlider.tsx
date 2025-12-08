@@ -3,44 +3,79 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 
 import "swiper/css";
-// import "swiper/css/free-mode";
-// import "swiper/css/navigation";
+import "swiper/css/free-mode";
+import "swiper/css/navigation";
 import "swiper/css/thumbs";
 import "./product-page.css";
 import { Autoplay, Thumbs } from "swiper/modules";
 import { useEffect, useState } from "react";
-import { Product } from "@/types/product.types";
 import Image from "next/image";
 
 import { Swiper as SwiperTypes } from "swiper/types";
 import HeaderProductCard from "@/components/HeaderProductCard";
 import { SlideNextButton, SlidePrevButton } from "@/components/SwiperButtonsReacr";
+import { Product } from "@/db/schemas/product-schema";
+import { getFotoFromGallery } from "@/app/actions/foto-galery/get-foto-from-gallery";
+import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
+import { BrandTypes } from "@/types/brands.types";
 
 export default function ProductSlider({ product }: { product: Product }) {
-  const { id, inStock, oldPrice, images, logo, category, name } = product;
+  const { id, inStock, oldPrice, imgSrc, parent_product_id, brand_slug, nameFull } = product;
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperTypes | null>(null);
+  const [images, setImages] = useState<string[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const [brandInfo, setBrandInfo] = useState<BrandTypes | null>(null);
   useEffect(() => {
     const setClient = () => setIsClient(true);
     setClient();
   }, []);
+  useEffect(() => {
+    const idOpt = parent_product_id ? parent_product_id : id;
+    const fetchImages = async () => {
+      try {
+        const resp = await getFotoFromGallery({ parent_product_id: idOpt });
+        if (resp.data && resp.data?.images.length > 0) {
+          setImages([...resp.data.images, imgSrc]);
+          return;
+        }
+        setImages([imgSrc]);
+      } catch (error) {
+        console.error(error);
+        setImages([imgSrc]);
+      }
+    };
+    fetchImages();
+  }, [id, parent_product_id, imgSrc]);
+  useEffect(() => {
+    const fetchLogoBrand = async () => {
+      try {
+        const resp = await getBrandBySlug(brand_slug);
+        if (resp.data) {
+          setBrandInfo(resp.data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchLogoBrand();
+  }, [brand_slug]);
   if (!isClient) return null;
   return (
     <div className="flex w-full max-w-[670px] justify-around gap-6 rounded-sm bg-background p-3 xl:flex-1 xl:justify-between">
       <Swiper
         direction={"vertical"}
         onSwiper={setThumbsSwiper}
-        // loop={true}
+        loop={true}
         spaceBetween={0}
         slidesPerView={7}
-        // freeMode={true}
+        freeMode={true}
         watchSlidesProgress={true}
         autoplay={{
           delay: 3000,
           disableOnInteraction: false,
         }}
         modules={[Thumbs, Autoplay]}
-        className="product_vertical_slider hidden w-24 md:block"
+        className="product_vertical_slider pointer-events-none hidden w-24 md:block"
       >
         {images.map((image, index) => (
           <SwiperSlide key={index} className="card_gradient rounded-sm">
@@ -64,10 +99,9 @@ export default function ProductSlider({ product }: { product: Product }) {
           />
           {thumbsSwiper && !thumbsSwiper.destroyed && (
             <Swiper
-              // loop={true}
+              loop={true}
               spaceBetween={0}
               slidesPerView={1}
-              // navigation={true}
               autoplay={{
                 delay: 4000,
                 disableOnInteraction: false,
@@ -76,14 +110,14 @@ export default function ProductSlider({ product }: { product: Product }) {
               modules={[Thumbs, Autoplay]}
               className="relative ml-5 max-w-[532px]"
             >
-              {product.images.map((image, index) => (
+              {images.map((image, index) => (
                 <SwiperSlide key={index}>
                   <Image
                     src={image}
                     alt={`Product image ${index + 1}`}
                     width={532}
                     height={532}
-                    className="mx-auto aspect-square object-contain object-center px-1"
+                    className="mx-auto aspect-square rounded-sm object-contain object-center px-1"
                   />
                 </SwiperSlide>
               ))}
@@ -93,15 +127,17 @@ export default function ProductSlider({ product }: { product: Product }) {
           )}
         </div>
         <Image
-          src={logo}
+          src={brandInfo?.image || "/logo.png"}
           alt="Product logo"
           width={428}
           height={24}
           placeholder="empty"
           className="mx-auto mt-5 h-6 object-contain object-center"
         />
-        <h2 className="helper_text mt-2 text-center text-text-grey capitalize">{category}</h2>
-        <p className="H4 mt-2 text-center text-white">{name}</p>
+        <h2 className="helper_text mt-2 text-center text-text-grey capitalize">
+          {brandInfo?.name}
+        </h2>
+        <p className="H4 mt-2 text-center text-white">{nameFull}</p>
       </div>
     </div>
   );

@@ -1,19 +1,19 @@
-type Prices = { price: number; oldPrice?: number | null };
+// type Prices = { price: number; oldPrice?: number | null };
 
-export type Product = Prices & {
-  id: string;
-  brand: string;
-  name: string;
-  description: string;
-  imgSrc: string;
-  category: string;
-  quantity: number;
-  rating: number;
-  inStock: number;
-  images: string[];
-  logo: string;
-  variants?: { id: string }[];
-};
+// export type Product = Prices & {
+//   id: string;
+//   brand: string;
+//   name: string;
+//   description: string;
+//   imgSrc: string;
+//   category: string;
+//   quantity: number;
+//   rating: number;
+//   inStock: number;
+//   images: string[];
+//   logo: string;
+//   variants?: { id: string }[];
+// };
 export type Product_Details = {
   product_id: string;
   characteristics_descrizione: { images: string[]; title: string; description: string };
