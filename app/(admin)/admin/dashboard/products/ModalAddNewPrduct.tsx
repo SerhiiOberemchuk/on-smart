@@ -206,11 +206,11 @@ export default function ModalAddNewPrduct({ isEditProd }: { isEditProd?: boolean
             type="number"
           />
           <InputAdminStyle
-            className="my-auto ml-3"
             {...register("inStock")}
-            type="checkbox"
-            defaultChecked={true}
-            input_title="Показувати на сайті"
+            type="number"
+            min={0}
+            defaultValue={1}
+            input_title="Доступно до замовлення"
           />
           <InputAdminStyle
             className="my-auto ml-3"

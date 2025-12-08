@@ -4,12 +4,12 @@ import { db } from "@/db/db";
 import { Product, productsSchema } from "@/db/schemas/product-schema";
 import { eq } from "drizzle-orm";
 
-export async function getProductById(id: Product["id"]) {
-  if (!id) {
+export async function getProductBySlug(slug: Product["slug"]) {
+  if (!slug) {
     return { success: false, error: "Id as requared!" };
   }
   try {
-    const rows = await db.select().from(productsSchema).where(eq(productsSchema.id, id));
+    const rows = await db.select().from(productsSchema).where(eq(productsSchema.slug, slug));
 
     const product = rows[0] ?? null;
 

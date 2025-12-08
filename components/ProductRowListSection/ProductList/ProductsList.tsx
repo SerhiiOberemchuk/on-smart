@@ -1,7 +1,6 @@
 "use client";
 
 import CardProduct from "@/components/ProductCard/CardProduct";
-import { Product } from "@/types/product.types";
 import { SwiperSlide, Swiper } from "swiper/react";
 
 import "swiper/css";
@@ -9,6 +8,7 @@ import "swiper/css/free-mode";
 
 import "./styles.css";
 import { FreeMode, Navigation } from "swiper/modules";
+import { Product } from "@/db/schemas/product-schema";
 
 export default function ProductsList({
   initialProducts,

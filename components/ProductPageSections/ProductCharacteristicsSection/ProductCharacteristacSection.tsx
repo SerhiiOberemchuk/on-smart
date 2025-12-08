@@ -5,7 +5,7 @@ import {
   TABS_CHARACTERISTICS,
   TabTypeCaracteristics,
 } from "@/types/product-cararteristics.types";
-import { Product, Product_Details } from "@/types/product.types";
+import { Product_Details } from "@/types/product.types";
 import { useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -13,6 +13,7 @@ import Descrizione from "./components-characteristic/Descrizione";
 import Specifiche from "./components-characteristic/Specifiche";
 import Documenti from "./components-characteristic/Documenti";
 import Valutazione from "./components-characteristic/Valutazione";
+import { Product } from "@/db/schemas/product-schema";
 
 const calcCurrentIndex = (prevTab: TabTypeCaracteristics) =>
   TABS_CHARACTERISTICS.findIndex((tab) => tab.searchParam === prevTab);

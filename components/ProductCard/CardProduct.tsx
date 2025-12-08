@@ -1,25 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
 import TitleTooltip from "./card-components/TitleTooltip";
-import { Product } from "@/types/product.types";
 import HeaderProductCard from "../HeaderProductCard";
 import PricesBox from "../PricesBox";
 import StarsRating from "../StarsRating";
 import styles from "./product-styles.module.css";
 import ButtonOpenDialogAddToCart from "../ButtonOpenDialogAddToCart";
-import { toSlug } from "@/utils/slug";
 import { twMerge } from "tailwind-merge";
+import { Product } from "@/db/schemas/product-schema";
 
 export default function CardProduct({ className, ...product }: Product & { className?: string }) {
-  const { name, price, imgSrc, id, category, brand, oldPrice, rating, inStock } = product;
-  const slagId = toSlug(name);
-  const slugBrand = toSlug(brand);
-  const slugCategory = toSlug(category);
+  const { name, price, imgSrc, id, category_slug, brand_slug, slug, oldPrice, rating, inStock } =
+    product;
+
   return (
     <article className={twMerge(styles.card, className)}>
       <HeaderProductCard oldPrice={oldPrice} inStock={inStock} id={id} />
       <figure className="">
-        <Link href={`/catalogo/${slugCategory}/${slugBrand}/${slagId}-${id}`} aria-label={name}>
+        <Link href={`/catalogo/${category_slug}/${brand_slug}/${slug}`} aria-label={name}>
           <Image
             src={imgSrc}
             className="aspect-square object-contain object-center p-1 md:p-2 xl:p-3"
@@ -37,7 +35,7 @@ export default function CardProduct({ className, ...product }: Product & { class
             {name}
           </h2>
           <TitleTooltip id="card-title-tooltip" />
-          <h3 className="helper_text my-2 text-text-grey capitalize">{category}</h3>
+          <h3 className="helper_text my-2 text-text-grey capitalize">{category_slug}</h3>
 
           <StarsRating rating={rating} />
         </figcaption>

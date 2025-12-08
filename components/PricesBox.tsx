@@ -1,4 +1,4 @@
-import { Product } from "@/types/product.types";
+import { Product } from "@/db/schemas/product-schema";
 import { twMerge } from "tailwind-merge";
 
 type Props = Pick<Product, "price" | "oldPrice"> & {
@@ -37,10 +37,10 @@ export default function PricesBox({
             place === "dialog-cart-product-variant" && "H4M",
           )}
         >
-          {price.toFixed(2)} €
+          {price} €
         </span>
-        {oldPrice && oldPrice > 0 ? (
-          <span className="text-nowrap text-text-grey line-through">{oldPrice.toFixed(2)} €</span>
+        {oldPrice && Number(oldPrice) > 0 ? (
+          <span className="text-nowrap text-text-grey line-through">{oldPrice} €</span>
         ) : null}
       </div>
     </div>

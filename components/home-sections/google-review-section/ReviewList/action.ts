@@ -29,7 +29,7 @@ export async function getGoogleReviews() {
     clientName: "Marco Rinaldi",
     reviewText:
       "Ho avuto un’esperienza fantastica in questo negozio! Il personale è stato estremamente gentile e disponibile, pronto a rispondere a tutte le mie domande e a consigliarmi al meglio. La qualità dei prodotti è davvero eccellente e ho trovato esattamente ciò che cercavo. L’ambiente del negozio è accogliente e piacevole, e la consegna dei prodotti è stata veloce e senza problemi. Sicuramente tornerò e consiglierò questo negozio a tutti i miei amici e familiari. Un’esperienza di shopping davvero perfetta!",
-    rating: Math.floor(Math.random() * 5) + 1,
+    rating: (Math.floor(Math.random() * 5) + 1).toString(),
     date: new Date().toISOString(),
   })) as GoogleReview[];
 }

@@ -4,12 +4,13 @@ import CardSection from "./components/CardSection";
 
 export default async function CarrelloPage() {
   const products = await getAllProducts({});
+  if (!products.data) return;
   return (
     <>
       <CardSection />
       <ProductRowListSection
         title="Acquistati insieme"
-        productsList={products}
+        productsList={products.data}
         idSection="page_product_insieme"
         isBottomLink={false}
       />

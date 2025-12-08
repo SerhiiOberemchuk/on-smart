@@ -2,12 +2,12 @@
 
 import { getAllProducts } from "@/app/actions/product/get-all-products";
 import CardProduct from "@/components/ProductCard/CardProduct";
-import { Product } from "@/types/product.types";
 import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import styles from "./product.module.css";
 import { SORT_OPTIONS_PARAMS } from "@/types/catalog-filter-options.types";
 import { useQueryState } from "nuqs";
+import { Product } from "@/db/schemas/product-schema";
 
 export default function CatalogProductSection({ className }: { className?: string }) {
   const [products, setProducts] = useState<Product[] | null>(null);
@@ -21,7 +21,7 @@ export default function CatalogProductSection({ className }: { className?: strin
     const fetchProducts = async () => {
       const response = await getAllProducts();
       if (response) {
-        setProducts(response);
+        setProducts(response.data);
       }
       try {
       } catch (error) {

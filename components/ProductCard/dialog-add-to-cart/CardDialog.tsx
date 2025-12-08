@@ -8,7 +8,6 @@ import styles from "./style.module.css";
 import clsx from "clsx";
 import { DialogProductCard } from "./components/DialogProductCard";
 import PricesBox from "@/components/PricesBox";
-import { Product } from "@/types/product.types";
 import { twMerge } from "tailwind-merge";
 import { getSupportProductById } from "@/app/actions/product/get-support-product-by-id";
 // import checkboxIconChecked from "@/assets/icons/checkbox.svg";
@@ -20,6 +19,7 @@ import { useCalcTotalSum } from "@/utils/useCalcTotalSum";
 import ButtonAddToBasket from "@/components/ButtonAddToBasket";
 import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
+import { Product } from "@/db/schemas/product-schema";
 
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
@@ -38,7 +38,7 @@ export default function CardDialog() {
   const handleAddToCart = () => {
     setIsDisabled(true);
     const bascet: { id: string; qnt: number }[] = [
-      ...(selectedProduct?.inStock ? [{ id: selectedProduct!.id, qnt: selectedProduct!.qnt }] : []),
+      ...(selectedProduct?.inStock ? [{ id: selectedProduct.id, qnt: selectedProduct!.qnt }] : []),
       ...(selectedSupportProducts
         ? selectedSupportProducts.map((prod) => ({ id: prod.id, qnt: 1 }))
         : []),
@@ -51,7 +51,7 @@ export default function CardDialog() {
     }, 2000);
   };
   const totalPrice = useCalcTotalSum([
-    { qnt: selectedProduct?.qnt || 1, price: selectedProduct?.price || 0 },
+    { qnt: selectedProduct?.qnt || 1, price: selectedProduct?.price || "0" },
     ...(selectedSupportProducts?.map((prod) => ({ qnt: 1, price: prod.price })) || []),
   ]);
 
@@ -59,16 +59,16 @@ export default function CardDialog() {
     let newTotalOld = 0;
 
     if (selectedProduct && selectedProduct.inStock) {
-      newTotalOld += (selectedProduct.oldPrice || 0) * (selectedProduct.qnt || 1);
+      newTotalOld += (Number(selectedProduct.oldPrice) || 0) * (selectedProduct.qnt || 1);
     }
 
     if (selectedSupportProducts?.length) {
       selectedSupportProducts.forEach((prod) => {
-        newTotalOld += prod.oldPrice || 0;
+        newTotalOld += Number(prod.oldPrice) || 0;
       });
     }
 
-    return newTotalOld;
+    return newTotalOld.toString();
   }, [selectedProduct, selectedSupportProducts]);
 
   const handleOnChangeSupportProduct = (product: Product) => {
@@ -104,9 +104,9 @@ export default function CardDialog() {
       try {
         if (product?.variants?.length === 0 || !product?.variants || product.variants === undefined)
           return;
-        const variantsData = await getProductsByIds([{ id: product.id }, ...product.variants]);
-        if (variantsData && variantsData.length > 0) {
-          setVariantsOfProduct(variantsData as Product[]);
+        const variantsData = await getProductsByIds([product.id, ...product.variants]);
+        if (variantsData.data && variantsData.data?.length > 0) {
+          setVariantsOfProduct(variantsData.data);
         }
       } catch (error) {
         console.error({ error });
@@ -122,7 +122,7 @@ export default function CardDialog() {
         if (!product?.id) return;
         const supportProductsData = await getSupportProductById(product.id);
         if (supportProductsData && supportProductsData.length > 0) {
-          setSupportProducts(supportProductsData as Product[]);
+          setSupportProducts(supportProductsData);
         }
       } catch (error) {
         console.error({ error });
@@ -237,7 +237,7 @@ export default function CardDialog() {
                                     />
                                   </div> */}
                                   <Image
-                                    src={variant.imgSrc || variant.images?.[0] || "/logo.svg"}
+                                    src={variant.imgSrc || "/logo.svg"}
                                     alt={variant.name}
                                     width={80}
                                     height={80}
@@ -309,11 +309,7 @@ export default function CardDialog() {
                         />
 
                         <Image
-                          src={
-                            supportProductItem.imgSrc ||
-                            supportProductItem.images?.[0] ||
-                            "/logo.svg"
-                          }
+                          src={supportProductItem.imgSrc || "/logo.svg"}
                           alt={supportProductItem.name}
                           width={80}
                           height={80}

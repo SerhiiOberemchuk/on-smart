@@ -22,14 +22,14 @@ export default async function TopSalesSection() {
       image: p.imgSrc.startsWith("https") ? p.imgSrc : `${baseUrl}${p.imgSrc}`,
       brand: {
         "@type": "Brand",
-        name: p.brand ?? "OnSmart",
+        name: p.brand_slug ?? "OnSmart",
       },
-      description: p.description,
+      description: p.nameFull,
       offers: {
         "@type": "Offer",
         url: `${baseUrl}/catalogo/${encodeURIComponent(
-          p.category,
-        )}/${encodeURIComponent(p.brand)}/${p.id}`,
+          p.category_slug,
+        )}/${encodeURIComponent(p.brand_slug)}/${p.id}`,
         priceCurrency: "EUR",
         price: p.price,
         availability: "https://schema.org/InStock",

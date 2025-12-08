@@ -1,5 +1,5 @@
 import StarsRating from "@/components/StarsRating";
-import { Product, Product_Details } from "@/types/product.types";
+import { Product_Details } from "@/types/product.types";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { twMerge } from "tailwind-merge";
 import { Pagination } from "swiper/modules";
@@ -7,6 +7,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "./style-swiper-product.css";
 import FormFeedback from "@/components/FormFeedback/FormFeedback";
+import { Product } from "@/db/schemas/product-schema";
 export default function Valutazione({
   data,
   className,
@@ -26,7 +27,7 @@ export default function Valutazione({
       <div className="rounded-sm bg-background p-3 pb-0 xl:h-auto xl:flex-1 xl:pb-3">
         <h2 className="H4M mb-4">Recensioni</h2>
         <div className="mb-4 flex items-center gap-2">
-          <StarsRating rating={midleRating} className="" />
+          <StarsRating rating={midleRating.toString()} className="" />
           <span>{midleRating.toFixed(1)}</span>
           <span className="text-text-secondary ml-2 text-sm">{`(${recensioni.length})`}</span>
         </div>
@@ -81,7 +82,7 @@ function RecensioneCard({
         <h4 className="input_R_18">{clientName}</h4>
         <span className="helper_text text-text-grey">{date}</span>
       </div>
-      <StarsRating rating={rating} className="" />
+      <StarsRating rating={rating.toString()} className="" />
       <p className="text_R">{comment}</p>
     </div>
   );

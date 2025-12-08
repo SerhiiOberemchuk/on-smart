@@ -22,10 +22,10 @@ export const productsSchema = mysqlTable(
     category_slug: varchar("category_slug", { length: 255 }).notNull(),
     name: varchar("name", { length: 255 }).notNull(),
     nameFull: varchar("name_full", { length: 255 }).notNull(),
-    price: int("price").notNull(),
-    oldPrice: int("old_price"),
+    price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+    oldPrice: decimal("old_price", { precision: 10, scale: 2 }),
     rating: decimal("rating", { precision: 2, scale: 1 }).default("5.0"),
-    inStock: boolean("in_stock").default(true).notNull(),
+    inStock: int("in_stock").notNull(),
     toOrder: boolean("to_order").default(false).notNull(),
     imgSrc: json("imgSrc").$type<string>().notNull(),
     hasVariants: boolean("has_variants").default(false).notNull(),
@@ -39,4 +39,4 @@ export const productsSchema = mysqlTable(
   ],
 );
 
-export type Product = typeof productsSchema.$inferInsert;
+export type Product = typeof productsSchema.$inferSelect;

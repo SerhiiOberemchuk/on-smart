@@ -4,7 +4,7 @@ import Image from "next/image";
 import icon from "@/assets/icons/carrello.svg";
 
 import { useCardDialogStore } from "../store/card-dialog-store";
-import { Product } from "@/types/product.types";
+import { Product } from "@/db/schemas/product-schema";
 
 export default function ButtonOpenDialogAddToCart(product: Product) {
   const { openDialog } = useCardDialogStore();

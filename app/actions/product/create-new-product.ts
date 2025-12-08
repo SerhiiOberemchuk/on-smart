@@ -9,8 +9,7 @@ export async function createNewProduct(formData: Product) {
   updateTag("all-products");
   const normalizedFormData: Product = {
     ...formData,
-    price: Number(formData.price),
-    oldPrice: formData.oldPrice ? Number(formData.oldPrice) : null,
+    oldPrice: formData.oldPrice ? formData.oldPrice : null,
   };
 
   try {

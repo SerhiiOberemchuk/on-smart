@@ -13,7 +13,7 @@ import LinkYellow from "@/components/YellowLink";
 export default function ListProductsAdmin({ products }: { products: Product[] }) {
   const [pending, startTransition] = useTransition();
 
-  const handleDellProducts = async (id?: string) =>
+  const handleDellProducts = async (id: string) =>
     startTransition(async () => {
       const res = await deleteProductById(id);
       if (res.error) {

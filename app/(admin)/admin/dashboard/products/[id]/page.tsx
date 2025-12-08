@@ -1,6 +1,6 @@
-import { getProductById } from "@/app/actions/product/get-product-by-id";
 import { Suspense } from "react";
 import PageProductAdmin from "./components/PageProductAdmin";
+import { getProductById } from "@/app/actions/product/get-product-by-id";
 
 type Props = {
   params: Promise<{ id: string }>;
