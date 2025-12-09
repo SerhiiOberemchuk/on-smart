@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 
 export async function createNewProduct(formData: Product) {
-  updateTag("all-products");
+  updateTag("all-get_all_product");
   const normalizedFormData: Product = {
     ...formData,
     oldPrice: formData.oldPrice ? formData.oldPrice : null,

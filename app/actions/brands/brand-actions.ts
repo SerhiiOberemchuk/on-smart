@@ -5,7 +5,7 @@ import { brandProductsSchema } from "@/db/schemas/brand-products.schema";
 import { BrandTypes } from "@/types/brands.types";
 
 import { eq } from "drizzle-orm";
-import { cacheLife, cacheTag } from "next/cache";
+// import { cacheTag } from "next/cache";
 
 export async function createBrand(brand: BrandTypes) {
   try {
@@ -21,8 +21,8 @@ export async function createBrand(brand: BrandTypes) {
 
 export async function getAllBrands() {
   "use cache";
-  cacheTag("all_brands");
-  cacheLife({ expire: 7200 }); // 2 hours
+  // cacheTag("all_brands");
+  // cacheLife({ expire: 7200 }); // 2 hours
   try {
     const result = await db.select().from(brandProductsSchema);
     return {
@@ -85,8 +85,8 @@ export async function updateBrandById(brandData: Partial<BrandTypes> & { id: Bra
 
 export async function getBrandBySlug(brand_slug: BrandTypes["brand_slug"]) {
   "use cache";
-  cacheTag("brand_" + brand_slug);
-  cacheLife({ expire: 7200 }); // 2 hours
+  // cacheTag(brand_slug);
+  // cacheLife({ expire: 7200 }); // 2 hours
   try {
     const fetchBrand = await db
       .select()

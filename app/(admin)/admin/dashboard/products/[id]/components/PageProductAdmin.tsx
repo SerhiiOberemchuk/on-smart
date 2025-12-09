@@ -18,6 +18,7 @@ import { updateProductById } from "@/app/actions/product/update-product";
 import clsx from "clsx";
 import { objectFromPickedKeys } from "../../helpers/objectFromPickedKeys";
 import FotoGaleryProduct from "./FotoGaleryProduct";
+import CharacteristicProductSection from "./characteristic/CharacteristicProductSection";
 
 export default function PageProductAdmin({ dataAction }: { dataAction: Promise<Product> }) {
   const product = use(dataAction);
@@ -71,6 +72,7 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
       const res = await getAllCategoryProducts();
       if (!res.success) {
         toast.error("Error fetch categories");
+        console.error(res.error);
         return;
       }
       setCategories(res.data);
@@ -82,6 +84,7 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
       const res = await getAllBrands();
       if (!res.success) {
         toast.error("Error fetch brands");
+        console.error(res.error);
         return;
       }
       setBrands(res.data);
@@ -166,7 +169,7 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
           />
           <ButtonYellow
             disabled={fotoToUpload ? false : true}
-            className={clsx(isPendingUlpoadMainFoto && "animate-pulse")}
+            className={clsx("text-[14px] font-normal", isPendingUlpoadMainFoto && "animate-pulse")}
             onClick={handlUploadFoto}
           >
             {isPendingUlpoadMainFoto ? "Збереження..." : "Зберегти нове фото"}
@@ -256,12 +259,17 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
         </div>
 
         <div className="text-[14px] font-light">
-          <ButtonYellow type="submit" disabled={isPendingUpdateProduct}>
+          <ButtonYellow
+            type="submit"
+            className="text-[14px] font-normal"
+            disabled={isPendingUpdateProduct}
+          >
             {isPendingUpdateProduct ? "Оновлення..." : "Зберегти зміни"}
           </ButtonYellow>
         </div>
       </form>
       <FotoGaleryProduct id={product.id} />
+      <CharacteristicProductSection id={product.id} />
     </div>
   );
 }

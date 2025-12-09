@@ -5,7 +5,6 @@ import clsx from "clsx";
 import "../../styles/globals.css";
 
 import { Suspense } from "react";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ToastContainer } from "react-toastify";
 
 const fixelFont = localFont({
@@ -34,12 +33,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uk-UA">
-      <body className={clsx(fixelFont.className, "flex min-h-svh flex-col")}>
-        <NuqsAdapter>
-          <main className="flex-1">
-            <Suspense>{children}</Suspense>
-          </main>
-        </NuqsAdapter>
+      <body className={clsx(fixelFont.className, "overflow-y-hidden")}>
+        <main className="">
+          <Suspense>{children}</Suspense>
+        </main>
+
         <ToastContainer />
       </body>
     </html>

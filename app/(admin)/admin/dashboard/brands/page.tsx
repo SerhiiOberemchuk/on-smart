@@ -3,7 +3,7 @@ import BrandsPageClient from "./BrandPageClient";
 import { Suspense } from "react";
 
 export default async function BrandsPage() {
-  // "use cache";
+  "use cache";
   const res = await getAllBrands();
 
   return (

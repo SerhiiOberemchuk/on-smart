@@ -1,9 +1,9 @@
 "use server";
 
-import { allProducts } from "@/app/actions/products";
 import { db } from "@/db/db";
 import { productsSchema } from "@/db/schemas/product-schema";
-import { cacheLife, cacheTag } from "next/cache";
+import { safeQuery } from "@/utils/safeQuery";
+// import { cacheTag } from "next/cache";
 
 type Props = {
   page?: number;
@@ -12,19 +12,26 @@ type Props = {
   category?: string;
 };
 
+// async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 120): Promise<T> {
+//   try {
+//     return await fn();
+//   } catch (err) {
+//     if (retries <= 0) throw err;
+//     await new Promise((r) => setTimeout(r, delay));
+//     return retry(fn, retries - 1, delay);
+//   }
+// }
+
 export async function getAllProducts(props: Props = {}) {
-  "use cache"; // must be changed to "use cache: remote" if connecting to external DB
-  cacheTag("all-products");
-  cacheLife({ expire: 600 });
-  const { page = 1, limit = 20, brand_slug } = props;
+  "use cache";
+  // cacheTag("get_all_product");
   try {
-    const response = await db.select().from(productsSchema);
+    const response = await safeQuery(() => db.select().from(productsSchema));
+    // const response = await db.select().from(productsSchema);
+
     return { success: true, data: response, error: null };
   } catch (error) {
-    console.error(error);
+    console.error("DB error:", error);
     return { success: false, error, data: null };
   }
-  // const products = allProducts;
-
-  // return products;
 }

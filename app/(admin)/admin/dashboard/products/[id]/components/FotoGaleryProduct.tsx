@@ -4,8 +4,7 @@ import { Product } from "@/db/schemas/product-schema";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
-// import { saveProductImages } from "@/app/actions/products/save-images"; // (приклад)
-import { uploadFile } from "@/app/actions/files/uploadFile";
+import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
 import Image from "next/image";
 import { getFotoFromGallery } from "@/app/actions/foto-galery/get-foto-from-gallery";
 import { toast } from "react-toastify";
@@ -76,7 +75,13 @@ export default function FotoGaleryProduct({ id }: { id: Product["id"] }) {
 
   const handleDeleteFoto = async (url: string) => {
     const newUrl = images.filter((i) => i !== url);
+    const d = await deleteFileFromS3(url);
+    if (!d.success) {
+      toast.error("Помилка видалення фото");
+      return;
+    }
     await updateGallery({ parent_product_id: id, images: newUrl });
+
     setImages(newUrl);
   };
 
