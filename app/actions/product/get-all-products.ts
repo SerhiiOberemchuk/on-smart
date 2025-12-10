@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/db";
-import { productsSchema } from "@/db/schemas/product";
+import { Product, productsSchema } from "@/db/schemas/product";
 import { safeQuery } from "@/utils/safeQuery";
 import { cacheTag } from "next/cache";
 
@@ -10,6 +10,11 @@ type Props = {
   limit?: number;
   brand_slug?: string;
   category?: string;
+};
+export type ProductFetchResult = {
+  success: boolean;
+  data: Product[] | null;
+  error: string | null;
 };
 
 export async function getAllProducts(props: Props = {}) {
