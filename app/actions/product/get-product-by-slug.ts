@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/db";
-import { Product, productsSchema } from "@/db/schemas/product-schema";
+import { Product, productsSchema } from "@/db/schemas/product";
 import { eq } from "drizzle-orm";
 
 export async function getProductBySlug(slug: Product["slug"]) {

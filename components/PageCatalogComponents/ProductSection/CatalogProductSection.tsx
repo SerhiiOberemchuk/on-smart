@@ -7,7 +7,7 @@ import { twMerge } from "tailwind-merge";
 import styles from "./product.module.css";
 import { SORT_OPTIONS_PARAMS } from "@/types/catalog-filter-options.types";
 import { useQueryState } from "nuqs";
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 
 export default function CatalogProductSection({ className }: { className?: string }) {
   const [products, setProducts] = useState<Product[] | null>(null);

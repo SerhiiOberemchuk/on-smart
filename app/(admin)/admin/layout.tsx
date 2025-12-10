@@ -6,6 +6,7 @@ import "../../styles/globals.css";
 
 import { Suspense } from "react";
 import { ToastContainer } from "react-toastify";
+import AdminSessionWatcher from "./auth/AdminSessionWatcher";
 
 const fixelFont = localFont({
   src: "../../../fonts/FixelVariable.woff2",
@@ -37,8 +38,8 @@ export default function RootLayout({
         <main className="">
           <Suspense>{children}</Suspense>
         </main>
-
         <ToastContainer />
+        <AdminSessionWatcher />
       </body>
     </html>
   );

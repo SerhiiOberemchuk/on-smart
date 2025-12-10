@@ -6,7 +6,11 @@ import { useEffect, useState } from "react";
 import ListFiltereOptions from "./ListFilterOptions";
 import { FilterGroup } from "@/types/catalog-filter-options.types";
 
-export default function MobileFilterSection({ filters }: { filters: FilterGroup[] }) {
+export default function MobileFilterSection({
+  filtersAction,
+}: {
+  filtersAction: Promise<FilterGroup[]>;
+}) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   useEffect(() => {
     if (isFilterOpen) {
@@ -37,7 +41,7 @@ export default function MobileFilterSection({ filters }: { filters: FilterGroup[
             </button>
           </header>
           <main className="flex-1 overflow-y-scroll">
-            <ListFiltereOptions filters={filters} className="w-full max-w-full" />
+            <ListFiltereOptions filtersAction={filtersAction} className="w-full max-w-full" />
           </main>
           <footer className="py-6">
             <button

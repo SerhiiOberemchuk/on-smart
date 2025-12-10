@@ -1,7 +1,7 @@
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useModalStore } from "../../store/modal-store";
 import InputAdminStyle from "../InputComponent";
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 import ButtonYellow from "@/components/BattonYellow";
 import { useEffect, useState, useTransition } from "react";
 import { getAllCategoryProducts } from "@/app/actions/category/category-actions";

@@ -19,7 +19,7 @@ import { useCalcTotalSum } from "@/utils/useCalcTotalSum";
 import ButtonAddToBasket from "@/components/ButtonAddToBasket";
 import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 

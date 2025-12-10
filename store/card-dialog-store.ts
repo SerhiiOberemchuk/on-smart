@@ -1,4 +1,4 @@
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 import { create } from "zustand";
 type CardDialogStore = {
   isOpenDialog: boolean;

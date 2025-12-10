@@ -13,7 +13,7 @@ import Descrizione from "./components-characteristic/Descrizione";
 import Specifiche from "./components-characteristic/Specifiche";
 import Documenti from "./components-characteristic/Documenti";
 import Valutazione from "./components-characteristic/Valutazione";
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 
 const calcCurrentIndex = (prevTab: TabTypeCaracteristics) =>
   TABS_CHARACTERISTICS.findIndex((tab) => tab.searchParam === prevTab);

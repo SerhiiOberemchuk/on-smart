@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import PageProductAdmin from "./components/PageProductAdmin";
 import { getProductById } from "@/app/actions/product/get-product-by-id";
+import { notFound } from "next/navigation";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -8,11 +9,10 @@ type Props = {
 
 export default async function AdminProductPage({ params }: Props) {
   const { id } = await params;
-  // console.log({ id });
 
   const productPromise = getProductById(id).then((res) => {
     if (!res.success || !res.data) {
-      throw new Error("Product not found");
+      notFound();
     }
     return res.data;
   });

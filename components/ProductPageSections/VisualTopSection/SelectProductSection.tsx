@@ -14,7 +14,7 @@ import ButtonAddToBasket from "../../ButtonAddToBasket";
 import { useBasketStore } from "@/store/basket-store";
 import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
 export default function SelectProductSection({ product }: { product: Product }) {

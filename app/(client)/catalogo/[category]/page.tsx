@@ -1,11 +1,11 @@
 import { Suspense } from "react";
+import ClientPageCategoryCatalogo from "./ClientPageCategory";
 
-export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
-  const { category } = await params;
+export default function CategoryPage(params: { category: string }) {
   return (
     <section>
-      <Suspense>
-        <h1>{category}</h1>
+      <Suspense fallback={<p>Carico...</p>}>
+        <ClientPageCategoryCatalogo params={params} />
       </Suspense>
     </section>
   );

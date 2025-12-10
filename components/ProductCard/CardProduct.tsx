@@ -7,7 +7,7 @@ import StarsRating from "../StarsRating";
 import styles from "./product-styles.module.css";
 import ButtonOpenDialogAddToCart from "../ButtonOpenDialogAddToCart";
 import { twMerge } from "tailwind-merge";
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 
 export default function CardProduct({ className, ...product }: Product & { className?: string }) {
   const { name, price, imgSrc, id, category_slug, brand_slug, slug, oldPrice, rating, inStock } =

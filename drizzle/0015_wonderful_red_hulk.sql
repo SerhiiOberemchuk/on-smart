@@ -1,0 +1,1 @@
+ALTER TABLE `product_specifiche` RENAME COLUMN `description` TO `groups`;

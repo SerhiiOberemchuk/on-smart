@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 

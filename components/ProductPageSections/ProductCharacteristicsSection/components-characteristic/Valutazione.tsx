@@ -7,7 +7,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "./style-swiper-product.css";
 import FormFeedback from "@/components/FormFeedback/FormFeedback";
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 export default function Valutazione({
   data,
   className,

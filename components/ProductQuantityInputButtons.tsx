@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 import { HTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 
