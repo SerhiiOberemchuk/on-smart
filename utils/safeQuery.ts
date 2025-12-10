@@ -2,7 +2,7 @@ function isError(e: unknown): e is Error {
   return e instanceof Error;
 }
 
-export async function safeQuery<T>(fn: () => Promise<T>, retries = 5, delay = 500): Promise<T> {
+export async function safeQuery<T>(fn: () => Promise<T>, retries = 10, delay = 500): Promise<T> {
   try {
     return await fn();
   } catch (err: unknown) {
