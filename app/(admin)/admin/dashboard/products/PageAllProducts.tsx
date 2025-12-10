@@ -4,7 +4,7 @@ import { useModalStore } from "../../store/modal-store";
 import ModalAddNewPrduct from "./ModalAddNewPrduct";
 import { use } from "react";
 import ListProductsAdmin from "./ListProductsAdmin";
-import { ProductFetchResult } from "./page";
+import { ProductFetchResult } from "@/app/actions/product/get-all-products";
 
 export default function ClientPageAllProducts({
   productAction,

@@ -75,7 +75,7 @@ export default function CardSection() {
     }, 0);
   };
   return (
-    <section>
+    <section id="carello">
       <Breadcrumbs carello="Carello" />
       <HeaderCart />
       <div className="container bg-background xl:bg-transparent">
