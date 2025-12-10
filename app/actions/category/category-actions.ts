@@ -3,10 +3,12 @@
 import { db } from "@/db/db";
 import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
 import { CategoryTypes } from "@/types/category.types";
+import { safeQuery } from "@/utils/safeQuery";
 import { eq } from "drizzle-orm";
-// import { cacheTag } from "next/cache";
+import { cacheTag, updateTag } from "next/cache";
 
 export async function createCategoryProducts(category: CategoryTypes) {
+  updateTag("all_categories");
   try {
     const result = await db.insert(categoryProductsSchema).values(category).$returningId();
     return {
@@ -20,10 +22,9 @@ export async function createCategoryProducts(category: CategoryTypes) {
 
 export async function getAllCategoryProducts() {
   "use cache";
-  // cacheTag("all_categories");
-  // cacheLife({ expire: 7200 }); // 2 hours
+  cacheTag("all_categories");
   try {
-    const result = await db.select().from(categoryProductsSchema);
+    const result = await safeQuery(() => db.select().from(categoryProductsSchema));
     return {
       success: true,
       data: result,
@@ -34,6 +35,7 @@ export async function getAllCategoryProducts() {
 }
 
 export async function removeCategoryProductsById(categoryId: CategoryTypes["id"]) {
+  updateTag("all_categories");
   if (!categoryId) {
     return { success: false, error: "Category ID is required", serverStatus: null };
   }
@@ -56,7 +58,10 @@ export async function removeCategoryProductsById(categoryId: CategoryTypes["id"]
   }
 }
 
-export async function updateCategoryProductsById(categoryData: Partial<CategoryTypes>) {
+export async function updateCategoryProductsById(
+  categoryData: Partial<Omit<CategoryTypes, "category_slug">>,
+) {
+  updateTag("all_categories");
   if (!categoryData.id) {
     return { success: false, error: "Category ID is required for update", serverStatus: null };
   }
@@ -86,13 +91,14 @@ export async function updateCategoryProductsById(categoryData: Partial<CategoryT
 
 export async function getCategoryBySlug(category_slug: CategoryTypes["category_slug"]) {
   "use cache";
-  // cacheTag(category_slug);
-  // cacheLife({ expire: 7200 }); // 2 hours
+  cacheTag(category_slug);
   try {
-    const fetchCategory = await db
-      .select()
-      .from(categoryProductsSchema)
-      .where(eq(categoryProductsSchema.category_slug, category_slug));
+    const fetchCategory = await safeQuery(() =>
+      db
+        .select()
+        .from(categoryProductsSchema)
+        .where(eq(categoryProductsSchema.category_slug, category_slug)),
+    );
     if (fetchCategory.length === 0) {
       return { success: false, error: "Category not found", data: null };
     }

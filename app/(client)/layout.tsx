@@ -7,7 +7,6 @@ import "../styles/globals.css";
 import Header from "@/layout-components/Header/Header";
 import Footer from "@/layout-components/Footer";
 import Head from "next/head";
-import { Suspense } from "react";
 import CardDialog from "@/components/ProductCard/dialog-add-to-cart/CardDialog";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ToastContainer } from "react-toastify";
@@ -15,13 +14,13 @@ import { ToastContainer } from "react-toastify";
 const fixelFont = localFont({
   src: "../../fonts/FixelVariable.woff2",
   display: "swap",
-  // preload: true,
   fallback: ["system-ui", "Segoe UI", "Arial"],
   adjustFontFallback: "Arial",
   weight: "100 900",
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://on-smart.it"),
   title: { default: "OnSmart", template: "%s | OnSmart" },
   description: "La videosorveglianza è uno dei modi più affidabili per proteggere la tua proprietà",
   icons: {
@@ -33,7 +32,6 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   appleWebApp: { title: "ON-SMART" },
-  // manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
@@ -50,7 +48,6 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-title" content="ON SMART" />
-        {/* <link rel="manifest" href="/site.webmanifest" /> */}
         <link rel="preload" as="image" property="high" href="/hero-baner/Baner 1 Antifurto.png" />
         <link rel="preload" as="image" href="/brands/ajax.png" />
       </Head>
@@ -58,9 +55,7 @@ export default function RootLayout({
       <body className={clsx(fixelFont.className, "flex min-h-svh flex-col")}>
         <NuqsAdapter>
           <Header />
-          <main className="flex-1">
-            <Suspense>{children}</Suspense>
-          </main>
+          <main className="flex-1">{children}</main>
           <Footer />
           <CardDialog />
         </NuqsAdapter>

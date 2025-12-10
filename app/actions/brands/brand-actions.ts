@@ -3,9 +3,10 @@
 import { db } from "@/db/db";
 import { brandProductsSchema } from "@/db/schemas/brand-products.schema";
 import { BrandTypes } from "@/types/brands.types";
+import { safeQuery } from "@/utils/safeQuery";
 
 import { eq } from "drizzle-orm";
-// import { cacheTag } from "next/cache";
+import { cacheTag, updateTag } from "next/cache";
 
 export async function createBrand(brand: BrandTypes) {
   try {
@@ -21,10 +22,9 @@ export async function createBrand(brand: BrandTypes) {
 
 export async function getAllBrands() {
   "use cache";
-  // cacheTag("all_brands");
-  // cacheLife({ expire: 7200 }); // 2 hours
+  cacheTag("all_brands");
   try {
-    const result = await db.select().from(brandProductsSchema);
+    const result = await safeQuery(() => db.select().from(brandProductsSchema));
     return {
       success: true,
       data: result,
@@ -35,6 +35,7 @@ export async function getAllBrands() {
 }
 
 export async function removeBrandById(brandId: BrandTypes["id"]) {
+  updateTag("all_brands");
   if (!brandId) {
     return { success: false, error: "Brand ID is required", serverStatus: null };
   }
@@ -55,7 +56,11 @@ export async function removeBrandById(brandId: BrandTypes["id"]) {
   }
 }
 
-export async function updateBrandById(brandData: Partial<BrandTypes> & { id: BrandTypes["id"] }) {
+export async function updateBrandById(
+  brandData: Partial<Omit<BrandTypes, "brand_slug">> & Pick<BrandTypes, "id">,
+) {
+  updateTag("all_brands");
+
   if (!brandData.id) {
     return { success: false, error: "Brand ID is required for update", serverStatus: null };
   }
@@ -85,13 +90,11 @@ export async function updateBrandById(brandData: Partial<BrandTypes> & { id: Bra
 
 export async function getBrandBySlug(brand_slug: BrandTypes["brand_slug"]) {
   "use cache";
-  // cacheTag(brand_slug);
-  // cacheLife({ expire: 7200 }); // 2 hours
+  cacheTag(brand_slug);
   try {
-    const fetchBrand = await db
-      .select()
-      .from(brandProductsSchema)
-      .where(eq(brandProductsSchema.brand_slug, brand_slug));
+    const fetchBrand = await safeQuery(() =>
+      db.select().from(brandProductsSchema).where(eq(brandProductsSchema.brand_slug, brand_slug)),
+    );
     if (fetchBrand.length === 0) {
       return { success: false, error: "Brand not found", data: null };
     }

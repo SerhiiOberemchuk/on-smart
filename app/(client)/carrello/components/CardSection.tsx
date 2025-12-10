@@ -11,7 +11,7 @@ import { getProductsByIds } from "@/app/actions/product/get-products-by-array-id
 import RepilogoComponent from "./RepilogoComponent";
 import HeaderCart from "./HeaderCart";
 import Link from "next/link";
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 
 export default function CardSection() {
   const [fetchedBasketProducts, setFetchedBasketProducts] = useState<Product[]>([]);

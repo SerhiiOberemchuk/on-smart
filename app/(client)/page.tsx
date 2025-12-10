@@ -7,6 +7,7 @@ import HeroSection from "@/components/home-sections/hero-section/HeroSection";
 import TopSalesSection from "@/components/home-sections/top-sales-section/TopSalesSection";
 import Script from "next/script";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "OnSmart — Elettronica, Videosorveglianza, Smart Home al miglior prezzo",
@@ -47,12 +48,24 @@ export const metadata: Metadata = {
 export default async function Home() {
   return (
     <>
-      <HeroSection />
-      <TopSalesSection />
-      <CategorySection />
-      <BrandSection />
-      <GoogleReviewSection />
-      <FeedbackFormSection />
+      <Suspense>
+        <HeroSection />
+      </Suspense>
+      <Suspense>
+        <TopSalesSection />
+      </Suspense>
+      <Suspense>
+        <CategorySection />
+      </Suspense>
+      <Suspense>
+        <BrandSection />
+      </Suspense>
+      <Suspense>
+        <GoogleReviewSection />
+      </Suspense>
+      <Suspense>
+        <FeedbackFormSection />
+      </Suspense>
       <Script
         id="home_page_main"
         type="application/ld+json"

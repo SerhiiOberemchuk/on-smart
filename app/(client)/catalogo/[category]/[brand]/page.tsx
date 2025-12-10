@@ -1,16 +1,14 @@
-import BrandPage from "@/app/(client)/brand/[brand_slug]/components/BrandPage";
 import { Suspense } from "react";
+import PageCatalogoCategoryBrand from "./PageSuspense";
 
-export default async function CategoryBrandPage({
+export default function CategoryBrandPage({
   params,
 }: {
   params: Promise<{ category: string; brand: string }>;
 }) {
-  const { brand } = await params;
-
   return (
-    <Suspense>
-      <BrandPage brand_slug={brand} />;
+    <Suspense fallback={<p>Carico...</p>}>
+      <PageCatalogoCategoryBrand params={params} />;
     </Suspense>
   );
 }

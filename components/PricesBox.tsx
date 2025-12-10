@@ -1,4 +1,4 @@
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 import { twMerge } from "tailwind-merge";
 
 type Props = Pick<Product, "price" | "oldPrice"> & {

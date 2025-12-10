@@ -14,7 +14,7 @@ import Image from "next/image";
 import { Swiper as SwiperTypes } from "swiper/types";
 import HeaderProductCard from "@/components/HeaderProductCard";
 import { SlideNextButton, SlidePrevButton } from "@/components/SwiperButtonsReacr";
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 import { getFotoFromGallery } from "@/app/actions/foto-galery/get-foto-from-gallery";
 import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
 import { BrandTypes } from "@/types/brands.types";

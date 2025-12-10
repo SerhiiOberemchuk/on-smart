@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState, useTransition } from "react";
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 import { SubmitHandler, useForm } from "react-hook-form";
 import InputAdminStyle from "../../../InputComponent";
 import ButtonYellow from "@/components/BattonYellow";
@@ -268,8 +268,12 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
           </ButtonYellow>
         </div>
       </form>
-      <FotoGaleryProduct id={product.id} />
-      <CharacteristicProductSection id={product.id} />
+      {!product.parent_product_id && (
+        <>
+          <FotoGaleryProduct id={product.id} />
+          <CharacteristicProductSection id={product.id} />
+        </>
+      )}
     </div>
   );
 }

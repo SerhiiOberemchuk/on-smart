@@ -1,4 +1,3 @@
-// import Breadcrumbs from "@/components/Breadcrumbs";
 import ListFiltereOptions from "@/components/PageCatalogComponents/FiltersSection/ListFilterOptions";
 import MobileFilterSection from "@/components/PageCatalogComponents/FiltersSection/MobileFilterSection";
 import HeaderCatalogo from "@/components/PageCatalogComponents/HeaderCatalogo";
@@ -47,7 +46,7 @@ export const metadata: Metadata = {
     noarchive: false,
   },
 };
-export default async function CatalogoPage() {
+export default function CatalogoPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -68,21 +67,21 @@ export default async function CatalogoPage() {
       },
     ],
   };
-  const filters = await getCatalogFilters();
+  const filters = getCatalogFilters();
   return (
     <section className="pb-5 lg:pb-16">
-      {/* <Breadcrumbs /> */}
       <Suspense>
         <HeaderCatalogo />
       </Suspense>
+
       <div className="xl:bg-background">
-        <Suspense>
-          <MobileFilterSection filters={filters} />
+        <Suspense fallback={<p>Carico...</p>}>
+          <MobileFilterSection filtersAction={filters} />
         </Suspense>
 
         <div className="container flex flex-col gap-5 lg:flex-row">
-          <Suspense>
-            <ListFiltereOptions className="hidden lg:flex" filters={filters} />
+          <Suspense fallback={<p>Carico...</p>}>
+            <ListFiltereOptions className="hidden lg:flex" filtersAction={filters} />
           </Suspense>
 
           <Suspense>

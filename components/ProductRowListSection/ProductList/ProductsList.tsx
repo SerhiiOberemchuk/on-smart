@@ -8,7 +8,7 @@ import "swiper/css/free-mode";
 
 import "./styles.css";
 import { FreeMode, Navigation } from "swiper/modules";
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 
 export default function ProductsList({
   initialProducts,

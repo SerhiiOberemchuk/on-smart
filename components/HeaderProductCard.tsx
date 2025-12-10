@@ -1,4 +1,4 @@
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 import ButtonComparison from "./ProductCard/card-components/ButtonComparison";
 import { twMerge } from "tailwind-merge";
 

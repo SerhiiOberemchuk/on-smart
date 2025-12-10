@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import icon from "@/assets/icons/icon-comparison.svg";
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 
 export default function ButtonComparison({ id }: { id: Product["id"] }) {
   return (

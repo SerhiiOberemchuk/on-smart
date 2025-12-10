@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { twMerge } from "tailwind-merge";
 import icon_arrow_top from "@/assets/icons/arrow-top.svg";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { LabelInput } from "./sub-component/LabelInput";
 import { InputRange } from "./sub-component/InputRange";
 import { usePathname, useRouter } from "next/navigation";
@@ -11,11 +11,12 @@ import { FilterGroup } from "@/types/catalog-filter-options.types";
 
 export default function ListFiltereOptions({
   className,
-  filters,
+  filtersAction,
 }: {
   className?: string;
-  filters: FilterGroup[];
+  filtersAction: Promise<FilterGroup[]>;
 }) {
+  const filters = use(filtersAction);
   const router = useRouter();
   const pathname = usePathname();
 

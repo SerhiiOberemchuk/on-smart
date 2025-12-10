@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import ButtonsScrollSwiper from "../ButtonsScrollSwiper";
 import LinkYellow from "../YellowLink";
 import ProductsList from "./ProductList/ProductsList";
-import { Product } from "@/db/schemas/product-schema";
+import { Product } from "@/db/schemas/product";
 
 export type ProductRowListSectionProps = {
   productsList: Product[];
