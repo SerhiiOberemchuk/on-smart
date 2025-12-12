@@ -70,7 +70,7 @@ export default function CatalogoPage() {
   const filters = getCatalogFilters();
   return (
     <section className="pb-5 lg:pb-16">
-      <Suspense>
+      <Suspense fallback={<p>Carico...</p>}>
         <HeaderCatalogo />
       </Suspense>
 
@@ -84,7 +84,7 @@ export default function CatalogoPage() {
             <ListFiltereOptions className="hidden lg:flex" filtersAction={filters} />
           </Suspense>
 
-          <Suspense>
+          <Suspense fallback={<p>Carico...</p>}>
             <CatalogProductSection />
           </Suspense>
         </div>

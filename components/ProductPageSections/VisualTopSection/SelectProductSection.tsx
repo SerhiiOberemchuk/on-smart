@@ -6,8 +6,6 @@ import { twMerge } from "tailwind-merge";
 import styles from "./style.module.css";
 import Image from "next/image";
 import PricesBox from "../../PricesBox";
-// import checkboxIconChecked from "@/assets/icons/checkbox.svg";
-// import checkboxIcon from "@/assets/icons/checkbox-non.svg";
 import ProductQuantityInputButtons from "../../ProductQuantityInputButtons";
 import { useCalcTotalSum } from "@/utils/useCalcTotalSum";
 import ButtonAddToBasket from "../../ButtonAddToBasket";
@@ -77,41 +75,19 @@ export default function SelectProductSection({ product }: { product: Product }) 
                       className={twMerge("body_R_20 p-3", styles.label_variant)}
                     >
                       <input
-                        // disabled={variant.inStock === 0}
                         type="radio"
                         name="Product variant"
                         value={variant.id}
-                        // checked={selectedProduct?.id === variant.id}
                         onChange={() => {
                           setSelectedProduct({
                             ...variant,
                             qnt: 1,
                           } as Product & { qnt: number });
                         }}
-                        // className="sr-only"
                       />
-                      {/* <div className="mr-1 size-4 shrink-0">
-                        <Image
-                          src={checkboxIconChecked}
-                          className={styles.checked}
-                          alt="Checkbox icon"
-                          width={16}
-                          height={16}
-                        />
-                        <Image
-                          className={styles.check}
-                          src={checkboxIcon}
-                          alt="Checkbox icon"
-                          width={16}
-                          height={16}
-                        />
-                      </div> */}
+
                       <Image
-                        src={
-                          variant.imgSrc ||
-                          // || variant.images?.[0]
-                          "/logo.svg"
-                        }
+                        src={variant.imgSrc || "/logo.svg"}
                         alt={variant.name}
                         width={80}
                         height={80}

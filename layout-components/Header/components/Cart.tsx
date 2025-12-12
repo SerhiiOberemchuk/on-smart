@@ -13,7 +13,7 @@ export default function Cart() {
   };
   return (
     <Link href={"/carrello"} className="relative flex gap-2.5 p-3 md:px-4 md:py-2">
-      <div className="absolute grid h-3 w-3 place-content-center place-items-center rounded-full bg-yellow-500 text-[6px] font-medium text-black">
+      <div className="absolute top-0 left-2 grid h-5 w-5 place-content-center place-items-center rounded-full bg-yellow-500 text-[10px] font-medium text-black">
         <span className="text-center">{qnt()}</span>
       </div>
       <Image src={carello} width={24} alt="Carrello" title="Carrello" />

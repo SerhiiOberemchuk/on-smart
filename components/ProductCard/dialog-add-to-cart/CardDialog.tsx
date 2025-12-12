@@ -10,8 +10,6 @@ import { DialogProductCard } from "./components/DialogProductCard";
 import PricesBox from "@/components/PricesBox";
 import { twMerge } from "tailwind-merge";
 import { getSupportProductById } from "@/app/actions/product/get-support-product-by-id";
-// import checkboxIconChecked from "@/assets/icons/checkbox.svg";
-// import checkboxIcon from "@/assets/icons/checkbox-non.svg";
 import { useCardDialogStore } from "@/store/card-dialog-store";
 import { useBasketStore } from "@/store/basket-store";
 import ProductQuantityInputButtons from "@/components/ProductQuantityInputButtons";

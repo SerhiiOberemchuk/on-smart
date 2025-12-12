@@ -3,27 +3,27 @@
 import { db } from "@/db/db";
 import { productFotoGallery } from "@/db/schemas/product-foto-gallery";
 import { eq } from "drizzle-orm";
+import { updateTag } from "next/cache";
 
 export async function updateFotoGallery(params: { parent_product_id: string; images: string[] }) {
+  updateTag(params.parent_product_id);
   try {
     const isGallery = await db
       .select()
       .from(productFotoGallery)
       .where(eq(productFotoGallery.parent_product_id, params.parent_product_id));
     if (isGallery.length > 0) {
-      const updateResponse = await db
+      await db
         .update(productFotoGallery)
         .set({ images: params.images })
         .where(eq(productFotoGallery.parent_product_id, params.parent_product_id));
-      console.log({ updateResponse });
 
       return {
         success: true,
         error: null,
       };
     }
-    const createResponse = await db.insert(productFotoGallery).values(params);
-    console.log({ createResponse });
+    await db.insert(productFotoGallery).values(params);
     return {
       success: true,
       error: null,

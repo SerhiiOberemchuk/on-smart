@@ -72,7 +72,7 @@ export default function ListProductsAdmin({ products }: { products: Product[] })
 
                 <p className="capitalize">{item.category_slug}</p>
                 <p className="capitalize">{item.brand_slug}</p>
-                <div>{item.toOrder && <div>⏳</div>}</div>
+                <div>{item.isOnOrder && <div>⏳</div>}</div>
                 <div className="flex justify-around">
                   <span className="text-green">{item.price}</span>
                   {item.oldPrice && <span className="text-red">{item.oldPrice}</span>}
@@ -128,7 +128,7 @@ export default function ListProductsAdmin({ products }: { products: Product[] })
 
                       <p className="text-xs capitalize">{v.category_slug}</p>
                       <p className="text-xs capitalize">{v.brand_slug}</p>
-                      <div>{v.toOrder && <div>⏳</div>}</div>
+                      <div>{v.isOnOrder && <div>⏳</div>}</div>
                       <div className="flex justify-around">
                         <span className="text-green">{v.price}</span>
                         {v.oldPrice && <span className="text-red">{v.oldPrice}</span>}
