@@ -6,15 +6,15 @@ import PricesBox from "../PricesBox";
 import StarsRating from "../StarsRating";
 import styles from "./product-styles.module.css";
 import ButtonOpenDialogAddToCart from "../ButtonOpenDialogAddToCart";
-import { twMerge } from "tailwind-merge";
 import { Product } from "@/db/schemas/product";
+import clsx from "clsx";
 
 export default function CardProduct({ className, ...product }: Product & { className?: string }) {
   const { name, price, imgSrc, id, category_slug, brand_slug, slug, oldPrice, rating, inStock } =
     product;
 
   return (
-    <article className={twMerge(styles.card, className)}>
+    <article className={clsx(styles.card, className)}>
       <HeaderProductCard oldPrice={oldPrice} inStock={inStock} id={id} />
       <figure className="">
         <Link href={`/catalogo/${category_slug}/${brand_slug}/${slug}`} aria-label={name}>

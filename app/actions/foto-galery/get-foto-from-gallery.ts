@@ -3,8 +3,11 @@
 import { db } from "@/db/db";
 import { productFotoGallery } from "@/db/schemas/product-foto-gallery";
 import { eq } from "drizzle-orm";
+import { cacheTag } from "next/cache";
 
 export async function getFotoFromGallery(params: { parent_product_id: string }) {
+  "use cache";
+  cacheTag(params.parent_product_id);
   try {
     const response = await db
       .select()

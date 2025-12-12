@@ -2,144 +2,183 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import clsx from "clsx";
+import { toast } from "react-toastify";
+
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PricesBox from "@/components/PricesBox";
+import HeaderCart from "./HeaderCart";
+import RepilogoComponent from "./RepilogoComponent";
+
 import icon_dell from "@/assets/icons/icon_delete.svg";
-import clsx from "clsx";
+
 import { useBasketStore } from "@/store/basket-store";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
-import RepilogoComponent from "./RepilogoComponent";
-import HeaderCart from "./HeaderCart";
-import Link from "next/link";
-import { Product } from "@/db/schemas/product";
+import type { Product } from "@/db/schemas/product";
+const btnBase =
+  "size-11 flex items-center justify-center rounded-sm border border-stroke-grey transition";
 
-export default function CardSection() {
-  const [fetchedBasketProducts, setFetchedBasketProducts] = useState<Product[]>([]);
+const btnDisabled = "opacity-40 cursor-not-allowed";
+
+const btnActive = "hover:bg-grey-hover cursor-pointer";
+export default function CartSection() {
+  const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
+
   const { basket, removeFromBasketById, updateBasket } = useBasketStore();
 
   useEffect(() => {
-    // if (basket.length === 0) return;
+    if (basket.length === 0) {
+      const set = () => setFetchedProducts([]);
+      set();
+      return;
+    }
 
-    const fetchBasketProducts = async () => {
-      try {
-        const ids = basket.map((item) => item.id);
-        const products = await getProductsByIds(ids);
-        setFetchedBasketProducts(products.data as Product[]);
-      } catch (error) {
-        console.error("Error fetching basket products:", error);
+    const load = async () => {
+      const ids = basket.map((item) => item.id);
+      const { data, error } = await getProductsByIds(ids);
+
+      if (error) {
+        console.error(error);
+        toast.error("Errore nel caricamento dei prodotti");
+        return;
       }
+
+      const products = data ?? [];
+
+      if (products.length < ids.length) {
+        toast.warning("Alcuni prodotti non sono più disponibili.");
+
+        const validIds = new Set(products.map((p) => p.id));
+        basket.filter((b) => !validIds.has(b.id)).forEach((b) => removeFromBasketById(b.id));
+      }
+
+      products.forEach((prod) => {
+        const item = basket.find((i) => i.id === prod.id);
+        if (!item) return;
+
+        if (item.qnt > prod.inStock) {
+          updateBasket([{ id: prod.id, qnt: prod.inStock }]);
+        }
+      });
+
+      setFetchedProducts(products);
     };
-    fetchBasketProducts();
-  }, [basket]);
 
-  const calcProductPrice = (id: string) => {
-    const productInBasket = basket.find((item) => item.id === id);
-    const productDetails = fetchedBasketProducts.find((prod) => prod.id === id);
-    if (productInBasket && productDetails) {
-      return {
-        oldPrice: (productInBasket.qnt * (Number(productDetails?.oldPrice) ?? 0)).toString(),
-        price: (productInBasket.qnt * Number(productDetails.price)).toString(),
-      };
+    load();
+  }, [basket, removeFromBasketById, updateBasket]);
+
+  const calcProductPrice = (productId: string) => {
+    const item = basket.find((b) => b.id === productId);
+    const prod = fetchedProducts.find((p) => p.id === productId);
+
+    if (!item || !prod) return { price: "0", oldPrice: null };
+
+    return {
+      price: (item.qnt * Number(prod.price)).toString(),
+      oldPrice: prod.oldPrice ? (item.qnt * Number(prod.oldPrice)).toString() : null,
+    };
+  };
+
+  const incrementQnt = (id: string) => {
+    const item = basket.find((b) => b.id === id);
+    const prod = fetchedProducts.find((p) => p.id === id);
+
+    if (!item || !prod) return;
+
+    if (item.qnt < prod.inStock) {
+      updateBasket([{ id, qnt: item.qnt + 1 }]);
     } else {
-      return {
-        oldPrice: null,
-        price: "0",
-      };
+      toast.info("Quantità massima disponibile.");
     }
   };
 
-  const incrementProductQuantity = (id: string) => {
-    const productInBasket = basket.find((item) => item.id === id);
-    const maxProductQnt = fetchedBasketProducts.find((prod) => prod.id === id)?.inStock || 0;
-    if (productInBasket && productInBasket.qnt < maxProductQnt) {
-      const newQnt = productInBasket.qnt + 1;
-      updateBasket([{ id, qnt: newQnt }]);
+  const decrementQnt = (id: string) => {
+    const item = basket.find((b) => b.id === id);
+
+    if (item && item.qnt > 1) {
+      updateBasket([{ id, qnt: item.qnt - 1 }]);
     }
   };
 
-  const decrementProductQuantity = (id: string) => {
-    const productInBasket = basket.find((item) => item.id === id);
-    if (productInBasket && productInBasket.qnt > 1) {
-      const newQnt = productInBasket.qnt - 1;
-      updateBasket([{ id, qnt: newQnt }]);
-    }
-  };
-
-  const calcTotalePrice = () => {
-    return fetchedBasketProducts.reduce((acc, prod) => {
-      const productInBasket = basket.find((item) => item.id === prod.id);
-      if (productInBasket) {
-        return acc + productInBasket.qnt * Number(prod.price);
-      }
-      return acc;
+  const calcTotal = () => {
+    return fetchedProducts.reduce((acc, prod) => {
+      const item = basket.find((b) => b.id === prod.id);
+      if (!item) return acc;
+      return acc + item.qnt * Number(prod.price);
     }, 0);
   };
+
   return (
     <section id="carello">
       <Breadcrumbs carello="Carello" />
       <HeaderCart />
+
       <div className="container bg-background xl:bg-transparent">
         <div className="relative flex flex-col gap-4 xl:mt-5 xl:flex-row xl:gap-5">
-          <ul className="mx-auto flex w-full max-w-[916px] flex-col justify-center gap-6 rounded-sm bg-background p-3 xl:mx-0">
-            {fetchedBasketProducts.map((prod, index) => {
+          <ul className="mx-auto flex w-full max-w-[916px] flex-col gap-6 rounded-sm bg-background p-3 xl:mx-0">
+            {fetchedProducts.map((prod, index) => {
+              const item = basket.find((b) => b.id === prod.id);
+              const price = calcProductPrice(prod.id);
+              const canIncrement = item && prod && item.qnt < prod.inStock;
+              const canDecrement = item && item.qnt > 1;
               return (
                 <li
                   key={prod.id}
                   className={clsx(
-                    "relative flex flex-col justify-between gap-3 xl:flex-row xl:gap-5",
-                    index !== fetchedBasketProducts.length - 1 &&
+                    "relative flex flex-col gap-3 xl:flex-row xl:gap-5",
+                    index !== fetchedProducts.length - 1 &&
                       "border-b border-grey-hover-stroke pb-3 xl:pb-6",
                   )}
                 >
                   <button
-                    type="button"
-                    onClick={() => removeFromBasketById(prod.id as string)}
+                    onClick={() => removeFromBasketById(prod.id)}
                     className="absolute top-0 right-0"
                   >
-                    <Image src={icon_dell} alt="cestino" />
+                    <Image src={icon_dell} alt="delete" />
                   </button>
+
                   <Image
                     src={prod.imgSrc}
-                    className="card_gradient h-auto w-16 rounded-sm object-contain object-left xl:w-60"
                     alt="product"
                     width={230}
                     height={230}
+                    className="card_gradient h-auto w-16 rounded-sm object-contain object-left xl:w-60"
                   />
+
                   <div className="flex w-full flex-col justify-between">
                     <div>
-                      <Image
-                        src={prod.imgSrc}
-                        width={142}
-                        height={24}
-                        className="h-6"
-                        alt="logo product"
-                      />
                       <h2 className="input_R_18 mt-2 line-clamp-3 max-w-[412px]">{prod.name}</h2>
                     </div>
+
                     <div className="mt-2 flex items-center justify-between">
                       <div className="flex gap-2 rounded-sm border border-stroke-grey p-2">
                         <button
                           type="button"
-                          className="size-11"
-                          onClick={() => decrementProductQuantity(prod.id as string)}
+                          disabled={!canDecrement}
+                          className={clsx(btnBase, !canDecrement ? btnDisabled : btnActive)}
+                          onClick={() => canDecrement && decrementQnt(prod.id)}
                         >
                           -
                         </button>
+
                         <div className="flex size-11 items-center justify-center">
-                          <span>{basket.find((item) => item.id === prod.id)?.qnt || 0}</span>
+                          {item?.qnt ?? 0}
                         </div>
+
                         <button
                           type="button"
-                          className="size-11"
-                          onClick={() => incrementProductQuantity(prod.id)}
+                          disabled={!canIncrement}
+                          className={clsx(btnBase, !canIncrement ? btnDisabled : btnActive)}
+                          onClick={() => canIncrement && incrementQnt(prod.id)}
                         >
                           +
                         </button>
                       </div>
 
                       <PricesBox
-                        oldPrice={calcProductPrice(prod.id)?.oldPrice}
-                        price={calcProductPrice(prod.id)?.price}
+                        price={price.price}
+                        oldPrice={price.oldPrice}
                         place="main-card-product"
                       />
                     </div>
@@ -147,6 +186,7 @@ export default function CardSection() {
                 </li>
               );
             })}
+
             {basket.length === 0 && (
               <li className="text-center">
                 Il carrello è vuoto{" "}
@@ -156,7 +196,8 @@ export default function CardSection() {
               </li>
             )}
           </ul>
-          <RepilogoComponent totalPrice={calcTotalePrice()} basket={basket} />
+
+          <RepilogoComponent totalPrice={calcTotal()} basket={basket} />
         </div>
       </div>
     </section>

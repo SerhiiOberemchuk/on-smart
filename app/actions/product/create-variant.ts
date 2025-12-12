@@ -18,7 +18,7 @@ export async function createVariant({
     price: string;
     oldPrice: string | null;
     inStock: number;
-    toOrder: boolean;
+    isOnOrder: boolean;
     imgSrc: string;
   };
 }): Promise<{ success: boolean; error?: string }> {
@@ -63,7 +63,7 @@ export async function createVariant({
       price: newData.price,
       oldPrice: newData.oldPrice,
       inStock: newData.inStock,
-      toOrder: newData.toOrder,
+      isOnOrder: newData.isOnOrder,
       imgSrc: newData.imgSrc,
 
       brand_slug: parent.brand_slug,

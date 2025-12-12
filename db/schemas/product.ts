@@ -26,7 +26,7 @@ export const productsSchema = mysqlTable(
     oldPrice: decimal("old_price", { precision: 10, scale: 2 }),
     rating: decimal("rating", { precision: 2, scale: 1 }).default("5.0"),
     inStock: int("in_stock").notNull(),
-    toOrder: boolean("to_order").default(false).notNull(),
+    isOnOrder: boolean("is_on_order").default(false).notNull(),
     imgSrc: json("imgSrc").$type<string>().notNull(),
     hasVariants: boolean("has_variants").default(false).notNull(),
     variants: json("variants").$type<string[]>(),

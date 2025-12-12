@@ -24,7 +24,7 @@ export default function ModalAddVariant({
   const [price, setPrice] = useState("");
   const [oldPrice, setOldPrice] = useState("");
   const [inStock, setInStock] = useState(0);
-  const [toOrder, setToOrder] = useState(false);
+  const [isOnOrder, setToOrder] = useState(false);
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -78,7 +78,7 @@ export default function ModalAddVariant({
           price: price || "0",
           oldPrice: oldPrice || null,
           inStock,
-          toOrder,
+          isOnOrder,
           imgSrc: upload.fileUrl,
         },
       });
@@ -177,7 +177,7 @@ export default function ModalAddVariant({
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={toOrder}
+                checked={isOnOrder}
                 onChange={(e) => setToOrder(e.target.checked)}
               />
               Під замовлення

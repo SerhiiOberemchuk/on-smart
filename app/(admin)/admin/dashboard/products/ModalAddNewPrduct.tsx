@@ -214,7 +214,7 @@ export default function ModalAddNewPrduct({ isEditProd }: { isEditProd?: boolean
           />
           <InputAdminStyle
             className="my-auto ml-3"
-            {...register("toOrder")}
+            {...register('isOnOrder')}
             type="checkbox"
             input_title="Товар під замовлення"
           />

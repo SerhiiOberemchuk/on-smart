@@ -30,7 +30,7 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
     "price",
     "oldPrice",
     "inStock",
-    "toOrder",
+    "isOnOrder",
   ]);
   const [isPendingUlpoadMainFoto, startTransitionUpload] = useTransition();
   const [fotoToUpload, setFotoToUpload] = useState<File | null>(null);
@@ -217,9 +217,9 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
           <InputAdminStyle
             input_title="Товар під замовлення"
             type="checkbox"
-            {...register("toOrder")}
+            {...register("isOnOrder")}
             // checked={product.toOrder}
-            defaultChecked={product.toOrder}
+            defaultChecked={product.isOnOrder}
             className="mb-0 flex items-center gap-3"
           />
         </div>

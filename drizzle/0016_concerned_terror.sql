@@ -1,0 +1,1 @@
+ALTER TABLE `products` RENAME COLUMN `to_order` TO `is_on_order`;
