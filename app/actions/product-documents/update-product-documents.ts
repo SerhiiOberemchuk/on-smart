@@ -3,6 +3,7 @@
 import { db } from "@/db/db";
 import { productDocumentsSchema, ProductDocumentsType } from "@/db/schemas/product-documents";
 import { eq } from "drizzle-orm";
+import { updateTag } from "next/cache";
 
 export async function updateProductDocumentsById(props: ProductDocumentsType) {
   try {
@@ -19,7 +20,7 @@ export async function updateProductDocumentsById(props: ProductDocumentsType) {
       .where(eq(productDocumentsSchema.product_id, props.product_id));
 
     console.log("response create document", response);
-
+    updateTag("product_details_" + props.product_id);
     return { success: true, error: null, data: response[0].serverStatus };
   } catch (error) {
     return { success: false, error };

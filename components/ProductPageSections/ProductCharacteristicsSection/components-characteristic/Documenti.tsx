@@ -13,20 +13,22 @@ export default function Documenti({
 }) {
   return (
     <div className={twMerge("flex flex-col gap-3", className)}>
-      {data.link.map((link) => {
-        return (
-          <Link
-            href={link}
-            key={link}
-            download={true}
-            className="flex items-center gap-1 hover:text-yellow-500"
-            rel="noopener noreferrer"
-          >
-            <Image src={icon_document} alt="Document icon" /> {data.title}
-            <Image src={icon_download} alt="Download icon" />
-          </Link>
-        );
-      })}
+      {data &&
+        data.documents.length &&
+        data.documents.map((item) => {
+          return (
+            <Link
+              href={item.link}
+              key={item.title}
+              download={true}
+              className="flex items-center gap-1 hover:text-yellow-500"
+              rel="noopener noreferrer"
+            >
+              <Image src={icon_document} alt="Document icon" /> {item.title}
+              <Image src={icon_download} alt="Download icon" />
+            </Link>
+          );
+        })}
     </div>
   );
 }

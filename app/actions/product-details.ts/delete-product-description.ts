@@ -1,17 +1,17 @@
 "use server";
 
 import { db } from "@/db/db";
-import { productDescrizioneSchema } from "@/db/schemas/product-details";
 import { eq } from "drizzle-orm";
 import { deleteFileFromS3 } from "../files/uploadFile";
+import { productDescriptionSchema } from "@/db/schemas/product-details";
 
 export async function deleteProductDescriptionById({ id }: { id: string }) {
   try {
     const response = await db
       .select()
-      .from(productDescrizioneSchema)
-      .where(eq(productDescrizioneSchema.product_id, id));
-    await db.delete(productDescrizioneSchema);
+      .from(productDescriptionSchema)
+      .where(eq(productDescriptionSchema.product_id, id));
+    await db.delete(productDescriptionSchema);
     const images = response[0].images ?? [];
     if (images.length > 0) {
       const res = await Promise.allSettled(response[0].images.map((i) => deleteFileFromS3(i)));

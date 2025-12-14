@@ -1,26 +1,11 @@
 import { int, json, mysqlTable, text, varchar } from "drizzle-orm/mysql-core";
 import { ulid } from "ulid";
 
-export const productDescrizioneSchema = mysqlTable("product_descrizione", {
+export const productDescriptionSchema = mysqlTable("product_descrizione", {
   product_id: varchar("product_id", { length: 36 }).notNull(),
   images: json("images").$type<string[]>().notNull().default([]),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description").notNull(),
-});
-
-export const productSpecificheSchema = mysqlTable("product_specifiche", {
-  product_id: varchar("product_id", { length: 36 }).notNull(),
-  images: json("images").$type<string[]>().notNull().default([]),
-  title: varchar("title", { length: 255 }).notNull(),
-  description: json("description")
-    .$type<
-      {
-        title: string;
-        items: { name: string; value: string }[];
-      }[]
-    >()
-    .notNull()
-    .default([]),
 });
 
 export const productValutazioneSchema = mysqlTable("product_valutazione", {
@@ -35,4 +20,4 @@ export const productValutazioneSchema = mysqlTable("product_valutazione", {
   date: varchar("date", { length: 30 }).notNull(),
 });
 
-export type ProductDescriptionType = typeof productDescrizioneSchema.$inferSelect;
+export type ProductDescriptionType = typeof productDescriptionSchema.$inferSelect;

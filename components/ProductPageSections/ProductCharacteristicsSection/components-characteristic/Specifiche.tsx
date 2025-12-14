@@ -21,9 +21,10 @@ export default function Specifiche({
       <div className="flex flex-1 flex-col gap-3 rounded-sm bg-background p-3">
         <h2 className="H4M">{data.title}</h2>
         <ul className="mt-1 flex flex-col gap-3">
-          {data.description.map((item, index) => (
-            <li key={item.title + index} className="flex flex-col gap-1">
-              <h3 className="H5 p-1">{item.title}</h3>
+          {data.groups.map((item, index) => (
+            <li key={item.groupTitle + index} className="flex flex-col gap-1">
+              <h3 className="H5 p-1">{item.groupTitle}</h3>
+
               <ul className="flex flex-col">
                 {item.items.map((subItem, index) => (
                   <li
