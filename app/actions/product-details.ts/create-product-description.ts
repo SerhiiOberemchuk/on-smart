@@ -1,11 +1,11 @@
 "use server";
 
 import { db } from "@/db/db";
-import { ProductDescriptionType, productDescrizioneSchema } from "@/db/schemas/product-details";
+import { productDescriptionSchema, ProductDescriptionType } from "@/db/schemas/product-details";
 
 export async function createProductDescriptionById(props: ProductDescriptionType) {
   try {
-    await db.insert(productDescrizioneSchema).values(props);
+    await db.insert(productDescriptionSchema).values(props);
 
     return {
       success: true,
