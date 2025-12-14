@@ -18,7 +18,7 @@ export async function uploadFile({
   // ext = file.name.split(".").pop()!;
   if (sub_bucket === "categories" || sub_bucket === "products") {
     buffer = await sharp(buffer)
-      .resize({ width: 326, height: 326, fit: "cover", position: "center" })
+      .resize({ width: 532, height: 532, fit: "cover", position: "center" })
       .webp({ quality: 100 })
       .toBuffer();
   } else if (sub_bucket === "brands") {

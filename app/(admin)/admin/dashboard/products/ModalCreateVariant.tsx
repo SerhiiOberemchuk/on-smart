@@ -9,13 +9,14 @@ import { toast } from "react-toastify";
 import { uploadFile } from "@/app/actions/files/uploadFile";
 import { createProductVariant } from "@/app/actions/product/create-product-variant";
 import { FILE_MAX_SIZE } from "../categories/ModalCategoryForm";
+import { Product } from "@/db/schemas/product";
 
 export default function ModalAddVariant({
   parent,
   isOpen,
   onClose,
 }: {
-  parent: { id: string; slug: string };
+  parent: Product;
   isOpen: boolean;
   onClose: () => void;
 }) {
@@ -103,7 +104,7 @@ export default function ModalAddVariant({
       <div className="relative w-[90%] max-w-[900px] rounded-xl bg-background p-6 shadow-lg">
         <ButtonXDellete className="absolute top-4 right-4" onClick={onClose} />
 
-        <h2 className="mb-5 text-xl font-semibold">Додати варіант до товару</h2>
+        <h2 className="mb-5 text-xl font-semibold">Додати варіант до товару {parent.nameFull}</h2>
 
         <div className="grid grid-cols-3 gap-6">
           <div>

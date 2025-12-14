@@ -45,7 +45,7 @@ export default function SelectProductSection({ product }: { product: Product }) 
         return;
       }
       try {
-        const res = await getProductsByIds(product.variants!);
+        const res = await getProductsByIds([...product.variants, product.id]);
         if (res.data && res.data.length > 0) {
           setVariantsProduct(res.data as Product[]);
         }

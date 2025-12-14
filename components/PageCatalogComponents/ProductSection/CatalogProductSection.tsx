@@ -4,7 +4,7 @@ import { getAllProducts } from "@/app/actions/product/get-all-products";
 import CardProduct from "@/components/ProductCard/CardProduct";
 import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import styles from "./product.module.css";
+import styles from "./product-catalogo.module.css";
 import { SORT_OPTIONS_PARAMS } from "@/types/catalog-filter-options.types";
 import { useQueryState } from "nuqs";
 import { Product } from "@/db/schemas/product";

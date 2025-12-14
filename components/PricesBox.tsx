@@ -33,7 +33,7 @@ export default function PricesBox({
         <span
           className={twMerge(
             "H3 text-nowrap text-white",
-            oldPrice && "text-red",
+            Number(oldPrice) && "text-red",
             place === "dialog-cart-product-variant" && "H4M",
           )}
         >
