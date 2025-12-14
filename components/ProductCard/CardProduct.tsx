@@ -10,8 +10,19 @@ import { Product } from "@/db/schemas/product";
 import clsx from "clsx";
 
 export default function CardProduct({ className, ...product }: Product & { className?: string }) {
-  const { name, price, imgSrc, id, category_slug, brand_slug, slug, oldPrice, rating, inStock } =
-    product;
+  const {
+    name,
+    price,
+    imgSrc,
+    id,
+    category_slug,
+    brand_slug,
+    slug,
+    oldPrice,
+    rating,
+    inStock,
+    nameFull,
+  } = product;
 
   return (
     <article className={clsx(styles.card, className)}>
@@ -30,7 +41,7 @@ export default function CardProduct({ className, ...product }: Product & { class
           <h2
             className="body_R_20 two_line_ellipsis"
             data-tooltip-id="card-title-tooltip"
-            data-tooltip-content={name}
+            data-tooltip-content={nameFull}
           >
             {name}
           </h2>

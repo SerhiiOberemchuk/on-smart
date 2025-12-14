@@ -12,11 +12,9 @@ export async function updateProductById({
   id: Product["id"];
   data: Partial<Omit<Product, "id">>;
 }) {
-  updateTag("get_all_product");
-
   try {
     await db.update(productsSchema).set(data).where(eq(productsSchema.id, id));
-
+    updateTag("get_all_product");
     return { success: true, error: false };
   } catch (error) {
     return { success: false, error };

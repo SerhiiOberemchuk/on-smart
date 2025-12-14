@@ -2,7 +2,7 @@
 
 import { db } from "@/db/db";
 import { productsSchema, type Product } from "@/db/schemas/product";
-import { eq, and, isNotNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { deleteFileFromS3 } from "../files/uploadFile";
 
@@ -12,46 +12,46 @@ export async function deleteProductVariant({
   product_variant_id: Product["id"];
 }) {
   try {
-    const variants = await db
-      .select({
-        id: productsSchema.id,
-        imgSrc: productsSchema.imgSrc,
-        parent_product_id: productsSchema.parent_product_id,
-      })
+    const variantProduct = await db
+      .select()
       .from(productsSchema)
-      .where(
-        and(eq(productsSchema.id, product_variant_id), isNotNull(productsSchema.parent_product_id)),
-      )
-      .limit(1);
+      .where(eq(productsSchema.id, product_variant_id));
 
-    if (!variants.length) {
+    if (!variantProduct.length) {
       return {
         success: false,
         error: "Variant not found",
       };
     }
 
-    const variant = variants[0];
+    const variant = variantProduct[0];
 
-    await db.delete(productsSchema).where(eq(productsSchema.id, product_variant_id));
+    await db.delete(productsSchema).where(eq(productsSchema.id, variant.id));
 
     if (variant.imgSrc) {
       await deleteFileFromS3(variant.imgSrc);
     }
 
     if (variant.parent_product_id) {
-      const siblings = await db
-        .select({ id: productsSchema.id })
-        .from(productsSchema)
-        .where(eq(productsSchema.parent_product_id, variant.parent_product_id));
+      console.log(" if (variant.parent_product_id)");
 
-      await db
-        .update(productsSchema)
-        .set({
-          variants: siblings.map((v) => v.id),
-          hasVariants: siblings.length > 0,
-        })
+      const siblings = await db
+        .select()
+        .from(productsSchema)
         .where(eq(productsSchema.id, variant.parent_product_id));
+
+      console.log({ siblings });
+
+      if (siblings[0].variants?.length) {
+        const newVariants = siblings[0].variants.filter((i) => i !== product_variant_id);
+        await db
+          .update(productsSchema)
+          .set({
+            variants: newVariants,
+            hasVariants: newVariants.length > 0,
+          })
+          .where(eq(productsSchema.id, variant.parent_product_id));
+      }
     }
 
     updateTag("get_all_product");

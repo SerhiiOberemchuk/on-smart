@@ -48,7 +48,7 @@ export const DialogProductCard = ({
         const resp = await getFotoFromGallery({ parent_product_id: idToFetchFoto });
         if (resp.data && resp.data.images.length > 0) {
           setImages([...resp.data.images, imgSrc]);
-        } else if (resp.data?.images.length === 0) {
+        } else {
           setImages([imgSrc]);
         }
       } catch (error) {

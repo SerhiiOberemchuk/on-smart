@@ -103,6 +103,7 @@ export default function CardDialog() {
         if (product?.variants?.length === 0 || !product?.variants || product.variants === undefined)
           return;
         const variantsData = await getProductsByIds([product.id, ...product.variants]);
+
         if (variantsData.data && variantsData.data?.length > 0) {
           setVariantsOfProduct(variantsData.data);
         }
@@ -216,30 +217,14 @@ export default function CardDialog() {
                                         qnt: 1,
                                       } as Product & { qnt: number });
                                     }}
-                                    // className="sr-only"
                                   />
-                                  {/* <div className="mr-1 size-4 shrink-0">
-                                    <Image
-                                      src={checkboxIconChecked}
-                                      className={styles.checked}
-                                      alt="Checkbox icon"
-                                      width={16}
-                                      height={16}
-                                    />
-                                    <Image
-                                      className={styles.check}
-                                      src={checkboxIcon}
-                                      alt="Checkbox icon"
-                                      width={16}
-                                      height={16}
-                                    />
-                                  </div> */}
+
                                   <Image
                                     src={variant.imgSrc || "/logo.svg"}
                                     alt={variant.name}
                                     width={80}
                                     height={80}
-                                    className="h-10 w-10 object-contain object-center lg:h-20 lg:w-20"
+                                    className="h-10 w-10 object-contain object-center px-3 lg:h-20 lg:w-20"
                                   />
                                   <span className="pointer-events-none line-clamp-1">
                                     {variant.name}

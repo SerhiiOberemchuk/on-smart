@@ -70,12 +70,12 @@ export default function CatalogoPage() {
   const filters = getCatalogFilters();
   return (
     <section className="pb-5 lg:pb-16">
-      <Suspense fallback={<p>Carico...</p>}>
+      <Suspense fallback={<p>Caricamento...</p>}>
         <HeaderCatalogo />
       </Suspense>
 
       <div className="xl:bg-background">
-        <Suspense fallback={<p>Carico...</p>}>
+        <Suspense fallback={<p>Caricamento...</p>}>
           <MobileFilterSection filtersAction={filters} />
         </Suspense>
 
@@ -84,7 +84,7 @@ export default function CatalogoPage() {
             <ListFiltereOptions className="hidden lg:flex" filtersAction={filters} />
           </Suspense>
 
-          <Suspense fallback={<p>Carico...</p>}>
+          <Suspense fallback={<p>Caricamento...</p>}>
             <CatalogProductSection />
           </Suspense>
         </div>
