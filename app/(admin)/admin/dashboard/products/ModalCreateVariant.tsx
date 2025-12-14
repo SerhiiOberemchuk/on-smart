@@ -7,7 +7,7 @@ import ButtonXDellete from "../ButtonXDellete";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import { uploadFile } from "@/app/actions/files/uploadFile";
-import { createVariant } from "@/app/actions/product/create-variant";
+import { createProductVariant } from "@/app/actions/product/create-product-variant";
 import { FILE_MAX_SIZE } from "../categories/ModalCategoryForm";
 
 export default function ModalAddVariant({
@@ -70,7 +70,7 @@ export default function ModalAddVariant({
         return;
       }
 
-      const res = await createVariant({
+      const res = await createProductVariant({
         parentId: parent.id,
         newData: {
           name,

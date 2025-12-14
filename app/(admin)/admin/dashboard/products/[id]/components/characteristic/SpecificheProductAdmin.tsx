@@ -6,10 +6,11 @@ import InputAdminStyle from "../../../../InputComponent";
 import { updateOrCreateSpecifiche } from "@/app/actions/product-specifiche/update-or-create-specifiche";
 import { uploadFile } from "@/app/actions/files/uploadFile";
 import { toast } from "react-toastify";
-import { getSpecificheById } from "@/app/actions/product-specifiche/get-specifiche";
-import { deleteSpecificheImage } from "@/app/actions/product-specifiche/delete-specifiche";
+
 import Image from "next/image";
 import ButtonXDellete from "../../../../ButtonXDellete";
+import { getProductSpecificheById } from "@/app/actions/product-specifiche/get-product-specifiche";
+import { deleteProductSpecificheImage } from "@/app/actions/product-specifiche/delete-product-specifiche";
 
 export default function SpecificheProductAdmin({ id }: { id: string }) {
   const [title, setTitle] = useState("");
@@ -25,7 +26,7 @@ export default function SpecificheProductAdmin({ id }: { id: string }) {
 
   useEffect(() => {
     const fetch = async () => {
-      const res = await getSpecificheById(id);
+      const res = await getProductSpecificheById(id);
       if (res.data) {
         setTitle(res.data.title);
         setImages(res.data.images || []);
@@ -52,7 +53,7 @@ export default function SpecificheProductAdmin({ id }: { id: string }) {
   };
 
   const handleDeleteImage = async (img: string) => {
-    await deleteSpecificheImage(id, img);
+    await deleteProductSpecificheImage(id, img);
     setImages(images.filter((i) => i !== img));
     toast.success("Фото видалено");
   };

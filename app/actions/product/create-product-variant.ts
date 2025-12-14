@@ -7,7 +7,7 @@ import slugify from "@sindresorhus/slugify";
 import { ulid } from "ulid";
 import { updateTag } from "next/cache";
 
-export async function createVariant({
+export async function createProductVariant({
   parentId,
   newData,
 }: {

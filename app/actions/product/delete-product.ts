@@ -3,29 +3,57 @@
 import { db } from "@/db/db";
 import { Product, productsSchema } from "@/db/schemas/product";
 import { eq } from "drizzle-orm";
+
+import { deleteFotoGallery } from "../foto-galery/delete-foto-gallery";
+import { deleteProductDescriptionById } from "../product-details.ts/delete-product-description";
+import { deleteProductDocuments } from "../product-documents/delete-product-documents";
+import { deleteFileFromS3 } from "../files/uploadFile";
 import { updateTag } from "next/cache";
+import { deleteProductSpecificheById } from "../product-specifiche/delete-product-specifiche";
 
 export async function deleteProductById(id: Product["id"]) {
   if (!id) {
-    return {
-      success: false,
-      error: "Id requared",
-    };
+    return { success: false, error: "Id required" };
   }
-  updateTag("get_all_product");
 
   try {
-    const response = await db.delete(productsSchema).where(eq(productsSchema.id, id));
-    console.log(response);
+    const product = await db
+      .select()
+      .from(productsSchema)
+      .where(eq(productsSchema.id, id))
+      .limit(1);
 
-    return {
-      success: true,
-      error: null,
-    };
+    if (!product.length) {
+      return {
+        success: false,
+        error: "Product not found",
+      };
+    }
+    console.log(product);
+
+    if (product[0].hasVariants) {
+      return {
+        success: false,
+        error: "Product has variants",
+      };
+    }
+
+    await db.delete(productsSchema).where(eq(productsSchema.id, id));
+
+    await deleteFotoGallery(id);
+    await deleteProductDescriptionById({ id });
+    await deleteProductDocuments(id);
+    await deleteProductSpecificheById(id);
+
+    if (product[0].imgSrc) {
+      await deleteFileFromS3(product[0].imgSrc);
+    }
+
+    updateTag("get_all_product");
+
+    return { success: true };
   } catch (error) {
-    return {
-      success: false,
-      error,
-    };
+    console.error("[deleteProductById]", error);
+    return { success: false, error };
   }
 }

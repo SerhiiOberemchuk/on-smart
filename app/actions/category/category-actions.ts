@@ -23,18 +23,18 @@ export async function createCategoryProducts(category: CategoryTypes) {
 export async function getAllCategoryProducts() {
   "use cache";
   cacheTag("all_categories");
-  console.log("Log before fatch brands");
+  // console.log("Log before fatch brands");
 
   try {
     const result = await safeQuery(() => db.select().from(categoryProductsSchema));
-    console.log("Result fatch brands", result);
+    // console.log("Result fatch brands", result);
 
     return {
       success: true,
       data: result,
     };
   } catch (error) {
-    console.log("Error fatch brands: ", error);
+    // console.log("Error fatch brands: ", error);
 
     return { success: false, error, data: [] };
   }
