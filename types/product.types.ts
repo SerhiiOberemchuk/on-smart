@@ -1,31 +1,12 @@
-// type Prices = { price: number; oldPrice?: number | null };
+import { ProductDescriptionType } from "@/db/schemas/product-details";
+import { ProductDocumentsType } from "@/db/schemas/product-documents";
+import { ProductSpecificheType } from "@/db/schemas/product-specifiche";
 
-// export type Product = Prices & {
-//   id: string;
-//   brand: string;
-//   name: string;
-//   description: string;
-//   imgSrc: string;
-//   category: string;
-//   quantity: number;
-//   rating: number;
-//   inStock: number;
-//   images: string[];
-//   logo: string;
-//   variants?: { id: string }[];
-// };
 export type Product_Details = {
   product_id: string;
-  characteristics_descrizione: { images: string[]; title: string; description: string };
-  characteristics_specifiche: {
-    images: string[];
-    title: string;
-    description: {
-      title: string;
-      items: { name: string; value: string }[];
-    }[];
-  };
-  characteristics_documenti: { link: string[]; title: string };
+  characteristics_descrizione: Omit<ProductDescriptionType, "product_id">;
+  characteristics_specifiche: Omit<ProductSpecificheType, "product_id">;
+  characteristics_documenti: Omit<ProductDocumentsType, "product_id">;
   characteristics_valutazione: {
     recensioni: {
       clientName: string;

@@ -8,7 +8,7 @@ export default function CategoryBrandSlugIdPage({
 }) {
   return (
     <Suspense fallback={<p>Carico...</p>}>
-      <PageSuspenseCategoryBrandSlug params={params} />;
+      <PageSuspenseCategoryBrandSlug params={params} />
     </Suspense>
   );
 }

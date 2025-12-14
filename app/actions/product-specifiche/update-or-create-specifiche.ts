@@ -3,6 +3,7 @@
 import { db } from "@/db/db";
 import { productSpecificheSchema } from "@/db/schemas/product-specifiche";
 import { eq } from "drizzle-orm";
+import { updateTag } from "next/cache";
 
 export async function updateOrCreateSpecifiche(data: {
   product_id: string;
@@ -31,7 +32,7 @@ export async function updateOrCreateSpecifiche(data: {
     }
 
     await db.insert(productSpecificheSchema).values({ product_id, ...rest });
-
+    updateTag("product_details_" + product_id);
     return { success: true, created: true };
   } catch (error) {
     console.error(error);

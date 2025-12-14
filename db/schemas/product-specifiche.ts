@@ -17,4 +17,3 @@ export const productSpecificheSchema = mysqlTable("product_specifiche", {
 });
 
 export type ProductSpecificheType = typeof productSpecificheSchema.$inferSelect;
-export type ProductSpecificheInput = typeof productSpecificheSchema.$inferInsert;
