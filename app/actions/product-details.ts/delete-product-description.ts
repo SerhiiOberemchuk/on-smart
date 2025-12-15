@@ -3,7 +3,7 @@
 import { db } from "@/db/db";
 import { eq } from "drizzle-orm";
 import { deleteFileFromS3 } from "../files/uploadFile";
-import { productDescriptionSchema } from "@/db/schemas/product-details";
+import { productDescriptionSchema } from "@/db/schemas/product-details.schema";
 
 export async function deleteProductDescriptionById({ id }: { id: string }) {
   try {

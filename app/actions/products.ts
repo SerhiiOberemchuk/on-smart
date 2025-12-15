@@ -1,6 +1,5 @@
-import { Product } from "@/db/schemas/product";
-
-export const allProducts: Product[] = [
+import { ProductType } from "@/db/schemas/product.schema";
+export const allProducts: ProductType[] = [
   {
     id: "1",
     brand_slug: "Mach Power",
@@ -38,7 +37,7 @@ export const allProducts: Product[] = [
 ];
 
 // ========== 2. Інші товари ==========
-export const otherProducts: Product[] = allProducts.map((p, i) => ({
+export const otherProducts: ProductType[] = allProducts.map((p, i) => ({
   ...p,
   id: `o${i + 1}`,
   price: (Number(p.price) * 0.9).toFixed(2),
@@ -47,7 +46,7 @@ export const otherProducts: Product[] = allProducts.map((p, i) => ({
 }));
 
 // ========== 3. Рекомендовані ==========
-export const recomedProducts: Product[] = allProducts.map((p, i) => ({
+export const recomedProducts: ProductType[] = allProducts.map((p, i) => ({
   ...p,
   id: `r${i + 1}`,
   rating: Math.min(5, Number(p.rating) + 0.5).toString(),

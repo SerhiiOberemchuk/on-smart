@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/db";
-import { productFotoGallery } from "@/db/schemas/product-foto-gallery";
+import { productFotoGallery } from "@/db/schemas/product-foto-gallery.schema";
 import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 

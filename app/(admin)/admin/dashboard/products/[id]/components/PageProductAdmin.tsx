@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState, useTransition } from "react";
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 import { SubmitHandler, useForm } from "react-hook-form";
 import InputAdminStyle from "../../../InputComponent";
 import ButtonYellow from "@/components/BattonYellow";
@@ -20,7 +20,7 @@ import { objectFromPickedKeys } from "../../helpers/objectFromPickedKeys";
 import FotoGaleryProduct from "./FotoGaleryProduct";
 import CharacteristicProductSection from "./characteristic/CharacteristicProductSection";
 
-export default function PageProductAdmin({ dataAction }: { dataAction: Promise<Product> }) {
+export default function PageProductAdmin({ dataAction }: { dataAction: Promise<ProductType> }) {
   const product = use(dataAction);
   const mainPartDataProduct = objectFromPickedKeys(product, [
     "name",

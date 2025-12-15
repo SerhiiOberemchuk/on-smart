@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/db";
-import { productsSchema, type Product } from "@/db/schemas/product";
+import { productsSchema, type ProductType } from "@/db/schemas/product.schema";
 import { eq } from "drizzle-orm";
 import slugify from "@sindresorhus/slugify";
 import { ulid } from "ulid";
@@ -11,7 +11,7 @@ export async function createProductVariant({
   parentId,
   newData,
 }: {
-  parentId: Product["id"];
+  parentId: ProductType["id"];
   newData: {
     name: string;
     nameFull: string;

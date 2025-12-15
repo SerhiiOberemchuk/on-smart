@@ -1,13 +1,13 @@
 "use server";
 
 import { db } from "@/db/db";
-import { Product } from "@/db/schemas/product";
-import { productFotoGallery } from "@/db/schemas/product-foto-gallery";
+import { ProductType } from "@/db/schemas/product.schema";
+import { productFotoGallery } from "@/db/schemas/product-foto-gallery.schema";
 import { getFotoFromGallery } from "./get-foto-from-gallery";
 import { deleteFileFromS3 } from "../files/uploadFile";
 import { eq } from "drizzle-orm";
 
-export async function deleteFotoGallery(product_id: Product["id"]) {
+export async function deleteFotoGallery(product_id: ProductType["id"]) {
   try {
     const gallery = await getFotoFromGallery({
       parent_product_id: product_id,

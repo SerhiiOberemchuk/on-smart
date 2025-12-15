@@ -13,7 +13,7 @@ import Descrizione from "./components-characteristic/Descrizione";
 import Specifiche from "./components-characteristic/Specifiche";
 import Documenti from "./components-characteristic/Documenti";
 import Valutazione from "./components-characteristic/Valutazione";
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 
 const calcCurrentIndex = (prevTab: TabTypeCaracteristics) =>
   TABS_CHARACTERISTICS.findIndex((tab) => tab.searchParam === prevTab);
@@ -23,7 +23,7 @@ export default function ProductCharacteristicsSection({
   product,
 }: {
   productDetail: Product_Details;
-  product: Product;
+  product: ProductType;
 }) {
   const {
     characteristics_descrizione,

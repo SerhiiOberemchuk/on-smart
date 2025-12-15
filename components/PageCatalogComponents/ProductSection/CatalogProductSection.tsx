@@ -7,10 +7,10 @@ import { twMerge } from "tailwind-merge";
 import styles from "./product-catalogo.module.css";
 import { SORT_OPTIONS_PARAMS } from "@/types/catalog-filter-options.types";
 import { useQueryState } from "nuqs";
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 
 export default function CatalogProductSection({ className }: { className?: string }) {
-  const [products, setProducts] = useState<Product[] | null>(null);
+  const [products, setProducts] = useState<ProductType[] | null>(null);
   const [sortParam] = useQueryState(SORT_OPTIONS_PARAMS.PARAM_NAME);
   const [activePage, setActivePage] = useState(1);
   const maxPages = 5;

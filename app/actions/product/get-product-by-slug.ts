@@ -1,10 +1,10 @@
 "use server";
 
 import { db } from "@/db/db";
-import { Product, productsSchema } from "@/db/schemas/product";
+import { ProductType, productsSchema } from "@/db/schemas/product.schema";
 import { eq } from "drizzle-orm";
 
-export async function getProductBySlug(slug: Product["slug"]) {
+export async function getProductBySlug(slug: ProductType["slug"]) {
   if (!slug) {
     return { success: false, error: "Id as requared!" };
   }

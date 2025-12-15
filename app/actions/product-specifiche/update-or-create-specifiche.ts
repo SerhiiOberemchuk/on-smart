@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/db";
-import { productSpecificheSchema } from "@/db/schemas/product-specifiche";
+import { productSpecificheSchema } from "@/db/schemas/product-specifiche.schema";
 import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 

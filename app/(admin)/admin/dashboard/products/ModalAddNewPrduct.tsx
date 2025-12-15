@@ -1,7 +1,7 @@
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useModalStore } from "../../store/modal-store";
 import InputAdminStyle from "../InputComponent";
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 import ButtonYellow from "@/components/BattonYellow";
 import { useEffect, useState, useTransition } from "react";
 import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
@@ -21,11 +21,11 @@ import ButtonXDellete from "../ButtonXDellete";
 
 export default function ModalAddNewPrduct({ isEditProd }: { isEditProd?: boolean }) {
   const { type, isOpen, closeModal } = useModalStore();
-  const { register, handleSubmit, setValue } = useForm<Product>();
+  const { register, handleSubmit, setValue } = useForm<ProductType>();
   const [isPendingCreate, startTransitionCreateProduct] = useTransition();
   const [fileToUpload, setFileToUpload] = useState<File | null>(null);
   const router = useRouter();
-  const onSubmit: SubmitHandler<Product> = (data) => {
+  const onSubmit: SubmitHandler<ProductType> = (data) => {
     if (!image || !fileToUpload) {
       toast.warning("неохбхідно завантажити головне фото товару");
       return;
@@ -214,7 +214,7 @@ export default function ModalAddNewPrduct({ isEditProd }: { isEditProd?: boolean
           />
           <InputAdminStyle
             className="my-auto ml-3"
-            {...register('isOnOrder')}
+            {...register("isOnOrder")}
             type="checkbox"
             input_title="Товар під замовлення"
           />

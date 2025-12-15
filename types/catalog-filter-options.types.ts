@@ -1,4 +1,4 @@
-import { filtersSchema } from "@/db/schemas/filters-schema";
+import { filtersSchema } from "@/db/schemas/filters-schema.schema";
 
 export type FilterOption = {
   value: string;

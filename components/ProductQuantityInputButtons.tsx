@@ -1,12 +1,12 @@
 "use client";
 
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 import { HTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 
 type ProductQuantityInputButtonsProps = HTMLAttributes<HTMLDivElement> & {
-  selectedProduct: (Product & { qnt: number }) | null;
-  setSelectedProduct: React.Dispatch<React.SetStateAction<(Product & { qnt: number }) | null>>;
+  selectedProduct: (ProductType & { qnt: number }) | null;
+  setSelectedProduct: React.Dispatch<React.SetStateAction<(ProductType & { qnt: number }) | null>>;
 };
 
 export default function ProductQuantityInputButtons({

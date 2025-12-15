@@ -1,7 +1,10 @@
 "use server";
 
 import { db } from "@/db/db";
-import { productSpecificheSchema, ProductSpecificheType } from "@/db/schemas/product-specifiche";
+import {
+  productSpecificheSchema,
+  ProductSpecificheType,
+} from "@/db/schemas/product-specifiche.schema";
 import { eq } from "drizzle-orm";
 
 export async function getProductSpecificheById(product_id: ProductSpecificheType["product_id"]) {

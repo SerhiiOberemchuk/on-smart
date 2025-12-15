@@ -9,14 +9,14 @@ import { toast } from "react-toastify";
 import { uploadFile } from "@/app/actions/files/uploadFile";
 import { createProductVariant } from "@/app/actions/product/create-product-variant";
 import { FILE_MAX_SIZE } from "../categories/ModalCategoryForm";
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 
 export default function ModalAddVariant({
   parent,
   isOpen,
   onClose,
 }: {
-  parent: Product;
+  parent: ProductType;
   isOpen: boolean;
   onClose: () => void;
 }) {

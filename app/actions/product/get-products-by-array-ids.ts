@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/db";
-import { productsSchema } from "@/db/schemas/product";
+import { productsSchema } from "@/db/schemas/product.schema";
 import { inArray } from "drizzle-orm";
 
 export async function getProductsByIds(ids: string[]) {

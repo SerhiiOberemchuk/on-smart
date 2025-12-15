@@ -1,10 +1,10 @@
 "use server";
 
 import { db } from "@/db/db";
-import { Product, productsSchema } from "@/db/schemas/product";
+import { ProductType, productsSchema } from "@/db/schemas/product.schema";
 import { eq } from "drizzle-orm";
 
-export async function getProductById(id: Product["id"]) {
+export async function getProductById(id: ProductType["id"]) {
   try {
     const rows = await db.select().from(productsSchema).where(eq(productsSchema.id, id));
 

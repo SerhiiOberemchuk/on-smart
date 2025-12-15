@@ -39,4 +39,4 @@ export const productsSchema = mysqlTable(
   ],
 );
 
-export type Product = typeof productsSchema.$inferSelect;
+export type ProductType = typeof productsSchema.$inferSelect;

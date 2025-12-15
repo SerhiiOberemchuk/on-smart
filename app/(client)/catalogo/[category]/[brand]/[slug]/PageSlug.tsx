@@ -47,14 +47,14 @@ export default async function PageSlug({ slug }: { slug: string }) {
       aggregateRating: {
         "@type": "AggregateRating",
         ratingValue: product.data.rating,
-        reviewCount: productDetails?.characteristics_valutazione?.recensioni.length ?? 0,
+        reviewCount: productDetails?.characteristics_valutazione?.length ?? 0,
       },
     }),
 
     review:
-      productDetails?.characteristics_valutazione?.recensioni?.map((r) => ({
+      productDetails?.characteristics_valutazione?.map((r) => ({
         "@type": "Review",
-        author: r.clientName,
+        author: r.client_name,
         reviewBody: r.comment,
         reviewRating: {
           "@type": "Rating",

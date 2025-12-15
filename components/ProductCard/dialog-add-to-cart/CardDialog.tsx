@@ -17,7 +17,7 @@ import { useCalcTotalSum } from "@/utils/useCalcTotalSum";
 import ButtonAddToBasket from "@/components/ButtonAddToBasket";
 import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
@@ -25,11 +25,15 @@ export default function CardDialog() {
   const { isOpenDialog, product, closeDialog } = useCardDialogStore();
   const { updateBasket, showPopup } = useBasketStore();
   const [isDisabled, setIsDisabled] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<(Product & { qnt: number }) | null>(null);
-  const [selectedSupportProducts, setSelectedSupportProducts] = useState<Product[] | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<(ProductType & { qnt: number }) | null>(
+    null,
+  );
+  const [selectedSupportProducts, setSelectedSupportProducts] = useState<ProductType[] | null>(
+    null,
+  );
 
-  const [supportProducts, setSupportProducts] = useState<Product[] | null>(null);
-  const [variantsOfProduct, setVariantsOfProduct] = useState<Product[] | null>(null);
+  const [supportProducts, setSupportProducts] = useState<ProductType[] | null>(null);
+  const [variantsOfProduct, setVariantsOfProduct] = useState<ProductType[] | null>(null);
 
   const [variantsToShow, setVariantsToShow] = useState(NUMBER_OF_VARIANTS_TO_SHOW);
 
@@ -69,7 +73,7 @@ export default function CardDialog() {
     return newTotalOld.toString();
   }, [selectedProduct, selectedSupportProducts]);
 
-  const handleOnChangeSupportProduct = (product: Product) => {
+  const handleOnChangeSupportProduct = (product: ProductType) => {
     setSelectedSupportProducts((prev) => {
       if (!prev) return [product];
       const isAlreadySelected = prev.some((p) => p.id === product.id);
@@ -91,7 +95,8 @@ export default function CardDialog() {
 
   useEffect(() => {
     const setPreselectedProduct = () => {
-      if (product?.inStock) setSelectedProduct({ ...product, qnt: 1 } as Product & { qnt: number });
+      if (product?.inStock)
+        setSelectedProduct({ ...product, qnt: 1 } as ProductType & { qnt: number });
     };
     setPreselectedProduct();
     if (!product?.variants || product.variants.length === 0) {
@@ -215,7 +220,7 @@ export default function CardDialog() {
                                       setSelectedProduct({
                                         ...variant,
                                         qnt: 1,
-                                      } as Product & { qnt: number });
+                                      } as ProductType & { qnt: number });
                                     }}
                                   />
 

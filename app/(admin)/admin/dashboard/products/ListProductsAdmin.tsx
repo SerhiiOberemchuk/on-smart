@@ -6,17 +6,17 @@ import ButtonXDellete from "../ButtonXDellete";
 import { deleteProductById } from "@/app/actions/product/delete-product";
 import { toast } from "react-toastify";
 import LinkYellow from "@/components/YellowLink";
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 import { useState } from "react";
 import ModalAddVariant from "./ModalCreateVariant";
 import { deleteProductVariant } from "@/app/actions/product/delete-product-variant";
 
-export default function ListProductsAdmin({ products }: { products: Product[] }) {
+export default function ListProductsAdmin({ products }: { products: ProductType[] }) {
   const [openedProductId, setOpenedProductId] = useState<string | null>(null);
   const [variantModalOpen, setVariantModalOpen] = useState(false);
-  const [parentProduct, setParentProduct] = useState<Product | null>(null);
+  const [parentProduct, setParentProduct] = useState<ProductType | null>(null);
 
-  const openVariantModal = (product: Product) => {
+  const openVariantModal = (product: ProductType) => {
     setParentProduct(product);
     setVariantModalOpen(true);
   };

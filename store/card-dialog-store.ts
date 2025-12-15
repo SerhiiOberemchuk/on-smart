@@ -1,16 +1,16 @@
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 import { create } from "zustand";
 type CardDialogStore = {
   isOpenDialog: boolean;
 
-  product: Product | null;
-  openDialog: (product: Product) => void;
+  product: ProductType | null;
+  openDialog: (product: ProductType) => void;
   closeDialog: () => void;
 };
 
 export const useCardDialogStore = create<CardDialogStore>((set) => ({
   isOpenDialog: false,
   product: null,
-  openDialog: (product: Product) => set({ isOpenDialog: true, product }),
+  openDialog: (product: ProductType) => set({ isOpenDialog: true, product }),
   closeDialog: () => set({ isOpenDialog: false, product: null }),
 }));
