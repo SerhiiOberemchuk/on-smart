@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/db";
-import { productsSchema, type Product } from "@/db/schemas/product";
+import { productsSchema, type ProductType } from "@/db/schemas/product.schema";
 import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { deleteFileFromS3 } from "../files/uploadFile";
@@ -9,7 +9,7 @@ import { deleteFileFromS3 } from "../files/uploadFile";
 export async function deleteProductVariant({
   product_variant_id,
 }: {
-  product_variant_id: Product["id"];
+  product_variant_id: ProductType["id"];
 }) {
   try {
     const variantProduct = await db

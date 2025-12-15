@@ -1,47 +1,33 @@
 "use server";
 
-import { db } from "@/db/db";
-import { productDescriptionSchema } from "@/db/schemas/product-details";
-import { productDocumentsSchema } from "@/db/schemas/product-documents";
-import { productSpecificheSchema } from "@/db/schemas/product-specifiche";
 import { Product_Details } from "@/types/product.types";
-import { eq } from "drizzle-orm";
-import { cacheTag } from "next/cache";
+import { getProductDescriptionById } from "../product-details.ts/get-product-description";
+import { getProductSpecificheById } from "../product-specifiche/get-product-specifiche";
+import { getProductDocumentsById } from "../product-documents/get-product-documents";
+import { getProductReviews } from "../product-reviews/get-product-reviews";
 
 export async function getProductDetailsById(id: string): Promise<Product_Details> {
   "use cache";
-  cacheTag("product_details_" + id);
-  const [descr] = await db
-    .select()
-    .from(productDescriptionSchema)
-    .where(eq(productDescriptionSchema.product_id, id))
-    .limit(1);
-
-  const [specifiche] = await db
-    .select()
-    .from(productSpecificheSchema)
-    .where(eq(productSpecificheSchema.product_id, id))
-    .limit(1);
-
-  const [documents] = await db
-    .select()
-    .from(productDocumentsSchema)
-    .where(eq(productDocumentsSchema.product_id, id));
-
+  const [description, specifiche, documents, reviews] = await Promise.all([
+    getProductDescriptionById({ id }),
+    getProductSpecificheById(id),
+    getProductDocumentsById({ product_id: id }),
+    getProductReviews(id),
+  ]);
   return {
     product_id: id,
 
     characteristics_descrizione: {
-      title: descr?.title ?? "No title",
-      description: descr?.description ?? "",
-      images: descr?.images?.length ? descr.images : ["/logo.png"],
+      title: description?.data?.title ?? "No title",
+      description: description?.data?.description ?? "",
+      images: description?.data?.images?.length ? description.data.images : ["/logo.png"],
     },
 
     characteristics_specifiche: {
-      title: specifiche?.title ?? "Specifiche",
-      images: specifiche?.images?.length ? specifiche.images : ["/logo.png"],
-      groups: specifiche?.groups?.length
-        ? specifiche.groups
+      title: specifiche?.data?.title ?? "Specifiche",
+      images: specifiche?.data?.images?.length ? specifiche.data.images : ["/logo.png"],
+      groups: specifiche?.data?.groups?.length
+        ? specifiche.data.groups
         : [
             {
               groupTitle: "Specifiche",
@@ -51,13 +37,11 @@ export async function getProductDetailsById(id: string): Promise<Product_Details
     },
 
     characteristics_documenti: {
-      documents: documents?.documents?.length
-        ? documents.documents
+      documents: documents?.data?.documents?.length
+        ? documents.data.documents
         : [{ title: "Document example", link: "/logo.png" }],
     },
 
-    characteristics_valutazione: {
-      recensioni: [],
-    },
+    characteristics_valutazione: reviews.reviews ? reviews.reviews : [],
   };
 }

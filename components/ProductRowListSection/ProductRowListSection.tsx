@@ -2,10 +2,10 @@ import { Suspense } from "react";
 import ButtonsScrollSwiper from "../ButtonsScrollSwiper";
 import LinkYellow from "../YellowLink";
 import ProductsList from "./ProductList/ProductsList";
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 
 export type ProductRowListSectionProps = {
-  productsList: Product[];
+  productsList: ProductType[];
   idSection: string;
   title: string;
   isBottomLink?: boolean;

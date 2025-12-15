@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/db";
-import { Product, productsSchema } from "@/db/schemas/product";
+import { ProductType, productsSchema } from "@/db/schemas/product.schema";
 import { safeQuery } from "@/utils/safeQuery";
 import { cacheTag } from "next/cache";
 
@@ -13,7 +13,7 @@ type Props = {
 };
 export type ProductFetchResult = {
   success: boolean;
-  data: Product[] | null;
+  data: ProductType[] | null;
   error: string | null;
 };
 

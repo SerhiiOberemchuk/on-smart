@@ -1,7 +1,7 @@
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 import { twMerge } from "tailwind-merge";
 
-type Props = Pick<Product, "price" | "oldPrice"> & {
+type Props = Pick<ProductType, "price" | "oldPrice"> & {
   place:
     | "main-card-product"
     | "dialog-cart-product-footer"

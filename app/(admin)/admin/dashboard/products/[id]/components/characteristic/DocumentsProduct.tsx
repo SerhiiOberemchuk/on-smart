@@ -8,7 +8,7 @@ import { FILE_MAX_SIZE } from "../../../../categories/ModalCategoryForm";
 import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
 import { updateProductDocumentsById } from "@/app/actions/product-documents/update-product-documents";
 import { getProductDocumentsById } from "@/app/actions/product-documents/get-product-documents";
-import { ProductDocumentsType } from "@/db/schemas/product-documents";
+import { ProductDocumentsType } from "@/db/schemas/product-documents.schema";
 
 export default function DocumentsProduct({ id }: { id: string }) {
   const [file, setFile] = useState<File | null>(null);

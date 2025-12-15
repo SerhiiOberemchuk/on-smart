@@ -1,7 +1,10 @@
 "use server";
 
 import { db } from "@/db/db";
-import { productDescriptionSchema, ProductDescriptionType } from "@/db/schemas/product-details";
+import {
+  productDescriptionSchema,
+  ProductDescriptionType,
+} from "@/db/schemas/product-details.schema";
 
 export async function createProductDescriptionById(props: ProductDescriptionType) {
   try {

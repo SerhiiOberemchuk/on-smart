@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -26,7 +26,7 @@ const updateGallery = async ({
   }
 };
 
-export default function FotoGaleryProduct({ id }: { id: Product["id"] }) {
+export default function FotoGaleryProduct({ id }: { id: ProductType["id"] }) {
   const [images, setImages] = useState<string[]>([]);
   const [isUploading, setUploading] = useState(false);
 

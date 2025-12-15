@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/db";
-import { Product, productsSchema } from "@/db/schemas/product";
+import { ProductType, productsSchema } from "@/db/schemas/product.schema";
 import { eq } from "drizzle-orm";
 
 import { deleteFotoGallery } from "../foto-galery/delete-foto-gallery";
@@ -11,7 +11,7 @@ import { deleteFileFromS3 } from "../files/uploadFile";
 import { updateTag } from "next/cache";
 import { deleteProductSpecificheById } from "../product-specifiche/delete-product-specifiche";
 
-export async function deleteProductById(id: Product["id"]) {
+export async function deleteProductById(id: ProductType["id"]) {
   if (!id) {
     return { success: false, error: "Id required" };
   }

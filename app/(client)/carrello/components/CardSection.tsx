@@ -15,7 +15,7 @@ import icon_dell from "@/assets/icons/icon_delete.svg";
 
 import { useBasketStore } from "@/store/basket-store";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
-import type { Product } from "@/db/schemas/product";
+import type { ProductType } from "@/db/schemas/product.schema";
 const btnBase =
   "size-11 flex items-center justify-center rounded-sm border border-stroke-grey transition";
 
@@ -23,7 +23,7 @@ const btnDisabled = "opacity-40 cursor-not-allowed";
 
 const btnActive = "hover:bg-grey-hover cursor-pointer";
 export default function CartSection() {
-  const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
+  const [fetchedProducts, setFetchedProducts] = useState<ProductType[]>([]);
 
   const { basket, removeFromBasketById, updateBasket } = useBasketStore();
 

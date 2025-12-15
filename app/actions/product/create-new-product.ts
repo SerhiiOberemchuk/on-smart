@@ -1,12 +1,12 @@
 "use server";
 
 import { db } from "@/db/db";
-import { Product, productsSchema } from "@/db/schemas/product";
+import { ProductType, productsSchema } from "@/db/schemas/product.schema";
 import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 
-export async function createNewProduct(formData: Product) {
-  const normalizedFormData: Product = {
+export async function createNewProduct(formData: ProductType) {
+  const normalizedFormData: ProductType = {
     ...formData,
     oldPrice: formData.oldPrice ? formData.oldPrice : null,
   };

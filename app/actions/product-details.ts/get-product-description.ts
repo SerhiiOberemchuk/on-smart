@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/db";
-import { productDescriptionSchema } from "@/db/schemas/product-details";
+import { productDescriptionSchema } from "@/db/schemas/product-details.schema";
 import { eq } from "drizzle-orm";
 
 export async function getProductDescriptionById({ id }: { id: string }) {

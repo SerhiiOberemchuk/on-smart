@@ -6,10 +6,13 @@ import PricesBox from "../PricesBox";
 import StarsRating from "../StarsRating";
 import styles from "./product-styles.module.css";
 import ButtonOpenDialogAddToCart from "../ButtonOpenDialogAddToCart";
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 import clsx from "clsx";
 
-export default function CardProduct({ className, ...product }: Product & { className?: string }) {
+export default function CardProduct({
+  className,
+  ...product
+}: ProductType & { className?: string }) {
   const {
     name,
     price,

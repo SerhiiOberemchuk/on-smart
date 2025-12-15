@@ -7,7 +7,7 @@ import { useDropzone } from "react-dropzone";
 import { toast } from "react-toastify";
 import ButtonXDellete from "../../../../ButtonXDellete";
 import Image from "next/image";
-import { ProductDescriptionType } from "@/db/schemas/product-details";
+import { ProductDescriptionType } from "@/db/schemas/product-details.schema";
 import { getProductDescriptionById } from "@/app/actions/product-details.ts/get-product-description";
 import { updateProductDescriptionById } from "@/app/actions/product-details.ts/update-product-description copy";
 import InputAdminStyle from "../../../../InputComponent";

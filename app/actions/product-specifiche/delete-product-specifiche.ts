@@ -1,7 +1,10 @@
 "use server";
 
 import { db } from "@/db/db";
-import { productSpecificheSchema, ProductSpecificheType } from "@/db/schemas/product-specifiche";
+import {
+  productSpecificheSchema,
+  ProductSpecificheType,
+} from "@/db/schemas/product-specifiche.schema";
 import { eq } from "drizzle-orm";
 import { deleteFileFromS3 } from "@/app/actions/files/uploadFile";
 import { getProductSpecificheById } from "./get-product-specifiche";

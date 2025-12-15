@@ -3,16 +3,13 @@
 import Form from "next/form";
 
 import styles from "./form.module.css";
-import SendButton from "./SendButton";
 import TextArea from "./TextArea";
-import {
-  submitGeneralFeedback,
-  submitProductFeedback,
-} from "@/app/actions/product/feedback-product";
+import { submitGeneralFeedback } from "@/app/actions/product/feedback-product";
 import { twMerge } from "tailwind-merge";
 import Link from "next/link";
 import InputsRating from "./InputsRating";
 import { useActionState, useEffect, useState } from "react";
+import { createProductReview } from "@/app/actions/product-reviews/create-review";
 
 export default function FormFeedback({
   productId,
@@ -24,11 +21,8 @@ export default function FormFeedback({
 
   type: "general-feedback" | "product-review";
 }) {
-  const action = type === "product-review" ? submitProductFeedback : submitGeneralFeedback;
-  const [state, formAction] = useActionState(action, {
-    success: false,
-    messaggio: "",
-  });
+  const action = type === "product-review" ? createProductReview : submitGeneralFeedback;
+  const [state, formAction, isPending] = useActionState(action, { success: false });
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
@@ -82,7 +76,13 @@ export default function FormFeedback({
         , e acconsento a ricevere notizie e offerte esclusive.
       </p>
       {showSuccess && <p className="text-green-600">Grazie! Recensione inviata.</p>}
-      <SendButton />
+      <button
+        type="submit"
+        disabled={isPending}
+        className="button_yellow btn mt-2 ml-auto flex text-black lg:mt-1"
+      >
+        {isPending ? "Invio..." : "Invia"}
+      </button>
     </Form>
   );
 }

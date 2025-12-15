@@ -1,9 +1,9 @@
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 
 export type GoogleReview = {
   id: string;
   clientName: string;
   reviewText: string;
-  rating: Product["rating"];
+  rating: ProductType["rating"];
   date: string;
 };

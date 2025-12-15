@@ -14,12 +14,12 @@ import Image from "next/image";
 import { Swiper as SwiperTypes } from "swiper/types";
 import HeaderProductCard from "@/components/HeaderProductCard";
 import { SlideNextButton, SlidePrevButton } from "@/components/SwiperButtonsReacr";
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 import { getFotoFromGallery } from "@/app/actions/foto-galery/get-foto-from-gallery";
 import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
 import { BrandTypes } from "@/types/brands.types";
 
-export default function ProductSlider({ product }: { product: Product }) {
+export default function ProductSlider({ product }: { product: ProductType }) {
   const { id, inStock, oldPrice, imgSrc, parent_product_id, brand_slug, nameFull } = product;
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperTypes | null>(null);
   const [images, setImages] = useState<string[]>([]);

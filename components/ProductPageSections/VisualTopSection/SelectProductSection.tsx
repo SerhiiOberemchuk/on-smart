@@ -12,16 +12,18 @@ import ButtonAddToBasket from "../../ButtonAddToBasket";
 import { useBasketStore } from "@/store/basket-store";
 import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
-export default function SelectProductSection({ product }: { product: Product }) {
+export default function SelectProductSection({ product }: { product: ProductType }) {
   const { name, rating } = product;
-  const [selectedProduct, setSelectedProduct] = useState<(Product & { qnt: number }) | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<(ProductType & { qnt: number }) | null>(
+    null,
+  );
 
   const [variantsToShow, setVariantsToShow] = useState(NUMBER_OF_VARIANTS_TO_SHOW);
 
-  const [variantsProduct, setVariantsProduct] = useState<Product[] | null>(null);
+  const [variantsProduct, setVariantsProduct] = useState<ProductType[] | null>(null);
 
   const { updateBasket, showPopup } = useBasketStore();
 
@@ -47,7 +49,7 @@ export default function SelectProductSection({ product }: { product: Product }) 
       try {
         const res = await getProductsByIds([...product.variants, product.id]);
         if (res.data && res.data.length > 0) {
-          setVariantsProduct(res.data as Product[]);
+          setVariantsProduct(res.data as ProductType[]);
         }
       } catch (error) {
         console.error("Error fetching variant products:", error);
@@ -82,7 +84,7 @@ export default function SelectProductSection({ product }: { product: Product }) 
                           setSelectedProduct({
                             ...variant,
                             qnt: 1,
-                          } as Product & { qnt: number });
+                          } as ProductType & { qnt: number });
                         }}
                       />
 

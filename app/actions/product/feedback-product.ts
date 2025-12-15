@@ -19,10 +19,7 @@ export async function submitProductFeedback(
     messaggio: "Feedback submitted successfully",
   };
 }
-export async function submitGeneralFeedback(
-  prevState: { success: boolean; messaggio: string },
-  formData: FormData,
-) {
+export async function submitGeneralFeedback(prevState: { success: boolean }, formData: FormData) {
   await setTimeout(1000);
 
   const nome = formData.get("nome");

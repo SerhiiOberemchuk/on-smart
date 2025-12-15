@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/db";
-import { Product, productsSchema } from "@/db/schemas/product";
+import { ProductType, productsSchema } from "@/db/schemas/product.schema";
 import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 
@@ -9,8 +9,8 @@ export async function updateProductById({
   id,
   data,
 }: {
-  id: Product["id"];
-  data: Partial<Omit<Product, "id">>;
+  id: ProductType["id"];
+  data: Partial<Omit<ProductType, "id">>;
 }) {
   try {
     await db.update(productsSchema).set(data).where(eq(productsSchema.id, id));

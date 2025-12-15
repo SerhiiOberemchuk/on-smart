@@ -1,4 +1,4 @@
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 // import ButtonComparison from "./ProductCard/card-components/ButtonComparison";
 import { twMerge } from "tailwind-merge";
 
@@ -7,7 +7,7 @@ export default function HeaderProductCard({
   inStock,
   // id,
   className,
-}: Pick<Product, "id" | "oldPrice" | "inStock"> & { className?: string }) {
+}: Pick<ProductType, "id" | "oldPrice" | "inStock"> & { className?: string }) {
   return (
     <header
       className={twMerge(

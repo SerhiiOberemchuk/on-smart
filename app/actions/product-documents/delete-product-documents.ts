@@ -1,12 +1,12 @@
 "use server";
 
-import { Product } from "@/db/schemas/product";
+import { ProductType } from "@/db/schemas/product.schema";
 import { getProductDocumentsById } from "./get-product-documents";
 import { deleteFileFromS3 } from "../files/uploadFile";
 import { db } from "@/db/db";
-import { productDocumentsSchema } from "@/db/schemas/product-documents";
+import { productDocumentsSchema } from "@/db/schemas/product-documents.schema";
 
-export async function deleteProductDocuments(id: Product["id"]) {
+export async function deleteProductDocuments(id: ProductType["id"]) {
   try {
     const documents = await getProductDocumentsById({ product_id: id });
     await db.delete(productDocumentsSchema);
