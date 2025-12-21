@@ -17,9 +17,10 @@ export const productsSchema = mysqlTable(
       .primaryKey()
       .notNull()
       .$defaultFn(() => ulid()),
-    slug: varchar("slug", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull().unique(),
     brand_slug: varchar("brand_slug", { length: 255 }).notNull(),
     category_slug: varchar("category_slug", { length: 255 }).notNull(),
+    category_id: varchar("category_id", { length: 36 }).notNull(),
     name: varchar("name", { length: 255 }).notNull(),
     nameFull: varchar("name_full", { length: 255 }).notNull(),
     price: decimal("price", { precision: 10, scale: 2 }).notNull(),

@@ -81,6 +81,7 @@ export default function ModalAddVariant({
           inStock,
           isOnOrder,
           imgSrc: upload.fileUrl,
+          category_id: parent.category_id,
         },
       });
 

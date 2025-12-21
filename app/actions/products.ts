@@ -16,6 +16,7 @@ export const allProducts: ProductType[] = [
     isOnOrder: false,
     hasVariants: false,
     parent_product_id: null,
+    category_id: "",
   },
   {
     id: "2",
@@ -33,6 +34,7 @@ export const allProducts: ProductType[] = [
     hasVariants: false,
     parent_product_id: null,
     variants: [],
+    category_id: "",
   },
 ];
 

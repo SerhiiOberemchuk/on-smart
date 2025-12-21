@@ -20,6 +20,7 @@ export async function createProductVariant({
     inStock: number;
     isOnOrder: boolean;
     imgSrc: string;
+    category_id: string;
   };
 }): Promise<{ success: boolean; error?: string }> {
   updateTag("get_all_product");
@@ -65,7 +66,7 @@ export async function createProductVariant({
       inStock: newData.inStock,
       isOnOrder: newData.isOnOrder,
       imgSrc: newData.imgSrc,
-
+      category_id: newData.category_id,
       brand_slug: parent.brand_slug,
       category_slug: parent.category_slug,
 

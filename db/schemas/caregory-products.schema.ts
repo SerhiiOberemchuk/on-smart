@@ -13,7 +13,7 @@ export const categoryProductsSchema = mysqlTable(
     title_full: varchar("title_full", { length: 255 }).notNull(),
     description: text("description").notNull(),
     image: varchar("image", { length: 1024 }).notNull(),
-    category_slug: varchar("category_slug", { length: 255 }).notNull(),
+    category_slug: varchar("category_slug", { length: 255 }).notNull().unique(),
   },
   (table) => [uniqueIndex("category_slug_unique").on(table.category_slug)],
 );

@@ -31,10 +31,12 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
     "oldPrice",
     "inStock",
     "isOnOrder",
+    "category_id",
   ]);
+
   const [isPendingUlpoadMainFoto, startTransitionUpload] = useTransition();
   const [fotoToUpload, setFotoToUpload] = useState<File | null>(null);
-  const { register, handleSubmit } = useForm<typeof mainPartDataProduct>({
+  const { register, handleSubmit, watch } = useForm<typeof mainPartDataProduct>({
     defaultValues: mainPartDataProduct,
   });
   const [categories, setCategories] = useState<CategoryTypes[]>([]);
@@ -49,9 +51,13 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
     if (!confirm("Ви впевнені що хочете оновити дані?")) {
       return;
     }
+    const slug = watch("category_slug");
+    const [category_id] = categories.filter((i) => i.category_slug === slug);
+
     const preparedData: typeof mainPartDataProduct = {
       ...data,
       oldPrice: Number(data.oldPrice) ? data.oldPrice : null,
+      category_id: category_id.id,
     };
     startTransitionUpdateProduct(async () => {
       try {
@@ -271,7 +277,7 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
       {!product.parent_product_id && (
         <>
           <FotoGaleryProduct id={product.id} />
-          <CharacteristicProductSection id={product.id} />
+          <CharacteristicProductSection id={product.id} category_id={product.category_id} />
         </>
       )}
     </div>

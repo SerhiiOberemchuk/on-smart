@@ -12,12 +12,24 @@ import ButtonXDellete from "../../../../ButtonXDellete";
 import { getProductSpecificheById } from "@/app/actions/product-specifiche/get-product-specifiche";
 import { deleteProductSpecificheImage } from "@/app/actions/product-specifiche/delete-product-specifiche";
 
-export default function SpecificheProductAdmin({ id }: { id: string }) {
+import {
+  getCharacteristicsByCategoryId,
+  GetCharacteristicsByCategoryIdType,
+} from "@/app/actions/product-characteristic/get-characteristics-by-category-id";
+import SelectComponentAdmin from "../../../../SelectComponent";
+
+export default function SpecificheProductAdmin({
+  product_id,
+  category_id,
+}: {
+  product_id: string;
+  category_id: string;
+}) {
   const [title, setTitle] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
-
+  const [chars, setShars] = useState<GetCharacteristicsByCategoryIdType[]>([]);
   const [groups, setGroups] = useState<
     { groupTitle: string; items: { name: string; value: string }[] }[]
   >([]);
@@ -26,7 +38,7 @@ export default function SpecificheProductAdmin({ id }: { id: string }) {
 
   useEffect(() => {
     const fetch = async () => {
-      const res = await getProductSpecificheById(id);
+      const res = await getProductSpecificheById(product_id);
       if (res.data) {
         setTitle(res.data.title);
         setImages(res.data.images || []);
@@ -37,7 +49,19 @@ export default function SpecificheProductAdmin({ id }: { id: string }) {
       }
     };
     fetch();
-  }, [id]);
+  }, [product_id]);
+
+  useEffect(() => {
+    const fetchChar = async () => {
+      const res = await getCharacteristicsByCategoryId({ category_id });
+      if (res.data) {
+        console.log(res.data);
+
+        setShars(res.data);
+      }
+    };
+    fetchChar();
+  }, [category_id, product_id]);
 
   const handleSelectFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
@@ -53,7 +77,7 @@ export default function SpecificheProductAdmin({ id }: { id: string }) {
   };
 
   const handleDeleteImage = async (img: string) => {
-    await deleteProductSpecificheImage(id, img);
+    await deleteProductSpecificheImage(product_id, img);
     setImages(images.filter((i) => i !== img));
     toast.success("Фото видалено");
   };
@@ -101,7 +125,7 @@ export default function SpecificheProductAdmin({ id }: { id: string }) {
       }
 
       await updateOrCreateSpecifiche({
-        product_id: id,
+        product_id: product_id,
         title,
         images: finalImages,
         groups,
@@ -201,7 +225,22 @@ export default function SpecificheProductAdmin({ id }: { id: string }) {
           </div>
 
           <h4>Параметри</h4>
-
+          {chars.map((i) => (
+            <div key={i.id} className="grid grid-cols-2 gap-3">
+              <InputAdminStyle
+                input_title={i.is_required ? "Обовязковий параметр" : "Не обовязково"}
+                value={i.name}
+                onChange={(e) => 'updateItem(gIndex, iIndex, "name", e.target.value)'}
+              />
+              <SelectComponentAdmin
+                selectTitle="Вибрати значення"
+                optionsTitle="-- Значення --"
+                options={i.values.map((v) => ({ name: v, value: v }))}
+                // value={i.values}
+                onChange={(e) => 'updateItem(gIndex, iIndex, "value", e.target.value)'}
+              />
+            </div>
+          ))}
           {g.items.map((item, iIndex) => (
             <div key={iIndex} className="grid grid-cols-2 gap-3">
               <InputAdminStyle

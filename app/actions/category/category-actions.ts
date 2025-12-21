@@ -7,10 +7,10 @@ import { safeQuery } from "@/utils/safeQuery";
 import { eq } from "drizzle-orm";
 import { cacheTag, updateTag } from "next/cache";
 
-export async function createCategoryProducts(category: CategoryTypes) {
-  updateTag("all_categories");
+export async function createCategoryProducts(category: Omit<CategoryTypes, "id">) {
   try {
     const result = await db.insert(categoryProductsSchema).values(category).$returningId();
+    updateTag("all_categories");
     return {
       success: true,
       categoryId: result[0].id,

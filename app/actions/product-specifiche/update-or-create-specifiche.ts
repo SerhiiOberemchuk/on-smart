@@ -1,19 +1,14 @@
 "use server";
 
 import { db } from "@/db/db";
-import { productSpecificheSchema } from "@/db/schemas/product-specifiche.schema";
+import {
+  productSpecificheSchema,
+  ProductSpecificheType,
+} from "@/db/schemas/product-specifiche.schema";
 import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 
-export async function updateOrCreateSpecifiche(data: {
-  product_id: string;
-  title: string;
-  images: string[];
-  groups: {
-    groupTitle: string;
-    items: { name: string; value: string }[];
-  }[];
-}) {
+export async function updateOrCreateSpecifiche(data: ProductSpecificheType) {
   const { product_id, ...rest } = data;
 
   try {
