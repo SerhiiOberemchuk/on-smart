@@ -6,13 +6,15 @@ import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 import { twMerge } from "tailwind-merge";
 
+const URL_DASHBOARD = "/admin/dashboard";
+
 const dashboardLinks = [
-  { href: "/admin/dashboard/products", title: "Товари", active: true },
-  { href: "/admin/dashboard/brands", title: "Бренди", active: true },
-  { href: "/admin/dashboard/categories", title: "Категорії", active: true },
-  { href: "/admin/dashboard/orders", title: "Замовлення", active: false },
-  { href: "/admin/dashboard/customers", title: "Клієнти", active: false },
-  { href: "/admin/dashboard/stock", title: "Склад", active: false },
+  { href: URL_DASHBOARD + "/products", title: "Товари", active: true },
+  { href: URL_DASHBOARD + "/brands", title: "Бренди", active: true },
+  { href: URL_DASHBOARD + "/categories", title: "Категорії", active: true },
+  { href: URL_DASHBOARD + "/characteristics", title: "Характеристики", active: true },
+  { href: URL_DASHBOARD + "/customers", title: "Клієнти", active: false },
+  { href: URL_DASHBOARD + "/stock", title: "Склад", active: false },
 ] as const;
 
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {

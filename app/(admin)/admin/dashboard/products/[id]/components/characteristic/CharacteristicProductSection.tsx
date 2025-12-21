@@ -3,11 +3,17 @@ import DocumentsProduct from "./DocumentsProduct";
 import SpecificheProductAdmin from "./SpecificheProductAdmin";
 import ValutazioneProduct from "./ValutazioneProduct";
 
-export default function CharacteristicProductSection({ id }: { id: string }) {
+export default function CharacteristicProductSection({
+  id,
+  category_id,
+}: {
+  id: string;
+  category_id: string;
+}) {
   return (
     <section className="mt-3 flex flex-col gap-3">
       <Description id={id} />
-      <SpecificheProductAdmin id={id} />
+      <SpecificheProductAdmin product_id={id} category_id={category_id} />
       <DocumentsProduct id={id} />
       <ValutazioneProduct id={id} />
     </section>

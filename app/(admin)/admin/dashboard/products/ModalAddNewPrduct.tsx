@@ -19,18 +19,28 @@ import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
 import { useRouter } from "next/navigation";
 import ButtonXDellete from "../ButtonXDellete";
 
-export default function ModalAddNewPrduct({ isEditProd }: { isEditProd?: boolean }) {
+export default function ModalAddNewPrduct() {
   const { type, isOpen, closeModal } = useModalStore();
-  const { register, handleSubmit, setValue } = useForm<ProductType>();
+  const { register, handleSubmit, setValue, watch } = useForm<ProductType>();
   const [isPendingCreate, startTransitionCreateProduct] = useTransition();
   const [fileToUpload, setFileToUpload] = useState<File | null>(null);
   const router = useRouter();
+
+  const [categories, setCategories] = useState<CategoryTypes[]>([]);
+  const [bradns, setBrands] = useState<BrandTypes[]>([]);
+
+  const [isPendengCategories, startTransitionCategory] = useTransition();
+
+  const [image, setImage] = useState<string | null>(null);
+  const [isPendengBrands, startTransitionBrands] = useTransition();
+
   const onSubmit: SubmitHandler<ProductType> = (data) => {
     if (!image || !fileToUpload) {
       toast.warning("неохбхідно завантажити головне фото товару");
       return;
     }
-
+    const slug = watch("category_slug");
+    const [category_id] = categories.filter((i) => i.category_slug === slug);
     startTransitionCreateProduct(async () => {
       try {
         const resp = await uploadFile({ file: fileToUpload, sub_bucket: "products" });
@@ -38,7 +48,11 @@ export default function ModalAddNewPrduct({ isEditProd }: { isEditProd?: boolean
           toast.error("Не вдалося вивантажити фото2");
           console.error(resp.$metadata.httpStatusCode);
         }
-        const res = await createNewProduct({ ...data, imgSrc: resp.fileUrl });
+        const res = await createNewProduct({
+          ...data,
+          imgSrc: resp.fileUrl,
+          category_id: category_id.id,
+        });
         if (res.error) {
           toast.error(res.error.toString());
           await deleteFileFromS3(resp.fileUrl);
@@ -54,14 +68,6 @@ export default function ModalAddNewPrduct({ isEditProd }: { isEditProd?: boolean
       }
     });
   };
-
-  const [categories, setCategories] = useState<CategoryTypes[]>([]);
-  const [bradns, setBrands] = useState<BrandTypes[]>([]);
-
-  const [isPendengCategories, startTransitionCategory] = useTransition();
-
-  const [image, setImage] = useState<string | null>(null);
-  const [isPendengBrands, startTransitionBrands] = useTransition();
 
   const generateSlug = (text: string) => {
     setValue("slug", slugify(text));

@@ -109,7 +109,7 @@ export default function ModalCategoryForm({
 
       const created = await createCategoryProducts(payload);
 
-      if (!created.success) {
+      if (!created.success || !created.categoryId) {
         toast.error("Помилка створення категорії");
         return;
       }
