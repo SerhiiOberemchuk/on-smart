@@ -11,12 +11,12 @@ import {
   ProductCharacteristicValuesType,
 } from "@/db/schemas/product_characteristic_values.schema";
 import { eq, sql } from "drizzle-orm";
-// import { cacheTag, updateTag } from "next/cache";
+import { cacheTag, updateTag } from "next/cache";
 
 export async function createCharacteristic(params: Omit<ProductCharacteristicType, "id">) {
   try {
     const res = await db.insert(productCharacteristicsSchema).values(params).$returningId();
-    // updateTag("getAllCharacteristicsWithMeta");
+    updateTag("getAllCharacteristicsWithMeta");
 
     return { success: true, id: res[0].id };
   } catch (error) {
@@ -34,8 +34,8 @@ export async function getAllCharacteristic() {
 }
 
 export async function getAllCharacteristicsWithMeta() {
-  // "use cache";
-  // cacheTag("getAllCharacteristicsWithMeta");
+  "use cache";
+  cacheTag("getAllCharacteristicsWithMeta");
   try {
     const data = await db
       .select({
@@ -109,7 +109,7 @@ export async function deleteCharacteristic(id: string) {
 
     await db.delete(productCharacteristicsSchema).where(eq(productCharacteristicsSchema.id, id));
 
-    // updateTag("getAllCharacteristicsWithMeta");
+    updateTag("getAllCharacteristicsWithMeta");
     return { success: true };
   } catch (error) {
     return { success: false, error };
@@ -148,7 +148,7 @@ export async function updateCharacteristic(
         })),
       );
     }
-    // updateTag("getAllCharacteristicsWithMeta");
+    updateTag("getAllCharacteristicsWithMeta");
 
     return { success: true };
   } catch (error) {
