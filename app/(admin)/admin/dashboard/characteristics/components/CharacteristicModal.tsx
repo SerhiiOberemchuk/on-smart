@@ -25,7 +25,7 @@ import { createProductCharacteristicValues } from "@/app/actions/product-charact
 import ButtonXDellete from "../../ButtonXDellete";
 
 export type CharacteristicFormValues = Omit<ProductCharacteristicType, "id"> & {
-  values: Pick<ProductCharacteristicValuesType, "value">[];
+  values: Pick<ProductCharacteristicValuesType, "value" | "id">[];
 };
 
 export function CharacteristicModal() {
@@ -65,6 +65,8 @@ export function CharacteristicModal() {
       setLoading(true);
 
       const res = await getCharacteristicById(editingId);
+      console.log(res);
+
       if (!res.success || !res.data) {
         toast.error("Не вдалося завантажити характеристику");
         setLoading(false);
@@ -87,6 +89,11 @@ export function CharacteristicModal() {
   }, [mode, editingId, reset]);
 
   const onSubmit = async (data: CharacteristicFormValues) => {
+    // if (!data.values.length) {
+    //   toast.error("Додайте хоча б одне значення");
+    //   return;
+    // }
+
     setLoading(true);
 
     if (mode === "create") {
@@ -211,7 +218,7 @@ export function CharacteristicModal() {
                 </div>
               ))}
 
-              <ButtonYellow type="button" onClick={() => append({ value: "" })}>
+              <ButtonYellow type="button" onClick={() => append({ value: "", id: "" })}>
                 + Додати значення
               </ButtonYellow>
             </div>

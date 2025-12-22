@@ -63,7 +63,7 @@ export default function ListCharacteristics({
 }) {
   const data = use(action);
   const { openEdit } = useCharacteristicStore();
-  console.log("Char list data: ", data);
+  // console.log("Char list data: ", data);
 
   const handleDelete = async (id: string) => {
     const confirm = window.confirm("Видалити характеристику?");
