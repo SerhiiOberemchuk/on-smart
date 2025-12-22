@@ -4,7 +4,8 @@ import { ulid } from "ulid";
 export const productCharacteristicValuesSchema = mysqlTable("product_characteristic_values", {
   id: varchar("id", { length: 36 })
     .primaryKey()
-    .$defaultFn(() => ulid()),
+    .$defaultFn(() => ulid())
+    .notNull(),
 
   characteristic_id: varchar("characteristic_id", { length: 36 }).notNull(),
 
