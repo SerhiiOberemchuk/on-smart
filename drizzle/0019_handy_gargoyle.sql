@@ -1,0 +1,1 @@
+ALTER TABLE `product_characteristics` MODIFY COLUMN `category_id` varchar(36);

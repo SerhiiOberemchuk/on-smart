@@ -22,7 +22,6 @@ export async function updateProductDocumentsById(props: ProductDocumentsType) {
       .set({ documents: props.documents })
       .where(eq(productDocumentsSchema.product_id, props.product_id));
 
-    console.log("response create document", response);
     updateTag("product_details_" + props.product_id);
     return { success: true, error: null, data: response[0].serverStatus };
   } catch (error) {

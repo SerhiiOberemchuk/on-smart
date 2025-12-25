@@ -33,14 +33,10 @@ export async function deleteProductVariant({
     }
 
     if (variant.parent_product_id) {
-      console.log(" if (variant.parent_product_id)");
-
       const siblings = await db
         .select()
         .from(productsSchema)
         .where(eq(productsSchema.id, variant.parent_product_id));
-
-      console.log({ siblings });
 
       if (siblings[0].variants?.length) {
         const newVariants = siblings[0].variants.filter((i) => i !== product_variant_id);

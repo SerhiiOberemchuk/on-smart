@@ -11,31 +11,29 @@ export default function Specifiche({
 }) {
   return (
     <div className={twMerge("flex flex-col gap-3 xl:flex-row xl:items-start xl:gap-6", className)}>
-      <Image
-        src={data.images[0]}
-        className="flex-1 rounded-sm"
-        alt={data.images[0] + data.title}
-        width={670}
-        height={670}
-      />
+      <ul className="grid grid-cols-2 gap-x-5 gap-y-6 xl:flex-1">
+        {data.images.length > 0 &&
+          data.images.map((img, idx) => (
+            <Image
+              key={img + idx}
+              src={img}
+              className="flex-1 rounded-sm"
+              alt={img + data.title}
+              width={670}
+              height={670}
+            />
+          ))}
+      </ul>
       <div className="flex flex-1 flex-col gap-3 rounded-sm bg-background p-3">
         <h2 className="H4M">{data.title}</h2>
         <ul className="mt-1 flex flex-col gap-3">
           {data.groups.map((item, index) => (
-            <li key={item.groupTitle + index} className="flex flex-col gap-1">
-              <h3 className="H5 p-1">{item.groupTitle}</h3>
-
-              <ul className="flex flex-col">
-                {item.items.map((subItem, index) => (
-                  <li
-                    key={subItem.name + index}
-                    className="text_R flex justify-between px-1 py-2 odd:bg-grey-hover-stroke even:bg-transparent"
-                  >
-                    <span className="text-text-grey">{subItem.name}:</span>{" "}
-                    <span className="uppercase">{subItem.value}</span>
-                  </li>
-                ))}
-              </ul>
+            <li
+              key={item.name + index}
+              className="text_R flex justify-between px-1 py-2 odd:bg-grey-hover-stroke even:bg-transparent"
+            >
+              <span className="text-text-grey">{item.name}:</span>{" "}
+              <span className="uppercase">{item.value}</span>
             </li>
           ))}
         </ul>

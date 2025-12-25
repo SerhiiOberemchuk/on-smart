@@ -17,8 +17,6 @@ export default function Valutazione({
   data: Product_Details["characteristics_valutazione"];
   className?: string;
 }) {
-  console.log("reviews section>>", data);
-
   const midleRating =
     data.reduce((acc, curr) => {
       return acc + curr.rating;

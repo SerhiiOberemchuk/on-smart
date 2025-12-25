@@ -9,7 +9,7 @@ import { useCharacteristicStore } from "../store/useCharacteristicStore";
 type CharacteristicListItem = {
   id: string;
   name: string;
-  category_id: string;
+  category_id: string | null;
   category_name: string | null;
   in_filter: boolean;
   is_required: boolean;
@@ -24,7 +24,7 @@ function groupByCategory(data: CharacteristicListItem[]) {
 
       if (!acc[key]) {
         acc[key] = {
-          categoryName: item.category_name ?? "Без категорії",
+          categoryName: item.category_name ?? "Універсальні характеристики",
           items: [],
         };
       }
@@ -45,7 +45,7 @@ export default function ListCharacteristics({
         data: {
           id: string;
           name: string;
-          category_id: string;
+          category_id: string | null;
           category_name: string | null;
           in_filter: boolean;
           is_required: boolean;
@@ -63,7 +63,6 @@ export default function ListCharacteristics({
 }) {
   const data = use(action);
   const { openEdit } = useCharacteristicStore();
-  // console.log("Char list data: ", data);
 
   const handleDelete = async (id: string) => {
     const confirm = window.confirm("Видалити характеристику?");

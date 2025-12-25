@@ -1,21 +1,17 @@
-// app/actions/product-characteristic/get-characteristics-by-category-id.ts
 "use server";
 
 import { db } from "@/db/db";
-import { eq, sql } from "drizzle-orm";
-import { productCharacteristicsSchema } from "@/db/schemas/product_characteristic.schema";
+import { eq, isNull, or, sql } from "drizzle-orm";
+import {
+  productCharacteristicsSchema,
+  ProductCharacteristicType,
+} from "@/db/schemas/product_characteristic.schema";
 import { productCharacteristicValuesSchema } from "@/db/schemas/product_characteristic_values.schema";
 import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
 
-export type GetCharacteristicsByCategoryIdType = {
-  id: string;
-  name: string;
-  category_id: string;
+export type GetCharacteristicsByCategoryIdType = ProductCharacteristicType & {
   category_name: string | null;
-  in_filter: boolean;
-  is_required: boolean;
-  is_multiple: boolean;
-  values: string[];
+  values: { value: string; id: string }[];
 };
 
 export async function getCharacteristicsByCategoryId({
@@ -35,9 +31,14 @@ export async function getCharacteristicsByCategoryId({
       in_filter: productCharacteristicsSchema.in_filter,
       is_required: productCharacteristicsSchema.is_required,
       is_multiple: productCharacteristicsSchema.is_multiple,
-      values: sql<string[]>`
+      values: sql<{ id: string; value: string }[]>`
         COALESCE(
-          JSON_ARRAYAGG(${productCharacteristicValuesSchema.value}),
+          JSON_ARRAYAGG(
+            JSON_OBJECT(
+              'id', ${productCharacteristicValuesSchema.id},
+              'value', ${productCharacteristicValuesSchema.value}
+            )
+          ),
           JSON_ARRAY()
         )
       `,
@@ -51,7 +52,12 @@ export async function getCharacteristicsByCategoryId({
       productCharacteristicValuesSchema,
       eq(productCharacteristicValuesSchema.characteristic_id, productCharacteristicsSchema.id),
     )
-    .where(eq(productCharacteristicsSchema.category_id, category_id))
+    .where(
+      or(
+        eq(productCharacteristicsSchema.category_id, category_id),
+        isNull(productCharacteristicsSchema.category_id),
+      ),
+    )
     .groupBy(productCharacteristicsSchema.id, categoryProductsSchema.name);
 
   return { success: true, data };

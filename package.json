@@ -37,7 +37,6 @@
     "react-toastify": "^11.0.5",
     "react-tooltip": "^5.30.0",
     "sharp": "^0.34.5",
-    "slugify": "^1.6.6",
     "swiper": "^12.0.3",
     "tailwind-merge": "^3.4.0",
     "ulid": "^3.0.2",

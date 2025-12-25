@@ -134,6 +134,13 @@
       "when": 1766267974698,
       "tag": "0018_even_senator_kelly",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1766693766874,
+      "tag": "0019_handy_gargoyle",
+      "breakpoints": true
     }
   ]
 }

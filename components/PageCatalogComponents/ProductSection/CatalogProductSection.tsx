@@ -16,8 +16,6 @@ export default function CatalogProductSection({ className }: { className?: strin
   const maxPages = 5;
 
   useEffect(() => {
-    console.log({ sortParam });
-
     const fetchProducts = async () => {
       const response = await getAllProducts();
       if (response) {

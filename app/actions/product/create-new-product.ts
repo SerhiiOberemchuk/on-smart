@@ -17,8 +17,6 @@ export async function createNewProduct(formData: ProductType) {
       .from(productsSchema)
       .where(eq(productsSchema.slug, formData.slug));
     if (isSlug[0]) {
-      console.log(isSlug);
-
       return { success: false, id: "", error: "Такий слаг існує" };
     }
     const res = await db.insert(productsSchema).values(normalizedFormData).$returningId();

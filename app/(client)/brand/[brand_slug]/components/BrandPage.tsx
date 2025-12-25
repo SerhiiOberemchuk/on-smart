@@ -10,8 +10,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes["brand_slug"] }) {
-  console.log({ brand_slug });
-
   const products = await getAllProducts({ brand_slug });
   const { success, data } = await getBrandBySlug(brand_slug);
   if (!success || !data || !products.data) {

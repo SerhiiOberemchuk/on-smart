@@ -7,7 +7,7 @@ export const productCharacteristicsSchema = mysqlTable("product_characteristics"
     .notNull()
     .$defaultFn(() => ulid())
     .unique(),
-  category_id: varchar("category_id", { length: 36 }).notNull(),
+  category_id: varchar("category_id", { length: 36 }),
   name: varchar("name", { length: 255 }).notNull(),
   is_required: boolean("is_required").notNull().default(false),
   is_multiple: boolean("is_multiple").notNull().default(false),

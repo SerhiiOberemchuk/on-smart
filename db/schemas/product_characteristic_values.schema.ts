@@ -10,7 +10,6 @@ export const productCharacteristicValuesSchema = mysqlTable("product_characteris
   characteristic_id: varchar("characteristic_id", { length: 36 }).notNull(),
 
   value: varchar("value", { length: 255 }).notNull(),
-  // "2MP", "4MP", "8MP", "Si", "No", "Wi-Fi", "Cablaggio"
 });
 
 export type ProductCharacteristicValuesType = typeof productCharacteristicValuesSchema.$inferSelect;

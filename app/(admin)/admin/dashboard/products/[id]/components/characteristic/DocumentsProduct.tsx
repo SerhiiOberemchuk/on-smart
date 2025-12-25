@@ -18,17 +18,14 @@ export default function DocumentsProduct({ id }: { id: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  // ---- GET DOCUMENTS ----
   useEffect(() => {
     const fetch = async () => {
       try {
         const res = await getProductDocumentsById({ product_id: id });
 
-        // res.data може бути null або об'єктом
         if (res.data) {
           setDocuments(res.data);
         } else {
-          // ⬅ якщо запису немає — створюємо локально порожню структуру
           setDocuments({
             product_id: id,
             documents: [],
@@ -41,7 +38,6 @@ export default function DocumentsProduct({ id }: { id: string }) {
     fetch();
   }, [id]);
 
-  // ---- SELECT FILE ----
   const handleSelectFile = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
     const selected = e.target.files[0];
@@ -53,7 +49,6 @@ export default function DocumentsProduct({ id }: { id: string }) {
     setFile(selected);
   };
 
-  // ---- DELETE DOCUMENT ----
   const handleDelete = async (link: string) => {
     if (!documents) return;
 
@@ -80,7 +75,6 @@ export default function DocumentsProduct({ id }: { id: string }) {
     }
   };
 
-  // ---- SAVE DOCUMENT ----
   const handleSubmit = async () => {
     if (!file || !title.trim()) {
       toast.warning("Заповніть усі поля");
@@ -107,7 +101,6 @@ export default function DocumentsProduct({ id }: { id: string }) {
         link: upload.fileUrl,
       };
 
-      // ⬅ ГАРАНТОВАНО маємо масив, навіть якщо його не було у БД
       const updatedDocuments = [...(documents.documents ?? []), newDoc];
 
       await updateProductDocumentsById({
@@ -136,7 +129,6 @@ export default function DocumentsProduct({ id }: { id: string }) {
     <div className="flex flex-col gap-3 rounded-xl border border-gray-500 p-3">
       <h2>Допоміжні документи для товару</h2>
 
-      {/* DOCUMENTS LIST */}
       {documents && (
         <ul className="flex flex-col gap-2">
           {documents.documents.length === 0 && (
@@ -170,8 +162,6 @@ export default function DocumentsProduct({ id }: { id: string }) {
           ))}
         </ul>
       )}
-
-      {/* FORM */}
       <form className="mt-3 flex flex-col gap-3">
         <InputAdminStyle
           input_title="Виберіть документ"

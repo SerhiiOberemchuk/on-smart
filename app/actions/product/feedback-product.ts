@@ -13,7 +13,6 @@ export async function submitProductFeedback(
   const messaggio = formData.get("messaggio");
   const rating = formData.get("rating");
   const productId = formData.get("productId");
-  console.log({ nome, email, messaggio, rating, productId });
   return {
     success: true,
     messaggio: "Feedback submitted successfully",
@@ -25,7 +24,6 @@ export async function submitGeneralFeedback(prevState: { success: boolean }, for
   const nome = formData.get("nome");
   const email = formData.get("email");
   const messaggio = formData.get("messaggio");
-  console.log({ nome, email, messaggio });
   return {
     success: true,
     messaggio: "Feedback submitted successfully",

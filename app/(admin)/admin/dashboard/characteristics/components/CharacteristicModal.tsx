@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import ButtonYellow from "@/components/BattonYellow";
 import InputAdminStyle from "../../InputComponent";
 import SelectComponentAdmin from "../../SelectComponent";
+import ButtonXDellete from "../../ButtonXDellete";
 
 import { useCharacteristicStore } from "../store/useCharacteristicStore";
 
@@ -21,10 +22,11 @@ import {
   getCharacteristicById,
   updateCharacteristic,
 } from "@/app/actions/product-characteristic/create-product-characteristic";
+
 import { createProductCharacteristicValues } from "@/app/actions/product-characteristic/create-product-characteristic-values";
-import ButtonXDellete from "../../ButtonXDellete";
 
 export type CharacteristicFormValues = Omit<ProductCharacteristicType, "id"> & {
+  category_id: string | null;
   values: Pick<ProductCharacteristicValuesType, "value" | "id">[];
 };
 
@@ -40,8 +42,8 @@ export function CharacteristicModal() {
       in_filter: false,
       is_required: false,
       is_multiple: false,
-      category_id: "",
-      values: [{ value: "" }],
+      category_id: null,
+      values: [{ value: "", id: "" }],
     },
   });
 
@@ -65,7 +67,6 @@ export function CharacteristicModal() {
       setLoading(true);
 
       const res = await getCharacteristicById(editingId);
-      console.log(res);
 
       if (!res.success || !res.data) {
         toast.error("Не вдалося завантажити характеристику");
@@ -78,8 +79,8 @@ export function CharacteristicModal() {
         in_filter: res.data.in_filter,
         is_required: res.data.is_required,
         is_multiple: res.data.is_multiple,
-        category_id: res.data.category_id,
-        values: res.data.values.length ? res.data.values : [{ value: "" }],
+        category_id: res.data.category_id ?? null,
+        values: res.data.values.length ? res.data.values : [{ value: "", id: "" }],
       });
 
       setLoading(false);
@@ -89,62 +90,65 @@ export function CharacteristicModal() {
   }, [mode, editingId, reset]);
 
   const onSubmit = async (data: CharacteristicFormValues) => {
-    // if (!data.values.length) {
-    //   toast.error("Додайте хоча б одне значення");
-    //   return;
-    // }
-
     setLoading(true);
 
-    if (mode === "create") {
-      const res = await createCharacteristic({
-        name: data.name,
-        in_filter: data.in_filter,
-        is_multiple: data.is_multiple,
-        is_required: data.is_required,
-        category_id: data.category_id,
-      });
+    try {
+      if (mode === "create") {
+        const res = await createCharacteristic({
+          name: data.name,
+          in_filter: data.in_filter,
+          is_multiple: data.is_multiple,
+          is_required: data.is_required,
+          category_id: data.category_id,
+        });
 
-      if (!res.success || !res.id) {
-        toast.error("Помилка створення");
-        setLoading(false);
-        return;
+        if (!res.success || !res.id) {
+          toast.error("Помилка створення характеристики");
+          setLoading(false);
+          return;
+        }
+
+        await Promise.all(
+          data.values
+            .filter((v) => v.value.trim() !== "")
+            .map((v) =>
+              createProductCharacteristicValues({
+                value: v.value,
+                characteristic_id: res.id,
+              }),
+            ),
+        );
+
+        toast.success("Характеристику створено");
       }
 
-      await Promise.all(
-        data.values.map((v) =>
-          createProductCharacteristicValues({
-            value: v.value,
-            characteristic_id: res.id,
-          }),
-        ),
-      );
+      if (mode === "update" && editingId) {
+        const res = await updateCharacteristic(editingId, {
+          name: data.name,
+          in_filter: data.in_filter,
+          is_multiple: data.is_multiple,
+          is_required: data.is_required,
+          category_id: data.category_id,
+          values: data.values,
+        });
 
-      toast.success("Характеристику створено");
-    }
+        if (!res.success) {
+          toast.error("Помилка оновлення характеристики");
+          setLoading(false);
+          return;
+        }
 
-    if (mode === "update" && editingId) {
-      const res = await updateCharacteristic(editingId, {
-        name: data.name,
-        in_filter: data.in_filter,
-        is_multiple: data.is_multiple,
-        is_required: data.is_required,
-        category_id: data.category_id,
-        values: data.values,
-      });
-
-      if (!res.success) {
-        toast.error("Помилка оновлення");
-        setLoading(false);
-        return;
+        toast.success("Характеристику оновлено");
       }
 
-      toast.success("Характеристику оновлено");
+      reset();
+      closeModal();
+    } catch (e) {
+      console.error(e);
+      toast.error("Невідома помилка");
+    } finally {
+      setLoading(false);
     }
-
-    reset();
-    closeModal();
-    setLoading(false);
   };
 
   if (!isModal) return null;
@@ -164,7 +168,7 @@ export function CharacteristicModal() {
         </h2>
 
         {loading ? (
-          <p className="text-center text-gray-400">Завантаження...</p>
+          <p className="text-center text-gray-400">Завантаження…</p>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <InputAdminStyle
@@ -175,19 +179,16 @@ export function CharacteristicModal() {
 
             <div className="grid grid-cols-3 gap-4">
               <InputAdminStyle
-                className="flex items-center gap-3"
                 type="checkbox"
                 {...register("in_filter")}
                 input_title="Для фільтрації"
               />
               <InputAdminStyle
-                className="flex items-center gap-3"
                 type="checkbox"
                 {...register("is_required")}
                 input_title="Обовʼязкова"
               />
               <InputAdminStyle
-                className="flex items-center gap-3"
                 type="checkbox"
                 {...register("is_multiple")}
                 input_title="Мультивибір"
@@ -196,10 +197,17 @@ export function CharacteristicModal() {
 
             <SelectComponentAdmin
               selectTitle="Категорія"
-              optionsTitle="-- Оберіть категорію --"
-              options={categories.map((c) => ({ name: c.name, value: c.id }))}
-              required
-              {...register("category_id", { required: true })}
+              optionsTitle="-- Виберіть категорію --"
+              options={[
+                { name: "🌐 Універсальна (для всіх товарів)", value: "" },
+                ...categories.map((c) => ({
+                  name: c.name,
+                  value: c.id,
+                })),
+              ]}
+              {...register("category_id", {
+                setValueAs: (v) => (v === "" ? null : v),
+              })}
             />
 
             <div className="space-y-3 rounded-lg border border-neutral-700 p-4">
@@ -208,7 +216,7 @@ export function CharacteristicModal() {
               {fields.map((field, index) => (
                 <div key={field.id} className="flex gap-2">
                   <input
-                    {...register(`values.${index}.value`, { required: true })}
+                    {...register(`values.${index}.value`)}
                     className="flex-1 rounded bg-neutral-800 p-2 text-white"
                     placeholder="Напр. 4 MP"
                   />

@@ -33,7 +33,7 @@ export function LabelInput(option: FilterOption & Pick<FilterGroup, "param">) {
     >
       <input id={option.value} type="checkbox" checked={checked} onChange={handleChange} />
       <span className="text_R">{option.label}</span>
-      <span>{"(5)"}</span>
+      {/* <span>{"(5)"}</span> */}
     </label>
   );
 }
