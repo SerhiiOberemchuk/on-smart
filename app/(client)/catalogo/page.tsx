@@ -69,31 +69,33 @@ export default function CatalogoPage() {
   };
   const filters = getCatalogFilters();
   return (
-    <section className="pb-5 lg:pb-16">
-      <Suspense fallback={<p>Caricamento...</p>}>
-        <HeaderCatalogo />
-      </Suspense>
-
-      <div className="xl:bg-background">
+    <Suspense fallback={<p>Caricamento...</p>}>
+      <section className="pb-5 lg:pb-16">
         <Suspense fallback={<p>Caricamento...</p>}>
-          <MobileFilterSection filtersAction={filters} />
+          <HeaderCatalogo />
         </Suspense>
 
-        <div className="container flex flex-col gap-5 lg:flex-row">
-          <Suspense fallback={<p>Carico...</p>}>
-            <ListFiltereOptions className="hidden lg:flex" filtersAction={filters} />
+        <div className="xl:bg-background">
+          <Suspense fallback={<p>Caricamento...</p>}>
+            <MobileFilterSection filtersAction={filters} />
           </Suspense>
 
-          <Suspense fallback={<p>Caricamento...</p>}>
-            <CatalogProductSection />
-          </Suspense>
+          <div className="container flex flex-col gap-5 lg:flex-row">
+            <Suspense fallback={<p>Carico...</p>}>
+              <ListFiltereOptions className="hidden lg:flex" filtersAction={filters} />
+            </Suspense>
+
+            <Suspense fallback={<p>Caricamento...</p>}>
+              <CatalogProductSection />
+            </Suspense>
+          </div>
         </div>
-      </div>
-      <Script
-        id="catalogo-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-    </section>
+        <Script
+          id="catalogo-jsonld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </section>
+    </Suspense>
   );
 }

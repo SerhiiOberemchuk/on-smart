@@ -1,10 +1,11 @@
+import "../envConfig";
+// import "dotenv/config";
 import { account, session, user, verification } from "@/auth-schema";
 import { db } from "@/db/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { admin } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
-
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "mysql",
@@ -16,4 +17,5 @@ export const auth = betterAuth({
     //  requireEmailVerification: true
   },
   plugins: [nextCookies(), admin()],
+  // secret: process.env.BETTER_AUTH_SECRET!,
 });

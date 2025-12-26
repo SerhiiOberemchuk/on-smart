@@ -8,6 +8,54 @@ import { productCharacteristicValuesSchema } from "@/db/schemas/product_characte
 import { productCharacteristicsSchema } from "@/db/schemas/product_characteristic.schema";
 import slugify from "@sindresorhus/slugify";
 
+export const getCatalogCharacteristicFilters = async (): Promise<FilterGroup[]> => {
+  "use cache";
+  try {
+    const characteristics = await db
+      .select()
+      .from(productCharacteristicsSchema)
+      .where(eq(productCharacteristicsSchema.in_filter, true));
+
+    if (!characteristics.length) return [];
+
+    const values = await db.select().from(productCharacteristicValuesSchema);
+
+    const valuesMap = new Map<string, { value: string; label: string }[]>();
+
+    for (const v of values) {
+      if (!valuesMap.has(v.characteristic_id)) {
+        valuesMap.set(v.characteristic_id, []);
+      }
+
+      valuesMap.get(v.characteristic_id)!.push({
+        value: v.id,
+        label: v.value,
+      });
+    }
+
+    return characteristics
+      .map((c) => {
+        const options = valuesMap.get(c.id) ?? [];
+        if (!options.length) return null;
+
+        return {
+          param: slugify(c.name),
+          title: c.name,
+          type: "checkbox",
+          options,
+        } as FilterGroup;
+      })
+      .filter(Boolean) as FilterGroup[];
+  } catch (error) {
+    console.error(
+      "[getCatalogCharacteristicFilters] Failed to load characteristic filters:",
+      error,
+    );
+
+    return [];
+  }
+};
+
 export const getCatalogFilters = async (): Promise<FilterGroup[]> => {
   "use cache";
 
@@ -42,44 +90,7 @@ export const getCatalogFilters = async (): Promise<FilterGroup[]> => {
     },
   ];
 
-  const characteristics = await db
-    .select()
-    .from(productCharacteristicsSchema)
-    .where(eq(productCharacteristicsSchema.in_filter, true));
-
-  if (!characteristics.length) {
-    return staticFilters;
-  }
-
-  const values = await db.select().from(productCharacteristicValuesSchema);
-
-  const valuesMap = new Map<string, { value: string; label: string }[]>();
-
-  for (const v of values) {
-    if (!valuesMap.has(v.characteristic_id)) {
-      valuesMap.set(v.characteristic_id, []);
-    }
-
-    valuesMap.get(v.characteristic_id)!.push({
-      value: v.id,
-      label: v.value,
-    });
-  }
-
-  const dynamicFilters: FilterGroup[] = characteristics
-    .map((c) => {
-      const options = valuesMap.get(c.id) ?? [];
-
-      if (!options.length) return null;
-
-      return {
-        param: slugify(c.name),
-        title: c.name,
-        type: "checkbox",
-        options,
-      } as FilterGroup;
-    })
-    .filter(Boolean) as FilterGroup[];
+  const dynamicFilters = await getCatalogCharacteristicFilters();
 
   return [...staticFilters, ...dynamicFilters];
 };
