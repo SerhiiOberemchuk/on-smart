@@ -25,13 +25,13 @@ export function LabelInput(option: FilterOption & Pick<FilterGroup, "param">) {
       //  {      limitUrlUpdates: debounce(1000),    }
     );
   };
-
+  const idLabel = `${option.param}__${option.value}`;
   return (
     <label
-      htmlFor={option.value}
+      htmlFor={idLabel}
       className="flex cursor-pointer items-center gap-2 hover:text-yellow-500"
     >
-      <input id={option.value} type="checkbox" checked={checked} onChange={handleChange} />
+      <input id={idLabel} type="checkbox" checked={checked} onChange={handleChange} />
       <span className="text_R">{option.label}</span>
       {/* <span>{"(5)"}</span> */}
     </label>

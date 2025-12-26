@@ -3,6 +3,7 @@ import { filtersSchema } from "@/db/schemas/filters-schema.schema";
 export type FilterOption = {
   value: string;
   label: string;
+  characteristic_value_id?: string;
 };
 
 export type FilterGroup = typeof filtersSchema.$inferInsert;

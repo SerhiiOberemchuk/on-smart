@@ -162,26 +162,37 @@ export async function updateCharacteristic(
   data: UpdateCharacteristicPayload,
 ) {
   try {
-    await db
-      .update(productCharacteristicsSchema)
-      .set({
-        name: data.name,
-        category_id: data.category_id,
-        in_filter: data.in_filter,
-        is_required: data.is_required,
-        is_multiple: data.is_multiple,
-      })
-      .where(eq(productCharacteristicsSchema.id, characteristicId));
+    await db.transaction(async (tx) => {
+      await tx
+        .update(productCharacteristicsSchema)
+        .set({
+          name: data.name,
+          category_id: data.category_id,
+          in_filter: data.in_filter,
+          is_required: data.is_required,
+          is_multiple: data.is_multiple,
+        })
+        .where(eq(productCharacteristicsSchema.id, characteristicId));
 
-    for (const v of data.values) {
-      if (!v.id) continue;
+      await tx
+        .delete(productCharacteristicValuesSchema)
+        .where(eq(productCharacteristicValuesSchema.characteristic_id, characteristicId));
 
-      await db
-        .update(productCharacteristicValuesSchema)
-        .set({ value: v.value })
-        .where(eq(productCharacteristicValuesSchema.id, v.id));
-    }
+      const valuesToInsert = data.values
+        .filter((v) => v.value.trim() !== "")
+        .map((v) => ({
+          value: v.value,
+          characteristic_id: characteristicId,
+        }));
+
+      if (valuesToInsert.length) {
+        await tx.insert(productCharacteristicValuesSchema).values(valuesToInsert);
+      }
+    });
+
     updateTag("getAllCharacteristicsWithMeta");
+    updateTag("catalog-filters");
+    updateTag("catalog-filters-characteristics");
 
     return { success: true };
   } catch (error) {

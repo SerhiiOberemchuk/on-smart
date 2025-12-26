@@ -1,15 +1,18 @@
+"use server";
 import { getAllBrands } from "@/app/actions/brands/brand-actions";
 import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
-import { FilterGroup } from "@/types/catalog-filter-options.types";
+import { FilterGroup, FilterOption } from "@/types/catalog-filter-options.types";
 
 import { db } from "@/db/db";
 import { eq } from "drizzle-orm";
 import { productCharacteristicValuesSchema } from "@/db/schemas/product_characteristic_values.schema";
 import { productCharacteristicsSchema } from "@/db/schemas/product_characteristic.schema";
 import slugify from "@sindresorhus/slugify";
+import { cacheTag } from "next/cache";
 
 export const getCatalogCharacteristicFilters = async (): Promise<FilterGroup[]> => {
   "use cache";
+  cacheTag("catalog-filters-characteristics");
   try {
     const characteristics = await db
       .select()
@@ -20,7 +23,7 @@ export const getCatalogCharacteristicFilters = async (): Promise<FilterGroup[]> 
 
     const values = await db.select().from(productCharacteristicValuesSchema);
 
-    const valuesMap = new Map<string, { value: string; label: string }[]>();
+    const valuesMap = new Map<string, FilterOption[]>();
 
     for (const v of values) {
       if (!valuesMap.has(v.characteristic_id)) {
@@ -28,8 +31,9 @@ export const getCatalogCharacteristicFilters = async (): Promise<FilterGroup[]> 
       }
 
       valuesMap.get(v.characteristic_id)!.push({
-        value: v.id,
-        label: v.value,
+        value: slugify(v.value),
+        label: (v.value),
+        characteristic_value_id: v.id,
       });
     }
 
@@ -58,7 +62,7 @@ export const getCatalogCharacteristicFilters = async (): Promise<FilterGroup[]> 
 
 export const getCatalogFilters = async (): Promise<FilterGroup[]> => {
   "use cache";
-
+  cacheTag("catalog-filters");
   const categories = await getAllCategoryProducts();
   const brands = await getAllBrands();
 

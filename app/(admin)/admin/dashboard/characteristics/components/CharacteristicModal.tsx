@@ -79,7 +79,7 @@ export function CharacteristicModal() {
         in_filter: res.data.in_filter,
         is_required: res.data.is_required,
         is_multiple: res.data.is_multiple,
-        category_id: res.data.category_id ?? null,
+        category_id: res.data.category_id ?? "",
         values: res.data.values.length ? res.data.values : [{ value: "", id: "" }],
       });
 
@@ -99,7 +99,7 @@ export function CharacteristicModal() {
           in_filter: data.in_filter,
           is_multiple: data.is_multiple,
           is_required: data.is_required,
-          category_id: data.category_id,
+          category_id: data.category_id || null,
         });
 
         if (!res.success || !res.id) {
@@ -128,7 +128,7 @@ export function CharacteristicModal() {
           in_filter: data.in_filter,
           is_multiple: data.is_multiple,
           is_required: data.is_required,
-          category_id: data.category_id,
+          category_id: data.category_id || null,
           values: data.values,
         });
 

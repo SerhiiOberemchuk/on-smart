@@ -229,7 +229,7 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
             className="mb-0 flex items-center gap-3"
           />
         </div>
-        <div>
+        {!product.parent_product_id &&<div>
           {isPendengCategories ? (
             <p>Завантаження...</p>
           ) : (
@@ -245,24 +245,26 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
               {...register("category_slug", { required: true })}
             />
           )}{" "}
-        </div>
-        <div>
-          {isPendengBrands ? (
-            <p>Завантаження...</p>
-          ) : (
-            <SelectComponentAdmin
-              selectTitle="Бренд товару"
-              optionsTitle="--Виберіть бренд--"
-              options={bradns.map((item) => ({
-                value: item.brand_slug as string,
-                name: item.name,
-              }))}
-              required
-              defaultValue={product.brand_slug}
-              {...register("brand_slug", { required: true })}
-            />
-          )}
-        </div>
+        </div>}
+        {!product.parent_product_id && (
+          <div>
+            {isPendengBrands ? (
+              <p>Завантаження...</p>
+            ) : (
+              <SelectComponentAdmin
+                selectTitle="Бренд товару"
+                optionsTitle="--Виберіть бренд--"
+                options={bradns.map((item) => ({
+                  value: item.brand_slug as string,
+                  name: item.name,
+                }))}
+                required
+                defaultValue={product.brand_slug}
+                {...register("brand_slug", { required: true })}
+              />
+            )}
+          </div>
+        )}
 
         <div className="text-[14px] font-light">
           <ButtonYellow

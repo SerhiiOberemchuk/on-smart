@@ -12,7 +12,7 @@ import Script from "next/script";
 export default async function PageSlug({ slug }: { slug: string }) {
   const product = await getProductBySlug(slug);
   const products = await getAllProducts();
-  const id = product.data?.id;
+  const id = product.data?.parent_product_id || product.data?.id;
   if (!id) {
     notFound();
   }

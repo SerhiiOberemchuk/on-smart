@@ -81,7 +81,7 @@ export function ItemFilteredOptions(props: FilterGroup) {
       >
         {props.type === "checkbox" &&
           props.options?.map((option) => (
-            <li key={ulid()}>
+            <li key={option.characteristic_value_id + option.value}>
               <LabelInput {...option} param={props.param} />
             </li>
           ))}

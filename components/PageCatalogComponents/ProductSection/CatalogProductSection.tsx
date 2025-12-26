@@ -1,34 +1,124 @@
 "use client";
 
-import { getAllProducts } from "@/app/actions/product/get-all-products";
-import CardProduct from "@/components/ProductCard/CardProduct";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { twMerge } from "tailwind-merge";
+import { parseAsInteger, useQueryState } from "nuqs";
+
+import CardProduct from "@/components/ProductCard/CardProduct";
 import styles from "./product-catalogo.module.css";
-import { SORT_OPTIONS_PARAMS } from "@/types/catalog-filter-options.types";
-import { useQueryState } from "nuqs";
+
+import { FilterGroup, SORT_OPTIONS_PARAMS } from "@/types/catalog-filter-options.types";
 import { ProductType } from "@/db/schemas/product.schema";
+import { getCatalogFilters } from "@/lib/get-catalog-filters";
+import {
+  CatalogQueryPayload,
+  getAllProductsFiltered,
+} from "@/app/actions/product/get-all-products-filtered";
 
 export default function CatalogProductSection({ className }: { className?: string }) {
   const [products, setProducts] = useState<ProductType[] | null>(null);
-  const [sortParam] = useQueryState(SORT_OPTIONS_PARAMS.PARAM_NAME);
-  const [activePage, setActivePage] = useState(1);
-  const maxPages = 5;
+  const [allFilters, setAllFilters] = useState<FilterGroup[]>();
+  const [pages, setPages] = useState<{ page: number; totalPages: number }>({
+    page: 1,
+    totalPages: 1,
+  });
+
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+
+  const changePage = useCallback(
+    (nextPage: number) => {
+      setPage(nextPage <= 1 ? null : nextPage, { scroll: false });
+    },
+    [setPage],
+  );
+
+  useEffect(() => {
+    const fetch = async () => {
+      const res = await getCatalogFilters();
+      setAllFilters(res);
+    };
+    fetch();
+  }, []);
+
+  const searchParams = useSearchParams();
+
+  const payload = useMemo<CatalogQueryPayload>(() => {
+    if (!allFilters) return {};
+
+    const categorySlugs: string[] = [];
+    const brandSlugs: string[] = [];
+    const characteristics: Record<string, string[]> = {};
+
+    allFilters.forEach((filter) => {
+      if (filter.type !== "checkbox") return;
+
+      const rawValue = searchParams.get(filter.param);
+      if (!rawValue) return;
+
+      const selectedSlugs = rawValue.split(",");
+
+      if (filter.param === "categoria") {
+        categorySlugs.push(...selectedSlugs);
+        return;
+      }
+
+      if (filter.param === "brand") {
+        brandSlugs.push(...selectedSlugs);
+        return;
+      }
+
+      const valueIds =
+        filter.options
+          ?.filter((opt) => selectedSlugs.includes(opt.value))
+          .map((opt) => opt.characteristic_value_id)
+          .filter((id): id is string => Boolean(id)) ?? [];
+
+      if (valueIds.length) {
+        characteristics[filter.param] = valueIds;
+      }
+    });
+
+    const priceRaw = searchParams.get("price");
+    const [minRaw, maxRaw] = priceRaw?.split(",") ?? [];
+
+    const min = minRaw ? Number(minRaw) : undefined;
+    const max = maxRaw ? Number(maxRaw) : undefined;
+
+    const sort =
+      (searchParams.get(SORT_OPTIONS_PARAMS.PARAM_NAME) as CatalogQueryPayload["sort"]) ?? "new";
+
+    return {
+      categorySlugs,
+      brandSlugs,
+      characteristics,
+      price: {
+        min: Number.isFinite(min) ? min : undefined,
+        max: Number.isFinite(max) ? max : undefined,
+      },
+      sort,
+      page,
+    };
+  }, [searchParams, allFilters, page]);
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const response = await getAllProducts();
-      if (response) {
-        setProducts(response.data);
-      }
-      try {
-      } catch (error) {
-        console.error("Error fetching products:", error);
+      const response = await getAllProductsFiltered(payload);
+      if (!response) return;
+
+      setProducts(response.data);
+      setPages({
+        page: response.meta.page,
+        totalPages: response.meta.totalPages,
+      });
+
+      if (response.meta.page !== page) {
+        changePage(response.meta.page);
       }
     };
-    fetchProducts();
-  }, [sortParam]);
 
+    fetchProducts();
+  }, [payload, page, changePage]);
   return (
     <section className={twMerge("flex-1", className)}>
       {products && (
@@ -38,59 +128,52 @@ export default function CatalogProductSection({ className }: { className?: strin
           ))}
         </ul>
       )}
+
       <nav className="mx-auto mt-6 flex items-center justify-center gap-2">
         <button
           type="button"
-          disabled={activePage === 1}
+          disabled={pages.page === 1}
           className={twMerge(
             "flex items-center gap-2 px-3 py-2",
-            activePage === 1 && "cursor-not-allowed opacity-50",
+            pages.page === 1 && "cursor-not-allowed opacity-50",
           )}
-          onClick={() => {
-            setActivePage((prev) => {
-              if (prev === 1) return 1;
-              return prev - 1;
-            });
-          }}
+          onClick={() => changePage(pages.page - 1)}
         >
-          <IconRow className="rotate-180" /> <span className="hidden md:block">Precedente</span>
+          <IconRow className="rotate-180" />
+          <span className="hidden md:block">Precedente</span>
         </button>
 
-        {Array.from({ length: maxPages }, (_, i) => i + 1).map((pageNum) => (
+        {Array.from({ length: pages.totalPages }, (_, i) => i + 1).map((pageNum) => (
           <button
             key={pageNum}
             className={twMerge(
               "flex size-8 items-center justify-center rounded-sm",
-              activePage === pageNum && "cursor-not-allowed bg-yellow-500 text-black",
+              pages.page === pageNum && "cursor-not-allowed bg-yellow-500 text-black",
             )}
-            disabled={activePage === pageNum}
-            onClick={() => setActivePage(pageNum)}
+            disabled={pages.page === pageNum}
+            onClick={() => changePage(pageNum)}
           >
-            <span> {pageNum} </span>
+            <span>{pageNum}</span>
           </button>
         ))}
 
         <button
           type="button"
+          disabled={pages.page === pages.totalPages}
           className={twMerge(
             "flex items-center gap-2 px-3 py-2",
-            activePage === maxPages && "cursor-not-allowed opacity-50",
+            pages.page === pages.totalPages && "cursor-not-allowed opacity-50",
           )}
-          disabled={activePage === maxPages}
-          onClick={() =>
-            setActivePage((prev) => {
-              if (prev === maxPages) return maxPages;
-
-              return prev + 1;
-            })
-          }
+          onClick={() => changePage(pages.page + 1)}
         >
-          <span className="hidden md:block">Successivo</span> <IconRow />
+          <span className="hidden md:block">Successivo</span>
+          <IconRow />
         </button>
       </nav>
     </section>
   );
 }
+
 function IconRow({ className }: { className?: string }) {
   return (
     <svg
