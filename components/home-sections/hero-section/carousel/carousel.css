@@ -55,6 +55,11 @@
   position: absolute;
   left: 0;
   z-index: 10;
-  top: 50%;
+  top: 20%;
   /* top: clamp(13.375rem, calc(23.75rem - (10.375rem * ((100vw - 375px) / 1065px))), 23.75rem); */
+}
+@media (width >= 48rem) {
+  .title_home_carousel {
+    top: 50%;
+  }
 }

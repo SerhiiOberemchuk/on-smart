@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Swiper, SwiperSlide, useSwiper } from "swiper/react";
 import type { Swiper as SwiperCore } from "swiper";
 
@@ -14,11 +14,9 @@ import { Autoplay, EffectFade, Pagination } from "swiper/modules";
 import { ButtonArrow } from "@/components/ButtonArrows";
 import LinkYellow from "@/components/YellowLink";
 import { slidesBanners } from "@/types/main-page-hero-banners.data";
-import { twMerge } from "tailwind-merge";
 
-export default function Carousel({ className }: { className?: string }) {
+export default function Carousel() {
   const progressCircle = useRef<SVGSVGElement | null>(null);
-  const [isReady, setIsReady] = useState(false);
 
   const onAutoplayTimeLeft = (_: SwiperCore, __: number, progress: number) => {
     if (!progressCircle.current) return;
@@ -26,13 +24,7 @@ export default function Carousel({ className }: { className?: string }) {
   };
 
   return (
-    <div
-      className={twMerge(
-        "absolute inset-0 z-10 transition-all duration-300",
-        isReady ? "opacity-100" : "opacity-0",
-        className,
-      )}
-    >
+    <div className="xl:container">
       <Swiper
         slidesPerView={1}
         spaceBetween={0}
@@ -48,15 +40,14 @@ export default function Carousel({ className }: { className?: string }) {
         modules={[Autoplay, Pagination, EffectFade]}
         onAutoplayTimeLeft={onAutoplayTimeLeft}
         className="hero_swiper"
-        onInit={() => setIsReady(true)}
       >
         {slidesBanners.map((baner, i) => (
-          <SwiperSlide key={i} className="relative">
+          <SwiperSlide key={i} className="relative bg-white">
             <div className="title_home_carousel px-4 md:max-w-[60%] md:pl-10">
-              <h2 className="H1 mb-6 text-pretty text-white">{baner.title}</h2>
+              <h2 className="H1 mb-6 max-w-[580px] text-pretty text-black">{baner.title}</h2>
               <LinkYellow href="/catalogo" title="Vai allo shop" />
             </div>
-            <div className="absolute top-0 right-0 bottom-0 left-0 bg-black/50"></div>
+            <div className="absolute top-0 right-0 bottom-0 left-0"></div>
             <Image
               src={baner.src}
               width={1440}
@@ -65,7 +56,17 @@ export default function Carousel({ className }: { className?: string }) {
               priority={i === 0}
               fetchPriority={i === 0 ? "high" : "auto"}
               loading={i === 0 ? "eager" : "lazy"}
-              className="mx-auto h-[677px] object-cover object-center"
+              className="mx-auto hidden h-[677px] w-auto object-cover object-center md:block"
+            />
+            <Image
+              src={baner.srcMob}
+              width={760}
+              height={580}
+              alt={baner.title}
+              priority={i === 0}
+              fetchPriority={i === 0 ? "high" : "auto"}
+              loading={i === 0 ? "eager" : "lazy"}
+              className="mx-auto h-[580px] object-cover object-bottom md:hidden"
             />
           </SwiperSlide>
         ))}

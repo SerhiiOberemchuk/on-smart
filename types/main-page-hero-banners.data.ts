@@ -1,18 +1,22 @@
-export const slidesBanners = [
+export const slidesBanners: { title: string; src: string; srcMob: string }[] = [
   {
     title: "AJAX: la difesa perfetta per ogni ambiente.",
-    src: "/hero-baner/Baner 1 Antifurto.png",
+    src: "/hero-baner/banner1.jpg",
+    srcMob: "/hero-baner/banner1mob.jpg",
   },
   {
     title: "Ogni dettaglio sotto controllo. Sempre.",
-    src: "/hero-baner/Baner 2 Videosorveglianza.png",
+    src: "/hero-baner/banner2.jpg",
+    srcMob: "/hero-baner/banner2mob.jpg",
   },
   {
     title: "La forza dell’energia, la certezza della protezione.",
-    src: "/hero-baner/Baner-3-Gruppidi-Continuita.jpg",
+    src: "/hero-baner/banner3.jpg",
+    srcMob: "/hero-baner/banner3mob.jpg",
   },
   {
     title: "Cavi, alimentatori e accessori per ogni installazione.",
-    src: "/hero-baner/Baner 4 Cavetteria e accessori.png",
+    src: "/hero-baner/banner3.jpg",
+    srcMob: "/hero-baner/banner4mob.jpg",
   },
 ];

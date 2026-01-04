@@ -10,6 +10,7 @@ import Head from "next/head";
 import CardDialog from "@/components/ProductCard/dialog-add-to-cart/CardDialog";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ToastContainer } from "react-toastify";
+import { ReactNode } from "react";
 
 const fixelFont = localFont({
   src: "../../fonts/FixelVariable.woff2",
@@ -34,11 +35,7 @@ export const metadata: Metadata = {
   appleWebApp: { title: "ON-SMART" },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="it-IT">
       <Head>

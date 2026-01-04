@@ -40,7 +40,7 @@ export default function ListCategories({
         {data.map(({ id, name, image, category_slug }) => (
           <li
             key={id}
-            className="relative rounded-sm transition-transform duration-300 hover:scale-105"
+            className="relative overflow-hidden rounded-sm transition-transform duration-300 hover:scale-105"
           >
             <Link href={"/categoria/" + category_slug} title={name}>
               <Image
@@ -51,7 +51,7 @@ export default function ListCategories({
                 alt={`Categoria: ${name}`}
               />
             </Link>
-            <h3 className="H3 pointer-events-none absolute bottom-[8%] left-0 w-full px-2 text-center text-wrap">
+            <h3 className="H3 pointer-events-none absolute bottom-[8%]   left-0 w-full px-2 text-center text-wrap">
               {name}
             </h3>
           </li>
