@@ -16,7 +16,7 @@ export const slidesBanners: { title: string; src: string; srcMob: string }[] = [
   },
   {
     title: "Cavi, alimentatori e accessori per ogni installazione.",
-    src: "/hero-baner/banner3.jpg",
+    src: "/hero-baner/banner4.jpg",
     srcMob: "/hero-baner/banner4mob.jpg",
   },
 ];
