@@ -19,13 +19,31 @@ export async function createCategoryProducts(category: Omit<CategoryTypes, "id">
     return { success: false, error };
   }
 }
-
-export async function getAllCategoryProducts() {
+export type GetAllCategoriesResponse = Promise<
+  | {
+      success: boolean;
+      data: {
+        id: string;
+        name: string;
+        title_full: string;
+        description: string;
+        image: string;
+        category_slug: string;
+      }[];
+      error?: undefined;
+    }
+  | {
+      success: boolean;
+      error: unknown;
+      data: never[];
+    }
+>;
+export async function getAllCategoryProducts(): GetAllCategoriesResponse {
   "use cache";
   cacheTag("all_categories");
 
   try {
-    const result = await safeQuery(() => db.select().from(categoryProductsSchema));
+    const result = await db.select().from(categoryProductsSchema);
 
     return {
       success: true,

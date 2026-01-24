@@ -1,17 +1,25 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { use, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "react-toastify";
 
 import ModalCategoryForm from "./ModalCategoryForm";
 import { CategoryTypes } from "@/types/category.types";
-import { removeCategoryProductsById } from "@/app/actions/category/category-actions";
+import {
+  GetAllCategoriesResponse,
+  removeCategoryProductsById,
+} from "@/app/actions/category/category-actions";
 import { deleteFileFromS3 } from "@/app/actions/files/uploadFile";
 
-export default function CategoriesClientPage({ initialData }: { initialData: CategoryTypes[] }) {
-  const [categories, setCategories] = useState<CategoryTypes[]>(initialData || []);
+export default function CategoriesClientPage({
+  initialDataPromise,
+}: {
+  initialDataPromise: GetAllCategoriesResponse;
+}) {
+  const initialData = use(initialDataPromise);
+  const [categories, setCategories] = useState<CategoryTypes[]>(initialData.data || []);
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState<CategoryTypes | null>(null);
   const [idToDelete, setIdToDelete] = useState<string | null>(null);

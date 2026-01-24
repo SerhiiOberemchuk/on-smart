@@ -24,7 +24,7 @@ export async function getAllBrands() {
   "use cache";
   cacheTag("all_brands");
   try {
-    const result = await safeQuery(() => db.select().from(brandProductsSchema));
+    const result = await  db.select().from(brandProductsSchema);
     return {
       success: true,
       data: result,

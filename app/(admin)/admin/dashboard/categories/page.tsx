@@ -4,11 +4,11 @@ import { Suspense } from "react";
 
 export default async function CategoriesPage() {
   "use cache";
-  const res = await getAllCategoryProducts();
+  const res = getAllCategoryProducts();
 
   return (
     <Suspense>
-      <CategoriesClientPage initialData={res.data} />
+      <CategoriesClientPage initialDataPromise={res} />
     </Suspense>
   );
 }

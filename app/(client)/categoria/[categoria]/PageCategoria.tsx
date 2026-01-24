@@ -41,7 +41,7 @@ export default async function PageCategoria({ params }: Props) {
   if (!success || !data) {
     notFound();
   }
-  const products = await getAllProducts({ category: categoria });
+  const products = await getAllProducts();
   if (!products.data) {
     return;
   }
