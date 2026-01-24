@@ -7,9 +7,18 @@ import { useQueryState } from "nuqs";
 import icon_arrow_top from "@/assets/icons/arrow-top.svg";
 import Image from "next/image";
 import { twMerge } from "tailwind-merge";
+import { testDbConnection } from "@/app/actions/test-db-conection";
 
 export default function HeaderCatalogo() {
   const refUl = useRef<HTMLUListElement | null>(null);
+
+  useEffect(() => {
+    const testDB = async () => {
+      const resp = await testDbConnection();
+      console.log("DB TEST:", resp);
+    };
+    testDB();
+  }, []);
 
   const [sortParam, setSortParam] = useQueryState(SORT_OPTIONS_PARAMS.PARAM_NAME, {
     defaultValue: SORT_OPTIONS_PARAMS.options[0].value,

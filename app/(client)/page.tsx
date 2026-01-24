@@ -8,6 +8,7 @@ import TopSalesSection from "@/components/home-sections/top-sales-section/TopSal
 import Script from "next/script";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import { Suspense } from "react";
+import FallbackHeroSection from "@/components/home-sections/hero-section/FallbackHeroSection";
 
 export const metadata: Metadata = {
   title: "OnSmart — Elettronica, Videosorveglianza, Smart Home al miglior prezzo",
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
 export default async function Home() {
   return (
     <>
-      <Suspense>
+      <Suspense fallback={<FallbackHeroSection />}>
         <HeroSection />
       </Suspense>
       <Suspense>

@@ -17,7 +17,7 @@ export const getCatalogCharacteristicFilters = async (): Promise<FilterGroup[]> 
     const characteristics = await db
       .select()
       .from(productCharacteristicsSchema)
-      .where(eq(productCharacteristicsSchema.in_filter, true));
+      .where(eq(productCharacteristicsSchema.in_filter, 1));
 
     if (!characteristics.length) return [];
 
@@ -32,7 +32,7 @@ export const getCatalogCharacteristicFilters = async (): Promise<FilterGroup[]> 
 
       valuesMap.get(v.characteristic_id)!.push({
         value: slugify(v.value),
-        label: (v.value),
+        label: v.value,
         characteristic_value_id: v.id,
       });
     }

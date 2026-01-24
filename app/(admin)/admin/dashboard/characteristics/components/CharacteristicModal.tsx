@@ -39,7 +39,7 @@ export function CharacteristicModal() {
   const { register, control, handleSubmit, reset } = useForm<CharacteristicFormValues>({
     defaultValues: {
       name: "",
-      in_filter: false,
+      in_filter: 0,
       is_required: false,
       is_multiple: false,
       category_id: null,

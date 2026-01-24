@@ -1,4 +1,4 @@
-import { boolean, mysqlTable, varchar } from "drizzle-orm/mysql-core";
+import { boolean, mysqlTable, tinyint, varchar } from "drizzle-orm/mysql-core";
 import { ulid } from "ulid";
 
 export const productCharacteristicsSchema = mysqlTable("product_characteristics", {
@@ -11,7 +11,7 @@ export const productCharacteristicsSchema = mysqlTable("product_characteristics"
   name: varchar("name", { length: 255 }).notNull(),
   is_required: boolean("is_required").notNull().default(false),
   is_multiple: boolean("is_multiple").notNull().default(false),
-  in_filter: boolean("in_filter").notNull().default(false),
+  in_filter: tinyint("in_filter").notNull().default(0),
 });
 
 export type ProductCharacteristicType = typeof productCharacteristicsSchema.$inferSelect;

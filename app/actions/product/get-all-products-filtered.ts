@@ -77,7 +77,7 @@ export async function getAllProductsFiltered(payload: CatalogQueryPayload) {
     .from(productsSchema)
     .where(where.length ? and(...where) : undefined)
     .orderBy(orderBy)
-    .limit(limit)
+    .limit(20)
     .offset(offset);
 
   const [{ total }] = await db

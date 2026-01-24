@@ -17,7 +17,7 @@ export type ProductFetchResult = {
   error: string | null;
 };
 
-export async function getAllProducts(props: Props = {}) {
+export async function getAllProducts() {
   "use cache";
 
   cacheTag("get_all_product");

@@ -11,7 +11,7 @@ type CharacteristicListItem = {
   name: string;
   category_id: string | null;
   category_name: string | null;
-  in_filter: boolean;
+  in_filter: number;
   is_required: boolean;
   is_multiple: boolean;
   values: string[];
@@ -47,7 +47,7 @@ export default function ListCharacteristics({
           name: string;
           category_id: string | null;
           category_name: string | null;
-          in_filter: boolean;
+          in_filter: number;
           is_required: boolean;
           is_multiple: boolean;
           values: string[];

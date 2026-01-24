@@ -13,7 +13,7 @@ const dashboardLinks = [
   { href: URL_DASHBOARD + "/brands", title: "Бренди", active: true },
   { href: URL_DASHBOARD + "/categories", title: "Категорії", active: true },
   { href: URL_DASHBOARD + "/characteristics", title: "Характеристики", active: true },
-  { href: URL_DASHBOARD + "/customers", title: "Клієнти", active: false },
+  { href: URL_DASHBOARD + "/banners", title: "Банери", active: false },
   { href: URL_DASHBOARD + "/stock", title: "Склад", active: false },
 ] as const;
 
