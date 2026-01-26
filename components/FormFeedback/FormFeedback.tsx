@@ -4,7 +4,7 @@ import Form from "next/form";
 
 import styles from "./form.module.css";
 import TextArea from "./TextArea";
-import { submitGeneralFeedback } from "@/app/actions/product/feedback-product";
+import { sendMailAssistance } from "@/app/actions/mail/assistance";
 import { twMerge } from "tailwind-merge";
 import Link from "next/link";
 import InputsRating from "./InputsRating";
@@ -21,7 +21,7 @@ export default function FormFeedback({
 
   type: "general-feedback" | "product-review";
 }) {
-  const action = type === "product-review" ? createProductReview : submitGeneralFeedback;
+  const action = type === "product-review" ? createProductReview : sendMailAssistance;
   const [state, formAction, isPending] = useActionState(action, { success: false });
   const [showSuccess, setShowSuccess] = useState(false);
 
