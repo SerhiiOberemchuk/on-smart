@@ -1,29 +1,40 @@
 "use server";
-import nodemailer from "nodemailer";
-import { transporterAssistance, transporterGoogle } from "@/lib/mail-transporter";
+
+import { transporterAssistance } from "@/lib/mail-transporter";
 
 export async function sendMailAssistance(prevState: { success: boolean }, formData: FormData) {
   try {
-    const nome = formData.get("nome");
-    const email = formData.get("email");
-    const messaggio = formData.get("messaggio");
-    const mail = await transporterAssistance.sendMail({
+    const nome = String(formData.get("nome") ?? "");
+    const email = String(formData.get("email") ?? "");
+    const messaggio = String(formData.get("messaggio") ?? "");
+
+    await transporterAssistance.sendMail({
       from: `"Assistenza On-Smart" <${process.env.MAIL_USER_ASSISTENZA}>`,
-      to: email as string,
+      to: process.env.MAIL_USER_ASSISTENZA,
+      replyTo: email,
       subject: "Nuova richiesta di assistenza da On-Smart",
-      text: `Nome: ${nome}\nEmail: ${email}\nMessaggio: ${messaggio}`,
+      text: `Nome: ${nome}\nEmail: ${email}\nMessaggio:\n${messaggio}`,
     });
-    console.log("Message sent: %s", mail.messageId);
-    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(mail));
+
+    await transporterAssistance.sendMail({
+      from: `"Assistenza On-Smart" <${process.env.MAIL_USER_ASSISTENZA}>`,
+      to: email,
+      subject: "Abbiamo ricevuto la tua richiesta – On-Smart",
+      text: `Ciao ${nome}, abbiamo ricevuto la tua richiesta di assistenza.
+      Messaggio inviato: "${messaggio}"
+      Il nostro team ti risponderà il prima possibile.
+      — On-Smart Support`,
+    });
 
     return {
-      mail: { nome, email, messaggio },
       success: true,
-      messaggio: "Feedback submitted successfully",
+      messaggio: "Richiesta inviata con successo",
     };
   } catch (error) {
-    console.log(error);
-
-    return { success: false, error };
+    console.error(error);
+    return {
+      success: false,
+      messaggio: "Errore durante l'invio della richiesta",
+    };
   }
 }
