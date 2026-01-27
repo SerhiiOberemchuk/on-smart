@@ -1,6 +1,6 @@
 export const CONTACTS_ADDRESS = {
   PHONE_NUMBER: "+393516930878",
-  EMAIL: "info@on-smart.it",
+  EMAIL: "assistenza@on-smart.it",
   ADDRESS: {
     STREET: "Via Novara 12",
     CITY: "Novara",
