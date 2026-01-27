@@ -1,23 +1,23 @@
 "use server";
 
-import { transporterAssistance } from "@/lib/mail-transporter";
+import { transporterOrders } from "@/lib/mail-transporter";
 
-export async function sendMailAssistance(prevState: { success: boolean }, formData: FormData) {
+export async function sendMailOrders(prevState: { success: boolean }, formData: FormData) {
   try {
     const nome = String(formData.get("nome") ?? "");
     const email = String(formData.get("email") ?? "");
     const messaggio = String(formData.get("messaggio") ?? "");
 
-    await transporterAssistance.sendMail({
-      from: `"Assistenza On-Smart" <${process.env.MAIL_USER_ASSISTENZA}>`,
-      to: process.env.MAIL_USER_ASSISTENZA,
+    await transporterOrders.sendMail({
+      from: `"Ordini On-Smart" <${process.env.MAIL_USER_ORDERS}>`,
+      to: process.env.MAIL_USER_ORDERS,
       replyTo: email,
       subject: "Nuova richiesta di assistenza da On-Smart",
       text: `Nome: ${nome}\nEmail: ${email}\nMessaggio:\n${messaggio}`,
     });
 
-    await transporterAssistance.sendMail({
-      from: `"Assistenza On-Smart" <${process.env.MAIL_USER_ASSISTENZA}>`,
+    await transporterOrders.sendMail({
+      from: `"Ordini On-Smart" <${process.env.MAIL_USER_ORDERS}>`,
       to: email,
       subject: "Abbiamo ricevuto la tua richiesta – On-Smart",
       text: `Ciao ${nome}, abbiamo ricevuto la tua richiesta di assistenza.

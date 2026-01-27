@@ -1,9 +1,11 @@
+import { ProductType } from "@/db/schemas/product.schema";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 type BearStoreState = {
   isPopupOpen: boolean;
   qntToShow: number;
   basket: { id: string; qnt: number }[];
+  productsInBasket: ProductType[];
 };
 type BasketStateFunctions = {
   removeAllBasket: () => void;
@@ -11,6 +13,8 @@ type BasketStateFunctions = {
   removeFromBasketById: (id: string) => void;
   showPopup: (quantity: number) => void;
   hidePopup: () => void;
+  setProductsInBasket: (products: ProductType[]) => void;
+  removeProdutsFromBasket: () => void;
 };
 type BasketState = BearStoreState & BasketStateFunctions;
 export const useBasketStore = create<BasketState, [["zustand/persist", BasketStateFunctions]]>(
@@ -19,6 +23,7 @@ export const useBasketStore = create<BasketState, [["zustand/persist", BasketSta
       basket: [],
       qntToShow: 0,
       isPopupOpen: false,
+      productsInBasket: [],
       removeAllBasket: () => set({ basket: [] }),
       removeFromBasketById: (id) =>
         set((state) => ({
@@ -32,6 +37,8 @@ export const useBasketStore = create<BasketState, [["zustand/persist", BasketSta
         })),
       showPopup: (quantity: number) => set({ isPopupOpen: true, qntToShow: quantity }),
       hidePopup: () => set({ isPopupOpen: false, qntToShow: 0 }),
+      setProductsInBasket: (products) => set({ productsInBasket: products }),
+      removeProdutsFromBasket: () => set({ productsInBasket: [] }),
     }),
     {
       name: "carello",

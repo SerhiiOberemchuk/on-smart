@@ -1,3 +1,5 @@
+"use client";
+
 import ButtonYellow from "@/components/BattonYellow";
 import RiepilogoDatiConsegna from "./RepilogoDatiConsegna";
 import RiepilogoDatiCliente from "./RiepilogoDatiCliente";
