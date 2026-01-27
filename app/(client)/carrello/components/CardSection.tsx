@@ -25,8 +25,10 @@ const btnActive = "hover:bg-grey-hover cursor-pointer";
 export default function CartSection() {
   const [fetchedProducts, setFetchedProducts] = useState<ProductType[]>([]);
 
-  const { basket, removeFromBasketById, updateBasket } = useBasketStore();
-
+  const { basket, removeFromBasketById, updateBasket, setProductsInBasket } = useBasketStore();
+  useEffect(() => {
+    setProductsInBasket(fetchedProducts);
+  }, [fetchedProducts, setProductsInBasket]);
   useEffect(() => {
     if (basket.length === 0) {
       const set = () => setFetchedProducts([]);
