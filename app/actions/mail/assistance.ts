@@ -8,7 +8,7 @@ export async function sendMailAssistance(prevState: { success: boolean }, formDa
     const email = formData.get("email");
     const messaggio = formData.get("messaggio");
     const mail = await transporterAssistance.sendMail({
-      from: `"Assistenza On-Smart" <${process.env.MAIL_SMTP_USER_ASSISTENZA}>`,
+      from: `"Assistenza On-Smart" <${process.env.MAIL_USER_ASSISTENZA}>`,
       to: email as string,
       subject: "Nuova richiesta di assistenza da On-Smart",
       text: `Nome: ${nome}\nEmail: ${email}\nMessaggio: ${messaggio}`,
