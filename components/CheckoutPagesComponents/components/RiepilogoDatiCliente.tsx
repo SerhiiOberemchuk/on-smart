@@ -5,32 +5,43 @@ import icon_pencil from "@/assets/icons/icon_add_review.svg";
 import Image from "next/image";
 import Link from "next/link";
 import { useCheckoutStore } from "@/store/checkout-store";
+import { InputsCheckoutStep1 } from "@/types/checkout-steps.types";
 
-export default function RiepilogoDatiCliente() {
+export default function RiepilogoDatiCliente({
+  isModifica = true,
+  externalData,
+}: {
+  isModifica?: boolean;
+  externalData?: Partial<InputsCheckoutStep1>;
+}) {
   const { dataFirstStep } = useCheckoutStore();
-  const { numeroTelefono, email, nome, indirizzo, città, cap, provincia_regione } = dataFirstStep;
+
+  const displayData = externalData || dataFirstStep;
+
+  if (!displayData) return null;
+
+  const { numeroTelefono, email, nome, indirizzo, città, cap, provincia_regione } = displayData;
+
   return (
     <div>
       <div className="flex items-center gap-2">
-        <Image
-          src={icon_email_confirmed}
-          alt="icon email confirmed"
-          aria-label="icon email confirmed"
-        />
+        <Image src={icon_email_confirmed} alt="icon email confirmed" />
         <h3 className="H5">I tuoi dati</h3>
-        <Link
-          href="/checkout/informazioni"
-          className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
-        >
-          <Image src={icon_pencil} alt="icon pencil" aria-label="icon pencil" /> Modifica
-        </Link>
+        {isModifica && (
+          <Link
+            href="/checkout/informazioni"
+            className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
+          >
+            <Image src={icon_pencil} alt="icon pencil" /> Modifica
+          </Link>
+        )}
       </div>
       <div className="text_R mt-3 pl-8 text-text-grey">
-        <p className="">{numeroTelefono}</p>
-        <p className="">{email}</p>
-        <p className="">{nome}</p>
-        <p className="">{cap}</p>
-        <p className="">{indirizzo}</p>
+        <p>{numeroTelefono}</p>
+        <p>{email}</p>
+        <p>{nome}</p>
+        <p>{cap}</p>
+        <p>{indirizzo}</p>
         <p>
           {città}, {provincia_regione}
         </p>

@@ -36,7 +36,7 @@ export default function RepilogoComponent({
         <ul className="flex flex-col gap-3">
           {[
             { title: "articolo (li)", price: totalPrice },
-            { title: "IVA (inclusa)", price: 2 },
+            { title: "IVA (inclusa)", price: totalPrice * 0.22 },
             { title: "Spedizione", price: 0 },
           ].map((i, index) => (
             <li key={index} className="flex items-center justify-between">

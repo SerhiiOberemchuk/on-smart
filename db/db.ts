@@ -1,6 +1,10 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
+
+const isProd = process.env.NODE_ENV === "production";
+console.log(isProd);
+
 const connection = mysql.createPool({
   host: process.env.DATABASE_HOST!,
   user: process.env.DATABASE_USER!,
@@ -14,7 +18,8 @@ const connection = mysql.createPool({
   connectionLimit: 5,
   queueLimit: 0,
   connectTimeout: 5000,
-  ssl: { rejectUnauthorized: false },
+  ...(isProd ? { ssl: { rejectUnauthorized: false } } : {}),
+
   // connectionLimit: 5,
 });
 export const db = drizzle({ client: connection });

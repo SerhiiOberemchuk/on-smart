@@ -5,10 +5,25 @@ import icon_pencil from "@/assets/icons/icon_add_review.svg";
 import Image from "next/image";
 import Link from "next/link";
 import { useCheckoutStore } from "@/store/checkout-store";
+import { InputsCheckoutStep1, InputsCheckoutStep2Consegna } from "@/types/checkout-steps.types";
 
-export default function RiepilogoDatiConsegna() {
+export default function RiepilogoDatiConsegna({
+  isModifica = true,
+  externalDataConsegna,
+  externalDataCustomer,
+}: {
+  isModifica?: boolean;
+  externalDataConsegna?: Partial<InputsCheckoutStep2Consegna>;
+  externalDataCustomer?: Partial<InputsCheckoutStep1>;
+}) {
   const { dataFirstStep, dataCheckoutStepConsegna } = useCheckoutStore();
-  const { numeroTelefono, email, nome, indirizzo, città, cap, provincia_regione } = dataFirstStep;
+
+  const dataCheckoutStepConsegnaFinal = externalDataConsegna || dataCheckoutStepConsegna;
+  const dataFirstStepFinal = externalDataCustomer || dataFirstStep;
+
+  const { numeroTelefono, email, nome, indirizzo, città, cap, provincia_regione } =
+    dataFirstStepFinal;
+
   const {
     deliveryMethod,
     sameAsBilling,
@@ -18,7 +33,7 @@ export default function RiepilogoDatiConsegna() {
     // ragione_sociale: ragione_socialeConsegna,
     referente_contatto,
     provincia_regione: provincia_regioneConsegna,
-  } = dataCheckoutStepConsegna;
+  } = dataCheckoutStepConsegnaFinal;
   return (
     <div>
       <div className="flex items-center gap-2">
@@ -28,12 +43,14 @@ export default function RiepilogoDatiConsegna() {
           aria-label="icon email confirmed"
         />
         <h3 className="H5">Metodo di consegna</h3>
-        <Link
-          href="/checkout/consegna"
-          className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
-        >
-          <Image src={icon_pencil} alt="icon pencil" aria-label="icon pencil" /> Modifica
-        </Link>
+        {isModifica && (
+          <Link
+            href="/checkout/consegna"
+            className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
+          >
+            <Image src={icon_pencil} alt="icon pencil" aria-label="icon pencil" /> Modifica
+          </Link>
+        )}
       </div>
 
       <div className="text_R mt-3 pl-8 text-text-grey">
