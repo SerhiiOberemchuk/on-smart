@@ -6,9 +6,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCheckoutStore } from "@/store/checkout-store";
 import BonificoDati from "./BonificoDati";
+import { MetodsPayment } from "@/types/bonifico.data";
 
-export default function RiepilogoDatiPagamento() {
+export default function RiepilogoDatiPagamento({
+  isModifica = true,
+  externalDataPayment,
+}: {
+  isModifica?: boolean;
+  externalDataPayment?: Partial<MetodsPayment>;
+}) {
   const { dataCheckoutStepPagamento } = useCheckoutStore();
+
+  const dataCheckoutStepPagamentoFinal = externalDataPayment || dataCheckoutStepPagamento;
 
   return (
     <div>
@@ -19,19 +28,21 @@ export default function RiepilogoDatiPagamento() {
           aria-label="icon email confirmed"
         />
         <h3 className="H5">Metodo di pagamento</h3>
-        <Link
-          href="/checkout/pagamento"
-          className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
-        >
-          <Image src={icon_pencil} alt="icon pencil" aria-label="icon pencil" /> Modifica
-        </Link>
+        {isModifica && (
+          <Link
+            href="/checkout/pagamento"
+            className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
+          >
+            <Image src={icon_pencil} alt="icon pencil" aria-label="icon pencil" /> Modifica
+          </Link>
+        )}
       </div>
 
       <div className="text_R mt-3">
-        {dataCheckoutStepPagamento?.paymentMethod === "bonifico" ? (
+        {dataCheckoutStepPagamentoFinal?.paymentMethod === "bonifico" ? (
           <BonificoDati />
         ) : (
-          <p className="pl-8 text-text-grey">{dataCheckoutStepPagamento?.title}</p>
+          <p className="pl-8 text-text-grey">{dataCheckoutStepPagamentoFinal?.title}</p>
         )}
       </div>
     </div>
