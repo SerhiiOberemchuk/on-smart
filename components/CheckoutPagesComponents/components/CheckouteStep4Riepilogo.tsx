@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { PAGES } from "@/types/pages.types";
 import KlarnaPaymentWidget from "@/components/pagamento/klarna/KlarnaPaymentWidget";
+import PayPalPaymentWidget from "@/components/pagamento/paypal/PayPalPaymentWidget";
 
 export default function CheckouteStep4Riepilogo() {
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -46,8 +47,7 @@ export default function CheckouteStep4Riepilogo() {
       {dataCheckoutStepPagamento.paymentMethod === "paypal" && (
         <div className="mt-4">
           <p className="mb-2 font-medium">Procedi con il pagamento PayPal qui sotto:</p>
-          {/* PayPal Payment Widget Component */}
-          <div>PayPal Payment Widget</div>
+          <PayPalPaymentWidget />
         </div>
       )}
       {dataCheckoutStepPagamento.paymentMethod === "card" && (
