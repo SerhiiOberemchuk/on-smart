@@ -13,6 +13,7 @@ import { Tooltip } from "react-tooltip";
 import { formatDate } from "@/utils/formatter-data";
 import { Navigation, Pagination } from "swiper/modules";
 import StarsRating from "@/components/StarsRating";
+import Link from "next/link";
 
 export default function ReviewList({ reviews }: { reviews: GoogleReview[] }) {
   return (
@@ -28,7 +29,14 @@ export default function ReviewList({ reviews }: { reviews: GoogleReview[] }) {
       {reviews.map((item, index) => (
         <SwiperSlide id="review-item" className="" key={index}>
           <article className="flex w-[326px] flex-col justify-between gap-3 rounded-sm border border-stroke-grey bg-background px-3 py-6">
-            <header className="flex items-start justify-between">
+            <header className="relative flex items-start justify-between">
+              <Link
+                href={item.reviewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute inset-0 z-10 cursor-pointer"
+                aria-label={`Leggi la recensione di ${item.clientName}`}
+              />
               <Image src={iconQuote} alt="Quote Icon" width={26} height={23} aria-hidden />
 
               <div className="flex flex-col">
@@ -47,7 +55,7 @@ export default function ReviewList({ reviews }: { reviews: GoogleReview[] }) {
               <Tooltip
                 id="review-tooltip-text"
                 place="left"
-                style={{ zIndex: 1000, maxWidth: 500 }}
+                style={{ zIndex: 1000, maxWidth: 500, height: "auto" }}
               />
 
               <h3 className="input_R_18 ml-auto">{item.clientName}</h3>

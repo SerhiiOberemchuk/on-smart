@@ -6,4 +6,5 @@ export type GoogleReview = {
   reviewText: string;
   rating: ProductType["rating"];
   date: string;
+  reviewUrl: string;
 };

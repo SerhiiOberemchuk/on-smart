@@ -1,12 +1,14 @@
 import { ProductType } from "@/db/schemas/product.schema";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-type BearStoreState = {
+
+export type BasceketStoreStateType = {
   isPopupOpen: boolean;
   qntToShow: number;
   basket: { id: string; qnt: number }[];
   productsInBasket: ProductType[];
 };
+
 type BasketStateFunctions = {
   removeAllBasket: () => void;
   updateBasket: (newBasket: { id: string; qnt: number }[]) => void;
@@ -16,7 +18,8 @@ type BasketStateFunctions = {
   setProductsInBasket: (products: ProductType[]) => void;
   removeProdutsFromBasket: () => void;
 };
-type BasketState = BearStoreState & BasketStateFunctions;
+
+type BasketState = BasceketStoreStateType & BasketStateFunctions;
 export const useBasketStore = create<BasketState, [["zustand/persist", BasketStateFunctions]]>(
   persist(
     (set) => ({
