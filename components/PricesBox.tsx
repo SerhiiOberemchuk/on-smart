@@ -37,10 +37,12 @@ export default function PricesBox({
             place === "dialog-cart-product-variant" && "H4M",
           )}
         >
-          {price} €
+          {Number(price).toFixed(2)} €
         </span>
         {oldPrice && Number(oldPrice) > 0 ? (
-          <span className="text-nowrap text-text-grey line-through">{oldPrice} €</span>
+          <span className="text-nowrap text-text-grey line-through">
+            {Number(oldPrice).toFixed(2)} €
+          </span>
         ) : null}
       </div>
     </div>

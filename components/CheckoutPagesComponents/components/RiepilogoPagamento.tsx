@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useCheckoutStore } from "@/store/checkout-store";
 import BonificoDati from "./BonificoDati";
 import { MetodsPayment } from "@/types/bonifico.data";
+import { PAGES } from "@/types/pages.types";
 
 export default function RiepilogoDatiPagamento({
   isModifica = true,
@@ -30,7 +31,7 @@ export default function RiepilogoDatiPagamento({
         <h3 className="H5">Metodo di pagamento</h3>
         {isModifica && (
           <Link
-            href="/checkout/pagamento"
+            href={PAGES.CHECKOUT_PAGES.PAYMENT}
             className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
           >
             <Image src={icon_pencil} alt="icon pencil" aria-label="icon pencil" /> Modifica
