@@ -1,15 +1,16 @@
 "use client";
 import clsx from "clsx";
 
-import InputSconto from "./InputSconto";
+// import InputSconto from "./InputSconto";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { redirect, usePathname } from "next/navigation";
 import ButtonYellow from "@/components/BattonYellow";
+import { DELIVERY_DATA } from "@/types/delivery.data";
 
 export default function RepilogoComponent({
   totalPrice,
   basket,
-  isInputSconto = true,
+  // isInputSconto = false,
 }: {
   totalPrice: number;
   basket: { id: string; qnt: number }[];
@@ -37,7 +38,13 @@ export default function RepilogoComponent({
           {[
             { title: "articolo (li)", price: totalPrice },
             { title: "IVA (inclusa)", price: totalPrice * 0.22 },
-            { title: "Spedizione", price: 0 },
+            {
+              title: "Spedizione",
+              price:
+                totalPrice > DELIVERY_DATA.FREE_THRESHOLD_TOTAL_PRISE
+                  ? 0
+                  : DELIVERY_DATA.PRISE_DELIVERY,
+            },
           ].map((i, index) => (
             <li key={index} className="flex items-center justify-between">
               <span className="text_R">
@@ -57,7 +64,7 @@ export default function RepilogoComponent({
           <h4 className="H3">Totale</h4>
           <span className="H4M">{totalPrice.toFixed(2)} €</span>
         </div>
-        {isInputSconto && totalPrice > 0 && <InputSconto />}
+        {/* {isInputSconto && totalPrice > 0 && <InputSconto />} */}
         {path === "/carrello" && (
           <ButtonYellow
             type="button"

@@ -42,7 +42,7 @@ export default function CardProduct({
         </Link>
         <figcaption className="mt-2 px-1 md:mt-3 md:px-2 xl:px-3">
           <h2
-            className="body_R_20 two_line_ellipsis"
+            className="body_R_20 line-clamp-3 min-h-[72px]"
             data-tooltip-id="card-title-tooltip"
             data-tooltip-content={nameFull}
           >

@@ -121,42 +121,6 @@ export type UpdateCharacteristicPayload = Omit<ProductCharacteristicType, "id"> 
   values: Pick<ProductCharacteristicValuesType, "value" | "id">[];
 };
 
-// export async function updateCharacteristic(
-//   characteristicId: string,
-//   data: UpdateCharacteristicPayload,
-// ) {
-//   try {
-//     await db
-//       .update(productCharacteristicsSchema)
-//       .set({
-//         name: data.name,
-//         in_filter: data.in_filter,
-//         is_required: data.is_required,
-//         is_multiple: data.is_multiple,
-//         category_id: data.category_id,
-//       })
-//       .where(eq(productCharacteristicsSchema.id, characteristicId));
-
-//     await db
-//       .delete(productCharacteristicValuesSchema)
-//       .where(eq(productCharacteristicValuesSchema.characteristic_id, characteristicId));
-
-//     if (data.values.length > 0) {
-//       await db.insert(productCharacteristicValuesSchema).values(
-//         data.values.map((v) => ({
-//           characteristic_id: characteristicId,
-//           value: v.value,
-//         })),
-//       );
-//     }
-//     updateTag("getAllCharacteristicsWithMeta");
-
-//     return { success: true };
-//   } catch (error) {
-//     console.error("updateCharacteristic error:", error);
-//     return { success: false, error };
-//   }
-// }
 export async function updateCharacteristic(
   characteristicId: string,
   data: UpdateCharacteristicPayload,

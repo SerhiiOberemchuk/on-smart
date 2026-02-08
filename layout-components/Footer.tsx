@@ -12,9 +12,9 @@ import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 export default async function Footer() {
   return (
     <footer className="bg-header-footer py-4">
-      <div className="container flex flex-col gap-11">
-        <div className="md:flex md:h-60 md:justify-between">
-          <LogoLink />
+      <div className="container flex flex-col gap-6">
+        <div className="md:flex md:justify-between">
+          <LogoLink footer={true} />
           <div className="flex flex-col gap-8 pt-6 md:max-w-[526px] md:flex-row md:gap-20 md:pt-0 lg:pt-0">
             <Suspense>
               <Navigation
@@ -29,7 +29,8 @@ export default async function Footer() {
               <span className="flex items-center gap-1">
                 <Image src={icon_location} alt="indirizzo" aria-hidden />
                 <span>
-                  {CONTACTS_ADDRESS.ADDRESS.POSTAL_CODE} {CONTACTS_ADDRESS.ADDRESS.CITY}
+                  {CONTACTS_ADDRESS.ADDRESS.CITY} {`(${CONTACTS_ADDRESS.ADDRESS.REGION})`}{" "}
+                  {CONTACTS_ADDRESS.ADDRESS.POSTAL_CODE}
                 </span>
               </span>
               <a
@@ -67,6 +68,6 @@ export default async function Footer() {
 async function CopyElement() {
   "use cache";
   cacheTag("footer_copy_element");
-  cacheLife({ expire: 3600 }); // 1 hour
+  cacheLife({ expire: 3600 });
   return <p className="">&copy; {new Date().getFullYear()} OnSmart. Tutti i diritti riservati.</p>;
 }

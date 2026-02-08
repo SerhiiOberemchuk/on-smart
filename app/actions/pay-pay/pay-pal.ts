@@ -26,9 +26,15 @@ export async function createPayPalOrderAction(draft: PayPalDraft) {
           },
         },
       ],
+      application_context: {
+        brand_name: "ON-SMART",
+        landing_page: "NO_PREFERENCE",
+        user_action: "PAY_NOW",
+      },
     },
   });
 
+  console.log("PayPal created order id:", data.id);
   return { orderId: data.id };
 }
 

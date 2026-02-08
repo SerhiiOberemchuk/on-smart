@@ -17,12 +17,14 @@ export default function CheckouteStep2ConsegnaDati() {
     setDataCheckoutStepConsegna,
     clearSecondStepDataConsegna,
     setStep,
+    priseDelivery,
+    dataFirstStep,
   } = useCheckoutStore();
   const { register, handleSubmit } = useForm<InputsCheckoutStep2Consegna>({
     defaultValues: dataCheckoutStepConsegna,
   });
   const [isIndirizzoSame, setIsIndirizzoSame] = useState<boolean>(
-    dataCheckoutStepConsegna?.sameAsBilling || false,
+    dataCheckoutStepConsegna?.sameAsBilling || dataFirstStep.client_type === "privato",
   );
 
   const [deliveryMethod, setDeliveryMethod] =
@@ -38,16 +40,25 @@ export default function CheckouteStep2ConsegnaDati() {
       router.push("/checkout/pagamento");
       return;
     }
-    if (data.sameAsBilling === true) {
+
+    if (isIndirizzoSame === true) {
       cleaned = {
         deliveryMethod: data.deliveryMethod,
-        sameAsBilling: true,
+        sameAsBilling: isIndirizzoSame,
+        // referente_contatto: "",
+        // ragione_sociale: "",
+        // partita_iva: "",
+        // indirizzo: "",
+        // città: "",
+        // cap: "",
+        // nazione: "",
+        // provincia_regione: "",
       };
       clearSecondStepDataConsegna();
     } else {
       cleaned = {
         deliveryMethod: data.deliveryMethod,
-        sameAsBilling: false,
+        sameAsBilling: isIndirizzoSame,
         referente_contatto: data.referente_contatto,
         ragione_sociale: data.ragione_sociale,
         partita_iva: data.partita_iva,
@@ -90,9 +101,11 @@ export default function CheckouteStep2ConsegnaDati() {
             />
             Consegna a domicilio tramite corriere
           </label>
-          <span className="helper_text text-grey">Gratis</span>
+          <span className="helper_text text-grey">
+            {priseDelivery ? `${priseDelivery.toFixed(2)} €` : "Gratis"}
+          </span>
         </div>
-        {deliveryMethod === "consegna_corriere" && (
+        {deliveryMethod === "consegna_corriere" && dataFirstStep.client_type === "azienda" && (
           <div>
             <label
               htmlFor="sameAsBilling"
@@ -128,6 +141,8 @@ export default function CheckouteStep2ConsegnaDati() {
                     {...register("partita_iva")}
                     title="Partita IVA*"
                     required
+                    minLength={11}
+                    maxLength={11}
                     type="text"
                     className="helper_text min-w-60 flex-1"
                   />
@@ -175,21 +190,24 @@ export default function CheckouteStep2ConsegnaDati() {
             )}
           </div>
         )}
-        <label
-          htmlFor="deliveryMethodNegozio"
-          className="text_R flex min-h-12 items-center gap-3 pl-3 text-grey"
-        >
-          <input
-            {...register("deliveryMethod")}
-            type="radio"
-            required
-            value={"ritiro_negozio"}
-            id="deliveryMethodNegozio"
-            checked={deliveryMethod === "ritiro_negozio"}
-            onChange={() => setDeliveryMethod("ritiro_negozio")}
-          />
-          Ritiro in negozio presso OnSmart - Via Milano 45, 83100 Avellino (AV)
-        </label>
+        <div className="flex items-center justify-between">
+          <label
+            htmlFor="deliveryMethodNegozio"
+            className="text_R flex min-h-12 items-center gap-3 pl-3 text-grey"
+          >
+            <input
+              {...register("deliveryMethod")}
+              type="radio"
+              required
+              value={"ritiro_negozio"}
+              id="deliveryMethodNegozio"
+              checked={deliveryMethod === "ritiro_negozio"}
+              onChange={() => setDeliveryMethod("ritiro_negozio")}
+            />
+            Ritiro presso il magazzino di Avellino - su prenotazione
+          </label>{" "}
+          <span className="helper_text text-grey">Gratis</span>
+        </div>
         <ButtonYellow className="ml-auto" type="submit">
           Vai avanti
         </ButtonYellow>

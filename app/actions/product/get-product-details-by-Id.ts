@@ -6,10 +6,11 @@ import { getProductSpecificheById } from "../product-specifiche/get-product-spec
 import { getProductDocumentsById } from "../product-documents/get-product-documents";
 import { getProductReviews } from "../product-reviews/get-product-reviews";
 import { cacheTag } from "next/cache";
+import { CACHE_TRIGGERS_TAGS } from "@/types/cache-trigers.constant";
 
 export async function getProductDetailsById(id: string): Promise<Product_Details> {
   "use cache";
-  cacheTag("getProductDetailsById");
+  cacheTag(CACHE_TRIGGERS_TAGS.product.PRODUCT_DETAILS_BY_ID);
   const [description, specifiche, documents, reviews] = await Promise.all([
     getProductDescriptionById({ id }),
     getProductSpecificheById(id),
@@ -30,7 +31,7 @@ export async function getProductDetailsById(id: string): Promise<Product_Details
       images: specifiche?.data?.images?.length ? specifiche.data.images : ["/logo.png"],
       groups: specifiche?.data?.groups?.length
         ? specifiche.data.groups
-        : [{ name: "-", value: "-" }],
+        : [{ name: "-", value: "-", position: 0 }],
     },
 
     characteristics_documenti: {

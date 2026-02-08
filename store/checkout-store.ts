@@ -1,5 +1,6 @@
 import { MetodsPayment } from "@/types/bonifico.data";
 import { InputsCheckoutStep1, InputsCheckoutStep2Consegna } from "@/types/checkout-steps.types";
+import { DELIVERY_DATA } from "@/types/delivery.data";
 import { makeOrderNumber } from "@/utils/order-number";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -11,6 +12,7 @@ export type BasketProductStateItem = {
 
 type CheckoutStoreState = {
   totalPrice?: number;
+  priseDelivery?: number;
   orderNumber?: string;
   basket?: BasketProductStateItem[];
   step: 0 | 1 | 2 | 3 | 4;
@@ -36,28 +38,38 @@ export const useCheckoutStore = create<CheckoutStoreState>()(
     (set, get) => ({
       totalPrice: 0,
       basket: [],
-      orderNumber: undefined,
+      orderNumber: "",
       step: 0,
+      priseDelivery: DELIVERY_DATA.PRISE_DELIVERY,
       dataFirstStep: {},
       dataCheckoutStepConsegna: {},
       dataCheckoutStepPagamento: {},
-      setCheckoutData: (data) => set(data),
+      setCheckoutData: (data) =>
+        set((state) => ({
+          ...state,
+          ...data,
+          priseDelivery:
+            data.totalPrice > DELIVERY_DATA.FREE_THRESHOLD_TOTAL_PRISE
+              ? 0
+              : DELIVERY_DATA.PRISE_DELIVERY,
+        })),
       setStep: (step) => set({ step }),
       clearAllCheckoutData: () =>
         set({
           totalPrice: 0,
           basket: [],
-          dataFirstStep: undefined,
-          dataCheckoutStepConsegna: undefined,
-          dataCheckoutStepPagamento: undefined,
+          priseDelivery: DELIVERY_DATA.PRISE_DELIVERY,
+          dataFirstStep: {},
+          dataCheckoutStepConsegna: {},
+          dataCheckoutStepPagamento: {},
           step: 0,
-          orderNumber: undefined,
+          orderNumber: "",
         }),
       setDataFirstStepCheckout: (data) => set({ dataFirstStep: data }),
       setDataCheckoutStepConsegna: (data) => set({ dataCheckoutStepConsegna: data }),
       setDataCheckoutStepPagamento: (data) => set({ dataCheckoutStepPagamento: data }),
-      clearFirstStepData: () => set({ dataFirstStep: undefined }),
-      clearSecondStepDataConsegna: () => set({ dataCheckoutStepConsegna: undefined }),
+      clearFirstStepData: () => set({ dataFirstStep: {} }),
+      clearSecondStepDataConsegna: () => set({ dataCheckoutStepConsegna: {} }),
       resetRequestCodiceFiscale: () =>
         set((state) => ({
           dataFirstStep: {
