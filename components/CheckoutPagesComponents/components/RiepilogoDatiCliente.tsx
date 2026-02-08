@@ -20,7 +20,26 @@ export default function RiepilogoDatiCliente({
 
   if (!displayData) return null;
 
-  const { numeroTelefono, email, nome, indirizzo, città, cap, provincia_regione } = displayData;
+  const {
+    numeroTelefono,
+    email,
+    nome,
+    indirizzo,
+    città,
+    cap,
+    provincia_regione,
+    cognome,
+    numero_civico,
+    nazione,
+    client_type,
+    codice_fiscale,
+    codice_unico,
+    partita_iva,
+    pec_azzienda,
+    ragione_sociale,
+    request_invoice,
+    referente_contatto,
+  } = displayData;
 
   return (
     <div>
@@ -40,11 +59,29 @@ export default function RiepilogoDatiCliente({
         <p>{numeroTelefono}</p>
         <p>{email}</p>
         <p>{nome}</p>
+        <p> {cognome}</p>
         <p>{cap}</p>
-        <p>{indirizzo}</p>
+        <p>
+          {indirizzo} {numero_civico}
+        </p>
         <p>
           {città}, {provincia_regione}
         </p>
+        <p>{nazione}</p>
+        {request_invoice && (
+          <>
+            <p>Codice fiscale: {codice_fiscale}</p>
+          </>
+        )}
+        {client_type === "azienda" && (
+          <>
+            <p>Referente: {referente_contatto}</p>
+            <p>PEC: {pec_azzienda}</p>
+            <p>Partita IVA: {partita_iva}</p>
+            <p>Codice UNICO: {codice_unico}</p>
+            <p>Ragione sociale: {ragione_sociale}</p>
+          </>
+        )}
       </div>
     </div>
   );

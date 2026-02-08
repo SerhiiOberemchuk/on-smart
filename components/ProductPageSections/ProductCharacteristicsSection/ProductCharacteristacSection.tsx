@@ -15,8 +15,12 @@ import Documenti from "./components-characteristic/Documenti";
 import Valutazione from "./components-characteristic/Valutazione";
 import { ProductType } from "@/db/schemas/product.schema";
 
-const calcCurrentIndex = (prevTab: TabTypeCaracteristics) =>
-  TABS_CHARACTERISTICS.findIndex((tab) => tab.searchParam === prevTab);
+import { Swiper, SwiperSlide } from "swiper/react";
+import type { Swiper as SwiperType } from "swiper";
+import "swiper/css";
+
+const calcCurrentIndex = (tab: TabTypeCaracteristics) =>
+  TABS_CHARACTERISTICS.findIndex((t) => t.searchParam === tab);
 
 export default function ProductCharacteristicsSection({
   productDetail,
@@ -31,52 +35,50 @@ export default function ProductCharacteristicsSection({
     characteristics_documenti,
     characteristics_valutazione,
   } = productDetail;
-  const swipeWrapperRef = useRef<HTMLDivElement | null>(null);
+
   const [currentTab, setCurrentTab] = useState<TabTypeCaracteristics>(DEFAULT_TAB_CHARACTERISTICS);
 
+  const swiperRef = useRef<SwiperType | null>(null);
+  const tabsNavRef = useRef<HTMLDivElement | null>(null);
+  const tabBtnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const activeIndex = calcCurrentIndex(currentTab);
+
   useEffect(() => {
-    let hammer: HammerManager | null = null;
-    import("hammerjs").then((Hammer) => {
-      const shouldIgnore = (ev: HammerInput) => {
-        return (ev.target as HTMLElement)?.closest(".swiper-stop");
-      };
-      if (!swipeWrapperRef.current) return;
-      hammer = new Hammer.default(swipeWrapperRef.current);
+    const s = swiperRef.current;
+    if (!s) return;
 
-      hammer.on("swipeleft", (ev) => {
-        if (shouldIgnore(ev)) return;
-        setCurrentTab((prev) => {
-          if (calcCurrentIndex(prev) >= TABS_CHARACTERISTICS.length - 1) return prev;
-          return TABS_CHARACTERISTICS[calcCurrentIndex(prev) + 1].searchParam;
-        });
-      });
+    if (s.activeIndex !== activeIndex) {
+      s.slideTo(activeIndex, 350);
+    }
+  }, [activeIndex]);
+  useEffect(() => {
+    const btn = tabBtnRefs.current[currentTab];
+    if (!btn) return;
 
-      hammer.on("swiperight", (ev) => {
-        if (shouldIgnore(ev)) return;
-        setCurrentTab((prev) => {
-          if (calcCurrentIndex(prev) <= 0) return prev;
-          return TABS_CHARACTERISTICS[calcCurrentIndex(prev) - 1].searchParam;
-        });
-      });
+    btn.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
     });
-    return () => {
-      if (hammer) {
-        hammer.destroy();
-      }
-    };
-  }, [swipeWrapperRef]);
+  }, [currentTab]);
 
   return (
     <section className="pt-3 pb-6 xl:pb-3">
       <div className="container">
-        <nav className="flex gap-5 overflow-x-auto border-b-2 border-stroke-grey">
+        <nav
+          ref={tabsNavRef}
+          className="flex gap-5 overflow-x-auto scroll-smooth border-b-2 border-stroke-grey"
+        >
           {TABS_CHARACTERISTICS.map((section) => (
             <button
+              ref={(el) => {
+                tabBtnRefs.current[section.searchParam] = el;
+              }}
               type="button"
               key={section.searchParam}
               onClick={() => setCurrentTab(section.searchParam)}
               className={twMerge(
-                "H5 border-b-2 border-transparent px-0.5 py-2 text-white md:px-2.5 md:py-4",
+                "H5 shrink-0 border-b-2 border-transparent px-0.5 py-2 text-white md:px-2.5 md:py-4",
                 section.searchParam === currentTab &&
                   "text-primary border-yellow-500 text-yellow-500",
               )}
@@ -85,24 +87,41 @@ export default function ProductCharacteristicsSection({
             </button>
           ))}
         </nav>
+
         <div className="mt-3 overflow-x-hidden md:mt-6">
-          <div
-            ref={swipeWrapperRef}
-            className={twMerge("flex transition-transform duration-400")}
-            style={{
-              width: `${TABS_CHARACTERISTICS.length * 100}%`,
-              transform: `translateX(-${TABS_CHARACTERISTICS.findIndex((tab) => tab.searchParam === currentTab) * 25}%)`,
+          <Swiper
+            onSwiper={(s) => (swiperRef.current = s)}
+            slidesPerView={1}
+            speed={400}
+            allowTouchMove
+            autoHeight={true}
+            noSwiping={true}
+            noSwipingClass="swiper-stop"
+            onSlideChange={(s) => {
+              const next = TABS_CHARACTERISTICS[s.activeIndex]?.searchParam;
+              if (next && next !== currentTab) setCurrentTab(next);
             }}
           >
-            <Descrizione data={characteristics_descrizione} className={"flex-1 shrink-0"} />
-            <Specifiche data={characteristics_specifiche} className={"flex-1 shrink-0"} />
-            <Documenti data={characteristics_documenti} className={"flex-1 shrink-0"} />
-            <Valutazione
-              data={characteristics_valutazione}
-              product={product}
-              className={"flex-1 shrink-0"}
-            />
-          </div>
+            <SwiperSlide>
+              <Descrizione data={characteristics_descrizione} className="w-full" />
+            </SwiperSlide>
+
+            <SwiperSlide>
+              <Specifiche data={characteristics_specifiche} className="w-full" />
+            </SwiperSlide>
+
+            <SwiperSlide>
+              <Documenti data={characteristics_documenti} className="w-full" />
+            </SwiperSlide>
+
+            <SwiperSlide>
+              <Valutazione
+                data={characteristics_valutazione}
+                product={product}
+                className="w-full"
+              />
+            </SwiperSlide>
+          </Swiper>
         </div>
       </div>
     </section>

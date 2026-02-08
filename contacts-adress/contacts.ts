@@ -3,9 +3,9 @@ export const CONTACTS_ADDRESS = {
   EMAIL: "assistenza@on-smart.it",
   ADDRESS: {
     STREET: "Via Novara 12",
-    CITY: "Novara",
-    POSTAL_CODE: "28100",
-    REGION: "NO",
+    CITY: "Avellino",
+    POSTAL_CODE: "83100",
+    REGION: "AV",
     COUNTRY: "IT",
   },
   OWNER: {
@@ -17,9 +17,10 @@ export const CONTACTS_ADDRESS = {
     LEGAL_FORM: "Società a responsabilità limitata",
   },
   BANC_DETAILS: {
+    INTESTARIO: "NUDZHEVSKA OLENA D.I.",
     IBAN: "IT49C0326815100052125108060",
     BIC: "SELBIT2BXXX",
-    BANK_NAME: "Banca Sella S.p.A.",
+    BANK_NAME: "Sella",
   },
   BASE_URL: "https://on-smart.it",
 };

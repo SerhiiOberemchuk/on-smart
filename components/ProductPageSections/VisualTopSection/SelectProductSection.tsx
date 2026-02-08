@@ -13,64 +13,111 @@ import { useBasketStore } from "@/store/basket-store";
 import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
 import { ProductType } from "@/db/schemas/product.schema";
+import { getProductById } from "@/app/actions/product/get-product-by-id";
+
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
+type SelectedProduct = ProductType & { qnt: number };
+
 export default function SelectProductSection({ product }: { product: ProductType }) {
-  const { name, rating } = product;
-  const [selectedProduct, setSelectedProduct] = useState<(ProductType & { qnt: number }) | null>(
-    null,
-  );
-
+  const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
   const [variantsToShow, setVariantsToShow] = useState(NUMBER_OF_VARIANTS_TO_SHOW);
-
   const [variantsProduct, setVariantsProduct] = useState<ProductType[] | null>(null);
 
   const { updateBasket, showPopup } = useBasketStore();
 
   const handleAddToCart = () => {
-    if (!selectedProduct || !selectedProduct.id) return;
+    if (!selectedProduct?.id) return;
     updateBasket([{ id: selectedProduct.id, qnt: selectedProduct.qnt }]);
     showPopup(selectedProduct.qnt);
   };
 
   const totalPrice = useCalcTotalSum([
-    { qnt: selectedProduct?.qnt || 1, price: selectedProduct?.price || "0" },
+    { qnt: selectedProduct?.qnt ?? 1, price: selectedProduct?.price ?? "0" },
   ]);
   const totalOldPrice = useCalcTotalSum([
-    { qnt: selectedProduct?.qnt || 1, price: selectedProduct?.oldPrice || "0" },
+    { qnt: selectedProduct?.qnt ?? 1, price: selectedProduct?.oldPrice ?? "0" },
   ]);
 
+  const uiProduct = selectedProduct ?? product;
+
   useEffect(() => {
-    const fetchVariants = async () => {
-      if (!product.variants || product.variants.length === 0) {
-        setSelectedProduct({ ...product, qnt: 1 });
-        return;
-      }
+    let alive = true;
+
+    (async () => {
       try {
-        const res = await getProductsByIds([...product.variants, product.id]);
-        if (res.data && res.data.length > 0) {
-          setVariantsProduct(res.data as ProductType[]);
+        if (product.parent_product_id && product.parent_product_id !== "NULL") {
+          const resParent = await getProductById(product.parent_product_id);
+          const parent = resParent.data;
+
+          if (!alive) return;
+
+          if (parent) {
+            const ids = Array.from(new Set([...(parent.variants ?? []), parent.id]));
+
+            if (ids.length) {
+              const res = await getProductsByIds(ids);
+              if (!alive) return;
+
+              const list = (res.data ?? []) as ProductType[];
+              setVariantsProduct(list);
+
+              const fallback = list.find((p) => p.id === product.id) ?? list[0] ?? null;
+
+              if (fallback) setSelectedProduct({ ...fallback, qnt: 1 });
+              return;
+            }
+          }
+
+          setSelectedProduct({ ...product, qnt: 1 });
+          return;
         }
+        if (!product.variants || product.variants.length === 0) {
+          setSelectedProduct({ ...product, qnt: 1 });
+          setVariantsProduct(null);
+          return;
+        }
+
+        const ids = Array.from(new Set([...(product.variants ?? []), product.id]));
+        const res = await getProductsByIds(ids);
+        if (!alive) return;
+
+        const list = (res.data ?? []) as ProductType[];
+        setVariantsProduct(list);
+
+        const fallback = list.find((p) => p.id === product.id) ?? list[0] ?? null;
+        if (fallback) setSelectedProduct({ ...fallback, qnt: 1 });
       } catch (error) {
-        console.error("Error fetching variant products:", error);
+        console.error("Error fetching variants:", error);
+
+        if (alive) setSelectedProduct({ ...product, qnt: 1 });
       }
+    })();
+
+    return () => {
+      alive = false;
     };
-    fetchVariants();
   }, [product]);
+
+  const shouldShowVariants = (variantsProduct?.length ?? 0) > 1;
 
   return (
     <section className="w-full rounded-sm bg-background p-3 xl:flex-1">
       <header>
-        <h2 className="H3 line-clamp-2">{name}</h2>
-        <StarsRating rating={rating} className="mt-2 justify-end" />
+        <h2 className="H3 line-clamp-2">{uiProduct.name}</h2>
+        <StarsRating rating={uiProduct.rating} className="mt-2 justify-end" />
       </header>
-      {product?.variants && product.variants.length > 0 && (
+
+      {shouldShowVariants && (
         <>
-          {variantsProduct && variantsProduct.length > 0 ? (
+          {variantsProduct ? (
             <>
               <fieldset className="mt-6 flex flex-col gap-3">
                 <legend className="input_M_18 mb-3 text-white">Scegli una versione</legend>
-                {variantsProduct?.slice(0, variantsToShow).map((variant) => {
+
+                {variantsProduct.slice(0, variantsToShow).map((variant) => {
+                  const checked = selectedProduct?.id === variant.id;
+
                   return (
                     <label
                       key={variant.id}
@@ -78,14 +125,10 @@ export default function SelectProductSection({ product }: { product: ProductType
                     >
                       <input
                         type="radio"
-                        name="Product variant"
+                        name="ProductVariant"
                         value={variant.id}
-                        onChange={() => {
-                          setSelectedProduct({
-                            ...variant,
-                            qnt: 1,
-                          } as ProductType & { qnt: number });
-                        }}
+                        checked={checked}
+                        onChange={() => setSelectedProduct({ ...variant, qnt: 1 })}
                       />
 
                       <Image
@@ -95,7 +138,9 @@ export default function SelectProductSection({ product }: { product: ProductType
                         height={80}
                         className="h-10 w-10 object-contain object-center lg:h-20 lg:w-20"
                       />
+
                       <span className="pointer-events-none line-clamp-1">{variant.name}</span>
+
                       <PricesBox
                         oldPrice={variant.oldPrice}
                         place="dialog-cart-product-variant"
@@ -106,6 +151,7 @@ export default function SelectProductSection({ product }: { product: ProductType
                   );
                 })}
               </fieldset>
+
               <button
                 type="button"
                 aria-label="Apri altri versioni"
@@ -128,15 +174,16 @@ export default function SelectProductSection({ product }: { product: ProductType
 
       <div className="mt-4 flex flex-col gap-5">
         <PricesBox price={totalPrice} oldPrice={totalOldPrice} place="dialog-cart-product-footer" />
-        {/* {selectedProduct && ( )} */}
+
         <ProductQuantityInputButtons
           selectedProduct={selectedProduct}
           setSelectedProduct={setSelectedProduct}
         />
       </div>
+
       <div className="flex gap-3">
         <ButtonAddToBasket
-          disabled={!selectedProduct?.inStock}
+          disabled={!selectedProduct || selectedProduct.inStock <= 0}
           className="mt-4 mb-auto w-full justify-center xl:w-fit"
           onClick={handleAddToCart}
         />

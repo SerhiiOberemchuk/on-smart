@@ -1,4 +1,5 @@
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
+import { DELIVERY_DATA } from "@/types/delivery.data";
 import type { Metadata } from "next";
 import Script from "next/script";
 
@@ -62,12 +63,14 @@ export default function SpedizionePage() {
           L`ammontare dei costi di spedizione a carico del cliente per i servizi del corriere è
           calcolato in base all`indirizzo di spedizione indicato al momento dell`ordine, alle
           dimensioni e al peso della merce inviata. Per L`Italia, si parte da un costo minimo di
-          spedizione di 6,00€ (iva esclusa - soggetto a possibili variazioni)
+          spedizione di {DELIVERY_DATA.PRISE_DELIVERY.toFixed(2)}€ (iva inclusa - soggetto a
+          possibili variazioni).
         </p>
 
         <p>
-          Il nostro servizio spedizione non comprende servizi aggiuntivi di: Facchinaggio; Fonsegna
-          su appuntamento; Spese di deposito per destinatario assente.
+          Per ordini superiori a {DELIVERY_DATA.FREE_THRESHOLD_TOTAL_PRISE.toFixed(2)} euro la
+          spedizione è gratuita. Il nostro servizio spedizione non comprende servizi aggiuntivi di:
+          Facchinaggio; Fonsegna su appuntamento; Spese di deposito per destinatario assente.
         </p>
 
         <h2 className="H3 pt-4 text-white">Come comportarsi al ricevimento del pacco</h2>

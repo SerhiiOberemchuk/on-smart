@@ -27,12 +27,19 @@ export default function PayPalButtonsClient() {
     <>
       {isPending ? <div className="animate-spin" /> : null}
       <PayPalButtons
-        style={{ layout: "horizontal" }}
+        style={{ layout: "horizontal", label: "buynow" }}
+        message={{
+          color: "white",
+          align: "center",
+          position: "bottom",
+        }}
         createOrder={async () => {
+          console.log("Creating PayPal order with draft:", draft);
           const { orderId } = await createPayPalOrderAction(draft);
           return orderId;
         }}
         onApprove={async (data) => {
+          console.log("PayPal onApprove data:", data);
           const orderId = data.orderID;
           if (!orderId) throw new Error("No orderID from PayPal");
 
@@ -43,6 +50,9 @@ export default function PayPalButtonsClient() {
 
           console.log("PayPal CAPTURE OK:", result);
           router.push(PAGES.CHECKOUT_PAGES.COMPLETED);
+        }}
+        onCancel={(data) => {
+          console.warn("PayPal onCancel:", data);
         }}
         onError={(err) => {
           console.error("PayPal error", err);

@@ -5,11 +5,13 @@ import {
   productSpecificheSchema,
   ProductSpecificheType,
 } from "@/db/schemas/product-specifiche.schema";
+import { CACHE_TRIGGERS_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 
 export async function updateOrCreateSpecifiche(
-  data: Pick<ProductSpecificheType, "product_id"> & Partial<Omit<ProductSpecificheType, "product_id">>,
+  data: Pick<ProductSpecificheType, "product_id"> &
+    Partial<Omit<ProductSpecificheType, "product_id">>,
 ) {
   const { product_id, ...rest } = data;
 
@@ -24,14 +26,16 @@ export async function updateOrCreateSpecifiche(
         .update(productSpecificheSchema)
         .set(rest)
         .where(eq(productSpecificheSchema.product_id, product_id));
-      updateTag("product_details_" + product_id);
-      updateTag("getProductDetailsById");
+      updateTag(CACHE_TRIGGERS_TAGS.product.byId(product_id));
+      updateTag(CACHE_TRIGGERS_TAGS.product.PRODUCT_DETAILS_BY_ID);
       return { success: true, created: false };
     }
 
-    await db.insert(productSpecificheSchema).values({ product_id, title: "", images: [], groups: [], ...rest });
-    updateTag("product_details_" + product_id);
-    updateTag("getProductDetailsById");
+    await db
+      .insert(productSpecificheSchema)
+      .values({ product_id, title: "", images: [], groups: [], ...rest });
+    updateTag(CACHE_TRIGGERS_TAGS.product.byId(product_id));
+    updateTag(CACHE_TRIGGERS_TAGS.product.PRODUCT_DETAILS_BY_ID);
     return { success: true, created: true };
   } catch (error) {
     console.error(error);

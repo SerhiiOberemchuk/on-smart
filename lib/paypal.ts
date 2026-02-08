@@ -1,4 +1,4 @@
-import "dotenv/config";
+// import "dotenv/config";
 
 type PayPalEnv = "sandbox" | "live";
 
@@ -14,7 +14,7 @@ export async function getAccessToken() {
   const clientId = process.env.PAYPAL_CLIENT_ID;
   const secret = process.env.PAYPAL_CLIENT_SECRET;
 
-  console.log(clientId, secret);
+  // console.log(clientId, secret);
 
   if (!clientId || !secret) throw new Error("PayPal credentials missing");
 
@@ -52,6 +52,11 @@ export async function paypalApi<T>(
   });
 
   const text = await res.text();
-  if (!res.ok) throw new Error(text);
+  if (!res.ok) {
+    console.error("PayPal status:", res.status);
+    console.error("PayPal debug id:", res.headers.get("paypal-debug-id"));
+    console.error("PayPal response:", text);
+    throw new Error(text);
+  }
   return JSON.parse(text) as T;
 }

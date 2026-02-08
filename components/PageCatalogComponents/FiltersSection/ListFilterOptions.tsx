@@ -31,7 +31,7 @@ export default function ListFiltereOptions({
       <li>
         <button
           type="button"
-          className="input_M_18 mx-auto flex text-center underline"
+          className="input_M_18 mx-auto flex pt-2 pb-4 text-center underline"
           onClick={() => {
             router.push(pathname, { scroll: false });
           }}

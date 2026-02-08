@@ -5,7 +5,10 @@ export const productSpecificheSchema = mysqlTable("product_specifiche", {
 
   title: varchar("title", { length: 255 }).notNull(),
   images: json("images").$type<string[]>().notNull().default([]),
-  groups: json("groups").$type<{ name: string; value: string }[]>().notNull().default([]),
+  groups: json("groups")
+    .$type<{ name: string; value: string; position: number }[]>()
+    .notNull()
+    .default([]),
 });
 
 export type ProductSpecificheType = typeof productSpecificheSchema.$inferSelect;

@@ -40,7 +40,7 @@
     "react-toastify": "^11.0.5",
     "react-tooltip": "^5.30.0",
     "sharp": "^0.34.5",
-    "swiper": "^12.0.3",
+    "swiper": "^12.1.0",
     "tailwind-merge": "^3.4.0",
     "ulid": "^3.0.2",
     "zustand": "^5.0.10"

@@ -5,6 +5,7 @@ import {
   productDescriptionSchema,
   ProductDescriptionType,
 } from "@/db/schemas/product-details.schema";
+import { CACHE_TRIGGERS_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 
@@ -30,7 +31,9 @@ export async function updateProductDescriptionById({
       .update(productDescriptionSchema)
       .set(props)
       .where(eq(productDescriptionSchema.product_id, product_id));
-    updateTag("product_details_" + product_id);
+    updateTag(CACHE_TRIGGERS_TAGS.product.byId(product_id));
+    updateTag(CACHE_TRIGGERS_TAGS.product.PRODUCT_DETAILS_BY_ID);
+    
     return {
       success: true,
       error: null,

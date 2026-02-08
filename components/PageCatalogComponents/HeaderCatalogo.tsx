@@ -7,18 +7,12 @@ import { useQueryState } from "nuqs";
 import icon_arrow_top from "@/assets/icons/arrow-top.svg";
 import Image from "next/image";
 import { twMerge } from "tailwind-merge";
-import { testDbConnection } from "@/app/actions/test-db-conection";
+import { useQntProductsFilteredStore } from "@/store/qnt-products-filtered";
+// import { testDbConnection } from "@/app/actions/test-db-conection";
 
 export default function HeaderCatalogo() {
   const refUl = useRef<HTMLUListElement | null>(null);
-
-  useEffect(() => {
-    const testDB = async () => {
-      const resp = await testDbConnection();
-      console.log("DB TEST:", resp);
-    };
-    testDB();
-  }, []);
+  const { qnt } = useQntProductsFilteredStore();
 
   const [sortParam, setSortParam] = useQueryState(SORT_OPTIONS_PARAMS.PARAM_NAME, {
     defaultValue: SORT_OPTIONS_PARAMS.options[0].value,
@@ -45,7 +39,7 @@ export default function HeaderCatalogo() {
   return (
     <header className="bg-background">
       <div className="helper_text container flex w-full flex-wrap items-center justify-between gap-3 py-3 text-text-grey">
-        <span className="shrink-0">97 prodotti</span>
+        <span className="shrink-0">{qnt} prodotti</span>
         <div className="relative">
           <button
             aria-expanded={isOpen}

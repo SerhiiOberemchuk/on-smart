@@ -5,6 +5,7 @@ export type InputsCheckoutStep1 = {
   nome: string;
   cognome: string;
   indirizzo: string;
+  numero_civico: string;
   città: string;
   cap: string;
   nazione: string;
@@ -14,6 +15,8 @@ export type InputsCheckoutStep1 = {
   ragione_sociale: string;
   partita_iva: string;
   request_invoice?: boolean;
+  pec_azzienda: string;
+  codice_unico: string;
 };
 export type InputsCheckoutStep2Consegna = {
   deliveryMethod: "consegna_corriere" | "ritiro_negozio";

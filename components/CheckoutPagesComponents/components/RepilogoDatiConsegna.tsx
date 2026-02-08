@@ -17,12 +17,20 @@ export default function RiepilogoDatiConsegna({
   externalDataCustomer?: Partial<InputsCheckoutStep1>;
 }) {
   const { dataFirstStep, dataCheckoutStepConsegna } = useCheckoutStore();
-
   const dataCheckoutStepConsegnaFinal = externalDataConsegna || dataCheckoutStepConsegna;
   const dataFirstStepFinal = externalDataCustomer || dataFirstStep;
-
-  const { numeroTelefono, email, nome, indirizzo, città, cap, provincia_regione } =
-    dataFirstStepFinal;
+  const {
+    numeroTelefono,
+    email,
+    nome,
+    indirizzo,
+    città,
+    cap,
+    provincia_regione,
+    numero_civico,
+    cognome,
+    referente_contatto,
+  } = dataFirstStepFinal;
 
   const {
     deliveryMethod,
@@ -31,7 +39,7 @@ export default function RiepilogoDatiConsegna({
     città: cittàConsegna,
     indirizzo: indirizzoConsegna,
     // ragione_sociale: ragione_socialeConsegna,
-    referente_contatto,
+    referente_contatto: referente_consegna,
     provincia_regione: provincia_regioneConsegna,
   } = dataCheckoutStepConsegnaFinal;
   return (
@@ -55,27 +63,31 @@ export default function RiepilogoDatiConsegna({
 
       <div className="text_R mt-3 pl-8 text-text-grey">
         {deliveryMethod === "consegna_corriere" && <p>Corriere</p>}
-        {deliveryMethod === "ritiro_negozio" && <p>Ritiro in negozio</p>}
-        {deliveryMethod === "consegna_corriere" && (
+        {deliveryMethod === "ritiro_negozio" && <p>Ritiro presso il magazzino di Avellino</p>}
+        {deliveryMethod === "consegna_corriere" && dataFirstStep.client_type === "azienda" && (
           <>
             {sameAsBilling ? (
               <>
-                <p className="">{numeroTelefono}</p>
-                <p className="">{email}</p>
-                <p className="">{nome}</p>
-                <p className="">{cap}</p>
-                <p className="">{indirizzo}</p>
+                <p>{numeroTelefono}</p>
+                <p>{email}</p>
+                <p>{nome}</p>
+                <p>{cognome}</p>
+                <p>{referente_contatto}</p>
+                <p>{cap}</p>
+                <p>
+                  {indirizzo}, {numero_civico}
+                </p>
                 <p>
                   {città}, {provincia_regione}
                 </p>
               </>
             ) : (
               <>
-                <p className="">{numeroTelefono}</p>
-                <p className="">{email}</p>
-                <p className="">{referente_contatto}</p>
-                <p className="">{capConsegna}</p>
-                <p className="">{indirizzoConsegna}</p>
+                <p>{numeroTelefono}</p>
+                <p>{email}</p>
+                <p>{referente_consegna}</p>
+                <p>{capConsegna}</p>
+                <p>{indirizzoConsegna}</p>
                 <p>
                   {cittàConsegna}, {provincia_regioneConsegna}
                 </p>

@@ -22,7 +22,7 @@ export default function CheckouteStep1FormClientData() {
   const [isCodiceFiscaleRequired, setIsCodiceFiscaleRequired] = useState(
     dataFirstStep?.request_invoice || false,
   );
-  const { register, handleSubmit, resetField } = useForm<InputsCheckoutStep1>({
+  const { register, handleSubmit, resetField, watch } = useForm<InputsCheckoutStep1>({
     defaultValues: dataFirstStep,
   });
   const router = useRouter();
@@ -46,7 +46,6 @@ export default function CheckouteStep1FormClientData() {
   }, [clientType, resetField]);
 
   const onSubmit: SubmitHandler<InputsCheckoutStep1> = (data) => {
-    // setIsButtonDisabled(true);
     let cleaned: Partial<InputsCheckoutStep1>;
 
     if (data.client_type === "privato") {
@@ -57,11 +56,12 @@ export default function CheckouteStep1FormClientData() {
         nome: data.nome,
         cognome: data.cognome,
         indirizzo: data.indirizzo,
+        numero_civico: data.numero_civico,
         città: data.città,
         cap: data.cap,
         nazione: data.nazione,
         provincia_regione: data.provincia_regione,
-        request_invoice: !!data.request_invoice,
+        request_invoice: data.request_invoice,
         codice_fiscale: data.request_invoice ? data.codice_fiscale : "",
       };
     } else {
@@ -73,10 +73,13 @@ export default function CheckouteStep1FormClientData() {
         ragione_sociale: data.ragione_sociale,
         partita_iva: data.partita_iva,
         indirizzo: data.indirizzo,
+        numero_civico: data.numero_civico,
         città: data.città,
         cap: data.cap,
         nazione: data.nazione,
         provincia_regione: data.provincia_regione,
+        pec_azzienda: data.pec_azzienda,
+        codice_unico: data.codice_unico,
       };
     }
 
@@ -85,6 +88,8 @@ export default function CheckouteStep1FormClientData() {
     generateOrderNumber();
     router.push("/checkout/consegna");
   };
+  const pec = watch("pec_azzienda");
+  const codice = watch("codice_unico");
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
@@ -169,30 +174,62 @@ export default function CheckouteStep1FormClientData() {
         )}
 
         {clientType === "azienda" && (
-          <div className="flex flex-wrap gap-3">
-            <InputBlock
-              title="Ragione sociale*"
-              {...register("ragione_sociale")}
-              required
-              type="text"
-              className="min-w-[200px] flex-1"
-            />
-            <InputBlock
-              title="Partita IVA*"
-              {...register("partita_iva")}
-              required
-              type="text"
-              className="min-w-[200px] flex-1"
-            />
-          </div>
+          <>
+            <div className="flex flex-wrap gap-3">
+              <InputBlock
+                title="Ragione sociale*"
+                {...register("ragione_sociale")}
+                required
+                type="text"
+                className="min-w-[200px] flex-1"
+              />
+              <InputBlock
+                title="Partita IVA*"
+                {...register("partita_iva")}
+                required
+                minLength={11}
+                maxLength={11}
+                type="text"
+                className="min-w-[200px] flex-1"
+              />
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <InputBlock
+                title={!codice ? "PEC *" : "PEC "}
+                {...register("pec_azzienda")}
+                required={!codice}
+                type="text"
+                className="min-w-[200px] flex-1"
+              />
+              <InputBlock
+                title={!pec ? "Codice UNIVOCO *" : "Codice UNIVOCO"}
+                {...register("codice_unico")}
+                required={!pec}
+                minLength={7}
+                maxLength={7}
+                type="text"
+                className="min-w-[200px] flex-1"
+              />
+            </div>
+          </>
         )}
-        <InputBlock
-          title="Indirizzo *"
-          {...register("indirizzo")}
-          required
-          type="text"
-          className="min-w-[200px] flex-1"
-        />
+        <div className="flex flex-wrap gap-3">
+          <InputBlock
+            title="Indirizzo *"
+            {...register("indirizzo")}
+            required
+            type="text"
+            className="min-w-[200px] flex-1"
+          />
+          <InputBlock
+            title="Numero civico *"
+            {...register("numero_civico")}
+            required
+            type="text"
+            className="min-w-[200px] flex-1"
+          />
+        </div>
+
         <div className="flex flex-wrap gap-3">
           <InputBlock
             title="Città *"
@@ -241,7 +278,7 @@ export default function CheckouteStep1FormClientData() {
           <>
             <label
               htmlFor="request_invoice"
-              className="fixel_display flex items-center gap-2 text-text-grey hover:text-yellow-600"
+              className="fixel_display flex items-center gap-2 text-xl text-yellow-600"
             >
               <input
                 type="checkbox"
@@ -268,6 +305,8 @@ export default function CheckouteStep1FormClientData() {
                 <InputBlock
                   title="Codice Fiscale *"
                   required={isCodiceFiscaleRequired}
+                  minLength={16}
+                  maxLength={16}
                   {...register("codice_fiscale")}
                   type="text"
                   className=""

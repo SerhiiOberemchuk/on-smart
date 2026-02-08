@@ -33,7 +33,9 @@ export default function PayPalPaymentWidget() {
   if (!clientId) return <div>Caricamento PayPal...</div>;
 
   return (
-    <PayPalScriptProvider options={{ clientId, currency: "EUR", intent: "capture" }}>
+    <PayPalScriptProvider
+      options={{ clientId, buyerCountry: "IT", currency: "EUR", intent: "capture", debug: true }}
+    >
       <PayPalButtonsClient />
     </PayPalScriptProvider>
   );

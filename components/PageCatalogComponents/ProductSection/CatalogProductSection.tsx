@@ -15,6 +15,7 @@ import {
   CatalogQueryPayload,
   getAllProductsFiltered,
 } from "@/app/actions/product/get-all-products-filtered";
+import { useQntProductsFilteredStore } from "@/store/qnt-products-filtered";
 
 export default function CatalogProductSection({ className }: { className?: string }) {
   const [products, setProducts] = useState<ProductType[] | null>(null);
@@ -23,7 +24,7 @@ export default function CatalogProductSection({ className }: { className?: strin
     page: 1,
     totalPages: 1,
   });
-
+  const { setQnt } = useQntProductsFilteredStore();
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
   const changePage = useCallback(
@@ -34,11 +35,10 @@ export default function CatalogProductSection({ className }: { className?: strin
   );
 
   useEffect(() => {
-    const fetch = async () => {
+    (async () => {
       const res = await getCatalogFilters();
       setAllFilters(res);
-    };
-    fetch();
+    })();
   }, []);
 
   const searchParams = useSearchParams();
@@ -102,7 +102,7 @@ export default function CatalogProductSection({ className }: { className?: strin
   }, [searchParams, allFilters, page]);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    (async () => {
       const response = await getAllProductsFiltered(payload);
       if (!response) return;
 
@@ -111,14 +111,12 @@ export default function CatalogProductSection({ className }: { className?: strin
         page: response.meta.page,
         totalPages: response.meta.totalPages,
       });
-
+      setQnt(response.data.length);
       if (response.meta.page !== page) {
         changePage(response.meta.page);
       }
-    };
-
-    fetchProducts();
-  }, [payload, page, changePage]);
+    })();
+  }, [payload, page, changePage, setQnt]);
   return (
     <section className={twMerge("flex-1", className)}>
       {products && (
