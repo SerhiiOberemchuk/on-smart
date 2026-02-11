@@ -27,6 +27,7 @@ type SumUpHostedCheckoutRequest = {
   checkout_reference: string;
   amount: number;
   currency: "EUR";
+  merchant_country: "IT";
   merchant_code: string;
   description?: string;
   return_url?: string;
@@ -68,6 +69,7 @@ export async function createSumUpCheckout(
       checkout_reference: input.checkout_reference,
       amount: input.amount,
       currency: "EUR",
+      merchant_country: "IT",
       merchant_code: MERCHANT_CODE,
       description: input.description ?? `Order ${input.checkout_reference}`,
       return_url: `${baseSiteURL}${PAGES.CHECKOUT_PAGES.COMPLETED}`,

@@ -74,7 +74,7 @@ export default function SumUpModalButton() {
       const checkout = await createSumUpCheckout({
         amount: getTotalPriceToPay(totalPrice),
         checkout_reference: checkoutReference,
-        description: "ffedvv  jffj kfkvnr",
+        description: `Order #${orderNumber}`,
       });
 
       if (!checkout.success) {
