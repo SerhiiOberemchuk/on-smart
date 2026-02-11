@@ -5,10 +5,11 @@ import { usePathname } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useEffect, useState } from "react";
+import { PAGES } from "@/types/pages.types";
 
 export default function LayoutRepilogoComponent({ className }: { className?: string }) {
   const pathName = usePathname();
-  const isCompletatoPage = pathName === "/checkout/completato";
+  const isCompletatoPage = pathName === PAGES.CHECKOUT_PAGES.COMPLETED;
 
   const { totalPrice, basket, orderNumber } = useCheckoutStore();
 

@@ -10,6 +10,7 @@ import { useCheckoutStore } from "@/store/checkout-store";
 import { PAGES } from "@/types/pages.types";
 import KlarnaPaymentWidget from "@/components/pagamento/klarna/KlarnaPaymentWidget";
 import PayPalPaymentWidget from "@/components/pagamento/paypal/PayPalPaymentWidget";
+import SumUpWidget from "@/components/pagamento/sumup/SumUpWidget";
 
 export default function CheckouteStep4Riepilogo() {
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -53,8 +54,7 @@ export default function CheckouteStep4Riepilogo() {
       {dataCheckoutStepPagamento.paymentMethod === "card" && (
         <div className="mt-4">
           <p className="mb-2 font-medium">Procedi con il pagamento con carta qui sotto:</p>
-          {/* Card Payment Widget Component */}
-          <div>Card Payment Widget</div>
+          <SumUpWidget />
         </div>
       )}
       {dataCheckoutStepPagamento.paymentMethod === "bonifico" && (

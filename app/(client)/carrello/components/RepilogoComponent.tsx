@@ -5,7 +5,8 @@ import clsx from "clsx";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { redirect, usePathname } from "next/navigation";
 import ButtonYellow from "@/components/BattonYellow";
-import { DELIVERY_DATA } from "@/types/delivery.data";
+import { PAGES } from "@/types/pages.types";
+import { getDeliveryPrice, getIvaValue, getTotalPriceToPay } from "@/utils/get-prices";
 
 export default function RepilogoComponent({
   totalPrice,
@@ -27,7 +28,8 @@ export default function RepilogoComponent({
       setStep(1);
     }
     setCheckoutData({ totalPrice, basket });
-    redirect("/checkout/informazioni");
+
+    redirect(PAGES.CHECKOUT_PAGES.INFORMATION);
   };
 
   return (
@@ -37,13 +39,10 @@ export default function RepilogoComponent({
         <ul className="flex flex-col gap-3">
           {[
             { title: "articolo (li)", price: totalPrice },
-            { title: "IVA (inclusa)", price: totalPrice * 0.22 },
+            { title: "IVA (inclusa)", price: getIvaValue(totalPrice) },
             {
               title: "Spedizione",
-              price:
-                totalPrice > DELIVERY_DATA.FREE_THRESHOLD_TOTAL_PRISE
-                  ? 0
-                  : DELIVERY_DATA.PRISE_DELIVERY,
+              price: getDeliveryPrice(totalPrice),
             },
           ].map((i, index) => (
             <li key={index} className="flex items-center justify-between">
@@ -62,7 +61,7 @@ export default function RepilogoComponent({
         </ul>
         <div className="flex items-center justify-between">
           <h4 className="H3">Totale</h4>
-          <span className="H4M">{totalPrice.toFixed(2)} €</span>
+          <span className="H4M">{getTotalPriceToPay(totalPrice).toFixed(2)} €</span>
         </div>
         {/* {isInputSconto && totalPrice > 0 && <InputSconto />} */}
         {path === "/carrello" && (
