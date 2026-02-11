@@ -13,6 +13,7 @@ import { redirect } from "next/navigation";
 import { PAGES } from "@/types/pages.types";
 import ButtonYellow from "@/components/BattonYellow";
 import { twMerge } from "tailwind-merge";
+import { getTotalPriceToPay } from "@/utils/get-prices";
 
 const containerId = "klarna_container";
 
@@ -45,7 +46,7 @@ export default function KlarnaPaymentWidget() {
           dataFirstStep,
           dataCheckoutStepConsegna,
           productsInBasket,
-          totalPrice,
+          totalPrice: getTotalPriceToPay(totalPrice),
           basket,
         });
 
@@ -112,7 +113,7 @@ export default function KlarnaPaymentWidget() {
           dataFirstStep,
           dataCheckoutStepConsegna,
           productsInBasket,
-          totalPrice,
+          totalPrice: getTotalPriceToPay(totalPrice),
           basket,
         });
 

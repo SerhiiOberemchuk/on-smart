@@ -13,7 +13,7 @@
     "@next/env": "^16.1.4",
     "@paypal/react-paypal-js": "^8.9.2",
     "@sindresorhus/slugify": "^3.0.0",
-    "@sumup/sdk": "^0.0.11",
+    "@sumup/sdk": "^0.0.13",
     "apify-client": "^2.22.0",
     "babel-plugin-react-compiler": "^1.0.0",
     "better-auth": "^1.4.17",

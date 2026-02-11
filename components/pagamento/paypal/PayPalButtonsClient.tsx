@@ -7,6 +7,7 @@ import {
 } from "@/app/actions/pay-pay/pay-pal";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { PAGES } from "@/types/pages.types";
+import { getTotalPriceToPay } from "@/utils/get-prices";
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 import { useRouter } from "next/navigation";
 
@@ -19,7 +20,7 @@ export default function PayPalButtonsClient() {
   }
   const draft: PayPalDraft = {
     currency: "EUR",
-    total: totalPrice.toFixed(2),
+    total: getTotalPriceToPay(totalPrice).toFixed(2),
     referenceId: orderNumber,
   };
 
