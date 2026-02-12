@@ -13,14 +13,17 @@ import { useRouter } from "next/navigation";
 
 export default function PayPalButtonsClient() {
   const [{ isPending }] = usePayPalScriptReducer();
-  const { totalPrice, orderNumber } = useCheckoutStore();
+  const { totalPrice, orderNumber, dataCheckoutStepConsegna } = useCheckoutStore();
   const router = useRouter();
   if (!totalPrice || !orderNumber) {
     return <div>Errore nel caricamento del pagamento PayPal.</div>;
   }
   const draft: PayPalDraft = {
     currency: "EUR",
-    total: getTotalPriceToPay(totalPrice).toFixed(2),
+    total: getTotalPriceToPay({
+      totalPrice,
+      deliveryMetod: dataCheckoutStepConsegna.deliveryMethod,
+    }).toFixed(2),
     referenceId: orderNumber,
   };
 
