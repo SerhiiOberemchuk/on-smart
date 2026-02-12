@@ -14,12 +14,20 @@ export type InputsCheckoutStep1 = {
   referente_contatto: string;
   ragione_sociale: string;
   partita_iva: string;
-  request_invoice?: boolean;
+  request_invoice: boolean;
   pec_azzienda: string;
   codice_unico: string;
 };
+
+export const DELIVERY_METHOD = {
+  CORRIERE: "consegna_corriere",
+  NEGOZIO: "ritiro_negozio",
+} as const;
+
+export type DeliveryMethod = (typeof DELIVERY_METHOD)[keyof typeof DELIVERY_METHOD];
+
 export type InputsCheckoutStep2Consegna = {
-  deliveryMethod: "consegna_corriere" | "ritiro_negozio";
+  deliveryMethod: DeliveryMethod;
   sameAsBilling: boolean;
 } & Pick<
   InputsCheckoutStep1,

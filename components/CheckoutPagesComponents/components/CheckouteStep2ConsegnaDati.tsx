@@ -5,11 +5,12 @@ import Image from "next/image";
 import { InputBlock } from "@/components/InputBloc";
 import { SubmitHandler, useForm } from "react-hook-form";
 import ButtonYellow from "@/components/BattonYellow";
-import { useState } from "react";
-import { InputsCheckoutStep2Consegna } from "@/types/checkout-steps.types";
+import { DELIVERY_METHOD, InputsCheckoutStep2Consegna } from "@/types/checkout-steps.types";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useRouter } from "next/navigation";
 import RiepilogoDatiCliente from "./RiepilogoDatiCliente";
+
+const NAME_RADIO_BUTTON_METOD = "deliveryMethod";
 
 export default function CheckouteStep2ConsegnaDati() {
   const {
@@ -19,46 +20,35 @@ export default function CheckouteStep2ConsegnaDati() {
     setStep,
     priseDelivery,
     dataFirstStep,
+    setDeliveryMethod,
+    setSameAsBilling,
   } = useCheckoutStore();
+
+  const sameAsBilling =
+    dataCheckoutStepConsegna.sameAsBilling ?? dataFirstStep.client_type === "privato";
   const { register, handleSubmit } = useForm<InputsCheckoutStep2Consegna>({
     defaultValues: dataCheckoutStepConsegna,
   });
-  const [isIndirizzoSame, setIsIndirizzoSame] = useState<boolean>(
-    dataCheckoutStepConsegna?.sameAsBilling || dataFirstStep.client_type === "privato",
-  );
-
-  const [deliveryMethod, setDeliveryMethod] =
-    useState<InputsCheckoutStep2Consegna["deliveryMethod"]>();
 
   const router = useRouter();
 
   const onSubmit: SubmitHandler<InputsCheckoutStep2Consegna> = (data) => {
     let cleaned: Partial<InputsCheckoutStep2Consegna>;
-    if (deliveryMethod === "ritiro_negozio") {
+    if (dataCheckoutStepConsegna.deliveryMethod === "ritiro_negozio") {
       setDataCheckoutStepConsegna({ deliveryMethod: "ritiro_negozio" });
       setStep(3);
       router.push("/checkout/pagamento");
       return;
     }
 
-    if (isIndirizzoSame === true) {
+    if (sameAsBilling === true) {
       cleaned = {
-        deliveryMethod: data.deliveryMethod,
-        sameAsBilling: isIndirizzoSame,
-        // referente_contatto: "",
-        // ragione_sociale: "",
-        // partita_iva: "",
-        // indirizzo: "",
-        // città: "",
-        // cap: "",
-        // nazione: "",
-        // provincia_regione: "",
+        // sameAsBilling,
       };
-      clearSecondStepDataConsegna();
+      // clearSecondStepDataConsegna();
     } else {
       cleaned = {
-        deliveryMethod: data.deliveryMethod,
-        sameAsBilling: isIndirizzoSame,
+        // sameAsBilling,
         referente_contatto: data.referente_contatto,
         ragione_sociale: data.ragione_sociale,
         partita_iva: data.partita_iva,
@@ -89,14 +79,14 @@ export default function CheckouteStep2ConsegnaDati() {
             className="text_R flex min-h-12 items-center gap-3 pl-3 text-grey"
           >
             <input
-              {...register("deliveryMethod")}
+              name={NAME_RADIO_BUTTON_METOD}
               type="radio"
-              value="consegna_corriere"
+              value={DELIVERY_METHOD.CORRIERE}
               required
               id="deliveryMethodCorriere"
-              checked={deliveryMethod === "consegna_corriere"}
+              checked={dataCheckoutStepConsegna.deliveryMethod === DELIVERY_METHOD.CORRIERE}
               onChange={() => {
-                setDeliveryMethod("consegna_corriere");
+                setDeliveryMethod(DELIVERY_METHOD.CORRIERE);
               }}
             />
             Consegna a domicilio tramite corriere
@@ -105,104 +95,107 @@ export default function CheckouteStep2ConsegnaDati() {
             {priseDelivery ? `${priseDelivery.toFixed(2)} €` : "Gratis"}
           </span>
         </div>
-        {deliveryMethod === "consegna_corriere" && dataFirstStep.client_type === "azienda" && (
-          <div>
-            <label
-              htmlFor="sameAsBilling"
-              className="helper_XL flex items-center gap-2 pl-12 text-grey"
-            >
-              <input
-                {...register("sameAsBilling")}
-                type="checkbox"
-                checked={isIndirizzoSame}
-                onChange={() => setIsIndirizzoSame((prev) => !prev)}
-                id="sameAsBilling"
-              />
-              L’indirizzo di spedizione coincide con l’indirizzo di fatturazione
-            </label>
-            {!isIndirizzoSame && (
-              <div className="flex flex-col gap-3 py-3 pl-12">
-                <InputBlock
-                  title="Referente / Contatto*"
-                  required
-                  {...register("referente_contatto")}
-                  type="text"
-                  className="helper_text"
+        {dataCheckoutStepConsegna.deliveryMethod === "consegna_corriere" &&
+          dataFirstStep.client_type === "azienda" && (
+            <div>
+              <label
+                htmlFor="sameAsBilling"
+                className="helper_XL flex items-center gap-2 pl-12 text-grey"
+              >
+                <input
+                  {...register("sameAsBilling")}
+                  type="checkbox"
+                  checked={dataCheckoutStepConsegna.sameAsBilling}
+                  onChange={() => setSameAsBilling(!dataCheckoutStepConsegna.sameAsBilling)}
+                  id="sameAsBilling"
                 />
-                <div className="flex flex-wrap gap-3">
+                L’indirizzo di spedizione coincide con l’indirizzo di fatturazione
+              </label>
+              {!sameAsBilling && (
+                <div className="flex flex-col gap-3 py-3 pl-12">
                   <InputBlock
-                    {...register("ragione_sociale")}
-                    title="Ragione sociale*"
+                    title="Referente / Contatto*"
                     required
-                    className="helper_text min-w-60 flex-1"
+                    {...register("referente_contatto")}
                     type="text"
+                    className="helper_text"
                   />
+                  <div className="flex flex-wrap gap-3">
+                    <InputBlock
+                      {...register("ragione_sociale")}
+                      title="Ragione sociale*"
+                      required
+                      className="helper_text min-w-60 flex-1"
+                      type="text"
+                    />
+                    <InputBlock
+                      {...register("partita_iva")}
+                      title="Partita IVA*"
+                      required
+                      minLength={11}
+                      maxLength={11}
+                      type="text"
+                      className="helper_text min-w-60 flex-1"
+                    />
+                  </div>
                   <InputBlock
-                    {...register("partita_iva")}
-                    title="Partita IVA*"
+                    {...register("indirizzo")}
+                    title="Indirizzo / Sede legale*"
                     required
-                    minLength={11}
-                    maxLength={11}
                     type="text"
                     className="helper_text min-w-60 flex-1"
                   />
+                  <div className="flex flex-wrap gap-3">
+                    <InputBlock
+                      {...register("città")}
+                      title="Città*"
+                      required
+                      className="helper_text min-w-60 flex-1"
+                      type="text"
+                    />
+                    <InputBlock
+                      {...register("cap")}
+                      title="CAP*"
+                      required
+                      type="text"
+                      className="helper_text min-w-60 flex-1"
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <InputBlock
+                      {...register("nazione")}
+                      title="Nazione*"
+                      required
+                      className="helper_text min-w-60 flex-1"
+                      type="text"
+                    />
+                    <InputBlock
+                      {...register("provincia_regione")}
+                      title="Provincia / Regione*"
+                      required
+                      type="text"
+                      className="helper_text min-w-60 flex-1"
+                    />
+                  </div>
                 </div>
-                <InputBlock
-                  {...register("indirizzo")}
-                  title="Indirizzo / Sede legale*"
-                  required
-                  type="text"
-                  className="helper_text min-w-60 flex-1"
-                />
-                <div className="flex flex-wrap gap-3">
-                  <InputBlock
-                    {...register("città")}
-                    title="Città*"
-                    required
-                    className="helper_text min-w-60 flex-1"
-                    type="text"
-                  />
-                  <InputBlock
-                    {...register("cap")}
-                    title="CAP*"
-                    required
-                    type="text"
-                    className="helper_text min-w-60 flex-1"
-                  />
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <InputBlock
-                    {...register("nazione")}
-                    title="Nazione*"
-                    required
-                    className="helper_text min-w-60 flex-1"
-                    type="text"
-                  />
-                  <InputBlock
-                    {...register("provincia_regione")}
-                    title="Provincia / Regione*"
-                    required
-                    type="text"
-                    className="helper_text min-w-60 flex-1"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
         <div className="flex items-center justify-between">
           <label
             htmlFor="deliveryMethodNegozio"
             className="text_R flex min-h-12 items-center gap-3 pl-3 text-grey"
           >
             <input
-              {...register("deliveryMethod")}
+              name={NAME_RADIO_BUTTON_METOD}
               type="radio"
               required
-              value={"ritiro_negozio"}
+              value={DELIVERY_METHOD.NEGOZIO}
               id="deliveryMethodNegozio"
-              checked={deliveryMethod === "ritiro_negozio"}
-              onChange={() => setDeliveryMethod("ritiro_negozio")}
+              checked={dataCheckoutStepConsegna.deliveryMethod === DELIVERY_METHOD.NEGOZIO}
+              onChange={() => {
+                setDeliveryMethod(DELIVERY_METHOD.NEGOZIO);
+              }}
             />
             Ritiro presso il magazzino di Avellino - su prenotazione
           </label>{" "}

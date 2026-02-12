@@ -18,10 +18,9 @@ export default function CheckouteStep1FormClientData() {
     dataFirstStep,
     resetRequestCodiceFiscale,
     generateOrderNumber,
+    switchRequestInvoce,
   } = useCheckoutStore();
-  const [isCodiceFiscaleRequired, setIsCodiceFiscaleRequired] = useState(
-    dataFirstStep?.request_invoice || false,
-  );
+
   const { register, handleSubmit, resetField, watch } = useForm<InputsCheckoutStep1>({
     defaultValues: dataFirstStep,
   });
@@ -284,9 +283,10 @@ export default function CheckouteStep1FormClientData() {
                 type="checkbox"
                 {...register("request_invoice")}
                 id="request_invoice"
+                checked={dataFirstStep?.request_invoice ? true : false}
                 onChange={() => {
-                  setIsCodiceFiscaleRequired((prev) => !prev);
-                  if (isCodiceFiscaleRequired === true) {
+                  switchRequestInvoce();
+                  if (dataFirstStep.request_invoice === true) {
                     resetField("codice_fiscale");
                     resetRequestCodiceFiscale();
                   }
@@ -298,13 +298,13 @@ export default function CheckouteStep1FormClientData() {
             <div
               className={twMerge(
                 "transition-max-height overflow-hidden duration-300 ease-in-out",
-                isCodiceFiscaleRequired ? "max-h-20" : "max-h-0",
+                dataFirstStep.request_invoice ? "max-h-20" : "max-h-0",
               )}
             >
-              {isCodiceFiscaleRequired && (
+              {dataFirstStep.request_invoice && (
                 <InputBlock
                   title="Codice Fiscale *"
-                  required={isCodiceFiscaleRequired}
+                  required={dataFirstStep.request_invoice}
                   minLength={16}
                   maxLength={16}
                   {...register("codice_fiscale")}

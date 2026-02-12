@@ -17,7 +17,7 @@ export default function RepilogoComponent({
   basket: { id: string; qnt: number }[];
   isInputSconto?: boolean;
 }) {
-  const { setCheckoutData, setStep, step } = useCheckoutStore();
+  const { setCheckoutData, setStep, step, dataCheckoutStepConsegna } = useCheckoutStore();
   const path = usePathname();
   const handleProceedToOrder = () => {
     if (basket.length === 0) {
@@ -42,7 +42,10 @@ export default function RepilogoComponent({
             { title: "IVA (inclusa)", price: getIvaValue(totalPrice) },
             {
               title: "Spedizione",
-              price: getDeliveryPrice(totalPrice),
+              price:
+                dataCheckoutStepConsegna?.deliveryMethod === "ritiro_negozio"
+                  ? 0
+                  : getDeliveryPrice(totalPrice),
             },
           ].map((i, index) => (
             <li key={index} className="flex items-center justify-between">
@@ -61,7 +64,13 @@ export default function RepilogoComponent({
         </ul>
         <div className="flex items-center justify-between">
           <h4 className="H3">Totale</h4>
-          <span className="H4M">{getTotalPriceToPay(totalPrice).toFixed(2)} €</span>
+          <span className="H4M">
+            {getTotalPriceToPay({
+              totalPrice,
+              deliveryMetod: dataCheckoutStepConsegna?.deliveryMethod,
+            }).toFixed(2)}{" "}
+            €
+          </span>
         </div>
         {/* {isInputSconto && totalPrice > 0 && <InputSconto />} */}
         {path === "/carrello" && (

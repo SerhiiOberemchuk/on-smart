@@ -12,7 +12,7 @@ import { getTotalPriceToPay } from "@/utils/get-prices";
 export default function SumUpModalButton() {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const { totalPrice, orderNumber } = useCheckoutStore();
+  const { totalPrice, orderNumber, dataCheckoutStepConsegna } = useCheckoutStore();
   const [open, setOpen] = useState(false);
   const [attempt, setAttempt] = useState(1);
   const [checkoutId, setCheckoutId] = useState<string | null>(null);
@@ -72,7 +72,10 @@ export default function SumUpModalButton() {
       setAttempt((p) => p + 1);
 
       const checkout = await createSumUpCheckout({
-        amount: getTotalPriceToPay(totalPrice),
+        amount: getTotalPriceToPay({
+          totalPrice,
+          deliveryMetod: dataCheckoutStepConsegna.deliveryMethod,
+        }),
         checkout_reference: checkoutReference,
         description: `Order #${orderNumber}`,
       });

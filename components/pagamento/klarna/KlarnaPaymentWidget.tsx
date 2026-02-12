@@ -46,7 +46,10 @@ export default function KlarnaPaymentWidget() {
           dataFirstStep,
           dataCheckoutStepConsegna,
           productsInBasket,
-          totalPrice: getTotalPriceToPay(totalPrice),
+          totalPrice: getTotalPriceToPay({
+            totalPrice,
+            deliveryMetod: dataCheckoutStepConsegna.deliveryMethod,
+          }),
           basket,
         });
 
@@ -113,7 +116,10 @@ export default function KlarnaPaymentWidget() {
           dataFirstStep,
           dataCheckoutStepConsegna,
           productsInBasket,
-          totalPrice: getTotalPriceToPay(totalPrice),
+          totalPrice: getTotalPriceToPay({
+            totalPrice,
+            deliveryMetod: dataCheckoutStepConsegna.deliveryMethod,
+          }),
           basket,
         });
 
