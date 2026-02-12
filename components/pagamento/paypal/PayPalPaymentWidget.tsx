@@ -13,15 +13,17 @@ export default function PayPalPaymentWidget() {
     let mounted = true;
 
     (async () => {
-      try {
-        const res = await getPayPalClientIdAction();
-        if (!mounted) return;
-        setClientId(res.clientId);
-      } catch (e) {
-        if (!mounted) return;
+      const res = await getPayPalClientIdAction();
+
+      if (!mounted) return;
+
+      if (!res.ok || res.error) {
+        console.error("PayPal clientId error:", res.error);
         setError("Errore nel caricamento del widget PayPal.");
-        console.error(e);
+        return;
       }
+
+      setClientId(res.clientId);
     })();
 
     return () => {
@@ -34,7 +36,15 @@ export default function PayPalPaymentWidget() {
 
   return (
     <PayPalScriptProvider
-      options={{ clientId, buyerCountry: "IT", currency: "EUR", intent: "capture", debug: true }}
+      key={clientId}
+      options={{
+        clientId,
+        buyerCountry: "IT",
+        currency: "EUR",
+        intent: "capture",
+        components: "buttons",
+        debug: true,
+      }}
     >
       <PayPalButtonsClient />
     </PayPalScriptProvider>

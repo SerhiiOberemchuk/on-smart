@@ -15,9 +15,11 @@ export default function PayPalButtonsClient() {
   const [{ isPending }] = usePayPalScriptReducer();
   const { totalPrice, orderNumber, dataCheckoutStepConsegna } = useCheckoutStore();
   const router = useRouter();
+
   if (!totalPrice || !orderNumber) {
     return <div>Errore nel caricamento del pagamento PayPal.</div>;
   }
+
   const draft: PayPalDraft = {
     currency: "EUR",
     total: getTotalPriceToPay({
@@ -30,29 +32,40 @@ export default function PayPalButtonsClient() {
   return (
     <>
       {isPending ? <div className="animate-spin" /> : null}
+
       <PayPalButtons
         style={{ layout: "horizontal", label: "buynow" }}
-        message={{
-          color: "white",
-          align: "center",
-          position: "bottom",
-        }}
-        createOrder={async () => {
-          console.log("Creating PayPal order with draft:", draft);
-          const { orderId } = await createPayPalOrderAction(draft);
-          return orderId;
+        message={{ color: "white", align: "center", position: "bottom" }}
+        createOrder={async (): Promise<string> => {
+          const res = await createPayPalOrderAction(draft);
+
+          if (!res.ok || !res.orderId) {
+            console.error("Create PayPal order failed:", res.error);
+            return "ERROR_ORDER";
+          }
+
+          return res.orderId;
         }}
         onApprove={async (data) => {
           console.log("PayPal onApprove data:", data);
-          const orderId = data.orderID;
-          if (!orderId) throw new Error("No orderID from PayPal");
 
-          const result = await capturePayPalOrderAction({
+          const orderId = data.orderID;
+          if (!orderId) {
+            console.error("No orderID from PayPal");
+            return;
+          }
+
+          const res = await capturePayPalOrderAction({
             orderId,
             referenceId: draft.referenceId,
           });
 
-          console.log("PayPal CAPTURE OK:", result);
+          if (!res.ok) {
+            console.error("PayPal capture failed:", res.error);
+            return;
+          }
+
+          console.log("PayPal CAPTURE OK:", res.data);
           router.push(PAGES.CHECKOUT_PAGES.COMPLETED);
         }}
         onCancel={(data) => {
