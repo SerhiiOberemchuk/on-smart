@@ -31,7 +31,7 @@ export default function LayoutRepilogoComponent({ className }: { className?: str
 
   const displayTotal = isCompletatoPage && !totalPrice ? frozenData?.totalPrice : totalPrice;
   const displayBasket = isCompletatoPage && basket?.length === 0 ? frozenData?.basket : basket;
-
+  if (isCompletatoPage) return null;
   return (
     <div className={twMerge(className)}>
       <RepilogoComponent
