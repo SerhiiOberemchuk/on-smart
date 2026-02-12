@@ -12,7 +12,7 @@ export type PayPalDraft = {
 export async function createPayPalOrderAction(draft: PayPalDraft) {
   const requestId = `create-${draft.referenceId}-${Date.now()}`;
 
-  const data = await paypalApi<{ id: string }>("/v2/checkout/orders", {
+  const res = await paypalApi<{ id: string }>("/v2/checkout/orders", {
     method: "POST",
     requestId,
     body: {
@@ -20,10 +20,7 @@ export async function createPayPalOrderAction(draft: PayPalDraft) {
       purchase_units: [
         {
           reference_id: draft.referenceId,
-          amount: {
-            currency_code: draft.currency,
-            value: draft.total,
-          },
+          amount: { currency_code: draft.currency, value: draft.total },
         },
       ],
       application_context: {
@@ -34,26 +31,33 @@ export async function createPayPalOrderAction(draft: PayPalDraft) {
     },
   });
 
-  console.log("PayPal created order id:", data.id);
-  return { orderId: data.id };
+  if (!res.ok) {
+    console.error("PayPal create order failed:", res.error);
+    return { ok: false, error: res.error }; // UI покаже toast
+  }
+
+  console.log("PayPal created order id:", res.data.id);
+  return { ok: true, orderId: res.data.id };
 }
 
 export async function capturePayPalOrderAction(input: { orderId: string; referenceId: string }) {
   const requestId = `capture-${input.referenceId}-${input.orderId}`;
 
-  const data = await paypalApi<PayPalOrderCaptureResponse>(
+  const res = await paypalApi<PayPalOrderCaptureResponse>(
     `/v2/checkout/orders/${input.orderId}/capture`,
-    {
-      method: "POST",
-      requestId,
-    },
+    { method: "POST", requestId },
   );
 
-  return { ok: true, data };
+  if (!res.ok) {
+    console.error("PayPal capture failed:", res.error);
+    return { ok: false, error: res.error };
+  }
+
+  return { ok: true, data: res.data };
 }
 
 export async function getPayPalClientIdAction() {
   const clientId = process.env.PAYPAL_CLIENT_ID;
-  if (!clientId) throw new Error("PAYPAL_CLIENT_ID missing");
-  return { clientId };
+  if (!clientId) return { ok: false, error: { message: "PAYPAL_CLIENT_ID missing" } };
+  return { ok: true, clientId };
 }
