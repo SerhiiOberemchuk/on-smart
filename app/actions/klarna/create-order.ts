@@ -4,7 +4,8 @@ import { ProductType } from "@/db/schemas/product.schema";
 import { klarnaAuthHeader, klarnaBaseUrl } from "@/lib/klarna";
 import { BasceketStoreStateType } from "@/store/basket-store";
 import { InputsCheckoutStep1, InputsCheckoutStep2Consegna } from "@/types/checkout-steps.types";
-
+import { PAGES } from "@/types/pages.types";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 export async function placeKlarnaOrder({
   authorizationToken,
   orderNumber,
@@ -40,7 +41,7 @@ export async function placeKlarnaOrder({
       };
     }),
     merchant_urls: {
-      confirmation: "https://on-smart.it/checkout/completato",
+      confirmation: `${siteUrl}${PAGES.CHECKOUT_PAGES.COMPLETED}`,
     },
     merchant_reference1: orderNumber || "NO-ORDER-NUMBER",
     billing_address: {
@@ -93,7 +94,7 @@ export async function placeKlarnaOrder({
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(text);
+    return { success: false, error: text };
   }
 
   const data = await res.json();
