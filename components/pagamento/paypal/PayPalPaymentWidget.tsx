@@ -39,10 +39,11 @@ export default function PayPalPaymentWidget() {
       key={clientId}
       options={{
         clientId,
-        buyerCountry: "IT",
+        // buyerCountry: "IT",
         currency: "EUR",
         intent: "capture",
         components: "buttons",
+        environment: "production",
         debug: true,
       }}
     >

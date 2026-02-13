@@ -1,4 +1,4 @@
-type PayPalEnv = "sandbox" | "live";
+import { ReactPayPalScriptOptions } from "@paypal/react-paypal-js";
 
 type Result<T> =
   | { ok: true; data: T }
@@ -7,10 +7,11 @@ type Result<T> =
       error: { message: string; status?: number; debugId?: string | null; raw?: string };
     };
 
-const getEnv = (): PayPalEnv => (process.env.PAYPAL_ENV === "live" ? "live" : "sandbox");
+export const getEnv = (): ReactPayPalScriptOptions["environment"] =>
+  process.env.PAYPAL_ENV === "production" ? "production" : "sandbox";
 
 const baseUrl = () =>
-  getEnv() === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
+  getEnv() === "production" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
 
 const normalizePath = (p: string) => (p.startsWith("/") ? p : `/${p}`);
 
@@ -33,6 +34,7 @@ export async function getAccessToken(): Promise<Result<string>> {
   if (!clientId || !secret) return { ok: false, error: { message: "PayPal credentials missing" } };
 
   const auth = Buffer.from(`${clientId}:${secret}`).toString("base64");
+  console.log(baseUrl());
 
   try {
     const res = await fetch(`${baseUrl()}/v1/oauth2/token`, {
@@ -44,6 +46,7 @@ export async function getAccessToken(): Promise<Result<string>> {
       body: "grant_type=client_credentials",
       cache: "no-store",
     });
+    console.log("getAccessToken", res);
 
     const debugId = res.headers.get("paypal-debug-id");
     const text = await res.text();
@@ -91,6 +94,7 @@ export async function paypalApi<T>(
       body: opts.body ? JSON.stringify(opts.body) : undefined,
       cache: "no-store",
     });
+    console.log("paypalApi: ", res);
 
     const debugId = res.headers.get("paypal-debug-id");
     const text = await res.text();
