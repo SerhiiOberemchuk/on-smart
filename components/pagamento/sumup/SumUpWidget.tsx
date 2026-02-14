@@ -109,14 +109,14 @@ export default function SumUpModalButton() {
 
       {open && (
         <div
-          className="fixed inset-0 z-1000 flex items-center justify-center bg-black/60 p-4"
+          className="fixed inset-0 z-1000 flex justify-center overflow-y-scroll bg-black/60 py-4"
           role="dialog"
           aria-modal="true"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) close();
           }}
         >
-          <div className="relative w-full max-w-2xl rounded-2xl bg-white p-4 shadow-2xl">
+          <div className="relative h-auto w-full max-w-2xl shadow-2xl">
             <button
               type="button"
               onClick={close}
@@ -125,13 +125,7 @@ export default function SumUpModalButton() {
             >
               ✕
             </button>
-
-            <div className="mb-3">
-              <div className="text-lg font-semibold text-black">Pagamento con carta</div>
-              <div className="text-sm text-black/60">Completa il pagamento con SumUp</div>
-            </div>
-
-            <div id="sumUpIdContainer" ref={containerRef} />
+            <div id="sumUpIdContainer" ref={containerRef} className="pb-4" />{" "}
           </div>
         </div>
       )}
