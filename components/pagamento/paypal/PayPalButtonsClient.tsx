@@ -31,8 +31,8 @@ export default function PayPalButtonsClient({ funding }: { funding?: FUNDING_SOU
   };
 
   return (
-    <>
-      {isPending ? <div className="animate-spin" /> : null}
+    <div className="bg-white px-2 pt-2">
+      {isPending ? <span className="animate-spin">Caricamento...</span> : null}
 
       <PayPalButtons
         fundingSource={funding}
@@ -76,6 +76,6 @@ export default function PayPalButtonsClient({ funding }: { funding?: FUNDING_SOU
           console.error("PayPal error", err);
         }}
       />
-    </>
+    </div>
   );
 }
