@@ -2,6 +2,7 @@
 
 import { paypalApi } from "@/lib/paypal";
 import { PayPalOrderCaptureResponse } from "@/types/paypal.types";
+import { ReactPayPalScriptOptions } from "@paypal/react-paypal-js";
 
 export type PayPalDraft = {
   currency: string;
@@ -27,6 +28,7 @@ export async function createPayPalOrderAction(draft: PayPalDraft) {
         brand_name: "ON-SMART",
         landing_page: "NO_PREFERENCE",
         user_action: "PAY_NOW",
+        shipping_preference: "NO_SHIPPING",
       },
     },
   });
@@ -58,6 +60,8 @@ export async function capturePayPalOrderAction(input: { orderId: string; referen
 
 export async function getPayPalClientIdAction() {
   const clientId = process.env.PAYPAL_CLIENT_ID;
-  if (!clientId) return { ok: false, error: { message: "PAYPAL_CLIENT_ID missing" } };
-  return { ok: true, clientId };
+  const paypalEnv = process.env.PAYPAL_ENV as ReactPayPalScriptOptions["environment"];
+  if (!clientId || !paypalEnv)
+    return { ok: false, error: { message: "PAYPAL_CLIENT_ID or PAYPAL_ENV missing" } };
+  return { ok: true, clientId, paypalEnv };
 }

@@ -1,21 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { PayPalScriptProvider, ReactPayPalScriptOptions } from "@paypal/react-paypal-js";
 import PayPalButtonsClient from "./PayPalButtonsClient";
 import { getPayPalClientIdAction } from "@/app/actions/pay-pay/pay-pal";
 
 export default function PayPalPaymentWidget() {
   const [clientId, setClientId] = useState<string | null>(null);
+  const [payPalENV, setPayPalENV] = useState<ReactPayPalScriptOptions["environment"]>(undefined);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let mounted = true;
+    // let mounted = true;
 
     (async () => {
       const res = await getPayPalClientIdAction();
 
-      if (!mounted) return;
+      // if (!mounted) return;
 
       if (!res.ok || res.error) {
         console.error("PayPal clientId error:", res.error);
@@ -24,10 +25,11 @@ export default function PayPalPaymentWidget() {
       }
 
       setClientId(res.clientId);
+      setPayPalENV(res.paypalEnv);
     })();
 
     return () => {
-      mounted = false;
+      // mounted = false;
     };
   }, []);
 
@@ -39,14 +41,18 @@ export default function PayPalPaymentWidget() {
       key={clientId}
       options={{
         clientId,
-        // buyerCountry: "IT",
         currency: "EUR",
         intent: "capture",
         components: "buttons",
-        environment: "production",
+        environment: payPalENV,
         debug: true,
       }}
     >
+      {/* <PayPalButtonsClient funding={"paypal"} />
+      <PayPalButtonsClient funding={"card"} />
+      <PayPalButtonsClient funding={"paylater"} />
+      <PayPalButtonsClient funding={"mybank"} />
+      <PayPalButtonsClient funding={"applepay"} /> */}
       <PayPalButtonsClient />
     </PayPalScriptProvider>
   );
