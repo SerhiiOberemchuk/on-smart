@@ -8,10 +8,11 @@ import {
 import { useCheckoutStore } from "@/store/checkout-store";
 import { PAGES } from "@/types/pages.types";
 import { getTotalPriceToPay } from "@/utils/get-prices";
-import { PayPalButtons, usePayPalScriptReducer, FUNDING } from "@paypal/react-paypal-js";
+import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
+import type { FUNDING_SOURCE } from "@paypal/paypal-js";
 import { useRouter } from "next/navigation";
 
-export default function PayPalButtonsClient() {
+export default function PayPalButtonsClient({ funding }: { funding?: FUNDING_SOURCE }) {
   const [{ isPending }] = usePayPalScriptReducer();
   const { totalPrice, orderNumber, dataCheckoutStepConsegna } = useCheckoutStore();
   const router = useRouter();
@@ -34,95 +35,8 @@ export default function PayPalButtonsClient() {
       {isPending ? <div className="animate-spin" /> : null}
 
       <PayPalButtons
-        fundingSource={FUNDING.CARD}
-        style={{ layout: "horizontal", label: "buynow" }}
-        message={{ color: "white", align: "center", position: "bottom" }}
-        createOrder={async (): Promise<string> => {
-          const res = await createPayPalOrderAction(draft);
-
-          if (!res.ok || !res.orderId) {
-            console.error("Create PayPal order failed:", res.error);
-            return "ERROR_ORDER";
-          }
-
-          return res.orderId;
-        }}
-        onApprove={async (data) => {
-          console.log("PayPal onApprove data:", data);
-
-          const orderId = data.orderID;
-          if (!orderId) {
-            console.error("No orderID from PayPal");
-            return;
-          }
-
-          const res = await capturePayPalOrderAction({
-            orderId,
-            referenceId: draft.referenceId,
-          });
-
-          if (!res.ok) {
-            console.error("PayPal capture failed:", res.error);
-            return;
-          }
-
-          console.log("PayPal CAPTURE OK:", res.data);
-          router.push(PAGES.CHECKOUT_PAGES.COMPLETED);
-        }}
-        onCancel={(data) => {
-          console.warn("PayPal onCancel:", data);
-        }}
-        onError={(err) => {
-          console.error("PayPal error", err);
-        }}
-      />
-      <PayPalButtons
-        fundingSource={FUNDING.PAYLATER}
-        style={{ layout: "horizontal" }}
-        message={{ color: "white", align: "center", position: "bottom" }}
-        createOrder={async (): Promise<string> => {
-          const res = await createPayPalOrderAction(draft);
-
-          if (!res.ok || !res.orderId) {
-            console.error("Create PayPal order failed:", res.error);
-            return "ERROR_ORDER";
-          }
-
-          return res.orderId;
-        }}
-        onApprove={async (data) => {
-          console.log("PayPal onApprove data:", data);
-
-          const orderId = data.orderID;
-          if (!orderId) {
-            console.error("No orderID from PayPal");
-            return;
-          }
-
-          const res = await capturePayPalOrderAction({
-            orderId,
-            referenceId: draft.referenceId,
-          });
-
-          if (!res.ok) {
-            console.error("PayPal capture failed:", res.error);
-            return;
-          }
-
-          console.log("PayPal CAPTURE OK:", res.data);
-          router.push(PAGES.CHECKOUT_PAGES.COMPLETED);
-        }}
-        onCancel={(data) => {
-          console.warn("PayPal onCancel:", data);
-        }}
-        onError={(err) => {
-          console.error("PayPal error", err);
-        }}
-      />
-      <PayPalButtons
-        fundingSource={FUNDING.PAYPAL}
-        style={{ layout: "horizontal" }}
-        message={{ color: "white", align: "center", position: "bottom" }}
+        fundingSource={funding}
+        style={{ layout: "vertical", label: "buynow" }}
         createOrder={async (): Promise<string> => {
           const res = await createPayPalOrderAction(draft);
 
