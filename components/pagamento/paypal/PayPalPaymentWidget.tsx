@@ -11,12 +11,8 @@ export default function PayPalPaymentWidget() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // let mounted = true;
-
     (async () => {
       const res = await getPayPalClientIdAction();
-
-      // if (!mounted) return;
 
       if (!res.ok || res.error) {
         console.error("PayPal clientId error:", res.error);
@@ -27,10 +23,6 @@ export default function PayPalPaymentWidget() {
       setClientId(res.clientId);
       setPayPalENV(res.paypalEnv);
     })();
-
-    return () => {
-      // mounted = false;
-    };
   }, []);
 
   if (error) return <div>{error}</div>;
@@ -38,22 +30,17 @@ export default function PayPalPaymentWidget() {
 
   return (
     <PayPalScriptProvider
-      key={clientId}
+      key={`${clientId}-${payPalENV}-EUR-capture`}
       options={{
         clientId,
         currency: "EUR",
         intent: "capture",
         components: "buttons",
-        environment: payPalENV,
-        debug: true,
+        // environment: payPalENV,
+        // debug: true,
       }}
     >
-      {/* <PayPalButtonsClient funding={"paypal"} />
-      <PayPalButtonsClient funding={"card"} />
-      <PayPalButtonsClient funding={"paylater"} />
-      <PayPalButtonsClient funding={"mybank"} />
-      <PayPalButtonsClient funding={"applepay"} /> */}
-      <PayPalButtonsClient />
+      <PayPalButtonsClient style={{ layout: "vertical", label: "buynow" }} />
     </PayPalScriptProvider>
   );
 }

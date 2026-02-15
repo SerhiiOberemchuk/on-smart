@@ -6,7 +6,6 @@ import { BasketProductStateItem } from "@/store/checkout-store";
 import { MetodsPayment } from "@/types/bonifico.data";
 import { InputsCheckoutStep1, InputsCheckoutStep2Consegna } from "@/types/checkout-steps.types";
 
-// Тип для вхідних даних функції відправки
 type OrderMailPayload = {
   orderNumber: string;
   customerData: Partial<InputsCheckoutStep1>;
@@ -16,7 +15,6 @@ type OrderMailPayload = {
   bascket: BasketProductStateItem[];
 };
 
-// Тип для даних, які йдуть суто в HTML-шаблон
 type TemplateProps = {
   orderNumber: string;
   customerData: Partial<InputsCheckoutStep1>;
@@ -112,12 +110,19 @@ function generateOrderTemplate({
         <p style="margin: 5px 0;"><strong>Cliente:</strong> ${customerDisplayName} (${customerData.client_type ?? ""})</p>
         <p style="margin: 5px 0;"><strong>Email:</strong> ${customerData.email ?? ""}</p>
         <p style="margin: 5px 0;"><strong>Telefono:</strong> ${customerData.numeroTelefono ?? ""}</p>
-        ${customerData.codice_fiscale ? `<p style="margin: 5px 0;"><strong>Codice Fiscale:</strong> ${customerData.codice_fiscale}</p>` : ""}
+        <p style="margin: 5px 0;"><strong>Citta:</strong> ${customerData.città ?? ""}</p>
+        <p style="margin: 5px 0;"><strong>Indirizzo:</strong> ${customerData.indirizzo ?? ""}, ${customerData.numero_civico}</p>
+        <p style="margin: 5px 0;"><strong>Provincia:</strong> ${customerData.provincia_regione ?? ""}</p>
+             
+        ${customerData.codice_fiscale && customerData.request_invoice ? `<p style="margin: 5px 0;"><strong>Il cliente richede invoce: </strong>Codice Fiscale ${customerData.codice_fiscale}</p>` : ""}
         ${
           customerData.client_type === "azienda"
-            ? `<p style="margin: 5px 0;"><strong>Ragione Sociale:</strong> ${customerData.ragione_sociale}</p>
-            <p style="margin: 5px 0;"><strong>Partita IVA:</strong> ${customerData.partita_iva}</p>
+            ? `
             <p style="margin: 5px 0;"><strong>Referente Contatto:</strong> ${customerData.referente_contatto}</p>
+            <p style="margin: 5px 0;"><strong>Ragione Sociale:</strong> ${customerData.ragione_sociale}</p>
+            <p style="margin: 5px 0;"><strong>Partita IVA:</strong> ${customerData.partita_iva}</p>
+            <p style="margin: 5px 0;"><strong>PEC:</strong> ${customerData.pec_azzienda ?? "--"}</p>
+            <p style="margin: 5px 0;"><strong>Codice UNICO:</strong> ${customerData.codice_unico ?? "--"}</p>
            `
             : ""
         }
@@ -128,17 +133,27 @@ function generateOrderTemplate({
         <p style="margin: 5px 0;"><strong>Metodo di Pagamento:</strong> ${dataCheckoutStepPagamento.title || dataCheckoutStepPagamento.paymentMethod || ""}</p>
         
         ${
-          !isPickup
+          !isPickup && !dataCheckoutStepConsegna.sameAsBilling
             ? `
           <p style="margin: 10px 0 5px;"><strong>Indirizzo di Spedizione:</strong></p>
-          <p style="margin: 0; color: #555;">
-            ${customerData.indirizzo ?? ""}<br>
-            ${customerData.cap ?? ""}, ${customerData.città ?? ""} (${customerData.provincia_regione ?? ""})<br>
-            ${customerData.nazione ?? ""}
-          </p>
-        `
-            : `<p style="color: #EAB308;"><strong>Il cliente ritirerà l'ordine presso il punto vendita.</strong></p>`
+          <p style="margin: 5px 0;"><strong>Referente:</strong>${dataCheckoutStepConsegna.referente_contatto ?? ""}</p>
+          <p style="margin: 5px 0;"><strong>Ragione sociale:</strong>${dataCheckoutStepConsegna.ragione_sociale ?? ""}</p>
+          <p style="margin: 5px 0;"><strong>Indirizzo:</strong>${dataCheckoutStepConsegna.indirizzo ?? ""}</p>
+          <p style="margin: 5px 0;"><strong>Citta:</strong>${dataCheckoutStepConsegna.città ?? ""}</p>
+          <p style="margin: 5px 0;"><strong>CAP:</strong>${dataCheckoutStepConsegna.cap ?? ""}</p>
+          <p style="margin: 5px 0;"><strong>Nazione:</strong>${dataCheckoutStepConsegna.nazione ?? ""}</p>
+          <p style="margin: 5px 0;"><strong>Provincia:</strong>${dataCheckoutStepConsegna.provincia_regione ?? ""}</p>
+          `
+            : ""
         }
+        ${
+          !isPickup && dataCheckoutStepConsegna.sameAsBilling
+            ? `<p style="margin: 10px 0 5px;"><strong>L’indirizzo di spedizione coincide con l’indirizzo di fatturazione</strong></p>`
+            : ""
+        }
+
+
+        ${isPickup ? `<p style="color: #EAB308;"><strong>Il cliente ritirerà l'ordine presso il punto vendita.</strong></p>` : ""}
 
         <h2 style="font-size: 18px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 20px;">Riepilogo Prodotti</h2>
         <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
