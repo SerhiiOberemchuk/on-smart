@@ -9,10 +9,12 @@ import { useCheckoutStore } from "@/store/checkout-store";
 import { PAGES } from "@/types/pages.types";
 import { getTotalPriceToPay } from "@/utils/get-prices";
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
-import type { FUNDING_SOURCE } from "@paypal/paypal-js";
+import type { PayPalButtonsComponentOptions } from "@paypal/paypal-js";
 import { useRouter } from "next/navigation";
 
-export default function PayPalButtonsClient({ funding }: { funding?: FUNDING_SOURCE }) {
+export default function PayPalButtonsClient(
+  props: Pick<PayPalButtonsComponentOptions, "message" | "fundingSource" | "style">,
+) {
   const [{ isPending }] = usePayPalScriptReducer();
   const { totalPrice, orderNumber, dataCheckoutStepConsegna } = useCheckoutStore();
   const router = useRouter();
@@ -35,8 +37,7 @@ export default function PayPalButtonsClient({ funding }: { funding?: FUNDING_SOU
       {isPending ? <span className="animate-spin">Caricamento...</span> : null}
 
       <PayPalButtons
-        fundingSource={funding}
-        style={{ layout: "vertical", label: "buynow" }}
+        {...props}
         createOrder={async (): Promise<string> => {
           const res = await createPayPalOrderAction(draft);
 

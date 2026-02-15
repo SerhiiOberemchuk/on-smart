@@ -35,7 +35,7 @@ export async function createPayPalOrderAction(draft: PayPalDraft) {
 
   if (!res.ok) {
     console.error("PayPal create order failed:", res.error);
-    return { ok: false, error: res.error }; // UI покаже toast
+    return { ok: false, error: res.error };
   }
 
   console.log("PayPal created order id:", res.data.id);
