@@ -11,9 +11,7 @@ export function makeOrderNumber(prefix = "OS") {
   const mm = pad2(d.getMinutes());
   const ss = pad2(d.getSeconds());
 
-  // 4 символи base36, щоб навіть 2 замовлення в одну секунду не злиплися
   const rnd = Math.random().toString(36).slice(2, 6).toUpperCase();
 
   return `${prefix}-${y}${m}${day}-${hh}${mm}${ss}-${rnd}`;
 }
-

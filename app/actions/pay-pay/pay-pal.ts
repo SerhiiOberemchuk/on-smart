@@ -27,11 +27,12 @@ export async function createPayPalOrderAction(draft: PayPalDraft) {
       application_context: {
         brand_name: "ON-SMART",
         landing_page: "NO_PREFERENCE",
-        user_action: "PAY_NOW",
+        // user_action: "PAY_NOW",
         shipping_preference: "NO_SHIPPING",
       },
     },
   });
+  console.log(res);
 
   if (!res.ok) {
     console.error("PayPal create order failed:", res.error);
