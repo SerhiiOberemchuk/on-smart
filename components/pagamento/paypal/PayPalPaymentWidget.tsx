@@ -29,18 +29,20 @@ export default function PayPalPaymentWidget() {
   if (!clientId) return <div>Caricamento PayPal...</div>;
 
   return (
-    <PayPalScriptProvider
-      key={`${clientId}-${payPalENV}-EUR-capture`}
-      options={{
-        clientId,
-        currency: "EUR",
-        intent: "capture",
-        components: "buttons",
-        // environment: payPalENV,
-        // debug: true,
-      }}
-    >
-      <PayPalButtonsClient style={{ layout: "vertical", label: "buynow" }} />
-    </PayPalScriptProvider>
+    <>
+      <PayPalScriptProvider
+        key={`${clientId}-${payPalENV}-EUR-capture`}
+        options={{
+          clientId,
+          currency: "EUR",
+          // intent: "capture",
+          components: ["messages", "buttons"],
+          // environment: payPalENV,
+          // debug: true,
+        }}
+      >
+        <PayPalButtonsClient style={{ layout: "vertical" }} />
+      </PayPalScriptProvider>
+    </>
   );
 }

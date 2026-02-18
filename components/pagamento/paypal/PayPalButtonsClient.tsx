@@ -1,45 +1,74 @@
 "use client";
 
-import {
-  capturePayPalOrderAction,
-  createPayPalOrderAction,
-  PayPalDraft,
-} from "@/app/actions/pay-pay/pay-pal";
+import { capturePayPalOrderAction, createPayPalOrderAction } from "@/app/actions/pay-pay/pay-pal";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { PAGES } from "@/types/pages.types";
 import { getTotalPriceToPay } from "@/utils/get-prices";
-import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
+import { PayPalButtons, PayPalMessages, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 import type { PayPalButtonsComponentOptions } from "@paypal/paypal-js";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function PayPalButtonsClient(
   props: Pick<PayPalButtonsComponentOptions, "message" | "fundingSource" | "style">,
 ) {
   const [{ isPending }] = usePayPalScriptReducer();
-  const { totalPrice, orderNumber, dataCheckoutStepConsegna } = useCheckoutStore();
+  const { totalPrice, orderNumber, dataCheckoutStepConsegna, basket } = useCheckoutStore();
+  const [priceToPay, setPriceToPay] = useState<string>("0");
+  const [isMessages, setIsMessages] = useState(false);
+
+  useEffect(() => {
+    if (!totalPrice) return;
+    console.log(totalPrice);
+    (() => {
+      setIsMessages(false);
+      setPriceToPay(
+        getTotalPriceToPay({
+          totalPrice,
+          deliveryMetod: dataCheckoutStepConsegna.deliveryMethod,
+        }).toFixed(2),
+      );
+      setIsMessages(true);
+    })();
+  }, [totalPrice, dataCheckoutStepConsegna.deliveryMethod, orderNumber, basket]);
   const router = useRouter();
 
   if (!totalPrice || !orderNumber) {
     return <div>Errore nel caricamento del pagamento PayPal.</div>;
   }
 
-  const draft: PayPalDraft = {
-    currency: "EUR",
-    total: getTotalPriceToPay({
-      totalPrice,
-      deliveryMetod: dataCheckoutStepConsegna.deliveryMethod,
-    }).toFixed(2),
-    referenceId: orderNumber,
-  };
-
   return (
     <div className="bg-white px-2 pt-2">
       {isPending ? <span className="animate-spin">Caricamento...</span> : null}
+      <div className="py-3">
+        {isMessages && (
+          <PayPalMessages
+            key={`pp-msg-${priceToPay}`}
+            forceReRender={[priceToPay, "EUR"]}
+            onApply={async (data) => {
+              console.log(data);
 
+              router.push(PAGES.CHECKOUT_PAGES.COMPLETED);
+            }}
+            amount={priceToPay}
+            currency="EUR"
+            style={{
+              layout: "flex",
+              ratio: "8x1",
+              color: "white",
+            }}
+          />
+        )}
+      </div>
       <PayPalButtons
         {...props}
+        forceReRender={[priceToPay, "EUR"]}
         createOrder={async (): Promise<string> => {
-          const res = await createPayPalOrderAction(draft);
+          const res = await createPayPalOrderAction({
+            currency: "EUR",
+            total: priceToPay,
+            referenceId: orderNumber,
+          });
 
           if (!res.ok || !res.orderId) {
             console.error("Create PayPal order failed:", res.error);
@@ -59,7 +88,7 @@ export default function PayPalButtonsClient(
 
           const res = await capturePayPalOrderAction({
             orderId,
-            referenceId: draft.referenceId,
+            referenceId: orderNumber,
           });
 
           if (!res.ok) {
