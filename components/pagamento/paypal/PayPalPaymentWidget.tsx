@@ -35,10 +35,12 @@ export default function PayPalPaymentWidget() {
         options={{
           clientId,
           currency: "EUR",
+          // buyerCountry: "it",
           // intent: "capture",
           components: ["messages", "buttons"],
           // environment: payPalENV,
           // debug: true,
+          enableFunding: "paylater",
         }}
       >
         <PayPalButtonsClient style={{ layout: "vertical" }} />
