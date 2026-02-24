@@ -32,7 +32,7 @@ type SumUpHostedCheckoutRequest = {
   description?: string;
   return_url?: string;
   redirect_url?: string;
-  hosted_checkout: { enabled: true };
+  // hosted_checkout: { enabled: true };
 };
 
 type SumUpHostedCheckoutResponse = {
@@ -75,7 +75,7 @@ export async function createSumUpCheckout(
       description: input.description ?? `Order ${input.checkout_reference}`,
       return_url: `${baseSiteURL}${PAGES.CHECKOUT_PAGES.COMPLETED}/${input.orderNumber}`,
       redirect_url: `${baseSiteURL}${PAGES.CHECKOUT_PAGES.COMPLETED}/${input.orderNumber}`,
-      hosted_checkout: { enabled: true },
+      // hosted_checkout: { enabled: true },
     };
 
     const res = await fetch(API_URL, {
