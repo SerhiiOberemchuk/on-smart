@@ -206,7 +206,7 @@ export default function SumUpModalButton() {
         close();
         return;
       }
-      toast.success("Pagato");
+      toast.success("Aprendo pagamento…");
       await updateOrderPaymentAction({
         orderNumber: internalOrderNumber,
         data: {
