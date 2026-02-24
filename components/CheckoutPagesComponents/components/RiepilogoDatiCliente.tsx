@@ -4,15 +4,14 @@ import icon_email_confirmed from "@/assets/icons/icon_email_confirm.svg";
 import icon_pencil from "@/assets/icons/icon_add_review.svg";
 import Image from "next/image";
 import Link from "next/link";
-import { useCheckoutStore } from "@/store/checkout-store";
-import { InputsCheckoutStep1 } from "@/types/checkout-steps.types";
+import { CheckoutTypesDataFirstStep, useCheckoutStore } from "@/store/checkout-store";
 
 export default function RiepilogoDatiCliente({
   isModifica = true,
   externalData,
 }: {
   isModifica?: boolean;
-  externalData?: Partial<InputsCheckoutStep1>;
+  externalData?: CheckoutTypesDataFirstStep;
 }) {
   const { dataFirstStep } = useCheckoutStore();
 
@@ -25,20 +24,20 @@ export default function RiepilogoDatiCliente({
     email,
     nome,
     indirizzo,
-    città,
+    citta,
     cap,
-    provincia_regione,
+    provinciaRegione,
     cognome,
-    numero_civico,
+    numeroCivico,
     nazione,
-    client_type,
-    codice_fiscale,
-    codice_unico,
-    partita_iva,
-    pec_azzienda,
-    ragione_sociale,
-    request_invoice,
-    referente_contatto,
+    clientType,
+    codiceFiscale,
+    codiceUnico,
+    partitaIva,
+    pecAzzienda,
+    ragioneSociale,
+    requestInvoice,
+    referenteContatto,
   } = displayData;
 
   return (
@@ -62,24 +61,24 @@ export default function RiepilogoDatiCliente({
         <p> {cognome}</p>
         <p>{cap}</p>
         <p>
-          {indirizzo} {numero_civico}
+          {indirizzo} {numeroCivico}
         </p>
         <p>
-          {città}, {provincia_regione}
+          {citta}, {provinciaRegione}
         </p>
         <p>{nazione}</p>
-        {request_invoice && (
+        {requestInvoice && (
           <>
-            <p>Codice fiscale: {codice_fiscale}</p>
+            <p>Codice fiscale: {codiceFiscale}</p>
           </>
         )}
-        {client_type === "azienda" && (
+        {clientType === "azienda" && (
           <>
-            <p>Referente: {referente_contatto}</p>
-            <p>PEC: {pec_azzienda}</p>
-            <p>Partita IVA: {partita_iva}</p>
-            <p>Codice UNICO: {codice_unico}</p>
-            <p>Ragione sociale: {ragione_sociale}</p>
+            <p>Referente: {referenteContatto}</p>
+            <p>PEC: {pecAzzienda}</p>
+            <p>Partita IVA: {partitaIva}</p>
+            <p>Codice UNICO: {codiceUnico}</p>
+            <p>Ragione sociale: {ragioneSociale}</p>
           </>
         )}
       </div>

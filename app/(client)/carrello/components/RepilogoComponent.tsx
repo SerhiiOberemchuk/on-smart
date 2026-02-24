@@ -2,26 +2,32 @@
 import clsx from "clsx";
 
 // import InputSconto from "./InputSconto";
-import { useCheckoutStore } from "@/store/checkout-store";
-import { redirect, usePathname } from "next/navigation";
+import {
+  BasketTypeUseCheckoutStore,
+  TotalPriseTypeuseCheckoutStore,
+  useCheckoutStore,
+} from "@/store/checkout-store";
+import { useRouter, usePathname } from "next/navigation";
 import ButtonYellow from "@/components/BattonYellow";
 import { PAGES } from "@/types/pages.types";
 import { getDeliveryPrice, getIvaValue, getTotalPriceToPay } from "@/utils/get-prices";
+import { toast } from "react-toastify";
+import { useEffect } from "react";
 
 export default function RepilogoComponent({
   totalPrice,
   basket,
-  // isInputSconto = false,
 }: {
-  totalPrice: number;
-  basket: { id: string; qnt: number }[];
+  totalPrice: TotalPriseTypeuseCheckoutStore;
+  basket: BasketTypeUseCheckoutStore;
   isInputSconto?: boolean;
 }) {
-  const { setCheckoutData, setStep, step, dataCheckoutStepConsegna } = useCheckoutStore();
+  const { setCheckoutData, setStep, step, dataFirstStep, setDelyveryPrice } = useCheckoutStore();
   const path = usePathname();
+  const router = useRouter();
   const handleProceedToOrder = () => {
     if (basket.length === 0) {
-      alert("Il carrello è vuoto");
+      toast.warn("Il carrello è vuoto");
       return;
     }
     if (!step) {
@@ -29,8 +35,15 @@ export default function RepilogoComponent({
     }
     setCheckoutData({ totalPrice, basket });
 
-    redirect(PAGES.CHECKOUT_PAGES.INFORMATION);
+    router.push(PAGES.CHECKOUT_PAGES.INFORMATION);
   };
+  useEffect(() => {
+    // console.log(totalPrice);
+    const deliveryValue = getDeliveryPrice(totalPrice);
+    // console.log(deliveryValue);
+
+    setDelyveryPrice({ deliveryPrice: deliveryValue });
+  }, [totalPrice, setDelyveryPrice]);
 
   return (
     <div className="sticky top-5 w-full xl:max-w-[426px]">
@@ -43,9 +56,9 @@ export default function RepilogoComponent({
             {
               title: "Spedizione",
               price:
-                dataCheckoutStepConsegna?.deliveryMethod === "ritiro_negozio"
+                dataFirstStep?.deliveryMethod === "RITIRO_NEGOZIO"
                   ? 0
-                  : getDeliveryPrice(totalPrice),
+                  : dataFirstStep.deliveryPrice,
             },
           ].map((i, index) => (
             <li key={index} className="flex items-center justify-between">
@@ -53,7 +66,7 @@ export default function RepilogoComponent({
                 <span className={clsx(index !== 0 && "hidden")}>
                   {" "}
                   {basket.reduce((acc, item) => {
-                    return acc + item.qnt;
+                    return acc + item.quantity;
                   }, 0)}
                 </span>{" "}
                 {i.title}
@@ -67,7 +80,7 @@ export default function RepilogoComponent({
           <span className="H4M">
             {getTotalPriceToPay({
               totalPrice,
-              deliveryMetod: dataCheckoutStepConsegna?.deliveryMethod,
+              deliveryMetod: dataFirstStep.deliveryMethod,
             }).toFixed(2)}{" "}
             €
           </span>

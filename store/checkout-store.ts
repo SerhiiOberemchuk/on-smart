@@ -1,80 +1,117 @@
+import { OrderItemsTypes, OrderTypes } from "@/db/schemas/orders.schema";
 import { MetodsPayment } from "@/types/bonifico.data";
-import { InputsCheckoutStep1, InputsCheckoutStep2Consegna } from "@/types/checkout-steps.types";
 import { DELIVERY_DATA } from "@/types/delivery.data";
-import { makeOrderNumber } from "@/utils/order-number";
+import { DeliveryMethod } from "@/types/orders.types";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-export type BasketProductStateItem = {
-  id: string;
-  qnt: number;
-};
-
+export type BasketTypeUseCheckoutStore = Pick<OrderItemsTypes, "productId" | "quantity">[];
+export type TotalPriseTypeuseCheckoutStore = number;
+export type CheckoutTypesDataFirstStep = Omit<
+  OrderTypes,
+  "id" | "createdAt" | "updatedAt" | "orderNumber" | "deliveryAdress" | "sameAsBilling"
+>;
+export type CheckoutTypesDataStepConsegna = Pick<OrderTypes, "deliveryAdress" | "sameAsBilling">;
 export type CheckoutStoreState = {
-  totalPrice?: number;
-  priseDelivery?: number;
-  orderNumber?: string;
-  basket?: BasketProductStateItem[];
+  totalPrice: TotalPriseTypeuseCheckoutStore;
+
+  basket: BasketTypeUseCheckoutStore;
   step: 0 | 1 | 2 | 3 | 4;
-  dataFirstStep: Partial<InputsCheckoutStep1>;
-  dataCheckoutStepConsegna: Partial<InputsCheckoutStep2Consegna>;
+  dataFirstStep: CheckoutTypesDataFirstStep;
+  dataCheckoutStepConsegna: CheckoutTypesDataStepConsegna;
   dataCheckoutStepPagamento: Partial<MetodsPayment>;
   setStep: (step: 0 | 1 | 2 | 3 | 4) => void;
-  setCheckoutData: (data: { totalPrice: number; basket: { id: string; qnt: number }[] }) => void;
-  setDataFirstStepCheckout: (data: Partial<InputsCheckoutStep1>) => void;
-  setDataCheckoutStepConsegna: (data: Partial<InputsCheckoutStep2Consegna>) => void;
+  setCheckoutData: (data: {
+    totalPrice: TotalPriseTypeuseCheckoutStore;
+    basket: BasketTypeUseCheckoutStore;
+  }) => void;
+  setDelyveryPrice: ({
+    deliveryPrice,
+  }: {
+    deliveryPrice: CheckoutTypesDataFirstStep["deliveryPrice"];
+  }) => void;
+  setDataFirstStepCheckout: (data: CheckoutTypesDataFirstStep) => void;
+  setDataCheckoutStepConsegna: (data: CheckoutTypesDataStepConsegna) => void;
   clearAllCheckoutData: () => void;
   clearFirstStepData: () => void;
   clearSecondStepDataConsegna: () => void;
   resetRequestCodiceFiscale: () => void;
   setDataCheckoutStepPagamento: (data: MetodsPayment) => void;
   switchRequestInvoce: () => void;
-  generateOrderNumber: () => string;
-  ensureOrderNumber: () => string;
-  clearOrderNumber: () => void;
-  setDeliveryMethod: (metod: InputsCheckoutStep2Consegna["deliveryMethod"]) => void;
+  setDeliveryMethod: (metod: DeliveryMethod) => void;
   setSameAsBilling: (value: boolean) => void;
+};
+
+const dataCheckoutStepConsegnaDefault: CheckoutTypesDataStepConsegna = {
+  deliveryAdress: null,
+  sameAsBilling: true,
+};
+
+const dataFirstStepDefault: CheckoutTypesDataFirstStep = {
+  email: "",
+  numeroTelefono: "",
+  clientType: "privato",
+  requestInvoice: false,
+  orderStatus: "PENDING_PAYMENT",
+  deliveryMethod: "CONSEGNA_CORRIERE",
+  deliveryPrice: DELIVERY_DATA.PRISE_DELIVERY,
+  userId: null,
+  nome: null,
+  cognome: null,
+  indirizzo: null,
+  numeroCivico: null,
+  citta: null,
+  cap: null,
+  nazione: null,
+  provinciaRegione: null,
+  codiceFiscale: null,
+  referenteContatto: null,
+  ragioneSociale: null,
+  partitaIva: null,
+  pecAzzienda: null,
+  codiceUnico: null,
+  paymentOrderID: null,
+  trackingNumber: null,
+  carrier: null,
+  shippedAt: null,
+  deliveredAt: null,
 };
 export const useCheckoutStore = create<CheckoutStoreState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       totalPrice: 0,
       basket: [],
-      orderNumber: "",
       step: 0,
-      priseDelivery: DELIVERY_DATA.PRISE_DELIVERY,
-      dataFirstStep: {},
-      dataCheckoutStepConsegna: { deliveryMethod: "ritiro_negozio" },
+      dataFirstStep: dataFirstStepDefault,
+      dataCheckoutStepConsegna: dataCheckoutStepConsegnaDefault,
       dataCheckoutStepPagamento: {},
       setCheckoutData: (data) =>
         set((state) => ({
           ...state,
           ...data,
-          priseDelivery:
-            data.totalPrice > DELIVERY_DATA.FREE_THRESHOLD_TOTAL_PRISE
-              ? 0
-              : DELIVERY_DATA.PRISE_DELIVERY,
         })),
+      setDelyveryPrice: ({ deliveryPrice }) =>
+        set((state) => ({ dataFirstStep: { ...state.dataFirstStep, deliveryPrice } })),
       setStep: (step) => set({ step }),
       clearAllCheckoutData: () =>
         set({
           totalPrice: 0,
           basket: [],
-          priseDelivery: DELIVERY_DATA.PRISE_DELIVERY,
-          dataFirstStep: {},
-          dataCheckoutStepConsegna: {},
+          dataFirstStep: dataFirstStepDefault,
+          dataCheckoutStepConsegna: dataCheckoutStepConsegnaDefault,
           dataCheckoutStepPagamento: {},
           step: 0,
-          orderNumber: "",
         }),
-      setDataFirstStepCheckout: (data) => set(() => ({ dataFirstStep: { ...data } })),
+      setDataFirstStepCheckout: (data) =>
+        set((state) => ({ dataFirstStep: { ...state.dataFirstStep, ...data } })),
       setDataCheckoutStepConsegna: (data) =>
         set((state) => ({
           dataCheckoutStepConsegna: { ...state.dataCheckoutStepConsegna, ...data },
         })),
       setDataCheckoutStepPagamento: (data) => set({ dataCheckoutStepPagamento: { ...data } }),
-      clearFirstStepData: () => set({ dataFirstStep: {} }),
-      clearSecondStepDataConsegna: () => set({ dataCheckoutStepConsegna: {} }),
+      clearFirstStepData: () => set({ dataFirstStep: dataFirstStepDefault }),
+      clearSecondStepDataConsegna: () =>
+        set({ dataCheckoutStepConsegna: dataCheckoutStepConsegnaDefault }),
       resetRequestCodiceFiscale: () =>
         set((state) => ({
           dataFirstStep: {
@@ -83,47 +120,24 @@ export const useCheckoutStore = create<CheckoutStoreState>()(
             codice_fiscale: "",
           },
         })),
-      generateOrderNumber: () => {
-        // const current = get().orderNumber;
-        // if (current) return current;
-        const created = makeOrderNumber("OS");
-        set({ orderNumber: created });
-        return created;
-      },
 
-      ensureOrderNumber: () => {
-        const current = get().orderNumber;
-        return current ?? get().generateOrderNumber();
-      },
       switchRequestInvoce: () =>
         set((state) => ({
           dataFirstStep: {
             ...state.dataFirstStep,
-            request_invoice: !state.dataFirstStep.request_invoice,
+            request_invoice: !state.dataFirstStep.requestInvoice,
           },
         })),
-      clearOrderNumber: () => set({ orderNumber: undefined }),
 
       setDeliveryMethod: (method) =>
-        set((state) => ({
-          dataCheckoutStepConsegna: {
-            ...state.dataCheckoutStepConsegna,
-            deliveryMethod: method,
-            ...(method === "ritiro_negozio"
-              ? {
-                  sameAsBilling: true,
-                  referente_contatto: "",
-                  ragione_sociale: "",
-                  partita_iva: "",
-                  indirizzo: "",
-                  città: "",
-                  cap: "",
-                  nazione: "",
-                  provincia_regione: "",
-                }
-              : {}),
-          },
-        })),
+        set((state) => {
+          return {
+            dataFirstStep: {
+              ...state.dataFirstStep,
+              deliveryMethod: method,
+            },
+          };
+        }),
       setSameAsBilling: (value: boolean) =>
         set((state) => ({
           dataCheckoutStepConsegna: {

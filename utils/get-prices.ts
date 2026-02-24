@@ -1,5 +1,5 @@
-import { DeliveryMethod } from "@/types/checkout-steps.types";
 import { DELIVERY_DATA } from "@/types/delivery.data";
+import { DeliveryMethod } from "@/types/orders.types";
 
 export function getTotalPriceToPay({
   totalPrice,
@@ -8,7 +8,7 @@ export function getTotalPriceToPay({
   totalPrice: number;
   deliveryMetod?: DeliveryMethod;
 }) {
-  if (deliveryMetod === "ritiro_negozio") {
+  if (deliveryMetod === "RITIRO_NEGOZIO") {
     return totalPrice;
   }
   return totalPrice > DELIVERY_DATA.FREE_THRESHOLD_TOTAL_PRISE

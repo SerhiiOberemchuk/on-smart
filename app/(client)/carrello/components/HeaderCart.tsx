@@ -13,7 +13,7 @@ export default function HeaderCart() {
   return (
     <header className="bg-background">
       <div className="container py-3">
-        <h1 className="H2">Carrello ({basket.reduce((acc, i) => acc + i.qnt, 0)} art.)</h1>
+        <h1 className="H2">Carrello ({basket.reduce((acc, i) => acc + i.quantity, 0)} art.)</h1>
       </div>
     </header>
   );

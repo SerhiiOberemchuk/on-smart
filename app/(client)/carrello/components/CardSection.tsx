@@ -37,7 +37,8 @@ export default function CartSection() {
     }
 
     const load = async () => {
-      const ids = basket.map((item) => item.id);
+      const ids = basket.map((item) => item.productId).filter((i) => i !== null);
+
       const { data, error } = await getProductsByIds(ids);
 
       if (error) {
@@ -52,15 +53,21 @@ export default function CartSection() {
         toast.warning("Alcuni prodotti non sono più disponibili.");
 
         const validIds = new Set(products.map((p) => p.id));
-        basket.filter((b) => !validIds.has(b.id)).forEach((b) => removeFromBasketById(b.id));
+        basket
+          .filter((b) => {
+            if (typeof b.productId === "string") return !validIds.has(b.productId);
+          })
+          .forEach((b) => {
+            if (typeof b.productId === "string") return removeFromBasketById(b.productId);
+          });
       }
 
       products.forEach((prod) => {
-        const item = basket.find((i) => i.id === prod.id);
+        const item = basket.find((i) => i.productId === prod.id);
         if (!item) return;
 
-        if (item.qnt > prod.inStock) {
-          updateBasket([{ id: prod.id, qnt: prod.inStock }]);
+        if (item.quantity > prod.inStock) {
+          updateBasket([{ productId: prod.id, quantity: prod.inStock }]);
         }
       });
 
@@ -71,43 +78,43 @@ export default function CartSection() {
   }, [basket, removeFromBasketById, updateBasket]);
 
   const calcProductPrice = (productId: string) => {
-    const item = basket.find((b) => b.id === productId);
+    const item = basket.find((b) => b.productId === productId);
     const prod = fetchedProducts.find((p) => p.id === productId);
 
     if (!item || !prod) return { price: "0", oldPrice: null };
 
     return {
-      price: (item.qnt * Number(prod.price)).toString(),
-      oldPrice: prod.oldPrice ? (item.qnt * Number(prod.oldPrice)).toString() : null,
+      price: (item.quantity * Number(prod.price)).toString(),
+      oldPrice: prod.oldPrice ? (item.quantity * Number(prod.oldPrice)).toString() : null,
     };
   };
 
-  const incrementQnt = (id: string) => {
-    const item = basket.find((b) => b.id === id);
-    const prod = fetchedProducts.find((p) => p.id === id);
+  const incrementQnt = (productId: string) => {
+    const item = basket.find((b) => b.productId === productId);
+    const prod = fetchedProducts.find((p) => p.id === productId);
 
     if (!item || !prod) return;
 
-    if (item.qnt < prod.inStock) {
-      updateBasket([{ id, qnt: item.qnt + 1 }]);
+    if (item.quantity < prod.inStock) {
+      updateBasket([{ productId, quantity: item.quantity + 1 }]);
     } else {
       toast.info("Quantità massima disponibile.");
     }
   };
 
   const decrementQnt = (id: string) => {
-    const item = basket.find((b) => b.id === id);
+    const item = basket.find((b) => b.productId === id);
 
-    if (item && item.qnt > 1) {
-      updateBasket([{ id, qnt: item.qnt - 1 }]);
+    if (item && item.quantity > 1) {
+      updateBasket([{ productId: id, quantity: item.quantity - 1 }]);
     }
   };
 
   const calcTotal = () => {
     return fetchedProducts.reduce((acc, prod) => {
-      const item = basket.find((b) => b.id === prod.id);
+      const item = basket.find((b) => b.productId === prod.id);
       if (!item) return acc;
-      return acc + item.qnt * Number(prod.price);
+      return acc + item.quantity * Number(prod.price);
     }, 0);
   };
 
@@ -120,10 +127,10 @@ export default function CartSection() {
         <div className="relative flex flex-col gap-4 xl:mt-5 xl:flex-row xl:gap-5">
           <ul className="mx-auto flex w-full max-w-[916px] flex-col gap-6 rounded-sm bg-background p-3 xl:mx-0">
             {fetchedProducts.map((prod, index) => {
-              const item = basket.find((b) => b.id === prod.id);
+              const item = basket.find((b) => b.productId === prod.id);
               const price = calcProductPrice(prod.id);
-              const canIncrement = item && prod && item.qnt < prod.inStock;
-              const canDecrement = item && item.qnt > 1;
+              const canIncrement = item && prod && item.quantity < prod.inStock;
+              const canDecrement = item && item.quantity > 1;
               return (
                 <li
                   key={prod.id}
@@ -165,7 +172,7 @@ export default function CartSection() {
                         </button>
 
                         <div className="flex size-11 items-center justify-center">
-                          {item?.qnt ?? 0}
+                          {item?.quantity ?? 0}
                         </div>
 
                         <button

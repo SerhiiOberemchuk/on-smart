@@ -1,4 +1,5 @@
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
+import { PaymentProviderTypes } from "./payments.types";
 
 export const bonificoData: { title: string; value: string }[] = [
   { title: "Intestatario conto", value: CONTACTS_ADDRESS.BANC_DETAILS.INTESTARIO },
@@ -13,13 +14,13 @@ export const bonificoData: { title: string; value: string }[] = [
 
 export type MetodsPayment = {
   title: string;
-  paymentMethod: "card" | "paypal" | "bonifico" | "klarna";
+  paymentMethod: PaymentProviderTypes;
 };
 
 export const PAYMENT_METHODS: MetodsPayment[] = [
   {
     title: "Pagamento con carta",
-    paymentMethod: "card",
+    paymentMethod: "sumup",
   },
   {
     title: "PayPal",

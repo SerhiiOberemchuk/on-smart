@@ -1,38 +1,17 @@
 "use client";
 
-import ButtonYellow from "@/components/BattonYellow";
 import RiepilogoDatiConsegna from "./RepilogoDatiConsegna";
 import RiepilogoDatiCliente from "./RiepilogoDatiCliente";
 import RiepilogoDatiPagamento from "./RiepilogoPagamento";
-import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
 import { useCheckoutStore } from "@/store/checkout-store";
-import { PAGES } from "@/types/pages.types";
 import KlarnaPaymentWidget from "@/components/pagamento/klarna/KlarnaPaymentWidget";
 import PayPalPaymentWidget from "@/components/pagamento/paypal/PayPalPaymentWidget";
 import SumUpWidget from "@/components/pagamento/sumup/SumUpWidget";
+import BonificoPaymentWidget from "@/components/pagamento/bonifico/BonificoPaymentWidget";
 
 export default function CheckouteStep4Riepilogo() {
-  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const { dataCheckoutStepPagamento } = useCheckoutStore();
 
-  const { orderNumber, dataCheckoutStepPagamento } = useCheckoutStore();
-
-  const handleConfirmOrder = () => {
-    setIsButtonDisabled(true);
-    if (
-      dataCheckoutStepPagamento.paymentMethod === "klarna" ||
-      dataCheckoutStepPagamento.paymentMethod === "paypal"
-    )
-      return;
-
-    redirect(PAGES.CHECKOUT_PAGES.COMPLETED);
-  };
-
-  useEffect(() => {
-    if (!orderNumber) {
-      redirect(PAGES.MAIN_PAGES.HOME);
-    }
-  }, [orderNumber]);
   return (
     <div className="flex flex-col gap-6">
       <RiepilogoDatiCliente />
@@ -51,17 +30,13 @@ export default function CheckouteStep4Riepilogo() {
           <PayPalPaymentWidget />
         </div>
       )}
-      {dataCheckoutStepPagamento.paymentMethod === "card" && (
+      {dataCheckoutStepPagamento.paymentMethod === "sumup" && (
         <div className="mt-4">
           <p className="mb-2 font-medium">Procedi con il pagamento con carta qui sotto:</p>
           <SumUpWidget />
         </div>
       )}
-      {dataCheckoutStepPagamento.paymentMethod === "bonifico" && (
-        <ButtonYellow className="ml-auto" disabled={isButtonDisabled} onClick={handleConfirmOrder}>
-          Conferma Ordine
-        </ButtonYellow>
-      )}
+      {dataCheckoutStepPagamento.paymentMethod === "bonifico" && <BonificoPaymentWidget />}
     </div>
   );
 }

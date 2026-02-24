@@ -35,6 +35,7 @@ export default function PayPalPaymentWidget() {
         options={{
           clientId,
           currency: "EUR",
+          locale: "it_IT",
           // buyerCountry: "it",
           // intent: "capture",
           components: ["messages", "buttons"],

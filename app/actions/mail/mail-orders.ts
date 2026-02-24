@@ -2,23 +2,26 @@
 
 import { ProductType } from "@/db/schemas/product.schema";
 import { transporterOrders } from "@/lib/mail-transporter";
-import { BasketProductStateItem } from "@/store/checkout-store";
+import {
+  BasketTypeUseCheckoutStore,
+  CheckoutTypesDataFirstStep,
+  CheckoutTypesDataStepConsegna,
+} from "@/store/checkout-store";
 import { MetodsPayment } from "@/types/bonifico.data";
-import { InputsCheckoutStep1, InputsCheckoutStep2Consegna } from "@/types/checkout-steps.types";
 
 type OrderMailPayload = {
   orderNumber: string;
-  customerData: Partial<InputsCheckoutStep1>;
-  dataCheckoutStepConsegna: InputsCheckoutStep2Consegna;
+  customerData: CheckoutTypesDataFirstStep;
+  dataCheckoutStepConsegna: CheckoutTypesDataStepConsegna;
   dataCheckoutStepPagamento: Partial<MetodsPayment>;
   productsInBasket: ProductType[];
-  bascket: BasketProductStateItem[];
+  bascket: BasketTypeUseCheckoutStore;
 };
 
 type TemplateProps = {
   orderNumber: string;
-  customerData: Partial<InputsCheckoutStep1>;
-  dataCheckoutStepConsegna: InputsCheckoutStep2Consegna;
+  customerData: CheckoutTypesDataFirstStep;
+  dataCheckoutStepConsegna: CheckoutTypesDataStepConsegna;
   dataCheckoutStepPagamento: Partial<MetodsPayment>;
   orderItems: { name: string; qnt: number; total: string }[];
   grandTotal: string;
@@ -34,22 +37,22 @@ export async function sendMailOrders({
   bascket,
 }: OrderMailPayload) {
   try {
-    const { email, nome, cognome, client_type, ragione_sociale } = customerData;
+    const { email, nome, cognome, clientType, ragioneSociale } = customerData;
 
     if (!email) return { success: false, messaggio: "Email mancante" };
 
     const customerDisplayName =
-      client_type === "azienda"
-        ? ragione_sociale || "Azienda"
+      clientType === "azienda"
+        ? ragioneSociale || "Azienda"
         : `${nome || ""} ${cognome || ""}`.trim() || "Cliente";
 
     const orderItems = bascket.map((item) => {
-      const product = productsInBasket.find((p) => p.id === item.id);
+      const product = productsInBasket.find((p) => p.id === item.productId);
       const price = parseFloat(product?.price || "0");
       return {
         name: product?.nameFull || "Prodotto",
-        qnt: item.qnt,
-        total: (price * item.qnt).toFixed(2),
+        qnt: item.quantity,
+        total: (price * item.quantity).toFixed(2),
       };
     });
 
@@ -96,7 +99,7 @@ function generateOrderTemplate({
   grandTotal,
   customerDisplayName,
 }: TemplateProps) {
-  const isPickup = dataCheckoutStepConsegna.deliveryMethod === "ritiro_negozio";
+  const isPickup = customerData.deliveryMethod === "RITIRO_NEGOZIO";
 
   return `
     <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee;">
@@ -107,22 +110,22 @@ function generateOrderTemplate({
 
       <div style="padding: 20px;">
         <h2 style="font-size: 18px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Dati del Cliente</h2>
-        <p style="margin: 5px 0;"><strong>Cliente:</strong> ${customerDisplayName} (${customerData.client_type ?? ""})</p>
+        <p style="margin: 5px 0;"><strong>Cliente:</strong> ${customerDisplayName} (${customerData.clientType ?? ""})</p>
         <p style="margin: 5px 0;"><strong>Email:</strong> ${customerData.email ?? ""}</p>
         <p style="margin: 5px 0;"><strong>Telefono:</strong> ${customerData.numeroTelefono ?? ""}</p>
-        <p style="margin: 5px 0;"><strong>Citta:</strong> ${customerData.città ?? ""}</p>
-        <p style="margin: 5px 0;"><strong>Indirizzo:</strong> ${customerData.indirizzo ?? ""}, ${customerData.numero_civico}</p>
-        <p style="margin: 5px 0;"><strong>Provincia:</strong> ${customerData.provincia_regione ?? ""}</p>
+        <p style="margin: 5px 0;"><strong>Citta:</strong> ${customerData.citta ?? ""}</p>
+        <p style="margin: 5px 0;"><strong>Indirizzo:</strong> ${customerData.indirizzo ?? ""}, ${customerData.numeroCivico}</p>
+        <p style="margin: 5px 0;"><strong>Provincia:</strong> ${customerData.provinciaRegione ?? ""}</p>
              
-        ${customerData.codice_fiscale && customerData.request_invoice ? `<p style="margin: 5px 0;"><strong>Il cliente richede invoce: </strong>Codice Fiscale ${customerData.codice_fiscale}</p>` : ""}
+        ${customerData.codiceFiscale && customerData.requestInvoice ? `<p style="margin: 5px 0;"><strong>Il cliente richede invoce: </strong>Codice Fiscale ${customerData.codiceFiscale}</p>` : ""}
         ${
-          customerData.client_type === "azienda"
+          customerData.clientType === "azienda"
             ? `
-            <p style="margin: 5px 0;"><strong>Referente Contatto:</strong> ${customerData.referente_contatto}</p>
-            <p style="margin: 5px 0;"><strong>Ragione Sociale:</strong> ${customerData.ragione_sociale}</p>
-            <p style="margin: 5px 0;"><strong>Partita IVA:</strong> ${customerData.partita_iva}</p>
-            <p style="margin: 5px 0;"><strong>PEC:</strong> ${customerData.pec_azzienda ?? "--"}</p>
-            <p style="margin: 5px 0;"><strong>Codice UNICO:</strong> ${customerData.codice_unico ?? "--"}</p>
+            <p style="margin: 5px 0;"><strong>Referente Contatto:</strong> ${customerData.referenteContatto}</p>
+            <p style="margin: 5px 0;"><strong>Ragione Sociale:</strong> ${customerData.ragioneSociale}</p>
+            <p style="margin: 5px 0;"><strong>Partita IVA:</strong> ${customerData.partitaIva}</p>
+            <p style="margin: 5px 0;"><strong>PEC:</strong> ${customerData.pecAzzienda ?? "--"}</p>
+            <p style="margin: 5px 0;"><strong>Codice UNICO:</strong> ${customerData.codiceUnico ?? "--"}</p>
            `
             : ""
         }
@@ -136,13 +139,13 @@ function generateOrderTemplate({
           !isPickup && !dataCheckoutStepConsegna.sameAsBilling
             ? `
           <p style="margin: 10px 0 5px;"><strong>Indirizzo di Spedizione:</strong></p>
-          <p style="margin: 5px 0;"><strong>Referente:</strong>${dataCheckoutStepConsegna.referente_contatto ?? ""}</p>
-          <p style="margin: 5px 0;"><strong>Ragione sociale:</strong>${dataCheckoutStepConsegna.ragione_sociale ?? ""}</p>
-          <p style="margin: 5px 0;"><strong>Indirizzo:</strong>${dataCheckoutStepConsegna.indirizzo ?? ""}</p>
-          <p style="margin: 5px 0;"><strong>Citta:</strong>${dataCheckoutStepConsegna.città ?? ""}</p>
-          <p style="margin: 5px 0;"><strong>CAP:</strong>${dataCheckoutStepConsegna.cap ?? ""}</p>
-          <p style="margin: 5px 0;"><strong>Nazione:</strong>${dataCheckoutStepConsegna.nazione ?? ""}</p>
-          <p style="margin: 5px 0;"><strong>Provincia:</strong>${dataCheckoutStepConsegna.provincia_regione ?? ""}</p>
+          <p style="margin: 5px 0;"><strong>Referente:</strong>${dataCheckoutStepConsegna.deliveryAdress?.referente_contatto ?? ""}</p>
+          <p style="margin: 5px 0;"><strong>Ragione sociale:</strong>${dataCheckoutStepConsegna.deliveryAdress?.ragione_sociale ?? ""}</p>
+          <p style="margin: 5px 0;"><strong>Indirizzo:</strong>${dataCheckoutStepConsegna.deliveryAdress?.indirizzo ?? ""}</p>
+          <p style="margin: 5px 0;"><strong>Citta:</strong>${dataCheckoutStepConsegna.deliveryAdress?.citta ?? ""}</p>
+          <p style="margin: 5px 0;"><strong>CAP:</strong>${dataCheckoutStepConsegna.deliveryAdress?.cap ?? ""}</p>
+          <p style="margin: 5px 0;"><strong>Nazione:</strong>${dataCheckoutStepConsegna.deliveryAdress?.nazione ?? ""}</p>
+          <p style="margin: 5px 0;"><strong>Provincia:</strong>${dataCheckoutStepConsegna.deliveryAdress?.provincia_regione ?? ""}</p>
           `
             : ""
         }

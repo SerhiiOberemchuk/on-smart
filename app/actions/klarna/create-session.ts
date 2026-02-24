@@ -3,7 +3,7 @@
 import { ProductType } from "@/db/schemas/product.schema";
 import { klarnaAuthHeader, klarnaBaseUrl } from "@/lib/klarna";
 import { BasceketStoreStateType } from "@/store/basket-store";
-import { InputsCheckoutStep1, InputsCheckoutStep2Consegna } from "@/types/checkout-steps.types";
+import { CheckoutTypesDataFirstStep, CheckoutTypesDataStepConsegna } from "@/store/checkout-store";
 import { PAGES } from "@/types/pages.types";
 
 export type KlarnaSessionResponseType = {
@@ -28,8 +28,8 @@ export async function createKlarnaSessionAction({
   basket,
 }: {
   orderNumber: string | undefined;
-  dataFirstStep: Partial<InputsCheckoutStep1>;
-  dataCheckoutStepConsegna: Partial<InputsCheckoutStep2Consegna>;
+  dataFirstStep: CheckoutTypesDataFirstStep;
+  dataCheckoutStepConsegna: CheckoutTypesDataStepConsegna;
   productsInBasket: ProductType[];
   totalPrice: number;
   basket: BasceketStoreStateType["basket"];
@@ -44,12 +44,12 @@ export async function createKlarnaSessionAction({
       phone: dataFirstStep.numeroTelefono,
       street_address: dataFirstStep.indirizzo,
       postal_code: dataFirstStep.cap,
-      city: dataFirstStep.città,
+      city: dataFirstStep.citta,
       country: "IT",
     },
 
     shipping_address:
-      dataCheckoutStepConsegna.deliveryMethod === "ritiro_negozio"
+      dataFirstStep.deliveryMethod === "RITIRO_NEGOZIO"
         ? undefined
         : dataCheckoutStepConsegna.sameAsBilling
           ? {
@@ -59,16 +59,16 @@ export async function createKlarnaSessionAction({
               phone: dataFirstStep.numeroTelefono,
               street_address: dataFirstStep.indirizzo,
               postal_code: dataFirstStep.cap,
-              city: dataFirstStep.città,
+              city: dataFirstStep.citta,
               country: "IT",
             }
           : {
-              given_name: dataCheckoutStepConsegna.referente_contatto,
+              given_name: dataCheckoutStepConsegna.deliveryAdress?.referente_contatto,
               email: dataFirstStep.email,
               phone: dataFirstStep.numeroTelefono,
-              street_address: dataCheckoutStepConsegna.indirizzo,
-              postal_code: dataCheckoutStepConsegna.cap,
-              city: dataCheckoutStepConsegna.città,
+              street_address: dataCheckoutStepConsegna.deliveryAdress?.indirizzo,
+              postal_code: dataCheckoutStepConsegna.deliveryAdress?.cap,
+              city: dataCheckoutStepConsegna.deliveryAdress?.citta,
               country: "IT",
             },
 
@@ -78,13 +78,13 @@ export async function createKlarnaSessionAction({
     order_amount: Number((totalPrice * 100).toFixed(0)),
 
     order_lines: productsInBasket.map((product) => {
-      const basketItem = basket.find((item) => item.id === product.id);
+      const basketItem = basket.find((item) => item.productId === product.id);
       const unit_price = Number((Number(product.price) * 100).toFixed(0));
       return {
         name: product.nameFull,
-        quantity: basketItem ? basketItem.qnt : 1,
+        quantity: basketItem ? basketItem.quantity : 1,
         unit_price,
-        total_amount: Number((unit_price * (basketItem ? basketItem.qnt : 1)).toFixed(0)),
+        total_amount: Number((unit_price * (basketItem ? basketItem.quantity : 1)).toFixed(0)),
       };
     }),
 

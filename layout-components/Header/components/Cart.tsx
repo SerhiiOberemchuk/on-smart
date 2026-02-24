@@ -9,7 +9,7 @@ export default function Cart() {
   const { basket } = useBasketStore();
   const qnt = () => {
     if (basket.length === 0) return 0;
-    return basket.reduce((acc, item) => acc + item.qnt, 0);
+    return basket.reduce((acc, item) => acc + item.quantity, 0);
   };
   return (
     <Link href={"/carrello"} className="relative flex gap-2.5 p-3 md:px-4 md:py-2">
