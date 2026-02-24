@@ -211,6 +211,7 @@ export default function SumUpModalButton() {
         orderNumber: internalOrderNumber,
         data: {
           providerOrderId: checkout.data.id,
+          status: "PAYED",
         },
       });
 
