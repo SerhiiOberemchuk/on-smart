@@ -189,6 +189,7 @@ export default function SumUpModalButton() {
       setAttempt((p) => p + 1);
 
       const checkout = await createSumUpCheckout({
+        orderNumber: internalOrderNumber,
         amount: priceToPay,
         checkout_reference: checkoutReference,
         description: `Order #${internalOrderNumber}`,
@@ -205,7 +206,7 @@ export default function SumUpModalButton() {
         close();
         return;
       }
-
+      toast.success("Pagato");
       await updateOrderPaymentAction({
         orderNumber: internalOrderNumber,
         data: {
