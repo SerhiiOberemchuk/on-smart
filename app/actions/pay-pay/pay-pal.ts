@@ -5,13 +5,12 @@ import { PayPalOrderCaptureResponse } from "@/types/paypal.types";
 import { ReactPayPalScriptOptions } from "@paypal/react-paypal-js";
 
 export type PayPalDraft = {
-  currency: string;
   total: string;
   referenceId: string;
 };
 
-export async function createPayPalOrderAction(draft: PayPalDraft) {
-  const requestId = `create-${draft.referenceId}-${Date.now()}`;
+export async function createPayPalOrderAction({ total, referenceId }: PayPalDraft) {
+  const requestId = `create-${referenceId}-${Date.now()}`;
 
   const res = await paypalApi<{ id: string }>("/v2/checkout/orders", {
     method: "POST",
@@ -20,8 +19,8 @@ export async function createPayPalOrderAction(draft: PayPalDraft) {
       intent: "CAPTURE",
       purchase_units: [
         {
-          reference_id: draft.referenceId,
-          amount: { currency_code: draft.currency, value: draft.total },
+          reference_id: referenceId,
+          amount: { currency_code: "EUR", value: total },
         },
       ],
       application_context: {

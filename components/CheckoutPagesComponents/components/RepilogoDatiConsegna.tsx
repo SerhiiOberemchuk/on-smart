@@ -4,8 +4,11 @@ import icon_delivery_success from "@/assets/icons/icon_delivery_success.svg";
 import icon_pencil from "@/assets/icons/icon_add_review.svg";
 import Image from "next/image";
 import Link from "next/link";
-import { useCheckoutStore } from "@/store/checkout-store";
-import { InputsCheckoutStep1, InputsCheckoutStep2Consegna } from "@/types/checkout-steps.types";
+import {
+  CheckoutTypesDataFirstStep,
+  CheckoutTypesDataStepConsegna,
+  useCheckoutStore,
+} from "@/store/checkout-store";
 
 export default function RiepilogoDatiConsegna({
   isModifica = true,
@@ -13,8 +16,8 @@ export default function RiepilogoDatiConsegna({
   externalDataCustomer,
 }: {
   isModifica?: boolean;
-  externalDataConsegna?: Partial<InputsCheckoutStep2Consegna>;
-  externalDataCustomer?: Partial<InputsCheckoutStep1>;
+  externalDataConsegna?: CheckoutTypesDataStepConsegna;
+  externalDataCustomer?: CheckoutTypesDataFirstStep;
 }) {
   const { dataFirstStep, dataCheckoutStepConsegna } = useCheckoutStore();
   const dataCheckoutStepConsegnaFinal = externalDataConsegna || dataCheckoutStepConsegna;
@@ -24,24 +27,16 @@ export default function RiepilogoDatiConsegna({
     email,
     nome,
     indirizzo,
-    città,
+    citta,
     cap,
-    provincia_regione,
-    numero_civico,
+    provinciaRegione,
+    numeroCivico,
     cognome,
-    referente_contatto,
+    referenteContatto,
+    deliveryMethod,
   } = dataFirstStepFinal;
 
-  const {
-    deliveryMethod,
-    sameAsBilling,
-    cap: capConsegna,
-    città: cittàConsegna,
-    indirizzo: indirizzoConsegna,
-    // ragione_sociale: ragione_socialeConsegna,
-    referente_contatto: referente_consegna,
-    provincia_regione: provincia_regioneConsegna,
-  } = dataCheckoutStepConsegnaFinal;
+  const { sameAsBilling, deliveryAdress } = dataCheckoutStepConsegnaFinal;
   return (
     <div>
       <div className="flex items-center gap-2">
@@ -62,9 +57,9 @@ export default function RiepilogoDatiConsegna({
       </div>
 
       <div className="text_R mt-3 pl-8 text-text-grey">
-        {deliveryMethod === "consegna_corriere" && <p>Corriere</p>}
-        {deliveryMethod === "ritiro_negozio" && <p>Ritiro presso il magazzino di Avellino</p>}
-        {deliveryMethod === "consegna_corriere" && dataFirstStep.client_type === "azienda" && (
+        {deliveryMethod === "CONSEGNA_CORRIERE" && <p>Corriere</p>}
+        {deliveryMethod === "RITIRO_NEGOZIO" && <p>Ritiro presso il magazzino di Avellino</p>}
+        {deliveryMethod === "CONSEGNA_CORRIERE" && dataFirstStep.clientType === "azienda" && (
           <>
             {sameAsBilling ? (
               <>
@@ -72,24 +67,24 @@ export default function RiepilogoDatiConsegna({
                 <p>{email}</p>
                 <p>{nome}</p>
                 <p>{cognome}</p>
-                <p>{referente_contatto}</p>
+                <p>{referenteContatto}</p>
                 <p>{cap}</p>
                 <p>
-                  {indirizzo}, {numero_civico}
+                  {indirizzo}, {numeroCivico}
                 </p>
                 <p>
-                  {città}, {provincia_regione}
+                  {citta}, {provinciaRegione}
                 </p>
               </>
             ) : (
               <>
                 <p>{numeroTelefono}</p>
                 <p>{email}</p>
-                <p>{referente_consegna}</p>
-                <p>{capConsegna}</p>
-                <p>{indirizzoConsegna}</p>
+                <p>{deliveryAdress?.referente_contatto}</p>
+                <p>{deliveryAdress?.cap}</p>
+                <p>{deliveryAdress?.indirizzo}</p>
                 <p>
-                  {cittàConsegna}, {provincia_regioneConsegna}
+                  {deliveryAdress?.citta}, {deliveryAdress?.provincia_regione}
                 </p>
               </>
             )}

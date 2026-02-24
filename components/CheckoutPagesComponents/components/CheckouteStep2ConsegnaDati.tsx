@@ -5,10 +5,11 @@ import Image from "next/image";
 import { InputBlock } from "@/components/InputBloc";
 import { SubmitHandler, useForm } from "react-hook-form";
 import ButtonYellow from "@/components/BattonYellow";
-import { DELIVERY_METHOD, InputsCheckoutStep2Consegna } from "@/types/checkout-steps.types";
-import { useCheckoutStore } from "@/store/checkout-store";
+import { CheckoutTypesDataStepConsegna, useCheckoutStore } from "@/store/checkout-store";
 import { useRouter } from "next/navigation";
 import RiepilogoDatiCliente from "./RiepilogoDatiCliente";
+import { DELIVERY_METHOD_CONSTANT } from "@/types/orders.types";
+import { useEffect } from "react";
 
 const NAME_RADIO_BUTTON_METOD = "deliveryMethod";
 
@@ -16,54 +17,63 @@ export default function CheckouteStep2ConsegnaDati() {
   const {
     dataCheckoutStepConsegna,
     setDataCheckoutStepConsegna,
-    clearSecondStepDataConsegna,
     setStep,
-    priseDelivery,
+    setDelyveryPrice,
     dataFirstStep,
     setDeliveryMethod,
     setSameAsBilling,
   } = useCheckoutStore();
 
   const sameAsBilling =
-    dataCheckoutStepConsegna.sameAsBilling ?? dataFirstStep.client_type === "privato";
-  const { register, handleSubmit } = useForm<InputsCheckoutStep2Consegna>({
+    dataCheckoutStepConsegna.sameAsBilling ?? dataFirstStep.clientType === "privato";
+  const { register, handleSubmit } = useForm<CheckoutTypesDataStepConsegna>({
     defaultValues: dataCheckoutStepConsegna,
   });
 
   const router = useRouter();
 
-  const onSubmit: SubmitHandler<InputsCheckoutStep2Consegna> = (data) => {
-    let cleaned: Partial<InputsCheckoutStep2Consegna>;
-    if (dataCheckoutStepConsegna.deliveryMethod === "ritiro_negozio") {
-      setDataCheckoutStepConsegna({ deliveryMethod: "ritiro_negozio" });
+  const onSubmit: SubmitHandler<CheckoutTypesDataStepConsegna> = (data) => {
+    let cleaned: CheckoutTypesDataStepConsegna["deliveryAdress"];
+    if (dataFirstStep.deliveryMethod === "RITIRO_NEGOZIO") {
+      setDataCheckoutStepConsegna({
+        sameAsBilling,
+        deliveryAdress: null,
+      });
       setStep(3);
       router.push("/checkout/pagamento");
       return;
     }
 
     if (sameAsBilling === true) {
-      cleaned = {
-        // sameAsBilling,
-      };
-      // clearSecondStepDataConsegna();
+      cleaned = null;
     } else {
       cleaned = {
-        // sameAsBilling,
-        referente_contatto: data.referente_contatto,
-        ragione_sociale: data.ragione_sociale,
-        partita_iva: data.partita_iva,
-        indirizzo: data.indirizzo,
-        città: data.città,
-        cap: data.cap,
-        nazione: data.nazione,
-        provincia_regione: data.provincia_regione,
+        referente_contatto: data?.deliveryAdress?.referente_contatto ?? "",
+        ragione_sociale: data?.deliveryAdress?.ragione_sociale ?? "",
+        partita_iva: data?.deliveryAdress?.partita_iva ?? "",
+        indirizzo: data?.deliveryAdress?.indirizzo ?? "",
+        citta: data?.deliveryAdress?.citta ?? "",
+        cap: data?.deliveryAdress?.cap ?? "",
+        nazione: data?.deliveryAdress?.nazione ?? "",
+        provincia_regione: data?.deliveryAdress?.provincia_regione ?? "",
       };
     }
 
-    setDataCheckoutStepConsegna(cleaned);
+    setDataCheckoutStepConsegna({
+      deliveryAdress: cleaned,
+      sameAsBilling,
+    });
     setStep(3);
     router.push("/checkout/pagamento");
   };
+  useEffect(() => {
+    (() => {
+      setDelyveryPrice({
+        deliveryPrice:
+          dataFirstStep.deliveryMethod === "RITIRO_NEGOZIO" ? 0 : dataFirstStep.deliveryPrice,
+      });
+    })();
+  }, [setDelyveryPrice, dataFirstStep.deliveryPrice, dataFirstStep.deliveryMethod]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -81,22 +91,22 @@ export default function CheckouteStep2ConsegnaDati() {
             <input
               name={NAME_RADIO_BUTTON_METOD}
               type="radio"
-              value={DELIVERY_METHOD.CORRIERE}
+              value={DELIVERY_METHOD_CONSTANT.CONSEGNA_CORRIERE}
               required
               id="deliveryMethodCorriere"
-              checked={dataCheckoutStepConsegna.deliveryMethod === DELIVERY_METHOD.CORRIERE}
+              checked={dataFirstStep.deliveryMethod === DELIVERY_METHOD_CONSTANT.CONSEGNA_CORRIERE}
               onChange={() => {
-                setDeliveryMethod(DELIVERY_METHOD.CORRIERE);
+                setDeliveryMethod(DELIVERY_METHOD_CONSTANT.CONSEGNA_CORRIERE);
               }}
             />
             Consegna a domicilio tramite corriere
           </label>
           <span className="helper_text text-grey">
-            {priseDelivery ? `${priseDelivery.toFixed(2)} €` : "Gratis"}
+            {dataFirstStep.deliveryPrice ? `${dataFirstStep.deliveryPrice.toFixed(2)} €` : "Gratis"}
           </span>
         </div>
-        {dataCheckoutStepConsegna.deliveryMethod === "consegna_corriere" &&
-          dataFirstStep.client_type === "azienda" && (
+        {dataFirstStep.deliveryMethod === "CONSEGNA_CORRIERE" &&
+          dataFirstStep.clientType === "azienda" && (
             <div>
               <label
                 htmlFor="sameAsBilling"
@@ -116,20 +126,20 @@ export default function CheckouteStep2ConsegnaDati() {
                   <InputBlock
                     title="Referente / Contatto*"
                     required
-                    {...register("referente_contatto")}
+                    {...register("deliveryAdress.referente_contatto")}
                     type="text"
                     className="helper_text"
                   />
                   <div className="flex flex-wrap gap-3">
                     <InputBlock
-                      {...register("ragione_sociale")}
+                      {...register("deliveryAdress.ragione_sociale")}
                       title="Ragione sociale*"
                       required
                       className="helper_text min-w-60 flex-1"
                       type="text"
                     />
                     <InputBlock
-                      {...register("partita_iva")}
+                      {...register("deliveryAdress.partita_iva")}
                       title="Partita IVA*"
                       required
                       minLength={11}
@@ -139,7 +149,7 @@ export default function CheckouteStep2ConsegnaDati() {
                     />
                   </div>
                   <InputBlock
-                    {...register("indirizzo")}
+                    {...register("deliveryAdress.indirizzo")}
                     title="Indirizzo / Sede legale*"
                     required
                     type="text"
@@ -147,14 +157,14 @@ export default function CheckouteStep2ConsegnaDati() {
                   />
                   <div className="flex flex-wrap gap-3">
                     <InputBlock
-                      {...register("città")}
+                      {...register("deliveryAdress.citta")}
                       title="Città*"
                       required
                       className="helper_text min-w-60 flex-1"
                       type="text"
                     />
                     <InputBlock
-                      {...register("cap")}
+                      {...register("deliveryAdress.cap")}
                       title="CAP*"
                       required
                       type="text"
@@ -163,14 +173,14 @@ export default function CheckouteStep2ConsegnaDati() {
                   </div>
                   <div className="flex flex-wrap gap-3">
                     <InputBlock
-                      {...register("nazione")}
+                      {...register("deliveryAdress.nazione")}
                       title="Nazione*"
                       required
                       className="helper_text min-w-60 flex-1"
                       type="text"
                     />
                     <InputBlock
-                      {...register("provincia_regione")}
+                      {...register("deliveryAdress.provincia_regione")}
                       title="Provincia / Regione*"
                       required
                       type="text"
@@ -190,11 +200,11 @@ export default function CheckouteStep2ConsegnaDati() {
               name={NAME_RADIO_BUTTON_METOD}
               type="radio"
               required
-              value={DELIVERY_METHOD.NEGOZIO}
+              value={DELIVERY_METHOD_CONSTANT.RITIRO_NEGOZIO}
               id="deliveryMethodNegozio"
-              checked={dataCheckoutStepConsegna.deliveryMethod === DELIVERY_METHOD.NEGOZIO}
+              checked={dataFirstStep.deliveryMethod === DELIVERY_METHOD_CONSTANT.RITIRO_NEGOZIO}
               onChange={() => {
-                setDeliveryMethod(DELIVERY_METHOD.NEGOZIO);
+                setDeliveryMethod(DELIVERY_METHOD_CONSTANT.RITIRO_NEGOZIO);
               }}
             />
             Ritiro presso il magazzino di Avellino - su prenotazione

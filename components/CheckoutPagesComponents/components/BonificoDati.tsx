@@ -1,21 +1,18 @@
-import { useCheckoutStore } from "@/store/checkout-store";
 import { bonificoData } from "@/types/bonifico.data";
-import { toast } from "react-toastify";
 
 export default function BonificoDati() {
-  const notify = () => toast("Testo copiato negli appunti", { autoClose: 2000 });
-  const { orderNumber } = useCheckoutStore();
+  // const notify = () => toast("Testo copiato negli appunti", { autoClose: 2000 });
+  // const { orderNumber } = useCheckoutStore();
   return (
     <div className="mt-4 pl-8 text-sm text-text-grey">
       <p>Per completare il pagamento tramite bonifico bancario, utilizza i seguenti dati:</p>
       <ul className="mt-2 gap-1 text-white">
         {bonificoData.map((item, index) => {
-          const textToCopy =
-            bonificoData.length !== index + 1 ? item.value : `${item.value} ${orderNumber}`;
+          const textToCopy = bonificoData.length !== index + 1 ? item.value : `${item.value} `;
           return (
             <li key={index} className="flex items-center gap-2">
               <span className="text-text-grey">{item.title}:</span> {textToCopy}
-              <button
+              {/* <button
                 className="stroke-white hover:stroke-yellow-600"
                 onClick={() => {
                   navigator.clipboard.writeText(textToCopy);
@@ -38,7 +35,7 @@ export default function BonificoDati() {
                     // stroke="#D9D9D9"
                   />
                 </svg>
-              </button>
+              </button> */}
             </li>
           );
         })}

@@ -28,7 +28,7 @@ export default function SelectProductSection({ product }: { product: ProductType
 
   const handleAddToCart = () => {
     if (!selectedProduct?.id) return;
-    updateBasket([{ id: selectedProduct.id, qnt: selectedProduct.qnt }]);
+    updateBasket([{ productId: selectedProduct.id, quantity: selectedProduct.qnt }]);
     showPopup(selectedProduct.qnt);
   };
 

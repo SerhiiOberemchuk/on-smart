@@ -18,6 +18,7 @@ import ButtonAddToBasket from "@/components/ButtonAddToBasket";
 import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
 import { ProductType } from "@/db/schemas/product.schema";
+import { BasketTypeUseCheckoutStore } from "@/store/checkout-store";
 
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
@@ -39,10 +40,12 @@ export default function CardDialog() {
 
   const handleAddToCart = () => {
     setIsDisabled(true);
-    const bascet: { id: string; qnt: number }[] = [
-      ...(selectedProduct?.inStock ? [{ id: selectedProduct.id, qnt: selectedProduct!.qnt }] : []),
+    const bascet: BasketTypeUseCheckoutStore = [
+      ...(selectedProduct?.inStock
+        ? [{ productId: selectedProduct.id, quantity: selectedProduct!.qnt }]
+        : []),
       ...(selectedSupportProducts
-        ? selectedSupportProducts.map((prod) => ({ id: prod.id, qnt: 1 }))
+        ? selectedSupportProducts.map((prod) => ({ productId: prod.id, quantity: 1 }))
         : []),
     ];
     updateBasket(bascet);

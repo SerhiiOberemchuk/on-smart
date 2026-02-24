@@ -12,7 +12,7 @@ declare global {
   };
 
   type SumUpCardMountConfig = {
-    id: string; // DOM element id
+    id: string;
     checkoutId: string;
     onResponse: (type: SumUpCardResponseType, body: SumUpCardResponseBody) => void;
   };
@@ -20,7 +20,6 @@ declare global {
   interface Window {
     SumUpCard?: {
       mount: (config: SumUpCardMountConfig) => void;
-      // unmount у них не завжди є — тому робимо ручне очищення контейнера
     };
   }
 }

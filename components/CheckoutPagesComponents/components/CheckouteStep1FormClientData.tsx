@@ -6,8 +6,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import ButtonYellow from "@/components/BattonYellow";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { InputsCheckoutStep1 } from "@/types/checkout-steps.types";
-import { useCheckoutStore } from "@/store/checkout-store";
+import { CheckoutTypesDataFirstStep, useCheckoutStore } from "@/store/checkout-store";
 import { useRouter } from "next/navigation";
 import { InputBlock } from "@/components/InputBloc";
 
@@ -17,78 +16,39 @@ export default function CheckouteStep1FormClientData() {
     setStep,
     dataFirstStep,
     resetRequestCodiceFiscale,
-    generateOrderNumber,
     switchRequestInvoce,
   } = useCheckoutStore();
 
-  const { register, handleSubmit, resetField, watch } = useForm<InputsCheckoutStep1>({
+  const { register, handleSubmit, resetField, watch } = useForm<CheckoutTypesDataFirstStep>({
     defaultValues: dataFirstStep,
   });
   const router = useRouter();
-  const [clientType, setClientType] = useState<InputsCheckoutStep1["client_type"]>(
-    dataFirstStep?.client_type || "privato",
+  const [clientType, setClientType] = useState<CheckoutTypesDataFirstStep["clientType"]>(
+    dataFirstStep?.clientType || "privato",
   );
 
   useEffect(() => {
     if (clientType === "privato") {
-      resetField("ragione_sociale");
-      resetField("partita_iva");
-      resetField("referente_contatto");
+      resetField("ragioneSociale");
+      resetField("partitaIva");
+      resetField("referenteContatto");
     }
 
     if (clientType === "azienda") {
       resetField("nome");
       resetField("cognome");
-      resetField("codice_fiscale");
-      resetField("request_invoice");
+      resetField("codiceFiscale");
+      resetField("requestInvoice");
     }
   }, [clientType, resetField]);
 
-  const onSubmit: SubmitHandler<InputsCheckoutStep1> = (data) => {
-    let cleaned: Partial<InputsCheckoutStep1>;
-
-    if (data.client_type === "privato") {
-      cleaned = {
-        client_type: "privato",
-        email: data.email,
-        numeroTelefono: data.numeroTelefono,
-        nome: data.nome,
-        cognome: data.cognome,
-        indirizzo: data.indirizzo,
-        numero_civico: data.numero_civico,
-        città: data.città,
-        cap: data.cap,
-        nazione: data.nazione,
-        provincia_regione: data.provincia_regione,
-        request_invoice: data.request_invoice,
-        codice_fiscale: data.request_invoice ? data.codice_fiscale : "",
-      };
-    } else {
-      cleaned = {
-        client_type: "azienda",
-        email: data.email,
-        numeroTelefono: data.numeroTelefono,
-        referente_contatto: data.referente_contatto,
-        ragione_sociale: data.ragione_sociale,
-        partita_iva: data.partita_iva,
-        indirizzo: data.indirizzo,
-        numero_civico: data.numero_civico,
-        città: data.città,
-        cap: data.cap,
-        nazione: data.nazione,
-        provincia_regione: data.provincia_regione,
-        pec_azzienda: data.pec_azzienda,
-        codice_unico: data.codice_unico,
-      };
-    }
-
-    setDataFirstStepCheckout(cleaned);
+  const onSubmit: SubmitHandler<CheckoutTypesDataFirstStep> = (data) => {
+    setDataFirstStepCheckout(data);
     setStep(2);
-    generateOrderNumber();
     router.push("/checkout/consegna");
   };
-  const pec = watch("pec_azzienda");
-  const codice = watch("codice_unico");
+  const pec = watch("pecAzzienda");
+  const codice = watch("codiceUnico");
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
@@ -102,7 +62,7 @@ export default function CheckouteStep1FormClientData() {
             <label className="text_R mr-4 flex shrink-0 items-center gap-2 hover:text-yellow-600">
               <input
                 type="radio"
-                {...register("client_type")}
+                {...register("clientType")}
                 onChange={() => {
                   setClientType("privato");
                 }}
@@ -115,7 +75,7 @@ export default function CheckouteStep1FormClientData() {
             <label className="body_R_2 flex shrink-0 items-center gap-2 hover:text-yellow-600">
               <input
                 type="radio"
-                {...register("client_type")}
+                {...register("clientType")}
                 onChange={() => {
                   setClientType("azienda");
                 }}
@@ -165,7 +125,7 @@ export default function CheckouteStep1FormClientData() {
         {clientType === "azienda" && (
           <InputBlock
             title="Referente / Contatto*"
-            {...register("referente_contatto")}
+            {...register("referenteContatto")}
             required
             type="text"
             className="min-w-[200px] flex-1"
@@ -177,14 +137,14 @@ export default function CheckouteStep1FormClientData() {
             <div className="flex flex-wrap gap-3">
               <InputBlock
                 title="Ragione sociale*"
-                {...register("ragione_sociale")}
+                {...register("ragioneSociale")}
                 required
                 type="text"
                 className="min-w-[200px] flex-1"
               />
               <InputBlock
                 title="Partita IVA*"
-                {...register("partita_iva")}
+                {...register("partitaIva")}
                 required
                 minLength={11}
                 maxLength={11}
@@ -195,14 +155,14 @@ export default function CheckouteStep1FormClientData() {
             <div className="flex flex-wrap gap-3">
               <InputBlock
                 title={!codice ? "PEC *" : "PEC "}
-                {...register("pec_azzienda")}
+                {...register("pecAzzienda")}
                 required={!codice}
                 type="text"
                 className="min-w-[200px] flex-1"
               />
               <InputBlock
                 title={!pec ? "Codice UNIVOCO *" : "Codice UNIVOCO"}
-                {...register("codice_unico")}
+                {...register("codiceUnico")}
                 required={!pec}
                 minLength={7}
                 maxLength={7}
@@ -222,7 +182,7 @@ export default function CheckouteStep1FormClientData() {
           />
           <InputBlock
             title="Numero civico *"
-            {...register("numero_civico")}
+            {...register("numeroCivico")}
             required
             type="text"
             className="min-w-[200px] flex-1"
@@ -232,7 +192,7 @@ export default function CheckouteStep1FormClientData() {
         <div className="flex flex-wrap gap-3">
           <InputBlock
             title="Città *"
-            {...register("città")}
+            {...register("citta")}
             required
             type="text"
             className="min-w-[200px] flex-1"
@@ -255,7 +215,7 @@ export default function CheckouteStep1FormClientData() {
           />
           <InputBlock
             title="Provincia / Regione *"
-            {...register("provincia_regione")}
+            {...register("provinciaRegione")}
             required
             type="text"
             className="min-w-[200px] flex-1"
@@ -281,13 +241,13 @@ export default function CheckouteStep1FormClientData() {
             >
               <input
                 type="checkbox"
-                {...register("request_invoice")}
+                {...register("requestInvoice")}
                 id="request_invoice"
-                checked={dataFirstStep?.request_invoice ? true : false}
+                checked={dataFirstStep?.requestInvoice ? true : false}
                 onChange={() => {
                   switchRequestInvoce();
-                  if (dataFirstStep.request_invoice === true) {
-                    resetField("codice_fiscale");
+                  if (dataFirstStep.requestInvoice === true) {
+                    resetField("codiceFiscale");
                     resetRequestCodiceFiscale();
                   }
                 }}
@@ -298,16 +258,16 @@ export default function CheckouteStep1FormClientData() {
             <div
               className={twMerge(
                 "transition-max-height overflow-hidden duration-300 ease-in-out",
-                dataFirstStep.request_invoice ? "max-h-20" : "max-h-0",
+                dataFirstStep.requestInvoice ? "max-h-20" : "max-h-0",
               )}
             >
-              {dataFirstStep.request_invoice && (
+              {dataFirstStep.requestInvoice && (
                 <InputBlock
                   title="Codice Fiscale *"
-                  required={dataFirstStep.request_invoice}
+                  required={dataFirstStep.requestInvoice}
                   minLength={16}
                   maxLength={16}
-                  {...register("codice_fiscale")}
+                  {...register("codiceFiscale")}
                   type="text"
                   className=""
                 />

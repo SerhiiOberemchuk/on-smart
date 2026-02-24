@@ -11,6 +11,10 @@ type KlarnaPaymentMethodCategory =
 export interface KlarnaPaymentsInitOptions {
   client_token: string;
 }
+export type KlarnaAuthorizeResponse = {
+  approved: boolean;
+  authorization_token?: string;
+};
 
 export interface KlarnaPaymentsLoadOptions {
   container: `#${string}`;

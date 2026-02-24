@@ -4,7 +4,7 @@ import Form from "next/form";
 
 import styles from "./form.module.css";
 import TextArea from "./TextArea";
-import { sendMailAssistance } from "@/app/actions/mail/assistance";
+import { sendMailAssistance } from "@/app/actions/mail/mail-assistance";
 import { twMerge } from "tailwind-merge";
 import Link from "next/link";
 import InputsRating from "./InputsRating";
