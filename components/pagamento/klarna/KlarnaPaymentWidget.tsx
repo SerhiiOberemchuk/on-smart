@@ -233,6 +233,7 @@ export default function KlarnaPaymentWidget() {
               deliveryMethod: dataFirstStep.deliveryMethod,
               email: dataFirstStep.email,
               numeroTelefono: dataFirstStep.numeroTelefono,
+              deliveryPrice: dataFirstStep.deliveryPrice.toFixed(2),
             });
           }
 

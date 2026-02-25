@@ -12,7 +12,6 @@ import RiepilogoDatiConsegna from "@/components/CheckoutPagesComponents/componen
 import RiepilogoDatiPagamento from "@/components/CheckoutPagesComponents/components/RiepilogoPagamento";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useBasketStore } from "@/store/basket-store";
-import { getSumUpCheckoutStatus } from "@/app/actions/sumup/action";
 
 export default function CompletatoPage({
   order,
@@ -31,20 +30,6 @@ export default function CompletatoPage({
   console.log("searchParamsState: ", searchParamsState);
 
   useEffect(() => {
-    if (searchParamsState.checkout_id) {
-      (async () => {
-        const resp = await getSumUpCheckoutStatus(searchParamsState.checkout_id as string);
-        console.log("SumUp status: ", resp);
-      })();
-    }
-    if (searchParamsState?.payment === "sumup") {
-      alert(
-        "Il pagamento è in fase di verifica. Se il pagamento è andato a buon fine, lo stato dell'ordine sarà aggiornato a breve. Se hai domande, contatta il supporto.",
-      );
-    }
-  }, [searchParamsState]);
-
-  useEffect(() => {
     const clear = setTimeout(() => {
       clearAllCheckoutData();
       clearBasketStore();
@@ -60,8 +45,9 @@ export default function CompletatoPage({
           <h1 className="H3 text-green">Ordine Completato</h1>
         </div>
 
-        <p className="btn_small">
-          Numero ordine: <span className="body_R_20">{orderInfo.order?.orderNumber}</span>
+        <p className="btn_small flex flex-wrap">
+          <span>Numero ordine:</span>{" "}
+          <span className="body_R_20">{orderInfo.order?.orderNumber}</span>
         </p>
         <p className="btn_small">
           Data dell`ordine:{" "}
@@ -71,14 +57,7 @@ export default function CompletatoPage({
         {orderInfo.order?.deliveryMethod === "CONSEGNA_CORRIERE" && (
           <>
             <p className="btn_small">
-              Totale:{" "}
-              <span className="body_R_20">
-                {(
-                  Number(paymantInfoState.paymentInfo?.amount) +
-                  Number(orderInfo.order.deliveryPrice)
-                ).toFixed(2)}{" "}
-                €
-              </span>
+              Totale: <span className="body_R_20">{paymantInfoState.paymentInfo?.amount} €</span>
             </p>
             <p className="btn_small">
               Consegna:{" "}

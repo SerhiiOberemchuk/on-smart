@@ -2,6 +2,7 @@
 
 import { PAGES } from "@/types/pages.types";
 import SumUp from "@sumup/sdk";
+import { SUM_UP_CONSTANTS } from "./sumup-constans";
 
 const client = new SumUp({
   apiKey: process.env?.SUMUP_API_KEY,
@@ -74,8 +75,8 @@ export async function createSumUpCheckout(
       merchant_country: "IT",
       merchant_code: MERCHANT_CODE,
       description: input.description ?? `Order ${input.checkout_reference}`,
-      return_url: `${baseSiteURL}${PAGES.CHECKOUT_PAGES.COMPLETED}/${input.orderNumber}?payment=sumup`,
-      redirect_url: `${baseSiteURL}${PAGES.CHECKOUT_PAGES.COMPLETED}/${input.orderNumber}?payment=sumup`,
+      return_url: `${baseSiteURL}${PAGES.CHECKOUT_PAGES.COMPLETED}/${input.orderNumber}/sumup?${SUM_UP_CONSTANTS.SEARCH_PARAM_PROVIDER.TITLE}=${SUM_UP_CONSTANTS.SEARCH_PARAM_PROVIDER.VALUE}&order_id=${input.orderId}`,
+      redirect_url: `${baseSiteURL}${PAGES.CHECKOUT_PAGES.COMPLETED}/${input.orderNumber}/sumup?${SUM_UP_CONSTANTS.SEARCH_PARAM_PROVIDER.TITLE}=${SUM_UP_CONSTANTS.SEARCH_PARAM_PROVIDER.VALUE}&order_id=${input.orderId}`,
       hosted_checkout: { enabled: true },
     };
 
@@ -113,8 +114,6 @@ export async function createSumUpCheckout(
   }
 }
 
-export type SumUpStatus = "PAID" | "FAILED" | "PENDING" | "EXPIRED";
-
 export async function getSumUpCheckoutStatus(checkoutId: string) {
   const res = await fetch(`${API_URL}/${checkoutId}`, {
     method: "GET",
@@ -130,6 +129,6 @@ export async function getSumUpCheckoutStatus(checkoutId: string) {
     throw new Error(`SumUp status failed: ${res.status}${text ? ` - ${text}` : ""}`);
   }
 
-  const data = (await res.json()) as { id: string; status: SumUpStatus };
+  const data = (await res.json()) as { id: string; status: SumUpCardResponseBody["status"] };
   return data;
 }

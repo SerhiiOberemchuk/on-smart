@@ -3,6 +3,13 @@
 import { URL_DASHBOARD } from "@/app/(admin)/admin/dashboard/dashboard-admin.types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL;
+
+const isLocalhost =
+  !BASE_URL ||
+  BASE_URL.includes("localhost") ||
+  BASE_URL.includes("127.0.0.1") ||
+  BASE_URL.startsWith("http://localhost");
+
 export async function sendTelegramMessage({
   orderNumber,
   customerDisplayName,
@@ -12,6 +19,7 @@ export async function sendTelegramMessage({
   email,
   numeroTelefono,
   orderId,
+  deliveryPrice,
 }: {
   orderNumber: string;
   orderId: string;
@@ -21,12 +29,31 @@ export async function sendTelegramMessage({
   deliveryMethod: string;
   email: string;
   numeroTelefono: string;
+  deliveryPrice: string;
 }) {
   const token = process.env.TG_BOT_TOKEN;
   const chatId = process.env.TG_CHAT_ID;
 
   if (!token) return { errore: "Missing TG_BOT_TOKEN" };
   if (!chatId) return { errore: "Missing TG_CHAT_ID" };
+
+  const reply_markup = isLocalhost
+    ? undefined
+    : {
+        inline_keyboard: [
+          [
+            {
+              text: "Apri ordine",
+              url:
+                BASE_URL +
+                URL_DASHBOARD.DASHBOARD +
+                URL_DASHBOARD.SUB_DASHBOARD.ORDERS +
+                "/" +
+                orderId,
+            },
+          ],
+        ],
+      };
   try {
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
@@ -38,35 +65,22 @@ export async function sendTelegramMessage({
 💶 Totale: <b>${total} €</b>
 💳 Pagamento: ${paymentMethod}
 🚚 Consegna: ${deliveryMethod}
-
+💰 Spese di consegna: ${deliveryPrice} €
 📧 Email: ${email}
-📱 Tel: ${numeroTelefono}
-`.trim(),
+📱 Tel: ${numeroTelefono}`.trim(),
         parse_mode: "HTML",
         disable_web_page_preview: true,
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: "Apri ordine",
-                url:
-                  BASE_URL +
-                  URL_DASHBOARD.DASHBOARD +
-                  URL_DASHBOARD.SUB_DASHBOARD.ORDERS +
-                  "/" +
-                  orderId,
-              },
-            ],
-          ],
-        },
+        ...(reply_markup ? { reply_markup } : {}),
       }),
     });
 
     if (!res.ok) {
       const body = await res.text();
-      return { message: `Telegram sendMessage failed: ${res.status} ${body}` };
+
+      console.error("Telegram sendMessage failed:", res.status, body);
+      throw new Error(`Telegram sendMessage failed: ${res.status} - ${body}`);
     }
-    return { message: "Telegram sendMessage successed" };
+    return { message: "Telegram sendMessage successed", response: await res.json() };
   } catch (error) {
     return { error };
   }

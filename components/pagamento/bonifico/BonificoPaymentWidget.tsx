@@ -8,6 +8,7 @@ import { startTransition, useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useBasketStore } from "@/store/basket-store";
 import { toast } from "react-toastify";
+import { notifyOrderById } from "@/app/actions/notify-order-by-id/notify-order-by-id";
 
 export default function BonificoPaymentWidget() {
   const router = useRouter();
@@ -24,13 +25,16 @@ export default function BonificoPaymentWidget() {
   const [stateOrder, actionOrder, pendingOrder] = useActionState(
     async () =>
       await createOrderAction({
-        sendMessages: true,
+        // sendMessages: true,
         dataCheckoutStepConsegna,
         dataFirstStep,
         basket,
         productsInBasket,
         paymentData: {
-          amount: totalPrice.toFixed(2),
+          amount:
+            dataFirstStep.deliveryMethod === "CONSEGNA_CORRIERE"
+              ? (totalPrice + dataFirstStep.deliveryPrice).toFixed(2)
+              : totalPrice.toFixed(2),
           provider: dataCheckoutStepPagamento.paymentMethod!,
           status: "PENDING_BONIFICO",
           providerOrderId: null,
@@ -43,14 +47,20 @@ export default function BonificoPaymentWidget() {
   const didRunRef = useRef(false);
 
   useEffect(() => {
-    if (stateOrder.isMailSended) {
-      toast.success("Order createt e messagio e inviato dal cliente");
-    }
-  }, [stateOrder.isMailSended]);
-
-  useEffect(() => {
     if (!stateOrder.success || !stateOrder.orderNumber) return;
     if (didRunRef.current) return;
+
+    (async () => {
+      try {
+        await notifyOrderById({ orderId: stateOrder.orderId });
+        toast.success(
+          "Ordine creato con successo! Riceverai una email con i dettagli per il pagamento.",
+        );
+      } catch (error) {
+        console.error("Error sending notification:", error);
+      }
+    })();
+
     didRunRef.current = true;
     const clear = setTimeout(() => {
       clearAllCheckoutData();
@@ -58,7 +68,14 @@ export default function BonificoPaymentWidget() {
     }, 1000);
     router.push(`${PAGES.CHECKOUT_PAGES.COMPLETED}/${stateOrder.orderNumber}`);
     return () => clearTimeout(clear);
-  }, [router, stateOrder.success, stateOrder.orderNumber, clearAllCheckoutData, clearBasketStore]);
+  }, [
+    router,
+    stateOrder.success,
+    stateOrder.orderNumber,
+    clearAllCheckoutData,
+    clearBasketStore,
+    stateOrder.orderId,
+  ]);
 
   useEffect(() => {
     if (stateOrder.error) console.error(stateOrder.error);

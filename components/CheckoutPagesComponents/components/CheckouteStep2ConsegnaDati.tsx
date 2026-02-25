@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import RiepilogoDatiCliente from "./RiepilogoDatiCliente";
 import { DELIVERY_METHOD_CONSTANT } from "@/types/orders.types";
 import { useEffect } from "react";
+import { getDeliveryPrice } from "@/utils/get-prices";
 
 const NAME_RADIO_BUTTON_METOD = "deliveryMethod";
 
@@ -22,6 +23,7 @@ export default function CheckouteStep2ConsegnaDati() {
     dataFirstStep,
     setDeliveryMethod,
     setSameAsBilling,
+    totalPrice,
   } = useCheckoutStore();
 
   const sameAsBilling =
@@ -70,10 +72,10 @@ export default function CheckouteStep2ConsegnaDati() {
     (() => {
       setDelyveryPrice({
         deliveryPrice:
-          dataFirstStep.deliveryMethod === "RITIRO_NEGOZIO" ? 0 : dataFirstStep.deliveryPrice,
+          dataFirstStep.deliveryMethod === "RITIRO_NEGOZIO" ? 0 : getDeliveryPrice(totalPrice),
       });
     })();
-  }, [setDelyveryPrice, dataFirstStep.deliveryPrice, dataFirstStep.deliveryMethod]);
+  }, [setDelyveryPrice, dataFirstStep.deliveryPrice, dataFirstStep.deliveryMethod, totalPrice]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -102,7 +104,9 @@ export default function CheckouteStep2ConsegnaDati() {
             Consegna a domicilio tramite corriere
           </label>
           <span className="helper_text text-grey">
-            {dataFirstStep.deliveryPrice ? `${dataFirstStep.deliveryPrice.toFixed(2)} €` : "Gratis"}
+            {getDeliveryPrice(totalPrice)
+              ? `${getDeliveryPrice(totalPrice).toFixed(2)} €`
+              : "Gratis"}
           </span>
         </div>
         {dataFirstStep.deliveryMethod === "CONSEGNA_CORRIERE" &&

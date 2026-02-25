@@ -96,7 +96,7 @@ export async function createOrderAction({
         isMailSended = false;
       }
       try {
-        await sendTelegramMessage({
+        const telegramResult = await sendTelegramMessage({
           orderNumber,
           orderId,
           customerDisplayName: dataFirstStep.nome || "" + dataFirstStep.cognome,
@@ -105,7 +105,12 @@ export async function createOrderAction({
           deliveryMethod: dataFirstStep.deliveryMethod,
           email: dataFirstStep.email,
           numeroTelefono: dataFirstStep.numeroTelefono,
+          deliveryPrice:
+            dataFirstStep.deliveryMethod === "CONSEGNA_CORRIERE"
+              ? dataFirstStep.deliveryPrice.toFixed(2)
+              : "0",
         });
+        console.log("Telegram message result:", telegramResult);
       } catch (error) {
         console.error("Telegram message bot error: ", error);
       }

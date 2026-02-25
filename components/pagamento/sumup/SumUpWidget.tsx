@@ -15,6 +15,7 @@ import { PAGES } from "@/types/pages.types";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useBasketStore } from "@/store/basket-store";
 import { getTotalPriceToPay } from "@/utils/get-prices";
+import { SUM_UP_CONSTANTS } from "@/app/actions/sumup/sumup-constans";
 
 type CreatedOrderRef = {
   orderId: string;
@@ -130,7 +131,7 @@ export default function SumUpModalButton() {
 
             await close();
             router.push(
-              `${PAGES.CHECKOUT_PAGES.COMPLETED}/${created.orderNumber}?payment=sumup&place=verification`,
+              `${PAGES.CHECKOUT_PAGES.COMPLETED}/${created.orderNumber}/sumup?${SUM_UP_CONSTANTS.SEARCH_PARAM_CHECKOUT_ID.TITLE}=${checkoutId}&order_id=${created.orderId}`,
             );
           } catch (e) {
             console.error(e);
