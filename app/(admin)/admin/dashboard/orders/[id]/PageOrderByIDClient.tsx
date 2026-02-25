@@ -271,42 +271,42 @@ export default function PageOrderByID({
           <div className="rounded-xl border border-neutral-800 bg-neutral-900">
             <div className="flex items-center justify-between border-b border-neutral-800 px-4 py-3">
               <div className="font-semibold">Pagamenti</div>
-              <div className="text-xs text-neutral-500">{payments?.length ?? 0}</div>
+              <div className="text-xs text-neutral-500">{payments ? 1 : 0}</div>
             </div>
 
-            {!payments?.length ? (
+            {!payments ? (
               <div className="p-4 text-sm text-neutral-400">Nessun pagamento</div>
             ) : (
               <div className="divide-y divide-neutral-800">
-                {payments.map((p) => (
+                {
                   <div
-                    key={p.id}
+                    key={payments.id}
                     className="flex flex-col gap-2 p-4 md:flex-row md:items-center md:justify-between"
                   >
                     <div>
-                      <div className="font-medium capitalize">{p.provider}</div>
+                      <div className="font-medium capitalize">{payments.provider}</div>
                       <div className="text-xs break-all text-neutral-500">
-                        Provider ID: {p.providerOrderId ?? "—"}
+                        Provider ID: {payments.providerOrderId ?? "—"}
                       </div>
                       <div className="text-xs text-neutral-500">
-                        {formatDate(p.createdAt)} • {formatDate(p.updatedAt)}
+                        {formatDate(payments.createdAt)} • {formatDate(payments.updatedAt)}
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3">
                       <div className="text-sm font-semibold">
-                        {formatCurrencyEURFromCents(centsFromAny(p.amount))}
+                        {formatCurrencyEURFromCents(centsFromAny(payments.amount))}
                       </div>
                       <span
                         className={`inline-flex items-center rounded-full border px-3 py-1 text-xs ${getPaymentStatusBadgeClass(
-                          p.status,
+                          payments.status,
                         )}`}
                       >
-                        {p.status}
+                        {payments.status}
                       </span>
                     </div>
                   </div>
-                ))}
+                }
               </div>
             )}
           </div>

@@ -43,6 +43,7 @@ type SumUpHostedCheckoutResponse = {
 
 type CreateSumUpCheckoutInput = {
   orderNumber: string;
+  orderId: string;
   amount: number;
   checkout_reference: string;
   description?: string;
@@ -73,8 +74,8 @@ export async function createSumUpCheckout(
       merchant_country: "IT",
       merchant_code: MERCHANT_CODE,
       description: input.description ?? `Order ${input.checkout_reference}`,
-      return_url: `${baseSiteURL}${PAGES.CHECKOUT_PAGES.COMPLETED}/${input.orderNumber}`,
-      redirect_url: `${baseSiteURL}${PAGES.CHECKOUT_PAGES.COMPLETED}/${input.orderNumber}`,
+      return_url: `${baseSiteURL}${PAGES.CHECKOUT_PAGES.COMPLETED}/${input.orderNumber}?payment=sumup`,
+      redirect_url: `${baseSiteURL}${PAGES.CHECKOUT_PAGES.COMPLETED}/${input.orderNumber}?payment=sumup`,
       hosted_checkout: { enabled: true },
     };
 
@@ -110,4 +111,25 @@ export async function createSumUpCheckout(
 
     return { success: false, error: message };
   }
+}
+
+export type SumUpStatus = "PAID" | "FAILED" | "PENDING" | "EXPIRED";
+
+export async function getSumUpCheckoutStatus(checkoutId: string) {
+  const res = await fetch(`${API_URL}/${checkoutId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${SUMUP_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`SumUp status failed: ${res.status}${text ? ` - ${text}` : ""}`);
+  }
+
+  const data = (await res.json()) as { id: string; status: SumUpStatus };
+  return data;
 }
