@@ -9,6 +9,7 @@ import { PAGES } from "@/types/pages.types";
 export type KlarnaSessionResponseType = {
   session_id: string;
   client_token: string;
+  error?: string;
   payment_method_categories: {
     identifier: string;
     name: string;
@@ -108,7 +109,14 @@ export async function createKlarnaSessionAction({
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Klarna create session failed: ${res.status} ${text}`);
+
+    return {
+      error: `Klarna create session failed: ${res.status} ${text}`,
+      session_id: "",
+      client_token: "",
+      payment_method_categories: [],
+    };
+    // throw new Error(`Klarna create session failed: ${res.status} ${text}`);
   }
 
   const data = await res.json();
