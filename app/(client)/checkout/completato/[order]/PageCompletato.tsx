@@ -12,21 +12,38 @@ import RiepilogoDatiConsegna from "@/components/CheckoutPagesComponents/componen
 import RiepilogoDatiPagamento from "@/components/CheckoutPagesComponents/components/RiepilogoPagamento";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useBasketStore } from "@/store/basket-store";
+import { getSumUpCheckoutStatus } from "@/app/actions/sumup/action";
+import { log } from "console";
 
 export default function CompletatoPage({
   order,
   paymentInfo,
   searchParams,
 }: {
-  searchParams: string | string[] | undefined;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
   order: GetOrderResponseType;
   paymentInfo: GetOrderPayInfoResponseType;
 }) {
   const orderInfo = use(order);
   const paymantInfoState = use(paymentInfo);
+  const searchParamsState = use(searchParams);
   const { clearAllCheckoutData } = useCheckoutStore();
   const { clearBasketStore } = useBasketStore();
-  console.log(searchParams);
+  console.log("searchParamsState: ", searchParamsState);
+
+  useEffect(() => {
+    if (searchParamsState.checkout_id) {
+      (async () => {
+        const resp = await getSumUpCheckoutStatus(searchParamsState.checkout_id as string);
+        log("SumUp status: ", resp);
+      })();
+    }
+    if (searchParamsState?.payment === "sumup") {
+      alert(
+        "Il pagamento è in fase di verifica. Se il pagamento è andato a buon fine, lo stato dell'ordine sarà aggiornato a breve. Se hai domande, contatta il supporto.",
+      );
+    }
+  }, [searchParamsState]);
 
   useEffect(() => {
     const clear = setTimeout(() => {

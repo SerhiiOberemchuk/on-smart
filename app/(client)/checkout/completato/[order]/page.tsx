@@ -6,7 +6,7 @@ import Spiner from "@/components/Spiner";
 
 export default async function Page(props: PageProps<"/checkout/completato/[order]">) {
   const { order } = await props.params;
-  const { searchParams } = await props.searchParams;
+  const searchParams = props.searchParams;
   const orderInfo = getOrderByNumberAction(order);
   const payInfo = getOrderPaymentByOrderNumberAction({ orderNumber: order });
   return (

@@ -1,7 +1,7 @@
 export {};
 
 declare global {
-  type SumUpCardResponseType = "success" | "error" | "pending" | "invalid" | "sent";
+  type SumUpCardResponseType = "success" | "error" | "pending" | "invalid" | "sent" | "auth-screen";
 
   type SumUpCardResponseBody = {
     status?: "PAID";
