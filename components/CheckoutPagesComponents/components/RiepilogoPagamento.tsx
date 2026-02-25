@@ -43,7 +43,19 @@ export default function RiepilogoDatiPagamento({
         {dataCheckoutStepPagamentoFinal?.paymentMethod === "bonifico" ? (
           <BonificoDati />
         ) : (
-          <p className="pl-8 text-text-grey">{dataCheckoutStepPagamentoFinal?.title}</p>
+          <>
+            {dataCheckoutStepPagamentoFinal.paymentMethod === "sumup" && (
+              <p className="pl-8 text-text-grey"> Pagamento effettuato con carta tramite SumUp.</p>
+            )}
+            {dataCheckoutStepPagamentoFinal.paymentMethod === "paypal" && (
+              <p className="pl-8 text-text-grey">
+                Pagamento completato in modo sicuro tramite PayPal.
+              </p>
+            )}
+            {dataCheckoutStepPagamentoFinal.paymentMethod === "klarna" && (
+              <p className="pl-8 text-text-grey">Pagamento gestito tramite Klarna.</p>
+            )}
+          </>
         )}
       </div>
     </div>

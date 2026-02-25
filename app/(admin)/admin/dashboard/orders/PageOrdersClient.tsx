@@ -210,7 +210,10 @@ export default function PageOrdersClient({
                   </td>
 
                   <td className="px-4 py-3">
-                    <div className="text-neutral-200"> {o.carrier ? o.carrier : "Curire"}</div>
+                    <div className="text-neutral-200">
+                      {" "}
+                      {o.carrier ? o.carrier : "Corriere /-/"}
+                    </div>
                     <div className="text-xs break-all text-neutral-400">
                       {o.trackingNumber ? o.trackingNumber : "Numero spediziene"}
                     </div>
@@ -231,7 +234,6 @@ export default function PageOrdersClient({
         </div>
       ) : null}
 
-      {/* Mobile / tablet cards */}
       {filtered.length ? (
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:hidden">
           {filtered.map((o) => (

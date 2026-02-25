@@ -5,25 +5,36 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
-import { createSumUpCheckout } from "@/app/actions/sumup/action";
+import { createSumUpCheckout, deactivateCheckoutSumUp } from "@/app/actions/sumup/action";
 import { createOrderAction } from "@/app/actions/orders/create-order";
 import { updateOrderPaymentAction } from "@/app/actions/payments/payment-order-actions";
-import { deleteOrderByOrderId } from "@/app/actions/orders/delete-order";
 import { sendMailOrders } from "@/app/actions/mail/mail-orders";
 import { sendTelegramMessage } from "@/app/actions/telegram/send-message";
+import { updateOrderInfoByOrderIDAction } from "@/app/actions/orders/udate-order-info";
 
 import { PAGES } from "@/types/pages.types";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useBasketStore } from "@/store/basket-store";
 import { getTotalPriceToPay } from "@/utils/get-prices";
-import { makeOrderNumber } from "@/utils/order-number";
-import { ulid } from "ulid";
-import { updateOrderInfoByOrderIDAction } from "@/app/actions/orders/udate-order-info";
 
 type CreatedOrderRef = {
   orderId: string;
   orderNumber: string;
 };
+
+// type SumUpCardResponseStatus = "PAID" | "FAILED" | "PENDING";
+
+// declare global {
+//   interface Window {
+//     SumUpCard?: {
+//       mount: (args: {
+//         id: string;
+//         checkoutId: string;
+//         onResponse: (type: string, body?: { status?: SumUpCardResponseStatus }) => void;
+//       }) => void;
+//     };
+//   }
+// }
 
 export default function SumUpModalButton() {
   const router = useRouter();
@@ -40,8 +51,8 @@ export default function SumUpModalButton() {
   const createdRef = useRef<CreatedOrderRef | null>(null);
   const didNotifyRef = useRef(false);
 
-  const [internalOrderNumber] = useState(() => makeOrderNumber("OS"));
-  const [internalOrderId] = useState(() => ulid());
+  // guard щоб не стартувати 2 рази паралельно
+  const startingRef = useRef(false);
 
   const priceToPay = totalPrice
     ? getTotalPriceToPay({
@@ -59,9 +70,19 @@ export default function SumUpModalButton() {
     };
   }, [open]);
 
-  const close = () => {
+  const close = async () => {
+    // Якщо юзер закрив модалку — деактивуємо поточний checkout (він одноразовий)
+    if (checkoutId) {
+      try {
+        await deactivateCheckoutSumUp({ id: checkoutId });
+      } catch (e) {
+        console.error("Errore deactivate checkout:", e);
+      }
+    }
+
     setOpen(false);
     setCheckoutId(null);
+
     if (containerRef.current) containerRef.current.innerHTML = "";
   };
 
@@ -70,8 +91,7 @@ export default function SumUpModalButton() {
 
     if (!window.SumUpCard) {
       toast.error("SumUp non disponibile, riprova.");
-
-      (() => close())();
+      void close();
       return;
     }
 
@@ -84,10 +104,35 @@ export default function SumUpModalButton() {
       id: "sumUpIdContainer",
       checkoutId,
       onResponse: async (type, body) => {
-        if (type === "success" || body?.status === "PAID") {
-          const created = createdRef.current;
-          if (!created) return;
+        const created = createdRef.current;
+        if (!created) return;
 
+        const status = body?.status;
+
+        // FAIL
+        if (type === "error" || status === "FAILED") {
+          toast.error("Pagamento non riuscito. Riprova o scegli un altro metodo.");
+
+          try {
+            await updateOrderPaymentAction({
+              orderNumber: created.orderNumber,
+              data: {
+                status: "FAILED",
+                providerOrderId: checkoutId,
+              },
+            });
+
+            await deactivateCheckoutSumUp({ id: checkoutId });
+          } catch (e) {
+            console.error("Errore post-failed:", e);
+          }
+
+          await close();
+          return;
+        }
+
+        // SUCCESS
+        if (type === "success" || status === "PAID") {
           try {
             await updateOrderPaymentAction({
               orderNumber: created.orderNumber,
@@ -96,6 +141,7 @@ export default function SumUpModalButton() {
                 providerOrderId: checkoutId,
               },
             });
+
             await updateOrderInfoByOrderIDAction({
               orderId: created.orderId,
               dataToUpdate: { orderStatus: "PAID" },
@@ -104,40 +150,53 @@ export default function SumUpModalButton() {
             if (!didNotifyRef.current) {
               didNotifyRef.current = true;
 
-              await sendMailOrders({
-                orderNumber: created.orderNumber,
-                customerData: dataFirstStep,
-                dataCheckoutStepConsegna,
-                dataCheckoutStepPagamento: {
-                  paymentMethod: "sumup",
-                  title: "SumUp",
-                },
-                productsInBasket,
-                bascket: basket,
-              });
+              try {
+                await sendMailOrders({
+                  orderNumber: created.orderNumber,
+                  customerData: dataFirstStep,
+                  dataCheckoutStepConsegna,
+                  dataCheckoutStepPagamento: {
+                    paymentMethod: "sumup",
+                    title: "SumUp",
+                  },
+                  productsInBasket,
+                  bascket: basket,
+                });
 
-              await sendTelegramMessage({
-                orderNumber: created.orderNumber,
-                orderId: created.orderId,
-                customerDisplayName:
-                  `${dataFirstStep.nome ?? ""} ${dataFirstStep.cognome ?? ""}`.trim() || "Cliente",
-                total: priceToPay.toString(),
-                paymentMethod: "SumUp",
-                deliveryMethod: dataFirstStep.deliveryMethod,
-                email: dataFirstStep.email,
-                numeroTelefono: dataFirstStep.numeroTelefono,
-              });
+                await sendTelegramMessage({
+                  orderNumber: created.orderNumber,
+                  orderId: created.orderId,
+                  customerDisplayName:
+                    `${dataFirstStep.nome ?? ""} ${dataFirstStep.cognome ?? ""}`.trim() ||
+                    "Cliente",
+                  total: priceToPay.toString(),
+                  paymentMethod: "SumUp",
+                  deliveryMethod: dataFirstStep.deliveryMethod,
+                  email: dataFirstStep.email,
+                  numeroTelefono: dataFirstStep.numeroTelefono,
+                });
+              } catch (notifyErr) {
+                console.error("Errore nelle notifiche post-pagamento:", notifyErr);
+              }
             }
 
-            close();
+            await close();
             router.push(`${PAGES.CHECKOUT_PAGES.COMPLETED}/${created.orderNumber}`);
           } catch (e) {
             console.error(e);
             toast.error("Errore post pagamento");
           }
+
+          return;
+        }
+
+        // PENDING / UNKNOWN (опційно)
+        if (status === "PENDING") {
+          toast.info("Pagamento in verifica…");
         }
       },
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     open,
     checkoutId,
@@ -150,73 +209,72 @@ export default function SumUpModalButton() {
   ]);
 
   const openAndCreate = async () => {
+    if (startingRef.current) return;
     if (!totalPrice || priceToPay <= 0) return;
 
-    const created = await createOrderAction({
-      customOrderNumberId: {
-        id: internalOrderId,
-        number: internalOrderNumber,
-      },
-      sendMessages: false,
-      dataFirstStep,
-      dataCheckoutStepConsegna,
-      basket,
-      productsInBasket,
-      paymentData: {
-        provider: "sumup",
-        status: "CREATED",
-        currency: "EUR",
-        amount: priceToPay.toString(),
-        providerOrderId: null,
-        notes: null,
-      },
-    });
+    startingRef.current = true;
 
-    if (!created?.success || !created.orderId) {
-      toast.error(`Errore: ${created?.error ?? ""}`);
-      return;
-    }
+    try {
+      // 1) Створюємо order тільки 1 раз (сервер повертає orderId + orderNumber)
+      if (!createdRef.current) {
+        const created = await createOrderAction({
+          sendMessages: false,
+          dataFirstStep,
+          dataCheckoutStepConsegna,
+          basket,
+          productsInBasket,
+          paymentData: {
+            provider: "sumup",
+            status: "CREATED",
+            currency: "EUR",
+            amount: priceToPay.toString(),
+            providerOrderId: null,
+            notes: null,
+          },
+        });
 
-    createdRef.current = {
-      orderId: created.orderId,
-      orderNumber: internalOrderNumber,
-    };
-
-    startTransition(async () => {
-      setOpen(true);
-
-      const checkoutReference = `${internalOrderNumber}-TRY-${attempt}`;
-      setAttempt((p) => p + 1);
-
-      const checkout = await createSumUpCheckout({
-        orderNumber: internalOrderNumber,
-        amount: priceToPay,
-        checkout_reference: checkoutReference,
-        description: `Order #${internalOrderNumber}`,
-      });
-
-      if (!checkout.success) {
-        toast.error("Prova più tardi");
-
-        if (createdRef.current) {
-          await deleteOrderByOrderId({ id: createdRef.current.orderId });
-          createdRef.current = null;
+        if (!created?.success || !created.orderId || !created.orderNumber) {
+          toast.error(`Errore: ${created?.error ?? ""}`);
+          return;
         }
 
-        close();
-        return;
+        createdRef.current = {
+          orderId: created.orderId,
+          orderNumber: created.orderNumber,
+        };
       }
-      toast.success("Aprendo pagamento…");
-      await updateOrderPaymentAction({
-        orderNumber: internalOrderNumber,
-        data: {
-          providerOrderId: checkout.data.id,
-          status: "PAYED",
-        },
-      });
 
-      setCheckoutId(checkout.data.id);
-    });
+      // 2) Кожен клік/спроба = новий checkout
+      startTransition(async () => {
+        setOpen(true);
+
+        const created = createdRef.current!;
+        const checkoutReference = `${created.orderNumber}-TRY-${attempt}`;
+        setAttempt((p) => p + 1);
+
+        const checkout = await createSumUpCheckout({
+          orderNumber: created.orderNumber,
+          amount: priceToPay,
+          checkout_reference: checkoutReference,
+          description: `Order #${created.orderNumber}`,
+        });
+
+        if (!checkout.success) {
+          toast.error("Prova più tardi");
+          await close();
+          return;
+        }
+
+        await updateOrderPaymentAction({
+          orderNumber: created.orderNumber,
+          data: { providerOrderId: checkout.data.id },
+        });
+
+        setCheckoutId(checkout.data.id);
+      });
+    } finally {
+      startingRef.current = false;
+    }
   };
 
   return (
@@ -229,7 +287,7 @@ export default function SumUpModalButton() {
       <button
         type="button"
         onClick={openAndCreate}
-        disabled={pending}
+        disabled={pending || startingRef.current}
         className="w-full rounded-xl bg-[#F2C94C] px-6 py-3 font-semibold text-black disabled:opacity-60"
       >
         {pending ? "Apro…" : "Paga e procedi avanti"}
@@ -241,18 +299,19 @@ export default function SumUpModalButton() {
           role="dialog"
           aria-modal="true"
           onMouseDown={(e) => {
-            if (e.target === e.currentTarget) close();
+            if (e.target === e.currentTarget) void close();
           }}
         >
           <div className="relative w-full max-w-2xl shadow-2xl">
             <button
               type="button"
-              onClick={close}
+              onClick={() => void close()}
               className="absolute top-3 right-3 rounded-lg px-3 py-1 text-sm text-black/70 hover:bg-black/5"
               aria-label="Chiudi"
             >
               ✕
             </button>
+
             <div id="sumUpIdContainer" ref={containerRef} className="pb-4" />
           </div>
         </div>

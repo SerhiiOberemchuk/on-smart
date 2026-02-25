@@ -11,11 +11,11 @@ export default function PageCheckout() {
   const router = useRouter();
 
   useEffect(() => {
-    if (step === 0) {
-      router.push(PAGES.MAIN_PAGES.CART);
+    if (step < 1) {
+      router.push(PAGES.MAIN_PAGES.CATALOG);
     }
   }, [router, step]);
-  if (step === 0) {
+  if (step < 1) {
     return null;
   }
 
