@@ -9,8 +9,6 @@ import { capturePayPalOrderAction, createPayPalOrderAction } from "@/app/actions
 import { createOrderAction } from "@/app/actions/orders/create-order";
 import { updateOrderPaymentAction } from "@/app/actions/payments/payment-order-actions";
 import { deleteOrderByOrderId } from "@/app/actions/orders/delete-order";
-import { sendMailOrders } from "@/app/actions/mail/mail-orders";
-import { sendTelegramMessage } from "@/app/actions/telegram/send-message";
 
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useBasketStore } from "@/store/basket-store";
@@ -20,6 +18,7 @@ import { makeOrderNumber } from "@/utils/order-number";
 import { ulid } from "ulid";
 import { toast } from "react-toastify";
 import { updateOrderInfoByOrderIDAction } from "@/app/actions/orders/udate-order-info";
+import { notifyOrderById } from "@/app/actions/notify-order-by-id/notify-order-by-id";
 
 type Props = Pick<PayPalButtonsComponentOptions, "message" | "fundingSource" | "style">;
 
@@ -106,7 +105,10 @@ export default function PayPalButtonsClient(props: Props) {
         forceReRender={[priceToPay, currency]}
         disabled={!canPay || isSdkPending}
         createOrder={async () => {
-          if (!canPay) throw new Error("PayPal createOrder blocked: invalid state");
+          if (!canPay) {
+            toast.error("PayPal createOrder blocked: invalid state");
+            throw new Error("PayPal createOrder blocked: invalid state");
+          }
           if (isCreatingRef.current)
             throw new Error("PayPal createOrder blocked: already creating");
 
@@ -213,7 +215,7 @@ export default function PayPalButtonsClient(props: Props) {
           try {
             await updateOrderPaymentAction({
               orderNumber: referenceId,
-              data: { status: "SUCCESS", providerOrderId: ppOrderId, notes: null },
+              data: { status: "PAYED", providerOrderId: ppOrderId, notes: null },
             });
             await updateOrderInfoByOrderIDAction({
               orderId: created.orderId,
@@ -227,35 +229,11 @@ export default function PayPalButtonsClient(props: Props) {
             didNotifyRef.current = true;
 
             try {
-              await sendMailOrders({
-                orderNumber: referenceId,
-                customerData: dataFirstStep,
-                dataCheckoutStepConsegna,
-                dataCheckoutStepPagamento: { paymentMethod: "paypal", title: "PayPal" },
-                productsInBasket,
-                bascket: basket,
+              await notifyOrderById({
+                orderId: created.orderId,
               });
             } catch (e) {
-              console.error("sendMailOrders failed:", e);
-            }
-
-            try {
-              const customerDisplayName =
-                `${dataFirstStep.nome ?? ""} ${dataFirstStep.cognome ?? ""}`.trim() || "Cliente";
-
-              await sendTelegramMessage({
-                orderNumber: referenceId,
-                orderId: internalOrderId,
-                customerDisplayName,
-                total: priceToPay,
-                paymentMethod: "PayPal",
-                deliveryMethod: dataFirstStep.deliveryMethod,
-                email: dataFirstStep.email,
-                numeroTelefono: dataFirstStep.numeroTelefono,
-                deliveryPrice: dataFirstStep.deliveryPrice.toFixed(2),
-              });
-            } catch (e) {
-              console.error("sendTelegramMessage failed:", e);
+              console.error("notifyOrderById failed:", e);
             }
           }
 

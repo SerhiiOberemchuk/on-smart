@@ -18,9 +18,6 @@ import { createOrderAction } from "@/app/actions/orders/create-order";
 import { updateOrderPaymentAction } from "@/app/actions/payments/payment-order-actions";
 import { deleteOrderByOrderId } from "@/app/actions/orders/delete-order";
 
-import { sendMailOrders } from "@/app/actions/mail/mail-orders";
-import { sendTelegramMessage } from "@/app/actions/telegram/send-message";
-
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useBasketStore } from "@/store/basket-store";
 
@@ -31,6 +28,7 @@ import { ulid } from "ulid";
 
 import { KlarnaAuthorizeResponse, KlarnaPaymentsLoadResponse } from "@/types/klarna";
 import { updateOrderInfoByOrderIDAction } from "@/app/actions/orders/udate-order-info";
+import { notifyOrderById } from "@/app/actions/notify-order-by-id/notify-order-by-id";
 
 const containerId = "klarna_container";
 const currency = "EUR";
@@ -99,7 +97,11 @@ export default function KlarnaPaymentWidget() {
           totalPrice: priceToPay,
           basket,
         });
-
+        if (session.error) {
+          setError(session.error);
+          console.error(session.error);
+          return;
+        }
         setSessionData(session);
       } catch (e) {
         console.error(e);
@@ -203,7 +205,7 @@ export default function KlarnaPaymentWidget() {
           await updateOrderPaymentAction({
             orderNumber,
             data: {
-              status: "SUCCESS",
+              status: "PAYED",
               providerOrderId: res.authorization_token,
             },
           });
@@ -214,27 +216,11 @@ export default function KlarnaPaymentWidget() {
           if (!didNotifyRef.current) {
             didNotifyRef.current = true;
 
-            await sendMailOrders({
-              orderNumber,
-              customerData: dataFirstStep,
-              dataCheckoutStepConsegna,
-              dataCheckoutStepPagamento: { paymentMethod: "klarna", title: "Klarna" },
-              productsInBasket,
-              bascket: basket,
-            });
-
-            await sendTelegramMessage({
-              orderNumber,
-              orderId,
-              customerDisplayName:
-                `${dataFirstStep.nome ?? ""} ${dataFirstStep.cognome ?? ""}`.trim() || "Cliente",
-              total: String(priceToPay),
-              paymentMethod: "Klarna",
-              deliveryMethod: dataFirstStep.deliveryMethod,
-              email: dataFirstStep.email,
-              numeroTelefono: dataFirstStep.numeroTelefono,
-              deliveryPrice: dataFirstStep.deliveryPrice.toFixed(2),
-            });
+            try {
+              await notifyOrderById({ orderId: created.orderId });
+            } catch (error) {
+              console.error("notifyOrderById failed:", error);
+            }
           }
 
           router.push(`${PAGES.CHECKOUT_PAGES.COMPLETED}/${orderNumber}`);
