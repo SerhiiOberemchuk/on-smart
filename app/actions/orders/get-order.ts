@@ -43,7 +43,7 @@ export async function getOrderByNumberAction(
 export type GetOrderFullInfoByIdResponseType = Promise<{
   order: OrderTypes | null;
   orderItems: OrderItemsTypes[] | null;
-  payments: OrderPaymentTypes[] | null;
+  payments: OrderPaymentTypes | null;
   error: unknown;
 }>;
 
@@ -59,7 +59,7 @@ export async function getOrderFullInfoById({
       .select()
       .from(orderItemsSchema)
       .where(eq(orderItemsSchema.orderId, id));
-    const payments = await db.select().from(paymentsSchema).where(eq(paymentsSchema.orderId, id));
+    const [payments] = await db.select().from(paymentsSchema).where(eq(paymentsSchema.orderId, id));
     return { order, orderItems, error: null, payments };
   } catch (error) {
     return { error, order: null, orderItems: null, payments: null };

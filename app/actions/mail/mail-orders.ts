@@ -14,7 +14,7 @@ type OrderMailPayload = {
   customerData: CheckoutTypesDataFirstStep;
   dataCheckoutStepConsegna: CheckoutTypesDataStepConsegna;
   dataCheckoutStepPagamento: Partial<MetodsPayment>;
-  productsInBasket: ProductType[];
+  productsInBasket: Partial<ProductType>[];
   bascket: BasketTypeUseCheckoutStore;
 };
 

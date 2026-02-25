@@ -11,6 +11,7 @@ export const PAYMENT_STATUS_LIST = [
   "FAILED",
   "CANCELED",
   "PENDING_BONIFICO",
+  "PENDING",
 ] as const;
 export const PAYMENT_STATUS_CONSTANT = createConstatObjFromEnumArray(PAYMENT_STATUS_LIST);
 export type PaymentStatusTypes = (typeof PAYMENT_STATUS_LIST)[number];

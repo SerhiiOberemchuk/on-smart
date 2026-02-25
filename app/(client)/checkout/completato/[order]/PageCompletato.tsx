@@ -16,7 +16,9 @@ import { useBasketStore } from "@/store/basket-store";
 export default function CompletatoPage({
   order,
   paymentInfo,
+  searchParams,
 }: {
+  searchParams: string | string[] | undefined;
   order: GetOrderResponseType;
   paymentInfo: GetOrderPayInfoResponseType;
 }) {
@@ -24,6 +26,7 @@ export default function CompletatoPage({
   const paymantInfoState = use(paymentInfo);
   const { clearAllCheckoutData } = useCheckoutStore();
   const { clearBasketStore } = useBasketStore();
+  console.log(searchParams);
 
   useEffect(() => {
     const clear = setTimeout(() => {
