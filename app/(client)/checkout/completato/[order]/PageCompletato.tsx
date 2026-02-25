@@ -79,7 +79,8 @@ export default function CompletatoPage({
           </>
         )}
         <p className="helper_text mt-2 w-full text-left text-text-grey">
-          L`Ordine è stato correttamente inviato...
+          L`Ordine è stato correttamente inviato. Riceverai una mail di conferma con i dettagli
+          dell`ordine e la fattura. Per qualsiasi domanda o assistenza, non esitare a contattarci.
         </p>
       </div>
 

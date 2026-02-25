@@ -12,7 +12,7 @@ export const PAGES = {
   MAIN_PAGES: {
     HOME: "/",
     CATALOG: "/catalogo",
-    CART: "/carello",
+    CART: "/carrello",
     CATEGORY: "/categoria",
     ABOUT_US: "/chi-siamo",
   },
