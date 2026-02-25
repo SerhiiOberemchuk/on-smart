@@ -76,7 +76,7 @@ export default function RepilogoComponent({
           ))}
         </ul>
         <div className="flex items-center justify-between">
-          <h4 className="H3">Totale</h4>
+          <h4 className="H3 mr-1">Totale</h4>{" "}
           <span className="H4M">
             {getTotalPriceToPay({
               totalPrice,

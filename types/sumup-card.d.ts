@@ -4,7 +4,7 @@ declare global {
   type SumUpCardResponseType = "success" | "error" | "pending" | "invalid" | "sent" | "auth-screen";
 
   type SumUpCardResponseBody = {
-    status?: "PAID";
+    status?: "PAID" | "FAILED" | "PENDING" | "EXPIRED";
     checkout_id?: string;
     transaction_id?: string;
     error_code?: string;

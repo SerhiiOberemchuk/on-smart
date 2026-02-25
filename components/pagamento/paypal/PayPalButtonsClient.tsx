@@ -252,6 +252,7 @@ export default function PayPalButtonsClient(props: Props) {
                 deliveryMethod: dataFirstStep.deliveryMethod,
                 email: dataFirstStep.email,
                 numeroTelefono: dataFirstStep.numeroTelefono,
+                deliveryPrice: dataFirstStep.deliveryPrice.toFixed(2),
               });
             } catch (e) {
               console.error("sendTelegramMessage failed:", e);
