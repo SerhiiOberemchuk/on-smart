@@ -13,7 +13,6 @@ import RiepilogoDatiPagamento from "@/components/CheckoutPagesComponents/compone
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useBasketStore } from "@/store/basket-store";
 import { getSumUpCheckoutStatus } from "@/app/actions/sumup/action";
-import { log } from "console";
 
 export default function CompletatoPage({
   order,
@@ -35,7 +34,7 @@ export default function CompletatoPage({
     if (searchParamsState.checkout_id) {
       (async () => {
         const resp = await getSumUpCheckoutStatus(searchParamsState.checkout_id as string);
-        log("SumUp status: ", resp);
+        console.log("SumUp status: ", resp);
       })();
     }
     if (searchParamsState?.payment === "sumup") {
