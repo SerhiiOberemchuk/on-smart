@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 import { toast } from "react-toastify";
 
-import KlarnaScript from "./KlarnaScript";
+// import KlarnaScript from "./KlarnaScript";
 import ButtonYellow from "@/components/BattonYellow";
 
 import {
@@ -29,6 +29,7 @@ import { ulid } from "ulid";
 import { KlarnaAuthorizeResponse, KlarnaPaymentsLoadResponse } from "@/types/klarna";
 import { updateOrderInfoByOrderIDAction } from "@/app/actions/orders/udate-order-info";
 import { notifyOrderById } from "@/app/actions/notify-order-by-id/notify-order-by-id";
+import Script from "next/script";
 
 const containerId = "klarna_container";
 const currency = "EUR";
@@ -238,14 +239,10 @@ export default function KlarnaPaymentWidget() {
 
   return (
     <div className="space-y-4 py-5">
-      <KlarnaScript />
-
+      <Script src="https://x.klarnacdn.net/kp/lib/v1/api.js" strategy="afterInteractive" />;
       <h2 className="text-xl font-semibold">Pagamento con Klarna</h2>
-
       {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>}
-
       <div id={containerId} className="min-h-[180px] rounded-md border bg-amber-50 p-3" />
-
       <ButtonYellow
         className={twMerge(
           "ml-auto",

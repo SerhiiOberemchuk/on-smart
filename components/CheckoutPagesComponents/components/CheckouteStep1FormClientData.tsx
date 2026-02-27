@@ -243,7 +243,7 @@ export default function CheckouteStep1FormClientData() {
                 type="checkbox"
                 {...register("requestInvoice")}
                 id="request_invoice"
-                checked={dataFirstStep?.requestInvoice ? true : false}
+                checked={dataFirstStep.requestInvoice}
                 onChange={() => {
                   switchRequestInvoce();
                   if (dataFirstStep.requestInvoice === true) {
