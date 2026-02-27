@@ -15,7 +15,9 @@ export default function Header() {
           <Suspense>
             <Navigation />
           </Suspense>
-          <Search />
+          <Suspense>
+            <Search />
+          </Suspense>
           <SearchMobile />
           <Cart />
           <MobileMenu />

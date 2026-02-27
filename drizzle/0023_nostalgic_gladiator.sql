@@ -1,0 +1,1 @@
+ALTER TABLE `products` ADD `related_product_ids` json;

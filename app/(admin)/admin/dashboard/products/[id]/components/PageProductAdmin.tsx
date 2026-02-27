@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState, useTransition } from "react";
+import { use, useEffect, useMemo, useState, useTransition } from "react";
 import { ProductType } from "@/db/schemas/product.schema";
 import { SubmitHandler, useForm } from "react-hook-form";
 import InputAdminStyle from "../../../InputComponent";
@@ -19,6 +19,7 @@ import clsx from "clsx";
 import { objectFromPickedKeys } from "../../helpers/objectFromPickedKeys";
 import FotoGaleryProduct from "./FotoGaleryProduct";
 import CharacteristicProductSection from "./characteristic/CharacteristicProductSection";
+import { getAllProducts } from "@/app/actions/product/get-all-products";
 
 export default function PageProductAdmin({ dataAction }: { dataAction: Promise<ProductType> }) {
   const product = use(dataAction);
@@ -46,6 +47,37 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
 
   const [isPendingUpdateProduct, startTransitionUpdateProduct] = useTransition();
   const [isPendengBrands, startTransitionBrands] = useTransition();
+  const [isPendengProducts, startTransitionProducts] = useTransition();
+  const [allProducts, setAllProducts] = useState<ProductType[]>([]);
+  const [relatedProductsQuery, setRelatedProductsQuery] = useState("");
+  const [relatedProductIds, setRelatedProductIds] = useState<string[]>(
+    product.relatedProductIds ?? [],
+  );
+
+  const relatedProductCandidates = useMemo(() => {
+    const normalizedQuery = relatedProductsQuery.trim().toLowerCase();
+    if (!normalizedQuery) return [];
+
+    return allProducts
+      .filter((item) => item.id !== product.id)
+      .filter((item) => !relatedProductIds.includes(item.id))
+      .filter((item) => {
+        const searchableText = `${item.name} ${item.nameFull} ${item.slug} ${item.id}`.toLowerCase();
+        return searchableText.includes(normalizedQuery);
+      })
+      .slice(0, 8);
+  }, [allProducts, product.id, relatedProductIds, relatedProductsQuery]);
+
+  const selectedRelatedProducts = useMemo(
+    () =>
+      relatedProductIds.map((id) => allProducts.find((item) => item.id === id)).filter(Boolean) as ProductType[],
+    [allProducts, relatedProductIds],
+  );
+
+  const selectedRelatedProductsMap = useMemo(
+    () => new Map(selectedRelatedProducts.map((item) => [item.id, item])),
+    [selectedRelatedProducts],
+  );
 
   const onSubmit: SubmitHandler<typeof mainPartDataProduct> = (data) => {
     if (!confirm("Ви впевнені що хочете оновити дані?")) {
@@ -54,10 +86,11 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
     const slug = watch("category_slug");
     const [category_id] = categories.filter((i) => i.category_slug === slug);
 
-    const preparedData: typeof mainPartDataProduct = {
+    const preparedData: Partial<Omit<ProductType, "id">> = {
       ...data,
       oldPrice: Number(data.oldPrice) ? data.oldPrice : null,
-      category_id: category_id.id,
+      category_id: category_id?.id ?? product.category_id,
+      relatedProductIds,
     };
     startTransitionUpdateProduct(async () => {
       try {
@@ -96,6 +129,29 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
       setBrands(res.data);
     });
   }, []);
+  useEffect(() => {
+    startTransitionProducts(async () => {
+      const res = await getAllProducts();
+      if (!res.success || !res.data) {
+        toast.error("Error fetch products");
+        console.error(res.error);
+        return;
+      }
+      setAllProducts(res.data);
+    });
+  }, []);
+
+  const addRelatedProduct = (id: ProductType["id"]) => {
+    setRelatedProductIds((prev) => {
+      if (prev.includes(id)) return prev;
+      return [...prev, id];
+    });
+    setRelatedProductsQuery("");
+  };
+
+  const removeRelatedProduct = (id: ProductType["id"]) => {
+    setRelatedProductIds((prev) => prev.filter((itemId) => itemId !== id));
+  };
   const prepareFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
     const file = e.target.files[0];
@@ -265,6 +321,71 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
             )}
           </div>
         )}
+        <div className="col-span-4 rounded-lg border border-neutral-700 bg-neutral-900 p-3">
+          <p className="mb-2 text-sm font-medium text-white">Рекомендовані супутні товари</p>
+          <p className="mb-3 text-xs text-neutral-400">
+            Пошук по назві, slug або ID. Обрані товари будуть використовуватись як рекомендації
+            “можливо клієнт забув купити”.
+          </p>
+
+          <InputAdminStyle
+            input_title="Пошук товару"
+            value={relatedProductsQuery}
+            onChange={(e) => setRelatedProductsQuery(e.target.value)}
+            placeholder="Введіть декілька букв назви..."
+          />
+
+          {isPendengProducts ? (
+            <p className="mt-2 text-xs text-neutral-400">Завантаження товарів...</p>
+          ) : relatedProductsQuery.trim() ? (
+            <div className="mt-2 max-h-64 overflow-auto rounded border border-neutral-700">
+              {relatedProductCandidates.length ? (
+                relatedProductCandidates.map((candidate) => (
+                  <button
+                    key={candidate.id}
+                    type="button"
+                    className="block w-full border-b border-neutral-700 px-3 py-2 text-left text-sm text-white last:border-b-0 hover:bg-neutral-800"
+                    onClick={() => addRelatedProduct(candidate.id)}
+                  >
+                    <span className="font-medium">{candidate.name}</span>
+                    <span className="ml-2 text-xs text-neutral-400">{candidate.slug}</span>
+                  </button>
+                ))
+              ) : (
+                <p className="px-3 py-2 text-xs text-neutral-400">Нічого не знайдено</p>
+              )}
+            </div>
+          ) : null}
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {relatedProductIds.length === 0 ? (
+              <p className="text-xs text-neutral-400">Супутні товари ще не додані</p>
+            ) : (
+              relatedProductIds.map((id) => {
+                const selectedProduct = selectedRelatedProductsMap.get(id);
+                const title = selectedProduct
+                  ? `${selectedProduct.name} (${selectedProduct.slug})`
+                  : `ID: ${id}`;
+
+                return (
+                  <span
+                    key={id}
+                    className="inline-flex items-center gap-2 rounded-full border border-neutral-600 bg-neutral-800 px-3 py-1 text-xs text-white"
+                  >
+                    {title}
+                    <button
+                      type="button"
+                      className="rounded bg-neutral-700 px-1.5 py-0.5 text-[10px] hover:bg-neutral-600"
+                      onClick={() => removeRelatedProduct(id)}
+                    >
+                      Видалити
+                    </button>
+                  </span>
+                );
+              })
+            )}
+          </div>
+        </div>
 
         <div className="text-[14px] font-light">
           <ButtonYellow

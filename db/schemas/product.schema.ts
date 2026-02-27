@@ -31,6 +31,7 @@ export const productsSchema = mysqlTable(
     imgSrc: json("imgSrc").$type<string>().notNull(),
     hasVariants: boolean("has_variants").default(false).notNull(),
     variants: json("variants").$type<string[]>(),
+    relatedProductIds: json("related_product_ids").$type<string[]>(),
     parent_product_id: varchar("parent_product_id", { length: 36 }),
   },
   (table) => [

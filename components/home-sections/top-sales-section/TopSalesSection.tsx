@@ -29,7 +29,7 @@ export default async function TopSalesSection() {
         "@type": "Offer",
         url: `${baseUrl}/catalogo/${encodeURIComponent(
           p.category_slug,
-        )}/${encodeURIComponent(p.brand_slug)}/${p.id}`,
+        )}/${encodeURIComponent(p.brand_slug)}/${encodeURIComponent(p.slug)}`,
         priceCurrency: "EUR",
         price: p.price,
         availability: "https://schema.org/InStock",
