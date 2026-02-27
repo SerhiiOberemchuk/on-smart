@@ -122,10 +122,10 @@ export const useCheckoutStore = create<CheckoutStoreState>()(
         })),
 
       switchRequestInvoce: () =>
-        set((state) => ({
+        set(({dataFirstStep}) => ({
           dataFirstStep: {
-            ...state.dataFirstStep,
-            request_invoice: !state.dataFirstStep.requestInvoice,
+            ...dataFirstStep,
+            requestInvoice: !dataFirstStep.requestInvoice,
           },
         })),
 
@@ -138,12 +138,9 @@ export const useCheckoutStore = create<CheckoutStoreState>()(
             },
           };
         }),
-      setSameAsBilling: (value: boolean) =>
+      setSameAsBilling: (sameAsBilling: boolean) =>
         set((state) => ({
-          dataCheckoutStepConsegna: {
-            ...state.dataCheckoutStepConsegna,
-            sameAsBilling: value,
-          },
+          dataCheckoutStepConsegna: { ...state.dataCheckoutStepConsegna, sameAsBilling },
         })),
     }),
     { name: "checkout-storage", storage: createJSONStorage(() => sessionStorage) },
