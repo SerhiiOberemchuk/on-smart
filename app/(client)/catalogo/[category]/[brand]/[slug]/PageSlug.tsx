@@ -1,6 +1,6 @@
-import { getAllProducts } from "@/app/actions/product/get-all-products";
 import { getProductBySlug } from "@/app/actions/product/get-product-by-slug";
 import { getProductDetailsById } from "@/app/actions/product/get-product-details-by-Id";
+import { getSupportProductById } from "@/app/actions/product/get-support-product-by-id";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ProductCharacteristicsSection from "@/components/ProductPageSections/ProductCharacteristicsSection/ProductCharacteristacSection";
 import VisualProductSection from "@/components/ProductPageSections/VisualTopSection/VisualProductSection";
@@ -11,14 +11,20 @@ import Script from "next/script";
 
 export default async function PageSlug({ slug }: { slug: string }) {
   const product = await getProductBySlug(slug);
-  const products = await getAllProducts();
   const id = product.data?.parent_product_id || product.data?.id;
   if (!id || !product.data?.inStock) {
     notFound();
   }
-  const productDetails = await getProductDetailsById(id);
+  const [productDetails, supportProductsRaw] = await Promise.all([
+    getProductDetailsById(id),
+    getSupportProductById(id),
+  ]);
 
-  if (!product.data || !products.data) return <h1>Prodotto non trovato</h1>;
+  if (!product.data) return <h1>Prodotto non trovato</h1>;
+
+  const supportProducts = supportProductsRaw.filter(
+    (supportProduct) => supportProduct.id !== product.data?.id && supportProduct.id !== id,
+  );
 
   const productUrl = `${baseUrl}/catalogo/${product.data?.category_slug}/${product.data?.brand_slug}/${product.data?.slug}`;
 
@@ -106,12 +112,14 @@ export default async function PageSlug({ slug }: { slug: string }) {
       {productDetails && product && (
         <ProductCharacteristicsSection product={product.data} productDetail={productDetails} />
       )}
-      <ProductRowListSection
-        title="Acquistati insieme"
-        productsList={products.data}
-        idSection="page_product_insieme"
-        isBottomLink={false}
-      />
+      {supportProducts.length > 0 ? (
+        <ProductRowListSection
+          title="Acquistati insieme"
+          productsList={supportProducts}
+          idSection="page_product_insieme"
+          isBottomLink={false}
+        />
+      ) : null}
       <Script
         id="product-jsonld"
         type="application/ld+json"
