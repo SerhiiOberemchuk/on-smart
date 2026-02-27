@@ -47,10 +47,10 @@ export default function PageOrderByID({
 
   if (error) {
     return (
-      <section className="p-6 text-white">
-        <h1 className="text-2xl font-semibold">Ordine</h1>
-        <div className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-200">
-          Errore nel caricamento ordine
+      <section className="admin-page">
+        <h1 className="admin-title">Замовлення</h1>
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-200">
+          Помилка завантаження замовлення
         </div>
       </section>
     );
@@ -58,11 +58,9 @@ export default function PageOrderByID({
 
   if (!order) {
     return (
-      <section className="p-6 text-white">
-        <h1 className="text-2xl font-semibold">Ordine</h1>
-        <div className="mt-6 rounded-xl border border-neutral-800 bg-neutral-900 p-6 text-neutral-300">
-          Ordine non trovato
-        </div>
+      <section className="admin-page">
+        <h1 className="admin-title">Замовлення</h1>
+        <div className="admin-empty">Замовлення не знайдено</div>
       </section>
     );
   }
@@ -95,19 +93,19 @@ export default function PageOrderByID({
       });
 
       if (!response.succes) {
-        const message = String(response.error ?? "Errore salvataggio");
+        const message = String(response.error ?? "Помилка збереження");
         setSaveError(message);
         toast.error(message);
         return;
       }
 
-      toast.success("Salvato");
+      toast.success("Збережено");
     });
   }
 
   function onGenerateInvoice() {
     if (!invoiceAllowed) {
-      toast.info(invoiceReason ?? "Invoice generation is not allowed for this order.");
+      toast.info(invoiceReason ?? "Генерація рахунку недоступна для цього замовлення.");
       return;
     }
 
@@ -119,9 +117,9 @@ export default function PageOrderByID({
         payment: payments ?? null,
         requestInvoice,
       });
-      toast.success("Invoice PDF generated");
+      toast.success("PDF-рахунок згенеровано");
     } catch (invoiceError) {
-      const message = invoiceError instanceof Error ? invoiceError.message : "Invoice generation failed";
+      const message = invoiceError instanceof Error ? invoiceError.message : "Помилка генерації рахунку";
       toast.error(message);
     } finally {
       setIsGeneratingInvoice(false);
@@ -129,7 +127,7 @@ export default function PageOrderByID({
   }
 
   return (
-    <section className="p-6 text-white">
+    <section className="admin-page">
       <OrderHeader
         orderNumber={currentOrder.orderNumber}
         orderStatus={currentOrder.orderStatus}
@@ -140,12 +138,12 @@ export default function PageOrderByID({
       />
 
       {saveError ? (
-        <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
           {saveError}
         </div>
       ) : null}
 
-      <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="space-y-4 xl:col-span-2">
           <OrderProductsCard orderItems={orderItems} totals={totals} />
           <OrderPaymentsCard payment={payments} />

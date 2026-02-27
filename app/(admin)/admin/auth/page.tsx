@@ -14,7 +14,7 @@ export default function AdminAuthPage() {
         <div className="mb-8 text-center">
           <div className="inline-flex items-center justify-center rounded-full border border-slate-700 bg-slate-900/70 px-4 py-1">
             <span className="text-xs tracking-[0.14em] text-emerald-400 uppercase">
-              OnSmart • Admin
+              OnSmart • Адмінка
             </span>
           </div>
           <h1 className="mt-4 text-2xl font-semibold tracking-tight text-slate-50">
@@ -28,7 +28,7 @@ export default function AdminAuthPage() {
         <div className="rounded-2xl border border-slate-800 bg-slate-900/80 shadow-xl shadow-black/40 backdrop-blur-md">
           <form action={signInUser} className="space-y-4 p-6">
             <label htmlFor="role" className="sr-only">
-              Is Admin
+              Роль адміністратора
               <input type="checkbox" name="role" id="role" value="admin" defaultChecked={true} />
             </label>
 

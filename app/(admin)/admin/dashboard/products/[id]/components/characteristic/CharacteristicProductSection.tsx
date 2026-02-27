@@ -11,7 +11,7 @@ export default function CharacteristicProductSection({
   category_id: string;
 }) {
   return (
-    <section className="mt-3 flex flex-col gap-3">
+    <section className="flex flex-col gap-3">
       <Description id={id} />
       <SpecificheProductAdmin product_id={id} category_id={category_id} />
       <DocumentsProduct id={id} />

@@ -7,5 +7,5 @@ export function canGenerateInvoice(clientType: ClientType, requestInvoice: boole
 
 export function getInvoiceAvailabilityReason(clientType: ClientType, requestInvoice: boolean) {
   if (canGenerateInvoice(clientType, requestInvoice)) return null;
-  return "For private clients, enable 'Richiede fattura' before generating the invoice.";
+  return "Для приватного клієнта увімкніть «Потрібен рахунок», щоб згенерувати PDF-рахунок.";
 }

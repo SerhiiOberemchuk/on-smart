@@ -2,14 +2,14 @@ import type { OrderTypes } from "@/db/schemas/orders.schema";
 import { safeValue } from "./formatters";
 
 export const DELIVERY_ADDRESS_LABELS: Record<string, string> = {
-  cap: "CAP",
-  citta: "Citta",
-  indirizzo: "Indirizzo",
-  nazione: "Nazione",
-  partita_iva: "Partita IVA",
-  provincia_regione: "Provincia / Regione",
-  ragione_sociale: "Ragione sociale",
-  referente_contatto: "Referente contatto",
+  cap: "Поштовий індекс",
+  citta: "Місто",
+  indirizzo: "Адреса",
+  nazione: "Країна",
+  partita_iva: "ПДВ (IVA)",
+  provincia_regione: "Провінція / Регіон",
+  ragione_sociale: "Назва компанії",
+  referente_contatto: "Контактна особа",
 };
 
 export function getDeliveryAddressLabel(key: string) {

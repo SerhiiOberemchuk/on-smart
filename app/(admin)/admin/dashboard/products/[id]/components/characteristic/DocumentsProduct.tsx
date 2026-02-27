@@ -1,20 +1,19 @@
 "use client";
 
+import { getProductDocumentsById } from "@/app/actions/product-documents/get-product-documents";
+import { updateProductDocumentsById } from "@/app/actions/product-documents/update-product-documents";
+import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
 import ButtonYellow from "@/components/BattonYellow";
-import InputAdminStyle from "../../../../InputComponent";
+import { ProductDocumentsType } from "@/db/schemas/product-documents.schema";
 import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { FILE_MAX_SIZE } from "../../../../categories/ModalCategoryForm";
-import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
-import { updateProductDocumentsById } from "@/app/actions/product-documents/update-product-documents";
-import { getProductDocumentsById } from "@/app/actions/product-documents/get-product-documents";
-import { ProductDocumentsType } from "@/db/schemas/product-documents.schema";
+import InputAdminStyle from "../../../../InputComponent";
 
 export default function DocumentsProduct({ id }: { id: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [documents, setDocuments] = useState<ProductDocumentsType | null>(null);
-
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
@@ -35,6 +34,7 @@ export default function DocumentsProduct({ id }: { id: string }) {
         console.error(error);
       }
     };
+
     fetch();
   }, [id]);
 
@@ -43,9 +43,10 @@ export default function DocumentsProduct({ id }: { id: string }) {
     const selected = e.target.files[0];
 
     if (selected.size > FILE_MAX_SIZE) {
-      toast.error("Розмір файлу перевищує 2 МБ");
+      toast.error("Файл перевищує 2 МБ");
       return;
     }
+
     setFile(selected);
   };
 
@@ -54,7 +55,6 @@ export default function DocumentsProduct({ id }: { id: string }) {
 
     try {
       setIsDeleting(link);
-
       await deleteFileFromS3(link);
 
       const updatedList = documents.documents.filter((doc) => doc.link !== link);
@@ -65,7 +65,6 @@ export default function DocumentsProduct({ id }: { id: string }) {
       });
 
       setDocuments({ product_id: id, documents: updatedList });
-
       toast.success("Документ видалено");
     } catch (error) {
       console.error(error);
@@ -90,9 +89,8 @@ export default function DocumentsProduct({ id }: { id: string }) {
       setIsLoading(true);
 
       const upload = await uploadFile({ file, sub_bucket: "files" });
-
       if (!upload.fileUrl) {
-        toast.error("Помилка при завантаженні файлу");
+        toast.error("Помилка завантаження");
         return;
       }
 
@@ -114,65 +112,56 @@ export default function DocumentsProduct({ id }: { id: string }) {
       });
 
       toast.success("Документ збережено");
-
       setFile(null);
       setTitle("");
     } catch (error) {
       console.error(error);
-      toast.error("Помилка при збереженні документа");
+      toast.error("Помилка збереження документа");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-gray-500 p-3">
-      <h2>Допоміжні документи для товару</h2>
+    <div className="admin-card admin-card-content flex flex-col gap-3">
+      <h2 className="text-base font-semibold">Документи товару</h2>
 
-      {documents && (
+      {documents ? (
         <ul className="flex flex-col gap-2">
-          {documents.documents.length === 0 && (
-            <p className="text-sm text-gray-400">Документів ще немає</p>
-          )}
-
-          {documents.documents.map((doc) => (
-            <li
-              key={doc.link}
-              className="flex items-center justify-between border-b border-gray-700 pb-1"
-            >
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">{doc.title}</span>
-                <a
-                  href={doc.link}
-                  target="_blank"
-                  className="text-xs break-all text-amber-400 hover:underline"
-                >
-                  {doc.link}
-                </a>
-              </div>
-
-              <button
-                onClick={() => handleDelete(doc.link)}
-                disabled={isDeleting === doc.link}
-                className="text-sm text-red-400 hover:text-red-500"
+          {documents.documents.length === 0 ? (
+            <p className="text-sm text-slate-400">Документів поки немає</p>
+          ) : (
+            documents.documents.map((doc) => (
+              <li
+                key={doc.link}
+                className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-600/45 pb-2"
               >
-                {isDeleting === doc.link ? "..." : "Видалити"}
-              </button>
-            </li>
-          ))}
+                <div className="min-w-0 flex-1">
+                  <span className="text-sm font-medium">{doc.title}</span>
+                  <a href={doc.link} target="_blank" className="block break-all text-xs text-amber-300 hover:underline">
+                    {doc.link}
+                  </a>
+                </div>
+
+                <button
+                  onClick={() => handleDelete(doc.link)}
+                  disabled={isDeleting === doc.link}
+                  className="admin-btn-danger !px-3 !py-1.5 !text-xs"
+                >
+                  {isDeleting === doc.link ? "..." : "Видалити"}
+                </button>
+              </li>
+            ))
+          )}
         </ul>
-      )}
+      ) : null}
+
       <form className="mt-3 flex flex-col gap-3">
-        <InputAdminStyle
-          input_title="Виберіть документ"
-          required
-          type="file"
-          onChange={handleSelectFile}
-        />
+        <InputAdminStyle input_title="Оберіть документ" required type="file" onChange={handleSelectFile} />
 
         <InputAdminStyle
-          input_title="Назва документу"
-          placeholder="Назва документу"
+          input_title="Назва документа"
+          placeholder="Назва документа"
           required
           type="text"
           value={title}
@@ -182,10 +171,10 @@ export default function DocumentsProduct({ id }: { id: string }) {
         <ButtonYellow
           type="button"
           onClick={handleSubmit}
-          className="text-[14px] font-normal"
+          className="admin-btn-secondary !px-4 !py-2 !text-sm"
           disabled={isLoading}
         >
-          {isLoading ? "Збереження..." : "Зберегти"}
+          {isLoading ? "Збереження..." : "Зберегти документ"}
         </ButtonYellow>
       </form>
     </div>

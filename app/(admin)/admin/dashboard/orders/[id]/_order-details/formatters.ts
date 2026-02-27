@@ -28,6 +28,65 @@ export function safeValue(value: unknown) {
   return String(value);
 }
 
+const ORDER_STATUS_LABELS: Record<string, string> = {
+  PENDING_PAYMENT: "Очікує оплату",
+  PAID: "Оплачено",
+  PROCESSING: "В обробці",
+  SHIPPED: "Відправлено",
+  DELIVERED: "Доставлено",
+  COMPLETED: "Завершено",
+  CANCELED: "Скасовано",
+  FAILED: "Помилка",
+  REFUNDED: "Повернено",
+};
+
+const PAYMENT_STATUS_LABELS: Record<string, string> = {
+  CREATED: "Створено",
+  SUCCESS: "Оплачено",
+  PAYED: "Оплачено",
+  FAILED: "Помилка",
+  CANCELED: "Скасовано",
+  PENDING_BONIFICO: "Очікує банківський переказ",
+  PENDING: "Очікує",
+};
+
+const PAYMENT_PROVIDER_LABELS: Record<string, string> = {
+  paypal: "PayPal",
+  sumup: "SumUp",
+  klarna: "Klarna",
+  bonifico: "Банківський переказ",
+};
+
+const DELIVERY_METHOD_LABELS: Record<string, string> = {
+  CONSEGNA_CORRIERE: "Кур'єрська доставка",
+  RITIRO_NEGOZIO: "Самовивіз з магазину",
+};
+
+const CLIENT_TYPE_LABELS: Record<string, string> = {
+  privato: "Приватна особа",
+  azienda: "Організація",
+};
+
+export function getOrderStatusLabel(status: string) {
+  return ORDER_STATUS_LABELS[status] ?? safeValue(status);
+}
+
+export function getPaymentStatusLabel(status: string) {
+  return PAYMENT_STATUS_LABELS[status] ?? safeValue(status);
+}
+
+export function getPaymentProviderLabel(provider: string) {
+  return PAYMENT_PROVIDER_LABELS[provider] ?? safeValue(provider);
+}
+
+export function getDeliveryMethodLabel(method: string) {
+  return DELIVERY_METHOD_LABELS[method] ?? safeValue(method);
+}
+
+export function getClientTypeLabel(clientType: string) {
+  return CLIENT_TYPE_LABELS[clientType] ?? safeValue(clientType);
+}
+
 export function getStatusBadgeClass(status: string) {
   switch (status) {
     case "COMPLETED":

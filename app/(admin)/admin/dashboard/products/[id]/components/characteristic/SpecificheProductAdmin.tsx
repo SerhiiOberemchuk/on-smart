@@ -99,7 +99,7 @@ function OrderedRow({
   const selectedIds = (isSelect ? (item as OrderedSelectItem | undefined)?.value_ids : []) ?? [];
 
   return (
-    <fieldset key={fieldId} className="rounded border p-3">
+    <fieldset key={fieldId} className="rounded-lg border border-slate-600/55 bg-slate-900/30 p-3">
       <legend className="flex items-center justify-between gap-3 px-2 text-sm font-medium">
         <span>
           <span className="mr-2 text-gray-400">{index + 1}.</span>
@@ -110,7 +110,7 @@ function OrderedRow({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="rounded border border-gray-600 px-2 py-1 text-xs hover:bg-gray-800 disabled:opacity-40"
+            className="rounded border border-slate-600/55 px-2 py-1 text-xs hover:bg-slate-800/60 disabled:opacity-40"
             onClick={moveUp}
             disabled={isFirst}
             title="Вгору"
@@ -119,7 +119,7 @@ function OrderedRow({
           </button>
           <button
             type="button"
-            className="rounded border border-gray-600 px-2 py-1 text-xs hover:bg-gray-800 disabled:opacity-40"
+            className="rounded border border-slate-600/55 px-2 py-1 text-xs hover:bg-slate-800/60 disabled:opacity-40"
             onClick={moveDown}
             disabled={isLast}
             title="Вниз"
@@ -408,23 +408,26 @@ export default function SpecificheProductAdmin({
   const getTpl = (id: string) => charsById.get(id);
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col gap-6 rounded-xl border border-gray-600 p-4"
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className="admin-card admin-card-content flex flex-col gap-6">
       <h2 className="text-lg font-semibold">Характеристики товару</h2>
 
-      <div {...getRootProps()} className="rounded-xl border border-dashed p-4 text-center">
+      <div {...getRootProps()} className="admin-dropzone">
         <input {...getInputProps()} />
         {uploading ? "Завантаження…" : "Перетягніть фото або клікніть"}
       </div>
 
       {images.length > 0 && (
-        <div className="grid grid-cols-4 gap-3">
+        <div className="admin-media-grid">
           {images.map((img) => (
             <div key={img} className="relative mx-auto">
-              <ButtonXDellete className="absolute top-0 right-0" onClick={() => deleteImage(img)} />
-              <Image src={img} alt="" width={160} height={160} />
+              <ButtonXDellete className="absolute top-2 right-2 h-8 w-8" onClick={() => deleteImage(img)} />
+              <Image
+                src={img}
+                alt=""
+                width={160}
+                height={160}
+                className="h-32 w-full rounded-lg border border-slate-600/55 object-cover"
+              />
             </div>
           ))}
         </div>
@@ -462,13 +465,17 @@ export default function SpecificheProductAdmin({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-sm font-medium">Кастомні параметри</h3>
 
-          <ButtonYellow type="button" onClick={() => appendCustom({ name: "", value: "" })}>
+          <ButtonYellow
+            type="button"
+            className="admin-btn-secondary !px-3 !py-1.5 !text-xs"
+            onClick={() => appendCustom({ name: "", value: "" })}
+          >
             Додати параметр
           </ButtonYellow>
         </div>
 
         {customFields.map((f, i) => (
-          <div key={f.id} className="grid grid-cols-[1fr_1fr_120px] items-end gap-3">
+          <div key={f.id} className="grid grid-cols-1 items-end gap-3 lg:grid-cols-[1fr_1fr_120px]">
             <InputAdminStyle
               {...register(`groups.${i}.name`, { required: true })}
               input_title="Назва"
@@ -481,7 +488,7 @@ export default function SpecificheProductAdmin({
             <div className="flex items-center justify-end gap-2">
               <button
                 type="button"
-                className="rounded border border-gray-600 px-2 py-1 text-xs hover:bg-gray-800 disabled:opacity-40"
+                className="rounded border border-slate-600/55 px-2 py-1 text-xs hover:bg-slate-800/60 disabled:opacity-40"
                 onClick={() => i > 0 && moveCustom(i, i - 1)}
                 disabled={i === 0}
                 title="Вгору"
@@ -490,7 +497,7 @@ export default function SpecificheProductAdmin({
               </button>
               <button
                 type="button"
-                className="rounded border border-gray-600 px-2 py-1 text-xs hover:bg-gray-800 disabled:opacity-40"
+                className="rounded border border-slate-600/55 px-2 py-1 text-xs hover:bg-slate-800/60 disabled:opacity-40"
                 onClick={() => i < customFields.length - 1 && moveCustom(i, i + 1)}
                 disabled={i === customFields.length - 1}
                 title="Вниз"
@@ -504,7 +511,11 @@ export default function SpecificheProductAdmin({
         ))}
       </div>
 
-      <ButtonYellow type="submit" disabled={loading}>
+      <ButtonYellow
+        type="submit"
+        disabled={loading}
+        className="admin-btn-primary !px-4 !py-2 !text-sm"
+      >
         {loading ? "Збереження…" : "Зберегти"}
       </ButtonYellow>
     </form>

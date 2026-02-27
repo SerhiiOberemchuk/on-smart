@@ -3,14 +3,28 @@ import { twMerge } from "tailwind-merge";
 
 type InputAdminStyleProps = InputHTMLAttributes<HTMLInputElement> & { input_title: string };
 
-export default function InputAdminStyle({ className, ...props }: InputAdminStyleProps) {
+export default function InputAdminStyle({
+  className,
+  input_title,
+  type,
+  ...props
+}: InputAdminStyleProps) {
+  const isCheckbox = type === "checkbox";
+  const isFile = type === "file";
+
   return (
-    <label className={twMerge("mb-1 block", className)}>
-      {props.input_title}
+    <label
+      className={twMerge("admin-field", isCheckbox && "admin-field-inline", className)}
+      data-admin-input-type={type}
+    >
+      <span className="admin-field-label">{input_title}</span>
+
       <input
+        type={type}
         className={twMerge(
-          "w-full rounded border border-neutral-700 bg-neutral-800 p-2 text-white",
-          // className,
+          isCheckbox && "admin-checkbox",
+          isFile && "admin-file-input",
+          !isCheckbox && !isFile && "admin-input",
         )}
         {...props}
       />
