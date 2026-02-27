@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import InputAdminStyle from "../InputComponent";
-import ButtonYellow from "@/components/BattonYellow";
-import ButtonXDellete from "../ButtonXDellete";
-import Image from "next/image";
-import { toast } from "react-toastify";
-import { uploadFile } from "@/app/actions/files/uploadFile";
 import { createProductVariant } from "@/app/actions/product/create-product-variant";
-import { FILE_MAX_SIZE } from "../categories/ModalCategoryForm";
+import { uploadFile } from "@/app/actions/files/uploadFile";
+import ButtonYellow from "@/components/BattonYellow";
 import { ProductType } from "@/db/schemas/product.schema";
+import Image from "next/image";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import ButtonXDellete from "../ButtonXDellete";
+import { FILE_MAX_SIZE } from "../categories/ModalCategoryForm";
+import InputAdminStyle from "../InputComponent";
 
 export default function ModalAddVariant({
   parent,
@@ -26,10 +26,8 @@ export default function ModalAddVariant({
   const [oldPrice, setOldPrice] = useState("");
   const [inStock, setInStock] = useState(0);
   const [isOnOrder, setToOrder] = useState(false);
-
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -39,14 +37,13 @@ export default function ModalAddVariant({
     const f = e.target.files[0];
 
     if (f.size > FILE_MAX_SIZE) {
-      toast.error("Розмір файлу перевищує 2 МБ");
+      toast.error("Файл перевищує 2 МБ");
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => setImagePreview(reader.result as string);
     reader.readAsDataURL(f);
-
     setFile(f);
   };
 
@@ -54,11 +51,12 @@ export default function ModalAddVariant({
     if (isSubmitting) return;
 
     if (!file) {
-      toast.error("Додайте фото");
+      toast.error("Додайте зображення");
       return;
     }
+
     if (!nameFull.trim() || !name.trim()) {
-      toast.error("Введіть назву варіанту");
+      toast.error("Заповніть назву варіанта");
       return;
     }
 
@@ -67,7 +65,7 @@ export default function ModalAddVariant({
 
       const upload = await uploadFile({ file, sub_bucket: "products" });
       if (!upload.fileUrl) {
-        toast.error("Помилка завантаження фото");
+        toast.error("Помилка завантаження зображення");
         return;
       }
 
@@ -86,7 +84,7 @@ export default function ModalAddVariant({
       });
 
       if (!res.success) {
-        toast.error(res.error ?? "Помилка створення варіанту");
+        toast.error(res.error ?? "Помилка створення варіанта");
         return;
       }
 
@@ -94,102 +92,102 @@ export default function ModalAddVariant({
       onClose();
     } catch (err) {
       console.error(err);
-      toast.error("Помилка створення");
+      toast.error("Помилка створення варіанта");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="bg-opacity-70 fixed inset-0 z-50 flex h-screen w-full items-start justify-center overflow-y-auto bg-black p-10">
-      <div className="relative w-[90%] max-w-[900px] rounded-xl bg-background p-6 shadow-lg">
-        <ButtonXDellete className="absolute top-4 right-4" onClick={onClose} />
+    <div className="admin-modal-overlay">
+      <div className="admin-modal max-w-4xl">
+        <div className="admin-modal-header">
+          <h2 className="text-base font-semibold">Додати варіант до {parent.nameFull}</h2>
+          <ButtonXDellete className="h-8 w-8" onClick={onClose} />
+        </div>
 
-        <h2 className="mb-5 text-xl font-semibold">Додати варіант до товару {parent.nameFull}</h2>
+        <div className="admin-modal-content space-y-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[260px_1fr]">
+            <div className="space-y-3">
+              {imagePreview ? (
+                <div className="relative mb-2 w-fit">
+                  <ButtonXDellete
+                    onClick={() => {
+                      setImagePreview(null);
+                      setFile(null);
+                    }}
+                    className="absolute top-2 right-2 h-8 w-8"
+                  />
+                  <Image
+                    src={imagePreview}
+                    width={260}
+                    height={260}
+                    alt="Попередній перегляд"
+                    className="aspect-square rounded-md border border-slate-600/55 object-cover"
+                  />
+                </div>
+              ) : null}
 
-        <div className="grid grid-cols-3 gap-6">
-          <div>
-            {imagePreview && (
-              <div className="relative mb-4 w-fit">
-                <ButtonXDellete
-                  onClick={() => {
-                    setImagePreview(null);
-                    setFile(null);
-                  }}
-                  className="absolute top-0 right-0"
+              <InputAdminStyle type="file" input_title="Головне зображення" accept="image/*" onChange={handleFileUpload} />
+            </div>
+
+            <div className="space-y-4">
+              <div className="admin-grid-2">
+                <InputAdminStyle
+                  input_title="Назва варіанта"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
                 />
-                <Image
-                  src={imagePreview}
-                  width={260}
-                  height={260}
-                  alt="preview"
-                  className="aspect-square rounded-md object-cover"
+                <InputAdminStyle
+                  input_title="Повна назва варіанта"
+                  value={nameFull}
+                  onChange={(e) => setNameFull(e.target.value)}
+                  required
                 />
               </div>
-            )}
 
-            <InputAdminStyle
-              type="file"
-              input_title="Головне фото"
-              accept="image/*"
-              onChange={handleFileUpload}
-            />
-          </div>
+              <div className="admin-grid-3">
+                <InputAdminStyle
+                  input_title="Ціна"
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                />
+                <InputAdminStyle
+                  input_title="Стара ціна"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={oldPrice}
+                  onChange={(e) => setOldPrice(e.target.value)}
+                />
+                <InputAdminStyle
+                  input_title="Кількість в наявності"
+                  type="number"
+                  min={0}
+                  value={inStock}
+                  onChange={(e) => setInStock(Number(e.target.value))}
+                />
+              </div>
 
-          <div className="col-span-2 grid grid-cols-2 gap-4">
-            <InputAdminStyle
-              input_title="Назва варіанту"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-            <InputAdminStyle
-              input_title="Повна назва варіанту"
-              value={nameFull}
-              onChange={(e) => setNameFull(e.target.value)}
-              required
-            />
-
-            <InputAdminStyle
-              input_title="Ціна"
-              type="number"
-              step="0.01"
-              min={0}
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-            />
-
-            <InputAdminStyle
-              input_title="Стара ціна"
-              type="number"
-              min={0}
-              step="0.01"
-              value={oldPrice}
-              onChange={(e) => setOldPrice(e.target.value)}
-            />
-
-            <InputAdminStyle
-              input_title="Дозволено до замовлення"
-              type="number"
-              min={0}
-              value={inStock}
-              onChange={(e) => setInStock(Number(e.target.value))}
-            />
-
-            <label className="flex items-center gap-2">
-              <input
+              <InputAdminStyle
                 type="checkbox"
+                input_title="Під замовлення"
                 checked={isOnOrder}
                 onChange={(e) => setToOrder(e.target.checked)}
               />
-              Під замовлення
-            </label>
+            </div>
+          </div>
+
+          <div className="admin-actions justify-end border-t border-slate-600/45 pt-3">
+            <ButtonYellow className="admin-btn-primary !px-4 !py-2 !text-sm" disabled={isSubmitting} onClick={handleSubmit}>
+              {isSubmitting ? "Створення..." : "Створити варіант"}
+            </ButtonYellow>
           </div>
         </div>
-
-        <ButtonYellow className="mt-6 w-full" disabled={isSubmitting} onClick={handleSubmit}>
-          {isSubmitting ? "Створення..." : "Створити варіант"}
-        </ButtonYellow>
       </div>
     </div>
   );

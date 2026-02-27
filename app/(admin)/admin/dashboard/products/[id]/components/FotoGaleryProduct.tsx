@@ -1,14 +1,13 @@
 "use client";
 
+import { getFotoFromGallery } from "@/app/actions/foto-galery/get-foto-from-gallery";
+import { updateFotoGallery } from "@/app/actions/foto-galery/update-foto-gallery";
+import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
 import { ProductType } from "@/db/schemas/product.schema";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
-
-import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
-import Image from "next/image";
-import { getFotoFromGallery } from "@/app/actions/foto-galery/get-foto-from-gallery";
 import { toast } from "react-toastify";
-import { updateFotoGallery } from "@/app/actions/foto-galery/update-foto-gallery";
 import ButtonXDellete from "../../../ButtonXDellete";
 
 const updateGallery = async ({
@@ -37,16 +36,15 @@ export default function FotoGaleryProduct({ id }: { id: ProductType["id"] }) {
         setImages(response.data.images);
         return;
       }
-      toast.warning("Галерея порожня");
       setImages([]);
     };
+
     getFoto();
   }, [id]);
 
   const onDrop = async (acceptedFiles: File[]) => {
     setUploading(true);
-
-    const uploadedUrls: string[] = images;
+    const uploadedUrls: string[] = [...images];
 
     for (const file of acceptedFiles) {
       try {
@@ -59,12 +57,12 @@ export default function FotoGaleryProduct({ id }: { id: ProductType["id"] }) {
           uploadedUrls.push(response.fileUrl);
         }
       } catch (error) {
-        console.error("Upload failed:", error);
+        console.error("Помилка завантаження:", error);
       }
     }
 
     setImages([...uploadedUrls]);
-    updateGallery({ parent_product_id: id, images: uploadedUrls });
+    await updateGallery({ parent_product_id: id, images: uploadedUrls });
     setUploading(false);
   };
 
@@ -77,54 +75,48 @@ export default function FotoGaleryProduct({ id }: { id: ProductType["id"] }) {
     const newUrl = images.filter((i) => i !== url);
     const d = await deleteFileFromS3(url);
     if (!d.success) {
-      toast.error("Помилка видалення фото");
+      toast.error("Не вдалося видалити зображення");
       return;
     }
-    await updateGallery({ parent_product_id: id, images: newUrl });
 
+    await updateGallery({ parent_product_id: id, images: newUrl });
     setImages(newUrl);
   };
 
   return (
-    <div className="mt-3 rounded-xl border border-gray-500 p-3">
-      <h2 className="mb-2 text-lg font-semibold">Галерея фото (бажано 4 фото)</h2>
+    <div className="admin-card admin-card-content">
+      <h2 className="mb-2 text-base font-semibold">Галерея фото (рекомендовано 4 зображення)</h2>
 
-      <div
-        {...getRootProps()}
-        className="cursor-pointer rounded-xl border border-dashed bg-background p-4 text-center"
-      >
+      <div {...getRootProps()} className="admin-dropzone cursor-pointer">
         <input {...getInputProps()} />
 
         {isDragActive ? (
-          <p>Покладіть файли сюди...</p>
+          <p>Відпустіть файли тут...</p>
         ) : (
-          <p>Перетягніть фото сюди або натисніть, щоб обрати</p>
+          <p>Перетягніть фото або натисніть, щоб обрати</p>
         )}
 
-        {isUploading && <p className="mt-2 text-yellow-400">Завантаження...</p>}
+        {isUploading ? <p className="mt-2 text-yellow-300">Завантаження...</p> : null}
       </div>
 
-      {images.length > 0 && (
-        <div className="mt-4 grid grid-cols-4 gap-3">
+      {images.length > 0 ? (
+        <div className="admin-media-grid mt-4">
           {images.map((url) => (
-            <div key={url} className="">
-              <div className="relative mx-auto w-fit rounded-lg border">
-                <ButtonXDellete
-                  className="absolute top-0 right-0"
-                  onClick={() => handleDeleteFoto(url)}
-                />
+            <div key={url}>
+              <div className="relative mx-auto w-fit rounded-lg border border-slate-600/55">
+                <ButtonXDellete className="absolute top-2 right-2 h-8 w-8" onClick={() => handleDeleteFoto(url)} />
                 <Image
                   width={326}
                   height={326}
                   alt={url}
                   src={url}
-                  className="w-40 rounded-lg object-cover object-center"
-                />{" "}
+                  className="h-32 w-full rounded-lg object-cover object-center"
+                />
               </div>
             </div>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

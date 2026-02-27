@@ -6,7 +6,7 @@ export default function ButtonXDellete({ ...rest }: {} & ButtonHTMLAttributes<HT
     <button
       {...rest}
       className={twMerge(
-        "h-10 w-10 rounded-full border border-red bg-red/10 text-red hover:bg-red-800",
+        "inline-flex h-10 w-10 items-center justify-center rounded-full border border-red-600 bg-transparent text-base font-medium text-red-500 transition hover:bg-red-600/15 hover:text-red-400",
         rest.className,
         rest.disabled && "cursor-not-allowed opacity-50",
       )}

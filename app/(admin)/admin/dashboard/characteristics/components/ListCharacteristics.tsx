@@ -1,8 +1,8 @@
 "use client";
 
-import { use } from "react";
 import { deleteCharacteristic } from "@/app/actions/product-characteristic/create-product-characteristic";
 import ButtonYellow from "@/components/BattonYellow";
+import { use } from "react";
 import ButtonXDellete from "../../ButtonXDellete";
 import { useCharacteristicStore } from "../store/useCharacteristicStore";
 
@@ -17,6 +17,8 @@ type CharacteristicListItem = {
   values: string[];
 };
 
+const DEFAULT_CATEGORY_NAME = "Універсальні характеристики";
+
 function groupByCategory(data: CharacteristicListItem[]) {
   return data.reduce<Record<string, { categoryName: string; items: CharacteristicListItem[] }>>(
     (acc, item) => {
@@ -24,7 +26,7 @@ function groupByCategory(data: CharacteristicListItem[]) {
 
       if (!acc[key]) {
         acc[key] = {
-          categoryName: item.category_name ?? "Універсальні характеристики",
+          categoryName: item.category_name ?? DEFAULT_CATEGORY_NAME,
           items: [],
         };
       }
@@ -34,6 +36,16 @@ function groupByCategory(data: CharacteristicListItem[]) {
     },
     {},
   );
+}
+
+function getFlags(item: CharacteristicListItem) {
+  const flags: string[] = [];
+
+  if (item.in_filter) flags.push("Фільтр");
+  if (item.is_required) flags.push("Обов'язково");
+  if (item.is_multiple) flags.push("Мультивибір");
+
+  return flags;
 }
 
 export default function ListCharacteristics({
@@ -65,72 +77,69 @@ export default function ListCharacteristics({
   const { openEdit } = useCharacteristicStore();
 
   const handleDelete = async (id: string) => {
-    const confirm = window.confirm("Видалити характеристику?");
-    if (!confirm) return;
-
+    const confirmDelete = window.confirm("Видалити характеристику?");
+    if (!confirmDelete) return;
     await deleteCharacteristic(id);
   };
 
   if (data.error || !data.data) {
-    return <p className="text-gray-400">Характеристики відсутні</p>;
+    return <div className="admin-empty">Характеристики недоступні.</div>;
   }
 
   const grouped = groupByCategory(data.data);
 
   return (
-    <div className="space-y-6">
+    <div className="admin-characteristics-list">
       {Object.entries(grouped).map(([categoryId, group]) => (
-        <details key={categoryId} className="rounded-xl border border-gray-600">
-          <summary className="rounded-xl rounded-t-xl bg-gray-800 px-4 py-2 text-lg font-semibold">
-            {group.categoryName}
+        <details key={categoryId} className="admin-card admin-characteristics-group">
+          <summary className="admin-characteristics-group-summary">
+            <div className="admin-characteristics-group-heading">
+              <span className="admin-characteristics-group-label">Група</span>
+              <span className="admin-characteristics-group-title">{group.categoryName}</span>
+            </div>
+            <span className="admin-characteristics-group-count">{group.items.length}</span>
           </summary>
 
-          <ul className="divide-y divide-gray-700">
+          <ul className="admin-characteristics-items">
             {group.items.map((item) => (
-              <li
-                key={item.id}
-                className="flex items-center justify-between rounded-xl px-4 py-1 font-normal hover:bg-gray-900"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[14px]">{item.name}</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {item.values.map((v) => (
-                      <span
-                        key={v}
-                        className="rounded bg-neutral-800 px-2 py-0.5 text-[10px] text-gray-300"
-                      >
-                        {v}
-                      </span>
-                    ))}
+              <li key={item.id} className="admin-characteristic-item">
+                <div className="admin-characteristic-content">
+                  <div className="admin-characteristic-head">
+                    <p className="admin-characteristic-name">{item.name}</p>
+                    <div className="admin-characteristic-meta">
+                      <span className="admin-chip admin-characteristic-count">{item.values.length} знач.</span>
+                      {getFlags(item).map((flag) => (
+                        <span key={flag} className="admin-chip admin-characteristic-flag-chip">
+                          {flag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  <div className="mt-1 flex gap-2 text-xs">
-                    {item.in_filter && (
-                      <span className="rounded bg-blue-600/20 px-2 py-0.5 text-blue-400">
-                        Фільтр
-                      </span>
-                    )}
-                    {item.is_required && (
-                      <span className="rounded bg-red-600/20 px-2 py-0.5 text-red-400">
-                        Обовʼязкова
-                      </span>
-                    )}
-                    {item.is_multiple && (
-                      <span className="rounded bg-green-600/20 px-2 py-0.5 text-green-400">
-                        Мульти
-                      </span>
-                    )}
+
+                  <div className="admin-characteristic-values-line">
+                    <span className="admin-characteristic-values-label">Значення:</span>
+                    <div className="admin-characteristic-values-list">
+                      {item.values.length ? (
+                        item.values.map((value) => (
+                          <span key={value} className="admin-chip admin-characteristic-value-chip">
+                            {value}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="admin-muted text-xs">Немає значень</span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="admin-actions admin-characteristic-actions">
                   <ButtonYellow
-                    className="text-[10px] font-normal"
+                    className="admin-btn-secondary admin-characteristic-edit-btn"
                     onClick={() => openEdit(item.id)}
                   >
-                    ✏️ Редагувати
+                    Редагувати
                   </ButtonYellow>
-
-                  <ButtonXDellete className="h-7 w-7" onClick={() => handleDelete(item.id)} />
+                  <ButtonXDellete className="h-8 w-8" onClick={() => handleDelete(item.id)} />
                 </div>
               </li>
             ))}

@@ -1,4 +1,4 @@
-import { formatDate, getStatusBadgeClass } from "./formatters";
+import { formatDate, getOrderStatusLabel, getStatusBadgeClass } from "./formatters";
 
 type OrderHeaderProps = {
   orderNumber: string;
@@ -11,13 +11,13 @@ type OrderHeaderProps = {
 
 export function OrderHeader({ orderNumber, orderStatus, createdAt, updatedAt, pending, onSave }: OrderHeaderProps) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="admin-page-header">
       <div>
-        <h1 className="text-2xl font-semibold">
-          Ordine <span className="text-neutral-300">#{orderNumber}</span>
+        <h1 className="admin-title">
+          Замовлення <span className="text-neutral-300">#{orderNumber}</span>
         </h1>
-        <div className="mt-1 text-sm text-neutral-400">
-          Creato: {formatDate(createdAt)} | Aggiornato: {formatDate(updatedAt)}
+        <div className="admin-subtitle">
+          Створено: {formatDate(createdAt)} | Оновлено: {formatDate(updatedAt)}
         </div>
       </div>
 
@@ -27,15 +27,15 @@ export function OrderHeader({ orderNumber, orderStatus, createdAt, updatedAt, pe
             orderStatus,
           )}`}
         >
-          {orderStatus}
+          {getOrderStatusLabel(orderStatus)}
         </span>
 
         <button
           onClick={onSave}
           disabled={pending}
-          className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
+          className="admin-btn-primary !px-4 !py-2 !text-sm"
         >
-          {pending ? "Saving..." : "Save changes"}
+          {pending ? "Збереження..." : "Зберегти зміни"}
         </button>
       </div>
     </div>

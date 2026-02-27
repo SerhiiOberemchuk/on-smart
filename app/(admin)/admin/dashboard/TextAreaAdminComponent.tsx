@@ -3,14 +3,15 @@ import { twMerge } from "tailwind-merge";
 
 type InputAdminStyleProps = InputHTMLAttributes<HTMLTextAreaElement> & { label_title: string };
 
-export default function TextAreaAdminComponent(props: InputAdminStyleProps) {
+export default function TextAreaAdminComponent({
+  className,
+  label_title,
+  ...props
+}: InputAdminStyleProps) {
   return (
-    <label className={twMerge("mb-1 block", props.className)}>
-      {props.label_title}
-      <textarea
-        className="w-full rounded border border-neutral-700 bg-neutral-800 p-2 text-white"
-        {...props}
-      />
+    <label className={twMerge("admin-field", className)}>
+      <span className="admin-field-label">{label_title}</span>
+      <textarea className="admin-textarea" {...props} />
     </label>
   );
 }

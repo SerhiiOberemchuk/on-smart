@@ -67,18 +67,53 @@ export async function getOrderFullInfoById({
 }
 
 export type GetOrdersAllActionResponseType = Promise<{
-  orders: OrderTypes[] | null;
+  orders: OrderListItem[] | null;
   error: unknown | null;
 }>;
+
+export type OrderListItem = OrderTypes & {
+  itemsSubtotal: number;
+  orderTotal: number;
+};
 
 export async function getOrdersAllAction(): GetOrdersAllActionResponseType {
   "use cache";
   cacheLife("minutes");
   cacheTag(CACHE_TAG_GET_ORDER_INFO);
   try {
-    const orders = await db.select().from(ordersSchema);
+    const [orders, orderItems] = await Promise.all([
+      db.select().from(ordersSchema),
+      db
+        .select({
+          orderId: orderItemsSchema.orderId,
+          quantity: orderItemsSchema.quantity,
+          unitPrice: orderItemsSchema.unitPrice,
+        })
+        .from(orderItemsSchema),
+    ]);
+
+    const subtotalByOrderId = new Map<string, number>();
+
+    for (const item of orderItems) {
+      const price = Number(item.unitPrice) || 0;
+      const quantity = Number(item.quantity) || 0;
+      const nextSubtotal = (subtotalByOrderId.get(item.orderId) ?? 0) + price * quantity;
+      subtotalByOrderId.set(item.orderId, nextSubtotal);
+    }
+
+    const enrichedOrders: OrderListItem[] = orders.map((order) => {
+      const itemsSubtotal = subtotalByOrderId.get(order.id) ?? 0;
+      const delivery = order.deliveryMethod === "RITIRO_NEGOZIO" ? 0 : Number(order.deliveryPrice) || 0;
+
+      return {
+        ...order,
+        itemsSubtotal,
+        orderTotal: itemsSubtotal + delivery,
+      };
+    });
+
     return {
-      orders,
+      orders: enrichedOrders,
       error: null,
     };
   } catch (error) {

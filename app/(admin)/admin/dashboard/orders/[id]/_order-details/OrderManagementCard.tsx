@@ -1,4 +1,5 @@
 import { ORDER_STATUS_LIST, type OrderStatusTypes } from "@/types/orders.types";
+import { getOrderStatusLabel } from "./formatters";
 
 type OrderManagementCardProps = {
   status: OrderStatusTypes | "";
@@ -34,61 +35,61 @@ export function OrderManagementCard({
   onSave,
 }: OrderManagementCardProps) {
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4">
-      <div className="mb-3 font-semibold">Gestione ordine</div>
+    <div className="admin-card admin-card-content">
+      <div className="mb-3 font-semibold">Керування замовленням</div>
 
-      <label className="mb-1 block text-xs text-neutral-400">Stato ordine</label>
+      <label className="mb-1 block text-xs text-neutral-400">Статус замовлення</label>
       <select
         value={status}
         onChange={(event) => onStatusChange(event.target.value as OrderStatusTypes)}
-        className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm outline-none focus:border-neutral-600"
+        className="admin-select"
       >
         {ORDER_STATUS_LIST.map((orderStatus) => (
           <option key={orderStatus} value={orderStatus}>
-            {orderStatus}
+            {getOrderStatusLabel(orderStatus)}
           </option>
         ))}
       </select>
 
       <div className="mt-4 grid grid-cols-1 gap-3">
         <div>
-          <label className="mb-1 block text-xs text-neutral-400">Carrier</label>
+          <label className="mb-1 block text-xs text-neutral-400">Перевізник</label>
           <input
             value={carrier}
             onChange={(event) => onCarrierChange(event.target.value)}
-            className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm outline-none focus:border-neutral-600"
-            placeholder="es. GLS / BRT / UPS"
+            className="admin-input"
+            placeholder="напр. GLS / BRT / UPS"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-xs text-neutral-400">Tracking number</label>
+          <label className="mb-1 block text-xs text-neutral-400">Трек-номер</label>
           <input
             value={trackingNumber}
             onChange={(event) => onTrackingNumberChange(event.target.value)}
-            className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm outline-none focus:border-neutral-600"
-            placeholder="Tracking code"
+            className="admin-input"
+            placeholder="Код відстеження"
           />
         </div>
 
         <div className="grid grid-cols-1 gap-3">
           <div>
-            <label className="mb-1 block text-xs text-neutral-400">Shipped at</label>
+            <label className="mb-1 block text-xs text-neutral-400">Відправлено</label>
             <input
               type="datetime-local"
               value={shippedAt}
               onChange={(event) => onShippedAtChange(event.target.value)}
-              className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm outline-none focus:border-neutral-600"
+              className="admin-input"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs text-neutral-400">Delivered at</label>
+            <label className="mb-1 block text-xs text-neutral-400">Доставлено</label>
             <input
               type="datetime-local"
               value={deliveredAt}
               onChange={(event) => onDeliveredAtChange(event.target.value)}
-              className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm outline-none focus:border-neutral-600"
+              className="admin-input"
             />
           </div>
         </div>
@@ -98,17 +99,18 @@ export function OrderManagementCard({
             type="checkbox"
             checked={requestInvoice}
             onChange={(event) => onRequestInvoiceChange(event.target.checked)}
+            className="admin-checkbox"
           />
-          Richiede fattura
+          Потрібен рахунок
         </label>
       </div>
 
       <button
         onClick={onSave}
         disabled={pending}
-        className="mt-4 w-full rounded-lg bg-white px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
+        className="admin-btn-primary mt-4 w-full !text-sm"
       >
-        {pending ? "Saving..." : "Save"}
+        {pending ? "Збереження..." : "Зберегти"}
       </button>
     </div>
   );

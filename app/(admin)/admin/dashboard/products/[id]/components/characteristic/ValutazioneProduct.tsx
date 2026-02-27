@@ -1,13 +1,13 @@
 "use client";
 
+import { deleteProductReviewById } from "@/app/actions/product-reviews/delete-review";
 import { getProductReviewsAdmin } from "@/app/actions/product-reviews/get-product-reviews";
+import { updateProductReviewById } from "@/app/actions/product-reviews/update-review";
 import ButtonYellow from "@/components/BattonYellow";
 import { ProductReviewType } from "@/db/schemas/product-reviews.schema";
 import { useEffect, useState } from "react";
-import ButtonXDellete from "../../../../ButtonXDellete";
-import { updateProductReviewById } from "@/app/actions/product-reviews/update-review";
-import { deleteProductReviewById } from "@/app/actions/product-reviews/delete-review";
 import { twMerge } from "tailwind-merge";
+import ButtonXDellete from "../../../../ButtonXDellete";
 
 export default function ValutazioneProduct({ id }: { id: string }) {
   const [reviews, setReviews] = useState<ProductReviewType[]>([]);
@@ -26,6 +26,7 @@ export default function ValutazioneProduct({ id }: { id: string }) {
 
     fetchReviews();
   }, [id]);
+
   const approveReview = async (reviewId: string) => {
     setReviews((prev) => prev.map((r) => (r.id === reviewId ? { ...r, is_approved: true } : r)));
 
@@ -55,19 +56,20 @@ export default function ValutazioneProduct({ id }: { id: string }) {
   };
 
   return (
-    <div className="rounded-xl border border-gray-500 p-3">
-      <h2>Відгуки на товар</h2>
+    <div className="admin-card admin-card-content">
+      <h2 className="mb-3 text-base font-semibold">Відгуки про товар</h2>
+
       {reviews.length > 0 ? (
         <ul className="flex flex-col gap-3">
           {reviews.map((i) => (
-            <div
+            <li
               key={i.id}
-              className="flex items-center gap-4 rounded-xl border border-gray-500 p-2"
+              className="flex flex-col gap-3 rounded-xl border border-slate-600/55 bg-slate-900/35 p-3 md:flex-row md:items-center"
             >
-              <div className="flex-1">
+              <div className="min-w-0 flex-1">
                 <p className="font-medium">{i.client_name}</p>
-                <p className="text-xs text-gray-400">{i.email}</p>
-                <p title={i.comment} className="line-clamp-1 text-sm">
+                <p className="text-xs text-slate-400">{i.email}</p>
+                <p title={i.comment} className="mt-1 line-clamp-2 text-sm text-slate-200">
                   {i.comment}
                 </p>
               </div>
@@ -81,22 +83,22 @@ export default function ValutazioneProduct({ id }: { id: string }) {
                 {i.is_approved ? "Погоджено" : "Очікує"}
               </span>
 
-              {!i.is_approved && (
+              {!i.is_approved ? (
                 <ButtonYellow
                   type="button"
-                  className="text-[13px]"
+                  className="admin-btn-secondary !px-3 !py-1.5 !text-xs"
                   onClick={() => approveReview(i.id)}
                 >
                   Погодити
                 </ButtonYellow>
-              )}
+              ) : null}
 
-              <ButtonXDellete onClick={() => deleteReview(i.id)} />
-            </div>
+              <ButtonXDellete className="h-8 w-8" onClick={() => deleteReview(i.id)} />
+            </li>
           ))}
         </ul>
       ) : (
-        <span>Відгуки відсутні</span>
+        <span className="text-sm text-slate-400">Відгуків поки немає</span>
       )}
     </div>
   );

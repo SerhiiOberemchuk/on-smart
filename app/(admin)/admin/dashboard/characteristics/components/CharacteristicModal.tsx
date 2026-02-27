@@ -1,29 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
-import { toast } from "react-toastify";
-
-import ButtonYellow from "@/components/BattonYellow";
-import InputAdminStyle from "../../InputComponent";
-import SelectComponentAdmin from "../../SelectComponent";
-import ButtonXDellete from "../../ButtonXDellete";
-
-import { useCharacteristicStore } from "../store/useCharacteristicStore";
-
-import { CategoryTypes } from "@/types/category.types";
 import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
-
-import { ProductCharacteristicType } from "@/db/schemas/product_characteristic.schema";
-import { ProductCharacteristicValuesType } from "@/db/schemas/product_characteristic_values.schema";
-
 import {
   createCharacteristic,
   getCharacteristicById,
   updateCharacteristic,
 } from "@/app/actions/product-characteristic/create-product-characteristic";
-
 import { createProductCharacteristicValues } from "@/app/actions/product-characteristic/create-product-characteristic-values";
+import ButtonYellow from "@/components/BattonYellow";
+import { ProductCharacteristicType } from "@/db/schemas/product_characteristic.schema";
+import { ProductCharacteristicValuesType } from "@/db/schemas/product_characteristic_values.schema";
+import { CategoryTypes } from "@/types/category.types";
+import { useEffect, useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import ButtonXDellete from "../../ButtonXDellete";
+import InputAdminStyle from "../../InputComponent";
+import SelectComponentAdmin from "../../SelectComponent";
+import { useCharacteristicStore } from "../store/useCharacteristicStore";
 
 export type CharacteristicFormValues = Omit<ProductCharacteristicType, "id"> & {
   category_id: string | null;
@@ -57,6 +51,7 @@ export function CharacteristicModal() {
       const res = await getAllCategoryProducts();
       if (res.success) setCategories(res.data);
     };
+
     fetchCategories();
   }, []);
 
@@ -65,7 +60,6 @@ export function CharacteristicModal() {
 
     const fetch = async () => {
       setLoading(true);
-
       const res = await getCharacteristicById(editingId);
 
       if (!res.success || !res.data) {
@@ -103,7 +97,7 @@ export function CharacteristicModal() {
         });
 
         if (!res.success || !res.id) {
-          toast.error("Помилка створення характеристики");
+          toast.error("Не вдалося створити характеристику");
           setLoading(false);
           return;
         }
@@ -133,7 +127,7 @@ export function CharacteristicModal() {
         });
 
         if (!res.success) {
-          toast.error("Помилка оновлення характеристики");
+          toast.error("Не вдалося оновити характеристику");
           setLoading(false);
           return;
         }
@@ -154,90 +148,74 @@ export function CharacteristicModal() {
   if (!isModal) return null;
 
   return (
-    <div onClick={closeModal} className="fixed inset-0 z-50 overflow-y-auto bg-black/80 py-6">
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="mx-auto w-[95%] max-w-3xl rounded-xl border border-gray-600 bg-black p-6"
-      >
-        <ButtonXDellete className="fixed top-4 right-4" onClick={closeModal}>
-          ✕
-        </ButtonXDellete>
+    <div onClick={closeModal} className="admin-modal-overlay">
+      <div onClick={(e) => e.stopPropagation()} className="admin-modal max-w-3xl">
+        <div className="admin-modal-header">
+          <h2 className="text-base font-semibold">
+            {mode === "create" ? "Нова характеристика" : "Редагувати характеристику"}
+          </h2>
+          <ButtonXDellete className="h-8 w-8" onClick={closeModal} />
+        </div>
 
-        <h2 className="mb-6 text-xl font-semibold">
-          {mode === "create" ? "Нова характеристика" : "Редагування характеристики"}
-        </h2>
-
-        {loading ? (
-          <p className="text-center text-gray-400">Завантаження…</p>
-        ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <InputAdminStyle
-              input_title="Назва характеристики"
-              {...register("name", { required: true })}
-              required
-            />
-
-            <div className="grid grid-cols-3 gap-4">
+        <div className="admin-modal-content">
+          {loading ? (
+            <p className="text-center text-sm text-slate-400">Завантаження...</p>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <InputAdminStyle
-                type="checkbox"
-                {...register("in_filter")}
-                input_title="Для фільтрації"
+                input_title="Назва характеристики"
+                {...register("name", { required: true })}
+                required
               />
-              <InputAdminStyle
-                type="checkbox"
-                {...register("is_required")}
-                input_title="Обовʼязкова"
+
+              <div className="admin-grid-3">
+                <InputAdminStyle type="checkbox" {...register("in_filter")} input_title="Використовувати у фільтрах" />
+                <InputAdminStyle type="checkbox" {...register("is_required")} input_title="Обов'язкова" />
+                <InputAdminStyle type="checkbox" {...register("is_multiple")} input_title="Кілька значень" />
+              </div>
+
+              <SelectComponentAdmin
+                selectTitle="Категорія"
+                optionsTitle="-- Виберіть категорію --"
+                options={[
+                  { name: "Універсальна (для всіх категорій)", value: "" },
+                  ...categories.map((c) => ({
+                    name: c.name,
+                    value: c.id,
+                  })),
+                ]}
+                {...register("category_id", {
+                  setValueAs: (v) => (v === "" ? null : v),
+                })}
               />
-              <InputAdminStyle
-                type="checkbox"
-                {...register("is_multiple")}
-                input_title="Мультивибір"
-              />
-            </div>
 
-            <SelectComponentAdmin
-              selectTitle="Категорія"
-              optionsTitle="-- Виберіть категорію --"
-              options={[
-                { name: "🌐 Універсальна (для всіх товарів)", value: "" },
-                ...categories.map((c) => ({
-                  name: c.name,
-                  value: c.id,
-                })),
-              ]}
-              {...register("category_id", {
-                setValueAs: (v) => (v === "" ? null : v),
-              })}
-            />
+              <div className="admin-card admin-card-content space-y-3">
+                <p className="text-sm font-semibold text-slate-100">Можливі значення</p>
 
-            <div className="space-y-3 rounded-lg border border-neutral-700 p-4">
-              <p className="font-medium">Можливі значення</p>
+                {fields.map((field, index) => (
+                  <div key={field.id} className="flex items-center gap-2">
+                    <input
+                      {...register(`values.${index}.value`)}
+                      className="admin-input"
+                      placeholder="Наприклад: 4 MP"
+                    />
+                    <ButtonXDellete type="button" className="h-8 w-8" onClick={() => remove(index)} />
+                  </div>
+                ))}
 
-              {fields.map((field, index) => (
-                <div key={field.id} className="flex gap-2">
-                  <input
-                    {...register(`values.${index}.value`)}
-                    className="flex-1 rounded bg-neutral-800 p-2 text-white"
-                    placeholder="Напр. 4 MP"
-                  />
-                  <button type="button" onClick={() => remove(index)} className="px-2 text-red-400">
-                    ✕
-                  </button>
-                </div>
-              ))}
+                <ButtonYellow type="button" className="admin-btn-secondary w-fit !text-xs" onClick={() => append({ value: "", id: "" })}>
+                  Додати значення
+                </ButtonYellow>
+              </div>
 
-              <ButtonYellow type="button" onClick={() => append({ value: "", id: "" })}>
-                + Додати значення
-              </ButtonYellow>
-            </div>
-
-            <div className="flex justify-end pt-4">
-              <ButtonYellow disabled={loading} type="submit">
-                {mode === "create" ? "Створити" : "Зберегти"}
-              </ButtonYellow>
-            </div>
-          </form>
-        )}
+              <div className="admin-actions justify-end">
+                <ButtonYellow disabled={loading} type="submit" className="admin-btn-primary !px-4 !py-2 !text-sm">
+                  {mode === "create" ? "Створити" : "Зберегти"}
+                </ButtonYellow>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );

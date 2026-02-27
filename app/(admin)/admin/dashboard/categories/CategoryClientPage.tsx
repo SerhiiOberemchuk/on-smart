@@ -1,17 +1,49 @@
 "use client";
 
-import { use, useState, useTransition } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { toast } from "react-toastify";
-
-import ModalCategoryForm from "./ModalCategoryForm";
-import { CategoryTypes } from "@/types/category.types";
 import {
   GetAllCategoriesResponse,
   removeCategoryProductsById,
 } from "@/app/actions/category/category-actions";
 import { deleteFileFromS3 } from "@/app/actions/files/uploadFile";
+import { CategoryTypes } from "@/types/category.types";
+import Image from "next/image";
+import Link from "next/link";
+import { use, useState, useTransition } from "react";
+import { toast } from "react-toastify";
+import ModalCategoryForm from "./ModalCategoryForm";
+
+function CategoryRowActions({
+  category,
+  onEdit,
+  onDelete,
+  isDeleting,
+}: {
+  category: CategoryTypes;
+  onEdit: (value: CategoryTypes) => void;
+  onDelete: (value: Pick<CategoryTypes, "id" | "image">) => void;
+  isDeleting: boolean;
+}) {
+  return (
+    <div className="admin-actions">
+      <button
+        type="button"
+        onClick={() => onEdit(category)}
+        className="admin-btn-secondary !px-3 !py-1.5 !text-xs"
+      >
+        Редагувати
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onDelete({ id: category.id, image: category.image })}
+        className="admin-btn-danger !px-3 !py-1.5 !text-xs"
+        disabled={isDeleting}
+      >
+        {isDeleting ? "Видалення..." : "Видалити"}
+      </button>
+    </div>
+  );
+}
 
 export default function CategoriesClientPage({
   initialDataPromise,
@@ -31,11 +63,13 @@ export default function CategoriesClientPage({
   };
 
   const handleDelete = ({ id, image }: Pick<CategoryTypes, "id" | "image">) => {
-    if (!confirm("Ви впевнені, що хочете видалити цю категорію?")) return;
+    if (!confirm("Видалити цю категорію?")) return;
+
     if (!id) {
       toast.error("Некоректний ID категорії");
       return;
     }
+
     setIdToDelete(id);
     startTransitionDell(async () => {
       const res = await removeCategoryProductsById(id);
@@ -47,7 +81,6 @@ export default function CategoriesClientPage({
       }
 
       await deleteFileFromS3(image);
-
       setCategories((prev) => prev.filter((c) => c.id !== id));
       setIdToDelete(null);
       toast.success("Категорію видалено");
@@ -63,82 +96,109 @@ export default function CategoriesClientPage({
   };
 
   return (
-    <div className="w-full p-6 text-white">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Категорії</h1>
+    <section className="admin-page">
+      <div className="admin-page-header">
+        <div>
+          <h1 className="admin-title">Категорії</h1>
+          <p className="admin-subtitle">Керування категоріями каталогу</p>
+        </div>
 
-        <button
-          onClick={() => openModal(null)}
-          className="rounded-md bg-yellow-500 px-4 py-2 font-semibold text-black transition hover:bg-yellow-600"
-        >
+        <button type="button" onClick={() => openModal(null)} className="admin-btn-primary">
           Додати категорію
         </button>
       </div>
 
-      <div className="w-full overflow-x-auto rounded-lg border border-neutral-700 bg-neutral-900">
-        <div className="grid grid-cols-[60px_120px_150px_150px_200px_1fr_140px] border-b border-neutral-700 bg-neutral-800 px-4 py-3 text-sm font-semibold">
-          <div>ID</div>
-          <div>Зображення</div>
-          <div>Slug</div>
-          <div>Назва</div>
-          <div>Тайтл</div>
-          <div>Опис</div>
-          <div className="text-center">Дії</div>
-        </div>
+      {categories.length ? (
+        <>
+          <div className="admin-table-wrap hidden lg:block">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Зображення</th>
+                  <th>Слаг</th>
+                  <th>Назва</th>
+                  <th>Заголовок</th>
+                  <th>Опис</th>
+                  <th>Дії</th>
+                </tr>
+              </thead>
 
-        {categories.length ? (
-          categories.map((cat) => (
-            <div
-              key={cat.id}
-              className="grid grid-cols-[60px_120px_150px_150px_200px_1fr_140px] items-center border-b border-neutral-800 px-4 py-4 text-sm [&>div]:p-2"
-            >
-              <div className="line-clamp-1">{cat.id}</div>
-
-              <div>
-                <Link href={cat.image} target="_blank" className="">
-                  <Image
-                    src={cat.image}
-                    alt={cat.name}
-                    width={80}
-                    height={80}
-                    loading="eager"
-                    className="h-auto w-fit rounded object-contain object-center"
-                  />
-                </Link>
-              </div>
-
-              <div>{cat.category_slug}</div>
-              <div>{cat.name}</div>
-              <div className="line-clamp-2">{cat.title_full}</div>
-
-              <div className="line-clamp-2 max-w-[450px] text-neutral-400" title={cat.description}>
-                {cat.description}
-              </div>
-
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={() => openModal(cat)}
-                  className="text-blue-400 hover:text-blue-300"
-                >
-                  Редагувати
-                </button>
-
-                <button
-                  onClick={() => handleDelete({ id: cat.id, image: cat.image })}
-                  className="text-red-400 hover:text-red-300"
-                  disabled={isPendingDell && idToDelete === cat.id}
-                >
-                  {isPendingDell && idToDelete === cat.id ? "Видалення..." : "Видалити"}
-                </button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="flex h-32 items-center justify-center text-neutral-500">
-            Немає категорій
+              <tbody>
+                {categories.map((cat) => (
+                  <tr key={cat.id}>
+                    <td className="max-w-[120px] truncate">{cat.id}</td>
+                    <td>
+                      <Link href={cat.image} target="_blank">
+                        <Image
+                          src={cat.image}
+                          alt={cat.name}
+                          width={66}
+                          height={66}
+                          loading="eager"
+                          className="h-16 w-16 rounded-md border border-slate-600/55 object-cover"
+                        />
+                      </Link>
+                    </td>
+                    <td>{cat.category_slug}</td>
+                    <td>{cat.name}</td>
+                    <td className="max-w-[260px]">{cat.title_full}</td>
+                    <td className="max-w-[420px]">
+                      <span className="line-clamp-2 text-slate-300">{cat.description}</span>
+                    </td>
+                    <td>
+                      <CategoryRowActions
+                        category={cat}
+                        onEdit={openModal}
+                        onDelete={handleDelete}
+                        isDeleting={isPendingDell && idToDelete === cat.id}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+
+          <ul className="grid grid-cols-1 gap-3 lg:hidden">
+            {categories.map((cat) => (
+              <li key={cat.id} className="admin-card admin-card-content">
+                <div className="flex gap-3">
+                  <Link href={cat.image} target="_blank" className="shrink-0">
+                    <Image
+                      src={cat.image}
+                      alt={cat.name}
+                      width={72}
+                      height={72}
+                      loading="eager"
+                      className="h-[72px] w-[72px] rounded-md border border-slate-600/55 object-cover"
+                    />
+                  </Link>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold">{cat.name}</p>
+                    <p className="text-xs text-slate-400">{cat.category_slug}</p>
+                    <p className="mt-1 line-clamp-2 text-xs text-slate-300">{cat.title_full}</p>
+                  </div>
+                </div>
+
+                <p className="mt-3 line-clamp-3 text-sm text-slate-300">{cat.description}</p>
+
+                <div className="mt-3 border-t border-slate-600/45 pt-3">
+                  <CategoryRowActions
+                    category={cat}
+                    onEdit={openModal}
+                    onDelete={handleDelete}
+                    isDeleting={isPendingDell && idToDelete === cat.id}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <div className="admin-empty">Категорій ще немає.</div>
+      )}
 
       <ModalCategoryForm
         isOpen={isModalOpen}
@@ -147,6 +207,6 @@ export default function CategoriesClientPage({
         onCreate={addCategory}
         onUpdate={updateCategory}
       />
-    </div>
+    </section>
   );
 }

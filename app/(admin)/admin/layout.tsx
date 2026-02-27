@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import clsx from "clsx";
 
 import "../../styles/globals.css";
+import "./admin-theme.css";
 
 import { Suspense } from "react";
 import { ToastContainer } from "react-toastify";
@@ -18,8 +19,8 @@ const fixelFont = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "OnSmart Admin",
-  description: "Pannello di amministrazione OnSmart",
+  title: "OnSmart Адмінка",
+  description: "Адміністративна панель OnSmart",
 
   robots: {
     index: false,
@@ -34,8 +35,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uk-UA">
-      <body className={clsx(fixelFont.className, "overflow-y-hidden")}>
-        <main className="">
+      <body className={clsx(fixelFont.className, "admin-body")}>
+        <main className="admin-root">
           <Suspense>{children}</Suspense>
         </main>
         <ToastContainer />
