@@ -2,11 +2,12 @@
 
 import { db } from "@/db/db";
 import { productFotoGallery } from "@/db/schemas/product-foto-gallery.schema";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 
 export async function updateFotoGallery(params: { parent_product_id: string; images: string[] }) {
-  updateTag(params.parent_product_id);
+  updateTag(CACHE_TAGS.gallery.byParentProductId(params.parent_product_id));
   try {
     const isGallery = await db
       .select()

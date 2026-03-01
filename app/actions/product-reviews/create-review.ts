@@ -3,6 +3,7 @@
 import { db } from "@/db/db";
 import { productReviewsSchema } from "@/db/schemas/product-reviews.schema";
 import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 export async function createProductReview(prevState: { success: boolean }, data: FormData) {
   const product_id = String(data.get("productId"));
@@ -19,7 +20,7 @@ export async function createProductReview(prevState: { success: boolean }, data:
       comment,
       is_approved: false,
     });
-    updateTag("product_review_" + product_id);
+    updateTag(CACHE_TAGS.product.reviewsById(product_id));
     return { success: true };
   } catch (error) {
     return { success: false, error };

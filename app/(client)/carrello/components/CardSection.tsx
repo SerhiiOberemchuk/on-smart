@@ -157,7 +157,9 @@ export default function CartSection() {
 
                   <div className="flex w-full flex-col justify-between">
                     <div>
-                      <h2 className="input_R_18 mt-2 line-clamp-3 max-w-[412px]">{prod.name}</h2>
+                      <h2 className="input_R_18 mt-2 line-clamp-3 max-w-[412px]">
+                        {prod.nameFull}
+                      </h2>
                     </div>
 
                     <div className="mt-2 flex items-center justify-between">

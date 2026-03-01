@@ -1,58 +1,120 @@
 import { getProductBySlug } from "@/app/actions/product/get-product-by-slug";
 import { getProductDetailsById } from "@/app/actions/product/get-product-details-by-Id";
+import { getProductById } from "@/app/actions/product/get-product-by-id";
+import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
 import { getSupportProductById } from "@/app/actions/product/get-support-product-by-id";
+import { getFotoFromGallery } from "@/app/actions/foto-galery/get-foto-from-gallery";
+import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ProductCharacteristicsSection from "@/components/ProductPageSections/ProductCharacteristicsSection/ProductCharacteristacSection";
 import VisualProductSection from "@/components/ProductPageSections/VisualTopSection/VisualProductSection";
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
+import type { ProductType } from "@/db/schemas/product.schema";
 import { baseUrl } from "@/types/baseUrl";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 
+function toAbsoluteUrl(url: string) {
+  return /^https?:\/\//i.test(url) ? url : `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
+async function getVariantsForProduct(product: ProductType): Promise<ProductType[] | null> {
+  if (product.parent_product_id && product.parent_product_id !== "NULL") {
+    const parentResponse = await getProductById(product.parent_product_id);
+    const parent = parentResponse.data;
+
+    if (!parent) {
+      return null;
+    }
+
+    const ids = Array.from(new Set([...(parent.variants ?? []), parent.id]));
+    if (ids.length === 0) {
+      return null;
+    }
+
+    const variantsResponse = await getProductsByIds(ids);
+    const list = (variantsResponse.data ?? []) as ProductType[];
+    return list.length > 0 ? list : null;
+  }
+
+  if (!product.variants || product.variants.length === 0) {
+    return null;
+  }
+
+  const ids = Array.from(new Set([...(product.variants ?? []), product.id]));
+  const variantsResponse = await getProductsByIds(ids);
+  const list = (variantsResponse.data ?? []) as ProductType[];
+  return list.length > 0 ? list : null;
+}
+
 export default async function PageSlug({ slug }: { slug: string }) {
-  const product = await getProductBySlug(slug);
-  const id = product.data?.parent_product_id || product.data?.id;
-  if (!id || !product.data?.inStock) {
+  const productResponse = await getProductBySlug(slug);
+  const product = productResponse.data;
+
+  if (!product) {
     notFound();
   }
-  const [productDetails, supportProductsRaw] = await Promise.all([
-    getProductDetailsById(id),
-    getSupportProductById(id),
-  ]);
 
-  if (!product.data) return <h1>Prodotto non trovato</h1>;
+  const id = product.parent_product_id || product.id;
+
+  const [productDetails, supportProductsRaw, galleryResponse, brandResponse, variantsProduct] =
+    await Promise.all([
+      getProductDetailsById(id),
+      getSupportProductById(id),
+      getFotoFromGallery({ parent_product_id: id }),
+      getBrandBySlug(product.brand_slug),
+      getVariantsForProduct(product),
+    ]);
 
   const supportProducts = supportProductsRaw.filter(
-    (supportProduct) => supportProduct.id !== product.data?.id && supportProduct.id !== id,
+    (supportProduct) => supportProduct.id !== product.id && supportProduct.id !== id,
   );
 
-  const productUrl = `${baseUrl}/catalogo/${product.data?.category_slug}/${product.data?.brand_slug}/${product.data?.slug}`;
+  const galleryImages = galleryResponse.success ? (galleryResponse.data?.images ?? []) : [];
+  const sliderImages = Array.from(new Set([product.imgSrc, ...galleryImages].filter(Boolean)));
+  const brandDisplayName = brandResponse.data?.name || product.brand_slug.replace(/[-_]+/g, " ").trim();
+  const brandLogo = brandResponse.data?.image || "/logo.png";
+
+  const productUrl = `${baseUrl}/catalogo/${product.category_slug}/${product.brand_slug}/${product.slug}`;
+  const eanValue = product.ean?.trim();
+  const productImages = sliderImages.map((url) => toAbsoluteUrl(url));
+  const eanSchemaField = eanValue
+    ? eanValue.length === 13
+      ? { gtin13: eanValue }
+      : eanValue.length === 14
+        ? { gtin14: eanValue }
+        : { gtin: eanValue }
+    : {};
 
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: product.data?.name,
-    image: product.data?.imgSrc,
-    description: product.data?.nameFull,
-    sku: product.data?.id,
+    url: productUrl,
+    name: product.name,
+    image: productImages,
+    description: product.nameFull,
+    sku: product.id,
+    productID: eanValue ?? product.id,
+    mpn: product.id,
+    category: product.category_slug,
+    ...eanSchemaField,
     brand: {
       "@type": "Brand",
-      name: product.data?.brand_slug,
+      name: brandDisplayName,
     },
     offers: {
       "@type": "Offer",
       url: productUrl,
       priceCurrency: "EUR",
-      price: product.data?.price,
-      availability: product.data?.inStock
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
+      price: Number(product.price ?? 0),
+      itemCondition: "https://schema.org/NewCondition",
+      availability: product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
     },
 
-    ...(product.data?.rating && {
+    ...(product.rating && {
       aggregateRating: {
         "@type": "AggregateRating",
-        ratingValue: product.data.rating,
+        ratingValue: product.rating,
         reviewCount: productDetails?.characteristics_valutazione?.length ?? 0,
       },
     }),
@@ -83,19 +145,19 @@ export default async function PageSlug({ slug }: { slug: string }) {
       {
         "@type": "ListItem",
         position: 2,
-        name: product.data?.category_slug,
-        item: `${baseUrl}/catalogo/${product.data?.category_slug}`,
+        name: product.category_slug,
+        item: `${baseUrl}/catalogo/${product.category_slug}`,
       },
       {
         "@type": "ListItem",
         position: 3,
-        name: product.data?.brand_slug,
-        item: `${baseUrl}/catalogo/${product.data?.category_slug}/${product.data?.brand_slug}`,
+        name: product.brand_slug,
+        item: `${baseUrl}/catalogo/${product.category_slug}/${product.brand_slug}`,
       },
       {
         "@type": "ListItem",
         position: 4,
-        name: product.data?.name,
+        name: product.name,
         item: productUrl,
       },
     ],
@@ -103,15 +165,15 @@ export default async function PageSlug({ slug }: { slug: string }) {
 
   return (
     <>
-      <Breadcrumbs
-        category={product?.data?.category_slug}
-        brand={product?.data?.brand_slug}
-        productName={product?.data?.name}
+      <Breadcrumbs category={product.category_slug} brand={product.brand_slug} productName={product.name} />
+      <VisualProductSection
+        product={product}
+        images={sliderImages}
+        brandLogo={brandLogo}
+        brandName={brandDisplayName}
+        variantsProduct={variantsProduct}
       />
-      {product && <VisualProductSection product={product.data} />}
-      {productDetails && product && (
-        <ProductCharacteristicsSection product={product.data} productDetail={productDetails} />
-      )}
+      <ProductCharacteristicsSection product={product} productDetail={productDetails} />
       {supportProducts.length > 0 ? (
         <ProductRowListSection
           title="Acquistati insieme"

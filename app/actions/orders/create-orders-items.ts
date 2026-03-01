@@ -6,6 +6,7 @@ import { ProductType } from "@/db/schemas/product.schema";
 import { BasketTypeUseCheckoutStore } from "@/store/checkout-store";
 import { updateTag } from "next/cache";
 import { CACHE_TAG_GET_ORDER_INFO } from "./cache-tags";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 export type CreateOrderItemsResponseType = Promise<{
   success: boolean;
@@ -47,6 +48,8 @@ export async function createOrderItems({
   try {
     await db.insert(orderItemsSchema).values(orderItems);
     updateTag(CACHE_TAG_GET_ORDER_INFO);
+    updateTag(CACHE_TAGS.orders.byId(orderId));
+    updateTag(CACHE_TAGS.product.topSales);
 
     return {
       success: true,

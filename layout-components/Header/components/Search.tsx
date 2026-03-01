@@ -16,6 +16,10 @@ const EMPTY_RESULTS: GlobalSearchResults = {
 };
 
 function getProductHref(product: GlobalSearchResults["products"][number]) {
+  if (product.productType === "bundle") {
+    return `/catalogo/${encodeURIComponent(product.category_slug)}/${encodeURIComponent(product.brand_slug)}/bundle/${encodeURIComponent(product.slug)}`;
+  }
+
   return `/catalogo/${encodeURIComponent(product.category_slug)}/${encodeURIComponent(product.brand_slug)}/${encodeURIComponent(product.slug)}`;
 }
 
@@ -54,6 +58,7 @@ export default function Search({
   const pathname = usePathname();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const requestIdRef = useRef(0);
+  const cacheRef = useRef<Map<string, GlobalSearchResults>>(new Map());
   const [isPending, startTransition] = useTransition();
 
   const [query, setQuery] = useState("");
@@ -90,13 +95,28 @@ export default function Search({
     const currentRequestId = ++requestIdRef.current;
     const timeoutId = setTimeout(() => {
       startTransition(async () => {
+        const cached = cacheRef.current.get(normalizedQuery);
+        if (cached) {
+          setResults(cached);
+          setIsOpen(true);
+          return;
+        }
+
         const response = await getGlobalSearchResults(normalizedQuery);
         if (currentRequestId !== requestIdRef.current) return;
 
-        setResults(response.data ?? EMPTY_RESULTS);
+        if (!response.success) {
+          setResults(EMPTY_RESULTS);
+          setIsOpen(false);
+          return;
+        }
+
+        const nextResults = response.data ?? EMPTY_RESULTS;
+        cacheRef.current.set(normalizedQuery, nextResults);
+        setResults(nextResults);
         setIsOpen(true);
       });
-    }, 240);
+    }, 420);
 
     return () => clearTimeout(timeoutId);
   }, [query]);
@@ -177,7 +197,7 @@ export default function Search({
       </form>
 
       {isOpen ? (
-        <div className="absolute top-full right-0 left-0 z-1100 mt-2 max-h-[70vh] overflow-auto rounded border border-neutral-700 bg-neutral-900 shadow-xl">
+        <div className="absolute top-full right-0 left-0 z-[1100] mt-2 max-h-[70vh] overflow-auto rounded border border-neutral-700 bg-neutral-900 shadow-xl">
           {isPending ? (
             <p className="px-3 py-3 text-sm text-neutral-300">Ricerca in corso...</p>
           ) : hasResults ? (

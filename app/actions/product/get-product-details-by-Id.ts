@@ -6,11 +6,12 @@ import { getProductSpecificheById } from "../product-specifiche/get-product-spec
 import { getProductDocumentsById } from "../product-documents/get-product-documents";
 import { getProductReviews } from "../product-reviews/get-product-reviews";
 import { cacheTag } from "next/cache";
-import { CACHE_TRIGGERS_TAGS } from "@/types/cache-trigers.constant";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 export async function getProductDetailsById(id: string): Promise<Product_Details> {
   "use cache";
-  cacheTag(CACHE_TRIGGERS_TAGS.product.PRODUCT_DETAILS_BY_ID);
+  cacheTag(CACHE_TAGS.product.details.all);
+  cacheTag(CACHE_TAGS.product.details.byId(id));
   const [description, specifiche, documents, reviews] = await Promise.all([
     getProductDescriptionById({ id }),
     getProductSpecificheById(id),

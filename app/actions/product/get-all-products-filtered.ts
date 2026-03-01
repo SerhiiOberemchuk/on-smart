@@ -3,7 +3,7 @@
 import { db } from "@/db/db";
 import { productsSchema } from "@/db/schemas/product.schema";
 import { productCharacteristicProductSchema } from "@/db/schemas/product_characteristic_product.schema";
-import { and, asc, desc, gt, gte, inArray, isNull, lte, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, gte, inArray, isNull, lte, sql, type SQL } from "drizzle-orm";
 
 export type CatalogQueryPayload = {
   categorySlugs?: string[];
@@ -28,14 +28,11 @@ export async function getAllProductsFiltered(payload: CatalogQueryPayload) {
     mode = "all",
   } = payload;
 
-  const offset = (page - 1) * limit;
-
   const effectiveProductId = sql<string>`
     COALESCE(${productsSchema.parent_product_id}, ${productsSchema.id})
   `;
 
   const where: SQL<unknown>[] = [];
-  where.push(gt(productsSchema.inStock, 0));
   if (mode === "parentsOnly") where.push(isNull(productsSchema.parent_product_id));
   if (categorySlugs?.length) where.push(inArray(productsSchema.category_slug, categorySlugs));
   if (brandSlugs?.length) where.push(inArray(productsSchema.brand_slug, brandSlugs));
@@ -69,8 +66,18 @@ export async function getAllProductsFiltered(payload: CatalogQueryPayload) {
     sort === "price-asc"
       ? asc(productsSchema.price)
       : sort === "price-desc"
-        ? desc(productsSchema.price)
-        : desc(productsSchema.id);
+      ? desc(productsSchema.price)
+      : desc(productsSchema.id);
+
+  const [{ total }] = await db
+    .select({ total: sql<number>`COUNT(*)` })
+    .from(productsSchema)
+    .where(whereClause);
+
+  const normalizedPage = Number.isFinite(page) && page > 0 ? Math.trunc(page) : 1;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const safePage = Math.min(normalizedPage, totalPages);
+  const offset = (safePage - 1) * limit;
 
   const data = await db
     .select()
@@ -80,18 +87,13 @@ export async function getAllProductsFiltered(payload: CatalogQueryPayload) {
     .limit(limit)
     .offset(offset);
 
-  const [{ total }] = await db
-    .select({ total: sql<number>`COUNT(*)` })
-    .from(productsSchema)
-    .where(whereClause);
-
   return {
     data,
     meta: {
-      page,
+      page: safePage,
       limit,
       total,
-      totalPages: Math.ceil(total / limit),
+      totalPages,
       mode,
       sort,
     },

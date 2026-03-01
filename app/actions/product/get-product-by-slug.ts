@@ -2,24 +2,26 @@
 
 import { db } from "@/db/db";
 import { ProductType, productsSchema } from "@/db/schemas/product.schema";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 
 export async function getProductBySlug(slug: ProductType["slug"]) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(CACHE_TAGS.product.bySlug(slug));
+  cacheTag(CACHE_TAGS.product.all);
+
   if (!slug) {
-    return { success: false, error: "Id as requared!" };
+    return {
+      success: false,
+      data: null,
+      error: "Product slug is required",
+    };
   }
+
   try {
-    const rows = await db.select().from(productsSchema).where(eq(productsSchema.slug, slug));
-
-    const product = rows[0] ?? null;
-
-    if (!product) {
-      return {
-        success: false,
-        data: null,
-        error: "Товар не знайдено",
-      };
-    }
+    const [product] = await db.select().from(productsSchema).where(eq(productsSchema.slug, slug));
 
     return {
       success: true,

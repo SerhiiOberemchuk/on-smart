@@ -10,13 +10,13 @@ export async function uploadFile({
   sub_bucket,
 }: {
   file: File;
-  sub_bucket: "products" | "brands" | "categories" | "files";
+  sub_bucket: "products" | "bundles" | "brands" | "categories" | "files";
 }) {
   const arrayBuffer = await file.arrayBuffer();
   let buffer: Buffer = Buffer.from(arrayBuffer);
   let ext: string = "webp";
   // ext = file.name.split(".").pop()!;
-  if (sub_bucket === "categories" || sub_bucket === "products") {
+  if (sub_bucket === "categories" || sub_bucket === "products" || sub_bucket === "bundles") {
     buffer = await sharp(buffer)
       .resize({ width: 532, height: 532, fit: "cover", position: "center" })
       .webp({ quality: 100 })

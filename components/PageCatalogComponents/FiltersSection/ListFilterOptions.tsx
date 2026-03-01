@@ -8,7 +8,6 @@ import { LabelInput } from "./sub-component/LabelInput";
 import { InputRange } from "./sub-component/InputRange";
 import { usePathname, useRouter } from "next/navigation";
 import { FilterGroup } from "@/types/catalog-filter-options.types";
-import { ulid } from "ulid";
 
 export default function ListFiltereOptions({
   className,
@@ -24,7 +23,7 @@ export default function ListFiltereOptions({
   return (
     <ul className={twMerge("flex w-full max-w-[264px] flex-col", className)}>
       {filters.map((filter) => (
-        <li key={ulid()}>
+        <li key={filter.param}>
           <ItemFilteredOptions {...filter} />
         </li>
       ))}

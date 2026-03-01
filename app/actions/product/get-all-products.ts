@@ -2,8 +2,9 @@
 
 import { db } from "@/db/db";
 import { ProductType, productsSchema } from "@/db/schemas/product.schema";
-import { safeQuery } from "@/utils/safeQuery";
+import { cacheLife } from "next/cache";
 import { cacheTag } from "next/cache";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 type Props = {
   page?: number;
@@ -19,11 +20,11 @@ export type ProductFetchResult = {
 
 export async function getAllProducts() {
   "use cache";
-
-  cacheTag("get_all_product");
+  cacheLife("seconds");
+  cacheTag(CACHE_TAGS.product.all);
 
   try {
-    const response = await safeQuery(() => db.select().from(productsSchema));
+    const response = await db.select().from(productsSchema);
     return { success: true, data: response, error: null };
   } catch (error) {
     console.error("DB error:", error);

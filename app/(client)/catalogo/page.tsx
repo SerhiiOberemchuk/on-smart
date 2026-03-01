@@ -9,7 +9,7 @@ import { Metadata } from "next/types";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Catalogo prodotti – Videosorveglianza, Antifurti, Smart Home | OnSmart",
+  title: "Catalogo prodotti - Videosorveglianza, Antifurti, Smart Home | OnSmart",
   description:
     "Sfoglia il catalogo completo OnSmart: sistemi di videosorveglianza, antifurti, sensori, domotica, accessori e prodotti professionali per la sicurezza.",
   keywords: [
@@ -75,7 +75,7 @@ export default function CatalogoPage() {
           <HeaderCatalogo />
         </Suspense>
 
-        <div className="xl:bg-background">
+        <div id="filters" className="xl:bg-background">
           <Suspense fallback={<p>Caricamento...</p>}>
             <MobileFilterSection filtersAction={filters} />
           </Suspense>
@@ -86,7 +86,7 @@ export default function CatalogoPage() {
             </Suspense>
 
             <Suspense fallback={<p>Caricamento...</p>}>
-              <CatalogProductSection />
+              <CatalogProductSection filtersAction={filters} />
             </Suspense>
           </div>
         </div>
@@ -99,3 +99,4 @@ export default function CatalogoPage() {
     </Suspense>
   );
 }
+

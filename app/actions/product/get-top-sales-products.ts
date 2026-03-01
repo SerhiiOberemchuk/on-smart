@@ -3,13 +3,15 @@
 import { db } from "@/db/db";
 import { orderItemsSchema, ordersSchema } from "@/db/schemas/orders.schema";
 import { ProductType, productsSchema } from "@/db/schemas/product.schema";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { ORDER_STATUS_LIST } from "@/types/orders.types";
 import { and, desc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 
 export async function getTopSalesProducts(limit = 12): Promise<ProductType[]> {
   "use cache";
-  cacheTag("top-sales-products");
+  cacheTag(CACHE_TAGS.product.topSales);
+  cacheTag(CACHE_TAGS.product.all);
   cacheLife("minutes");
   try {
     const safeLimit = Math.max(1, Math.min(limit, 30));

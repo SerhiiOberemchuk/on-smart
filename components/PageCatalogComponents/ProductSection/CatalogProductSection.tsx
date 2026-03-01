@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 import { parseAsInteger, useQueryState } from "nuqs";
@@ -10,16 +10,88 @@ import styles from "./product-catalogo.module.css";
 
 import { FilterGroup, SORT_OPTIONS_PARAMS } from "@/types/catalog-filter-options.types";
 import { ProductType } from "@/db/schemas/product.schema";
-import { getCatalogFilters } from "@/lib/get-catalog-filters";
 import {
   CatalogQueryPayload,
   getAllProductsFiltered,
 } from "@/app/actions/product/get-all-products-filtered";
 import { useQntProductsFilteredStore } from "@/store/qnt-products-filtered";
 
-export default function CatalogProductSection({ className }: { className?: string }) {
+function buildCatalogPayload({
+  allFilters,
+  searchParamsString,
+  page,
+}: {
+  allFilters: FilterGroup[];
+  searchParamsString: string;
+  page: number;
+}): CatalogQueryPayload {
+  const currentSearchParams = new URLSearchParams(searchParamsString);
+  const categorySlugs: string[] = [];
+  const brandSlugs: string[] = [];
+  const characteristics: Record<string, string[]> = {};
+
+  allFilters.forEach((filter) => {
+    if (filter.type !== "checkbox") return;
+
+    const rawValue = currentSearchParams.get(filter.param);
+    if (!rawValue) return;
+
+    const selectedSlugs = rawValue.split(",");
+
+    if (filter.param === "categoria") {
+      categorySlugs.push(...selectedSlugs);
+      return;
+    }
+
+    if (filter.param === "brand") {
+      brandSlugs.push(...selectedSlugs);
+      return;
+    }
+
+    const valueIds =
+      filter.options
+        ?.filter((opt) => selectedSlugs.includes(opt.value))
+        .map((opt) => opt.characteristic_value_id)
+        .filter((id): id is string => Boolean(id)) ?? [];
+
+    if (valueIds.length) {
+      characteristics[filter.param] = valueIds;
+    }
+  });
+
+  const priceRaw = currentSearchParams.get("price");
+  const [minRaw, maxRaw] = priceRaw?.split(",") ?? [];
+
+  const min = minRaw ? Number(minRaw) : undefined;
+  const max = maxRaw ? Number(maxRaw) : undefined;
+
+  const sort =
+    (currentSearchParams.get(SORT_OPTIONS_PARAMS.PARAM_NAME) as CatalogQueryPayload["sort"]) ??
+    "new";
+
+  return {
+    categorySlugs,
+    brandSlugs,
+    characteristics,
+    price: {
+      min: Number.isFinite(min) ? min : undefined,
+      max: Number.isFinite(max) ? max : undefined,
+    },
+    sort,
+    page,
+    mode: "all",
+  };
+}
+
+export default function CatalogProductSection({
+  className,
+  filtersAction,
+}: {
+  className?: string;
+  filtersAction: Promise<FilterGroup[]>;
+}) {
+  const allFilters = use(filtersAction);
   const [products, setProducts] = useState<ProductType[] | null>(null);
-  const [allFilters, setAllFilters] = useState<FilterGroup[]>();
   const [pages, setPages] = useState<{ page: number; totalPages: number }>({
     page: 1,
     totalPages: 1,
@@ -34,91 +106,36 @@ export default function CatalogProductSection({ className }: { className?: strin
     [setPage],
   );
 
-  useEffect(() => {
-    (async () => {
-      const res = await getCatalogFilters();
-      setAllFilters(res);
-    })();
-  }, []);
-
   const searchParams = useSearchParams();
-
-  const payload = useMemo<CatalogQueryPayload>(() => {
-    if (!allFilters) return {};
-
-    const categorySlugs: string[] = [];
-    const brandSlugs: string[] = [];
-    const characteristics: Record<string, string[]> = {};
-
-    allFilters.forEach((filter) => {
-      if (filter.type !== "checkbox") return;
-
-      const rawValue = searchParams.get(filter.param);
-      if (!rawValue) return;
-
-      const selectedSlugs = rawValue.split(",");
-
-      if (filter.param === "categoria") {
-        categorySlugs.push(...selectedSlugs);
-        return;
-      }
-
-      if (filter.param === "brand") {
-        brandSlugs.push(...selectedSlugs);
-        return;
-      }
-
-      const valueIds =
-        filter.options
-          ?.filter((opt) => selectedSlugs.includes(opt.value))
-          .map((opt) => opt.characteristic_value_id)
-          .filter((id): id is string => Boolean(id)) ?? [];
-
-      if (valueIds.length) {
-        characteristics[filter.param] = valueIds;
-      }
-    });
-
-    const priceRaw = searchParams.get("price");
-    const [minRaw, maxRaw] = priceRaw?.split(",") ?? [];
-
-    const min = minRaw ? Number(minRaw) : undefined;
-    const max = maxRaw ? Number(maxRaw) : undefined;
-
-    const sort =
-      (searchParams.get(SORT_OPTIONS_PARAMS.PARAM_NAME) as CatalogQueryPayload["sort"]) ?? "new";
-
-    return {
-      categorySlugs,
-      brandSlugs,
-      characteristics,
-      price: {
-        min: Number.isFinite(min) ? min : undefined,
-        max: Number.isFinite(max) ? max : undefined,
-      },
-      sort,
-      page,
-    };
-  }, [searchParams, allFilters, page]);
+  const searchParamsString = searchParams.toString();
 
   useEffect(() => {
+    let isActive = true;
     (async () => {
+      const payload = buildCatalogPayload({
+        allFilters,
+        searchParamsString,
+        page,
+      });
       const response = await getAllProductsFiltered(payload);
-      if (!response) return;
+      if (!response || !isActive) return;
 
       setProducts(response.data);
       setPages({
         page: response.meta.page,
         totalPages: response.meta.totalPages,
       });
-      setQnt(response.data.length);
+      setQnt(response.meta.total);
       if (response.meta.page !== page) {
         changePage(response.meta.page);
       }
     })();
-  }, [payload, page, changePage, setQnt]);
+    return () => {
+      isActive = false;
+    };
+  }, [allFilters, searchParamsString, page, changePage, setQnt]);
   return (
-    <section className={twMerge("flex-1", className)}>
+    <section id="products" className={twMerge("flex-1", className)}>
       {products && (
         <ul className={styles.list}>
           {products.map((product) => (

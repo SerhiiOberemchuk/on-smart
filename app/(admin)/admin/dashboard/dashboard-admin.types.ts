@@ -1,7 +1,8 @@
-export const URL_DASHBOARD = {
+﻿export const URL_DASHBOARD = {
   DASHBOARD: "/admin/dashboard",
   SUB_DASHBOARD: {
     PRODUCTS: "/products",
+    BUNDLES: "/bundles",
     BRANDS: "/brands",
     CATEGORIES: "/categories",
     CHARACTERISTICS: "/characteristics",
@@ -14,6 +15,7 @@ export const URL_DASHBOARD = {
 
 export type DashboardLinkIcon =
   | "products"
+  | "bundles"
   | "brands"
   | "categories"
   | "characteristics"
@@ -27,6 +29,12 @@ export const dashboardLinks = [
     href: URL_DASHBOARD.DASHBOARD + URL_DASHBOARD.SUB_DASHBOARD.PRODUCTS,
     title: "Товари",
     icon: "products",
+    active: true,
+  },
+  {
+    href: URL_DASHBOARD.DASHBOARD + URL_DASHBOARD.SUB_DASHBOARD.BUNDLES,
+    title: "Комплекти",
+    icon: "bundles",
     active: true,
   },
   {
@@ -77,3 +85,5 @@ export const dashboardLinks = [
   icon: DashboardLinkIcon;
   active: boolean;
 }>;
+
+

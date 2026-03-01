@@ -1,0 +1,1 @@
+ALTER TABLE `bundle_meta` ADD `description` text DEFAULT ('') NOT NULL;

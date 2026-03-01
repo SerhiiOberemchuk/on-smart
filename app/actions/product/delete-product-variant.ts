@@ -2,6 +2,7 @@
 
 import { db } from "@/db/db";
 import { productsSchema, type ProductType } from "@/db/schemas/product.schema";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { deleteFileFromS3 } from "../files/uploadFile";
@@ -50,7 +51,12 @@ export async function deleteProductVariant({
       }
     }
 
-    updateTag("get_all_product");
+    updateTag(CACHE_TAGS.product.all);
+    updateTag(CACHE_TAGS.product.byId(variant.id));
+    updateTag(CACHE_TAGS.product.bySlug(variant.slug));
+    if (variant.parent_product_id) {
+      updateTag(CACHE_TAGS.product.byId(variant.parent_product_id));
+    }
 
     return { success: true };
   } catch (error) {

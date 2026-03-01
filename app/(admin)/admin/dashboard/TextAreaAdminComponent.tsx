@@ -1,7 +1,7 @@
-import { InputHTMLAttributes } from "react";
+import { TextareaHTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 
-type InputAdminStyleProps = InputHTMLAttributes<HTMLTextAreaElement> & { label_title: string };
+type InputAdminStyleProps = TextareaHTMLAttributes<HTMLTextAreaElement> & { label_title: string };
 
 export default function TextAreaAdminComponent({
   className,

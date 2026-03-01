@@ -9,6 +9,8 @@ import {
 } from "@/db/schemas/orders.schema";
 import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
+import { CACHE_TAG_GET_ORDER_INFO } from "./cache-tags";
 
 export async function deleteOrderByOrderId({ id }: Pick<OrderTypes, "id">) {
   try {
@@ -17,7 +19,9 @@ export async function deleteOrderByOrderId({ id }: Pick<OrderTypes, "id">) {
       await tx.delete(ordersSchema).where(eq(ordersSchema.id, id));
       await tx.delete(orderItemsSchema).where(eq(orderItemsSchema.orderId, id));
     });
-    updateTag(id);
+    updateTag(CACHE_TAG_GET_ORDER_INFO);
+    updateTag(CACHE_TAGS.orders.byId(id));
+    updateTag(CACHE_TAGS.product.topSales);
     return { success: true };
   } catch (error) {
     return { error };

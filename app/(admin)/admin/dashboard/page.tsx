@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 
 export default async function AdminPage() {
   const session = await auth.api.getSession({ headers: await headers() });
+  console.log({ session });
 
   return (
     <section className="admin-page">
