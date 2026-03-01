@@ -1,7 +1,7 @@
 "use client";
 
 import StarsRating from "../../StarsRating";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import styles from "./style.module.css";
 import Image from "next/image";
@@ -11,18 +11,24 @@ import { useCalcTotalSum } from "@/utils/useCalcTotalSum";
 import ButtonAddToBasket from "../../ButtonAddToBasket";
 import { useBasketStore } from "@/store/basket-store";
 import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
-import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
 import { ProductType } from "@/db/schemas/product.schema";
-import { getProductById } from "@/app/actions/product/get-product-by-id";
 
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 
 type SelectedProduct = ProductType & { qnt: number };
 
-export default function SelectProductSection({ product }: { product: ProductType }) {
-  const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
+export default function SelectProductSection({
+  product,
+  variantsProduct,
+}: {
+  product: ProductType;
+  variantsProduct: ProductType[] | null;
+}) {
+  const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(() => {
+    const fallback = variantsProduct?.find((item) => item.id === product.id) ?? variantsProduct?.[0] ?? product;
+    return { ...fallback, qnt: 1 };
+  });
   const [variantsToShow, setVariantsToShow] = useState(NUMBER_OF_VARIANTS_TO_SHOW);
-  const [variantsProduct, setVariantsProduct] = useState<ProductType[] | null>(null);
 
   const { updateBasket, showPopup } = useBasketStore();
 
@@ -41,70 +47,13 @@ export default function SelectProductSection({ product }: { product: ProductType
 
   const uiProduct = selectedProduct ?? product;
 
-  useEffect(() => {
-    let alive = true;
-
-    (async () => {
-      try {
-        if (product.parent_product_id && product.parent_product_id !== "NULL") {
-          const resParent = await getProductById(product.parent_product_id);
-          const parent = resParent.data;
-
-          if (!alive) return;
-
-          if (parent) {
-            const ids = Array.from(new Set([...(parent.variants ?? []), parent.id]));
-
-            if (ids.length) {
-              const res = await getProductsByIds(ids);
-              if (!alive) return;
-
-              const list = (res.data ?? []) as ProductType[];
-              setVariantsProduct(list);
-
-              const fallback = list.find((p) => p.id === product.id) ?? list[0] ?? null;
-
-              if (fallback) setSelectedProduct({ ...fallback, qnt: 1 });
-              return;
-            }
-          }
-
-          setSelectedProduct({ ...product, qnt: 1 });
-          return;
-        }
-        if (!product.variants || product.variants.length === 0) {
-          setSelectedProduct({ ...product, qnt: 1 });
-          setVariantsProduct(null);
-          return;
-        }
-
-        const ids = Array.from(new Set([...(product.variants ?? []), product.id]));
-        const res = await getProductsByIds(ids);
-        if (!alive) return;
-
-        const list = (res.data ?? []) as ProductType[];
-        setVariantsProduct(list);
-
-        const fallback = list.find((p) => p.id === product.id) ?? list[0] ?? null;
-        if (fallback) setSelectedProduct({ ...fallback, qnt: 1 });
-      } catch (error) {
-        console.error("Error fetching variants:", error);
-
-        if (alive) setSelectedProduct({ ...product, qnt: 1 });
-      }
-    })();
-
-    return () => {
-      alive = false;
-    };
-  }, [product]);
-
   const shouldShowVariants = (variantsProduct?.length ?? 0) > 1;
 
   return (
     <section className="w-full rounded-sm bg-background p-3 xl:flex-1">
       <header>
-        <h2 className="H3 line-clamp-2">{uiProduct.name}</h2>
+        <h1 className="H3 line-clamp-2">{uiProduct.name}</h1>
+        {uiProduct.ean ? <p className="helper_text mt-1 text-text-grey">EAN: {uiProduct.ean}</p> : null}
         <StarsRating rating={uiProduct.rating} className="mt-2 justify-end" />
       </header>
 
@@ -164,11 +113,7 @@ export default function SelectProductSection({ product }: { product: ProductType
                 Apri piu
               </button>
             </>
-          ) : (
-            <div className="h-auto w-full animate-pulse bg-stroke-grey">
-              Caricamento versioni...
-            </div>
-          )}
+          ) : null}
         </>
       )}
 

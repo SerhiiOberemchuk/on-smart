@@ -5,10 +5,11 @@ import { productReviewsSchema } from "@/db/schemas/product-reviews.schema";
 import { ProductType } from "@/db/schemas/product.schema";
 import { eq, desc, and } from "drizzle-orm";
 import { cacheTag } from "next/cache";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 export async function getProductReviews(productId: ProductType["id"]) {
   "use cache";
-  cacheTag("product_review_" + productId);
+  cacheTag(CACHE_TAGS.product.reviewsById(productId));
   try {
     const reviews = await db
       .select()
@@ -27,7 +28,7 @@ export async function getProductReviews(productId: ProductType["id"]) {
 }
 export async function getProductReviewsAdmin(productId: ProductType["id"]) {
   "use cache";
-  cacheTag("product_review_" + productId);
+  cacheTag(CACHE_TAGS.product.reviewsById(productId));
   try {
     const reviews = await db
       .select()

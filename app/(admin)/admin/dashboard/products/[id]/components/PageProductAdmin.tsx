@@ -30,6 +30,11 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
     "category_slug",
     "price",
     "oldPrice",
+    "ean",
+    "lengthCm",
+    "widthCm",
+    "heightCm",
+    "weightKg",
     "inStock",
     "isOnOrder",
     "category_id",
@@ -51,7 +56,9 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
   const [isPendengProducts, startTransitionProducts] = useTransition();
 
   const [relatedProductsQuery, setRelatedProductsQuery] = useState("");
-  const [relatedProductIds, setRelatedProductIds] = useState<string[]>(product.relatedProductIds ?? []);
+  const [relatedProductIds, setRelatedProductIds] = useState<string[]>(
+    product.relatedProductIds ?? [],
+  );
 
   const relatedProductCandidates = useMemo(() => {
     const normalizedQuery = relatedProductsQuery.trim().toLowerCase();
@@ -61,14 +68,18 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
       .filter((item) => item.id !== product.id)
       .filter((item) => !relatedProductIds.includes(item.id))
       .filter((item) => {
-        const searchableText = `${item.name} ${item.nameFull} ${item.slug} ${item.id}`.toLowerCase();
+        const searchableText =
+          `${item.name} ${item.nameFull} ${item.slug} ${item.id}`.toLowerCase();
         return searchableText.includes(normalizedQuery);
       })
       .slice(0, 8);
   }, [allProducts, product.id, relatedProductIds, relatedProductsQuery]);
 
   const selectedRelatedProducts = useMemo(
-    () => relatedProductIds.map((id) => allProducts.find((item) => item.id === id)).filter(Boolean) as ProductType[],
+    () =>
+      relatedProductIds
+        .map((id) => allProducts.find((item) => item.id === id))
+        .filter(Boolean) as ProductType[],
     [allProducts, relatedProductIds],
   );
 
@@ -80,12 +91,27 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
   const onSubmit: SubmitHandler<typeof mainPartDataProduct> = (data) => {
     if (!confirm("Оновити дані товару?")) return;
 
+    const hasValue = (value: unknown) =>
+      value !== null && value !== undefined && `${value}`.trim() !== "";
+    if (
+      !hasValue(data.ean) ||
+      !hasValue(data.lengthCm) ||
+      !hasValue(data.widthCm) ||
+      !hasValue(data.heightCm) ||
+      !hasValue(data.weightKg)
+    ) {
+      toast.warning("Заповніть EAN, габарити та вагу товару");
+      return;
+    }
+
     const slug = watch("category_slug");
     const [category_id] = categories.filter((i) => i.category_slug === slug);
+    const normalizedEan = data.ean.trim();
 
     const preparedData: Partial<Omit<ProductType, "id">> = {
       ...data,
       oldPrice: Number(data.oldPrice) ? data.oldPrice : null,
+      ean: normalizedEan,
       category_id: category_id?.id ?? product.category_id,
       relatedProductIds,
     };
@@ -227,7 +253,11 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-4">
             <div className="admin-grid-2">
-              <InputAdminStyle input_title="Назва" {...register("name")} defaultValue={product.name} />
+              <InputAdminStyle
+                input_title="Назва"
+                {...register("name")}
+                defaultValue={product.name}
+              />
               <InputAdminStyle
                 input_title="Повна назва"
                 {...register("nameFull")}
@@ -307,6 +337,60 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
                 </div>
               </div>
             ) : null}
+
+            <div className="admin-grid-2">
+              <InputAdminStyle
+                input_title="EAN (штрихкод)"
+                type="text"
+                required
+                maxLength={14}
+                placeholder="Напр. 4820000000000"
+                {...register("ean", { required: true })}
+                defaultValue={product.ean ?? ""}
+              />
+            </div>
+
+            <div className="admin-grid-3">
+              <InputAdminStyle
+                input_title="Довжина, см"
+                type="number"
+                min={0}
+                step={0.01}
+                required
+                {...register("lengthCm", { required: true })}
+                defaultValue={product.lengthCm ?? ""}
+              />
+              <InputAdminStyle
+                input_title="Ширина, см"
+                type="number"
+                min={0}
+                step={0.01}
+                required
+                {...register("widthCm", { required: true })}
+                defaultValue={product.widthCm ?? ""}
+              />
+              <InputAdminStyle
+                input_title="Висота, см"
+                type="number"
+                min={0}
+                step={0.01}
+                required
+                {...register("heightCm", { required: true })}
+                defaultValue={product.heightCm ?? ""}
+              />
+            </div>
+
+            <div className="admin-grid-3">
+              <InputAdminStyle
+                input_title="Вага, кг"
+                type="number"
+                min={0}
+                step={0.001}
+                required
+                {...register("weightKg", { required: true })}
+                defaultValue={product.weightKg ?? ""}
+              />
+            </div>
           </div>
 
           <div className="admin-card admin-card-content space-y-3">
@@ -327,7 +411,10 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
             <ButtonYellow
               type="button"
               disabled={!fotoToUpload}
-              className={clsx("admin-btn-secondary w-full !text-sm", isPendingUlpoadMainFoto && "animate-pulse")}
+              className={clsx(
+                "admin-btn-secondary w-full text-sm!",
+                isPendingUlpoadMainFoto && "animate-pulse",
+              )}
               onClick={handlUploadFoto}
             >
               {isPendingUlpoadMainFoto ? "Збереження..." : "Зберегти головне фото"}
@@ -338,7 +425,8 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
         <div className="admin-card admin-card-content">
           <p className="mb-2 text-sm font-semibold text-slate-100">Супутні рекомендовані товари</p>
           <p className="mb-3 text-xs text-slate-400">
-            Пошук за назвою, слагом або ID. Обрані товари показуються клієнту в блоці "Купують разом".
+            Пошук за назвою, слагом або ID. Обрані товари показуються клієнту в блоці "Купують
+            разом".
           </p>
 
           <InputAdminStyle
@@ -376,10 +464,12 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
             ) : (
               relatedProductIds.map((id) => {
                 const selectedProduct = selectedRelatedProductsMap.get(id);
-                const title = selectedProduct ? `${selectedProduct.name} (${selectedProduct.slug})` : `ID: ${id}`;
+                const title = selectedProduct
+                  ? `${selectedProduct.name} (${selectedProduct.slug})`
+                  : `ID: ${id}`;
 
                 return (
-                  <span key={id} className="admin-chip !gap-2">
+                  <span key={id} className="admin-chip gap-2!">
                     <span>{title}</span>
                     <button
                       type="button"
@@ -396,7 +486,11 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
         </div>
 
         <div className="admin-actions justify-end border-t border-slate-600/45 pt-3">
-          <ButtonYellow type="submit" className="admin-btn-primary !px-4 !py-2 !text-sm" disabled={isPendingUpdateProduct}>
+          <ButtonYellow
+            type="submit"
+            className="admin-btn-primary px-4! py-2! text-sm!"
+            disabled={isPendingUpdateProduct}
+          >
             {isPendingUpdateProduct ? "Оновлення..." : "Зберегти зміни"}
           </ButtonYellow>
         </div>

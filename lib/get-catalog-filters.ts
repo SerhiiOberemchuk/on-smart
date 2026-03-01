@@ -9,10 +9,34 @@ import { productCharacteristicValuesSchema } from "@/db/schemas/product_characte
 import { productCharacteristicsSchema } from "@/db/schemas/product_characteristic.schema";
 import slugify from "@sindresorhus/slugify";
 import { cacheTag } from "next/cache";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
+
+function withUniqueParams(filters: FilterGroup[]): FilterGroup[] {
+  const usedParams = new Set<string>();
+
+  return filters.map((filter) => {
+    const baseParam = filter.param || "filter";
+    let uniqueParam = baseParam;
+    let suffix = 2;
+
+    while (usedParams.has(uniqueParam)) {
+      uniqueParam = `${baseParam}-${suffix}`;
+      suffix += 1;
+    }
+
+    usedParams.add(uniqueParam);
+
+    if (uniqueParam === filter.param) {
+      return filter;
+    }
+
+    return { ...filter, param: uniqueParam };
+  });
+}
 
 export const getCatalogCharacteristicFilters = async (): Promise<FilterGroup[]> => {
   "use cache";
-  cacheTag("catalog-filters-characteristics");
+  cacheTag(CACHE_TAGS.catalog.characteristicFilters);
   try {
     const characteristics = await db
       .select()
@@ -62,7 +86,7 @@ export const getCatalogCharacteristicFilters = async (): Promise<FilterGroup[]> 
 
 export const getCatalogFilters = async (): Promise<FilterGroup[]> => {
   "use cache";
-  cacheTag("catalog-filters");
+  cacheTag(CACHE_TAGS.catalog.filters);
   const categories = await getAllCategoryProducts();
   const brands = await getAllBrands();
 
@@ -96,5 +120,5 @@ export const getCatalogFilters = async (): Promise<FilterGroup[]> => {
 
   const dynamicFilters = await getCatalogCharacteristicFilters();
 
-  return [...staticFilters, ...dynamicFilters];
+  return withUniqueParams([...staticFilters, ...dynamicFilters]);
 };

@@ -19,6 +19,15 @@ function SidebarItemIcon({ icon }: { icon: DashboardLinkIcon }) {
           <path d="M8 14h3" />
         </svg>
       );
+    case "bundles":
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+          <rect x="4" y="7" width="16" height="13" rx="2.2" />
+          <path d="M4 10h16" />
+          <path d="M12 7v13" />
+          <path d="M7.5 4h9a1.5 1.5 0 0 1 1.5 1.5V7h-12V5.5A1.5 1.5 0 0 1 7.5 4Z" />
+        </svg>
+      );
     case "brands":
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">

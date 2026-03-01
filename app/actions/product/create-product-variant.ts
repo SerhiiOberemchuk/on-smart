@@ -2,6 +2,7 @@
 
 import { db } from "@/db/db";
 import { productsSchema, type ProductType } from "@/db/schemas/product.schema";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
 import slugify from "@sindresorhus/slugify";
 import { ulid } from "ulid";
@@ -15,6 +16,11 @@ export async function createProductVariant({
   newData: {
     name: string;
     nameFull: string;
+    ean: string;
+    lengthCm: string;
+    widthCm: string;
+    heightCm: string;
+    weightKg: string;
     price: string;
     oldPrice: string | null;
     inStock: number;
@@ -23,8 +29,18 @@ export async function createProductVariant({
     category_id: string;
   };
 }): Promise<{ success: boolean; error?: string }> {
-  updateTag("get_all_product");
   try {
+    const hasValue = (value: unknown) => value !== null && value !== undefined && `${value}`.trim() !== "";
+    if (
+      !hasValue(newData.ean) ||
+      !hasValue(newData.lengthCm) ||
+      !hasValue(newData.widthCm) ||
+      !hasValue(newData.heightCm) ||
+      !hasValue(newData.weightKg)
+    ) {
+      return { success: false, error: "EAN, dimensions and weight are required" };
+    }
+
     const parentRows = await db
       .select()
       .from(productsSchema)
@@ -61,6 +77,11 @@ export async function createProductVariant({
 
       name: newData.name,
       nameFull: newData.nameFull,
+      ean: newData.ean.trim(),
+      lengthCm: newData.lengthCm,
+      widthCm: newData.widthCm,
+      heightCm: newData.heightCm,
+      weightKg: newData.weightKg,
       price: newData.price,
       oldPrice: newData.oldPrice,
       inStock: newData.inStock,
@@ -88,6 +109,12 @@ export async function createProductVariant({
         variants: updatedVariants,
       })
       .where(eq(productsSchema.id, parentId));
+
+    updateTag(CACHE_TAGS.product.all);
+    updateTag(CACHE_TAGS.product.byId(parentId));
+    updateTag(CACHE_TAGS.product.byId(newId));
+    updateTag(CACHE_TAGS.product.bySlug(parent.slug));
+    updateTag(CACHE_TAGS.product.bySlug(variantSlug));
 
     return { success: true };
   } catch (error) {

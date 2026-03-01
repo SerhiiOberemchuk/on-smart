@@ -2,12 +2,13 @@
 
 import { db } from "@/db/db";
 import { productFotoGallery } from "@/db/schemas/product-foto-gallery.schema";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
 import { cacheTag } from "next/cache";
 
 export async function getFotoFromGallery(params: { parent_product_id: string }) {
   "use cache";
-  cacheTag(params.parent_product_id);
+  cacheTag(CACHE_TAGS.gallery.byParentProductId(params.parent_product_id));
   try {
     const response = await db
       .select()

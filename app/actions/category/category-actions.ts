@@ -3,14 +3,15 @@
 import { db } from "@/db/db";
 import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
 import { CategoryTypes } from "@/types/category.types";
-import { safeQuery } from "@/utils/safeQuery";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
 import { cacheTag, updateTag } from "next/cache";
 
 export async function createCategoryProducts(category: Omit<CategoryTypes, "id">) {
   try {
     const result = await db.insert(categoryProductsSchema).values(category).$returningId();
-    updateTag("all_categories");
+    updateTag(CACHE_TAGS.category.all);
+    updateTag(CACHE_TAGS.category.bySlug(category.category_slug));
     return {
       success: true,
       categoryId: result[0].id,
@@ -40,7 +41,7 @@ export type GetAllCategoriesResponse = Promise<
 >;
 export async function getAllCategoryProducts(): GetAllCategoriesResponse {
   "use cache";
-  cacheTag("all_categories");
+  cacheTag(CACHE_TAGS.category.all);
 
   try {
     const result = await db.select().from(categoryProductsSchema);
@@ -55,11 +56,15 @@ export async function getAllCategoryProducts(): GetAllCategoriesResponse {
 }
 
 export async function removeCategoryProductsById(categoryId: CategoryTypes["id"]) {
-  updateTag("all_categories");
   if (!categoryId) {
     return { success: false, error: "Category ID is required", serverStatus: null };
   }
   try {
+    const [existingCategory] = await db
+      .select({ category_slug: categoryProductsSchema.category_slug })
+      .from(categoryProductsSchema)
+      .where(eq(categoryProductsSchema.id, categoryId));
+
     const result = await db
       .delete(categoryProductsSchema)
       .where(eq(categoryProductsSchema.id, categoryId));
@@ -67,6 +72,11 @@ export async function removeCategoryProductsById(categoryId: CategoryTypes["id"]
     const affected = result[0].affectedRows;
     if (affected === 0) {
       return { success: false, error: "Category not found" };
+    }
+
+    updateTag(CACHE_TAGS.category.all);
+    if (existingCategory?.category_slug) {
+      updateTag(CACHE_TAGS.category.bySlug(existingCategory.category_slug));
     }
 
     return {
@@ -81,7 +91,6 @@ export async function removeCategoryProductsById(categoryId: CategoryTypes["id"]
 export async function updateCategoryProductsById(
   categoryData: Partial<Omit<CategoryTypes, "category_slug">>,
 ) {
-  updateTag("all_categories");
   if (!categoryData.id) {
     return { success: false, error: "Category ID is required for update", serverStatus: null };
   }
@@ -99,6 +108,9 @@ export async function updateCategoryProductsById(
       .set(categoryData)
       .where(eq(categoryProductsSchema.id, categoryData.id));
 
+    updateTag(CACHE_TAGS.category.all);
+    updateTag(CACHE_TAGS.category.bySlug(existCategory[0].category_slug));
+
     return {
       success: true,
       serverStatus: result[0].serverStatus,
@@ -111,14 +123,9 @@ export async function updateCategoryProductsById(
 
 export async function getCategoryBySlug(category_slug: CategoryTypes["category_slug"]) {
   "use cache";
-  cacheTag(category_slug);
+  cacheTag(CACHE_TAGS.category.bySlug(category_slug));
   try {
-    const fetchCategory = await safeQuery(() =>
-      db
-        .select()
-        .from(categoryProductsSchema)
-        .where(eq(categoryProductsSchema.category_slug, category_slug)),
-    );
+    const fetchCategory = await db.select().from(categoryProductsSchema).where(eq(categoryProductsSchema.category_slug, category_slug));
     if (fetchCategory.length === 0) {
       return { success: false, error: "Category not found", data: null };
     }

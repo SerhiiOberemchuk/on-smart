@@ -37,6 +37,19 @@ export default function ModalAddNewPrduct() {
       return;
     }
 
+    const hasValue = (value: unknown) =>
+      value !== null && value !== undefined && `${value}`.trim() !== "";
+    if (
+      !hasValue(data.ean) ||
+      !hasValue(data.lengthCm) ||
+      !hasValue(data.widthCm) ||
+      !hasValue(data.heightCm) ||
+      !hasValue(data.weightKg)
+    ) {
+      toast.warning("Заповніть EAN, габарити та вагу товару");
+      return;
+    }
+
     const slug = watch("category_slug");
     const [category_id] = categories.filter((i) => i.category_slug === slug);
 
@@ -50,8 +63,9 @@ export default function ModalAddNewPrduct() {
 
         const res = await createNewProduct({
           ...data,
+          ean: data.ean.trim(),
           imgSrc: resp.fileUrl,
-          category_id: category_id.id,
+          category_id: category_id?.id ?? "",
         });
 
         if (res.error) {
@@ -122,7 +136,10 @@ export default function ModalAddNewPrduct() {
         </div>
 
         <div className="admin-modal-content">
-          <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-4 xl:grid-cols-[320px_1fr]">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="grid grid-cols-1 gap-4 xl:grid-cols-[320px_1fr]"
+          >
             <div className="space-y-3">
               {image ? (
                 <div className="relative w-fit">
@@ -210,6 +227,55 @@ export default function ModalAddNewPrduct() {
                 )}
               </div>
 
+              <div className="admin-grid-2">
+                <InputAdminStyle
+                  required
+                  type="text"
+                  maxLength={14}
+                  {...register("ean", { required: true })}
+                  input_title="EAN (штрихкод)"
+                  placeholder="Напр. 4820000000000"
+                />
+              </div>
+
+              <div className="admin-grid-3">
+                <InputAdminStyle
+                  required
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  {...register("lengthCm", { required: true })}
+                  input_title="Довжина, см"
+                />
+                <InputAdminStyle
+                  required
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  {...register("widthCm", { required: true })}
+                  input_title="Ширина, см"
+                />
+                <InputAdminStyle
+                  required
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  {...register("heightCm", { required: true })}
+                  input_title="Висота, см"
+                />
+              </div>
+
+              <div className="admin-grid-3">
+                <InputAdminStyle
+                  required
+                  type="number"
+                  min={0}
+                  step={0.001}
+                  {...register("weightKg", { required: true })}
+                  input_title="Вага, кг"
+                />
+              </div>
+
               <div className="admin-grid-3">
                 <InputAdminStyle
                   required
@@ -247,7 +313,7 @@ export default function ModalAddNewPrduct() {
                 <ButtonYellow
                   type="submit"
                   disabled={isPendingCreate}
-                  className="admin-btn-primary !px-4 !py-2 !text-sm"
+                  className="admin-btn-primary px-4! py-2! text-sm!"
                 >
                   {isPendingCreate ? "Створення..." : "Створити товар"}
                 </ButtonYellow>

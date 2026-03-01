@@ -12,6 +12,7 @@ import {
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { CACHE_TAG_GET_ORDER_INFO } from "./cache-tags";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 export type GetOrderResponseType = Promise<{
   success: boolean;
@@ -52,7 +53,7 @@ export async function getOrderFullInfoById({
 }: Pick<OrderTypes, "id">): GetOrderFullInfoByIdResponseType {
   "use cache";
   cacheLife("minutes");
-  cacheTag(id);
+  cacheTag(CACHE_TAGS.orders.byId(id));
   try {
     const [order] = await db.select().from(ordersSchema).where(eq(ordersSchema.id, id));
     const orderItems = await db

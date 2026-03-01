@@ -22,6 +22,11 @@ export default function ModalAddVariant({
 }) {
   const [name, setName] = useState("");
   const [nameFull, setNameFull] = useState("");
+  const [ean, setEan] = useState("");
+  const [lengthCm, setLengthCm] = useState("");
+  const [widthCm, setWidthCm] = useState("");
+  const [heightCm, setHeightCm] = useState("");
+  const [weightKg, setWeightKg] = useState("");
   const [price, setPrice] = useState("");
   const [oldPrice, setOldPrice] = useState("");
   const [inStock, setInStock] = useState(0);
@@ -60,6 +65,17 @@ export default function ModalAddVariant({
       return;
     }
 
+    if (
+      !ean.trim() ||
+      !lengthCm.trim() ||
+      !widthCm.trim() ||
+      !heightCm.trim() ||
+      !weightKg.trim()
+    ) {
+      toast.error("Заповніть EAN, габарити та вагу");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
 
@@ -74,6 +90,11 @@ export default function ModalAddVariant({
         newData: {
           name,
           nameFull,
+          ean: ean.trim(),
+          lengthCm,
+          widthCm,
+          heightCm,
+          weightKg,
           price: price || "0",
           oldPrice: oldPrice || null,
           inStock,
@@ -128,7 +149,12 @@ export default function ModalAddVariant({
                 </div>
               ) : null}
 
-              <InputAdminStyle type="file" input_title="Головне зображення" accept="image/*" onChange={handleFileUpload} />
+              <InputAdminStyle
+                type="file"
+                input_title="Головне зображення"
+                accept="image/*"
+                onChange={handleFileUpload}
+              />
             </div>
 
             <div className="space-y-4">
@@ -143,6 +169,55 @@ export default function ModalAddVariant({
                   input_title="Повна назва варіанта"
                   value={nameFull}
                   onChange={(e) => setNameFull(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="admin-grid-3">
+                <InputAdminStyle
+                  input_title="EAN (штрихкод)"
+                  value={ean}
+                  onChange={(e) => setEan(e.target.value)}
+                  maxLength={14}
+                  required
+                />
+                <InputAdminStyle
+                  input_title="Довжина, см"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={lengthCm}
+                  onChange={(e) => setLengthCm(e.target.value)}
+                  required
+                />
+                <InputAdminStyle
+                  input_title="Ширина, см"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={widthCm}
+                  onChange={(e) => setWidthCm(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="admin-grid-3">
+                <InputAdminStyle
+                  input_title="Висота, см"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={heightCm}
+                  onChange={(e) => setHeightCm(e.target.value)}
+                  required
+                />
+                <InputAdminStyle
+                  input_title="Вага, кг"
+                  type="number"
+                  min={0}
+                  step="0.001"
+                  value={weightKg}
+                  onChange={(e) => setWeightKg(e.target.value)}
                   required
                 />
               </div>
@@ -183,7 +258,11 @@ export default function ModalAddVariant({
           </div>
 
           <div className="admin-actions justify-end border-t border-slate-600/45 pt-3">
-            <ButtonYellow className="admin-btn-primary !px-4 !py-2 !text-sm" disabled={isSubmitting} onClick={handleSubmit}>
+            <ButtonYellow
+              className="admin-btn-primary px-4! py-2! text-sm!"
+              disabled={isSubmitting}
+              onClick={handleSubmit}
+            >
               {isSubmitting ? "Створення..." : "Створити варіант"}
             </ButtonYellow>
           </div>

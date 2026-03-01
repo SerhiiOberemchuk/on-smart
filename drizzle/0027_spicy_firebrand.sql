@@ -1,0 +1,1 @@
+ALTER TABLE `products` DROP COLUMN `bundle_product_ids`;

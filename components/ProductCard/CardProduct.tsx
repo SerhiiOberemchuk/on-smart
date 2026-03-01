@@ -25,13 +25,18 @@ export default function CardProduct({
     rating,
     inStock,
     nameFull,
+    productType,
   } = product;
+  const isBundle = productType === "bundle";
+  const productHref = isBundle
+    ? `/catalogo/${category_slug}/${brand_slug}/bundle/${slug}`
+    : `/catalogo/${category_slug}/${brand_slug}/${slug}`;
 
   return (
     <article className={clsx(styles.card, className)}>
       <HeaderProductCard oldPrice={oldPrice} inStock={inStock} id={id} />
       <figure className="">
-        <Link href={`/catalogo/${category_slug}/${brand_slug}/${slug}`} aria-label={name}>
+        <Link href={productHref} aria-label={name} prefetch={false}>
           <Image
             src={imgSrc}
             className="aspect-square object-contain object-center p-1 md:p-2 xl:p-3"
@@ -41,6 +46,11 @@ export default function CardProduct({
           />
         </Link>
         <figcaption className="mt-2 px-1 md:mt-3 md:px-2 xl:px-3">
+          {isBundle && (
+            <span className="helper_XXS mb-2 inline-flex w-fit rounded-sm border border-yellow-500 bg-yellow-500/15 px-2 py-1 uppercase tracking-wide text-yellow-400">
+              Kit
+            </span>
+          )}
           <h2
             className="body_R_20 line-clamp-3 min-h-[72px]"
             data-tooltip-id="card-title-tooltip"

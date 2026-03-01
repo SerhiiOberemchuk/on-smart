@@ -25,7 +25,7 @@ export default function ClientPageAllProducts({
           </div>
 
           <ButtonYellow
-            className="admin-btn-primary !px-4 !py-2 !text-sm"
+            className="admin-btn-primary px-4! py-2! text-sm!"
             onClick={() => {
               setType("product");
               openModal();
@@ -36,7 +36,7 @@ export default function ClientPageAllProducts({
         </div>
 
         {products.data?.length ? (
-          <ListProductsAdmin products={products.data} />
+          <ListProductsAdmin products={products.data.filter((p) => p.productType === "product")} />
         ) : (
           <div className="admin-empty">Товари не знайдено.</div>
         )}

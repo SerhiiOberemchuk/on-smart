@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -28,7 +28,7 @@ export default function SearchMobile() {
 
       {isOpen ? (
         <div
-          className="fixed inset-0 z-1200 bg-black/70 p-4 sm:hidden"
+          className="fixed inset-0 z-[1200] bg-black/70 p-4 sm:hidden"
           role="dialog"
           aria-modal="true"
           onClick={() => setIsOpen(false)}
@@ -55,3 +55,4 @@ export default function SearchMobile() {
     </>
   );
 }
+

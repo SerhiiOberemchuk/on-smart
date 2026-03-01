@@ -2,6 +2,7 @@
 
 import { db } from "@/db/db";
 import { ProductType, productsSchema } from "@/db/schemas/product.schema";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
 
 import { deleteFotoGallery } from "../foto-galery/delete-foto-gallery";
@@ -49,7 +50,10 @@ export async function deleteProductById(id: ProductType["id"]) {
       await deleteFileFromS3(product[0].imgSrc);
     }
 
-    updateTag("get_all_product");
+    updateTag(CACHE_TAGS.product.all);
+    updateTag(CACHE_TAGS.product.byId(id));
+    updateTag(CACHE_TAGS.product.bySlug(product[0].slug));
+    updateTag(CACHE_TAGS.product.supportById(id));
 
     return { success: true };
   } catch (error) {

@@ -2,9 +2,20 @@
 
 import { db } from "@/db/db";
 import { ProductType, productsSchema } from "@/db/schemas/product.schema";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq, inArray } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 
 export async function getSupportProductById(productId: ProductType["id"]) {
+  "use cache";
+  cacheLife("seconds");
+  cacheTag(CACHE_TAGS.product.supportById(productId));
+  cacheTag(CACHE_TAGS.product.all);
+
+  if (!productId) {
+    return [];
+  }
+
   try {
     const [product] = await db
       .select({ relatedProductIds: productsSchema.relatedProductIds })

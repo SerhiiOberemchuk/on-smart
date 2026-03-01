@@ -21,6 +21,7 @@ import { sendMailOrders } from "../mail/mail-orders";
 import { sendTelegramMessage } from "../telegram/send-message";
 import { updateTag } from "next/cache";
 import { CACHE_TAG_GET_ORDER_INFO } from "./cache-tags";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 export async function createOrderAction({
   dataFirstStep,
@@ -116,6 +117,8 @@ export async function createOrderAction({
       }
     }
     updateTag(CACHE_TAG_GET_ORDER_INFO);
+    updateTag(CACHE_TAGS.orders.byId(orderId));
+    updateTag(CACHE_TAGS.product.topSales);
 
     return {
       success: true,
