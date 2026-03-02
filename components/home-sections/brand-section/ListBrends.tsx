@@ -2,8 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
 
-import type { GetAllBrandsResponse } from "@/app/actions/brands/brand-actions";
 import { baseUrl } from "@/types/baseUrl";
+import { BrandTypes } from "@/types/brands.types";
+
+type BrandListResult = {
+  success: boolean;
+  data: BrandTypes[];
+  error?: unknown;
+};
 
 function toAbsoluteImageUrl(src: string) {
   if (!src) return src;
@@ -14,19 +20,11 @@ function toAbsoluteImageUrl(src: string) {
 export default async function ListBrends({
   props,
 }: {
-  props: GetAllBrandsResponse;
+  props: Promise<BrandListResult>;
 }) {
   const { data, success } = await props;
 
-  if (!success) {
-    return (
-      <p className="py-10 text-center text-gray-400">
-        I brand sono temporaneamente non disponibili.
-      </p>
-    );
-  }
-
-  if (!data || data.length === 0) {
+  if (!data || data.length === 0 || !success) {
     return <p className="py-10 text-center text-gray-400">Nessun brand disponibile.</p>;
   }
 

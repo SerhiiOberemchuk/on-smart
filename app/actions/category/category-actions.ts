@@ -4,7 +4,6 @@ import { db } from "@/db/db";
 import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
 import { CategoryTypes } from "@/types/category.types";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
-import { withRetry } from "@/utils/with-retry";
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
 
@@ -21,48 +20,39 @@ export async function createCategoryProducts(category: Omit<CategoryTypes, "id">
     return { success: false, error };
   }
 }
-export type GetAllCategoriesResult = {
-  success: boolean;
-  data: CategoryTypes[];
-  error?: unknown;
-};
-
-export type GetAllCategoriesResponse = Promise<GetAllCategoriesResult>;
-
-type GetCategoryBySlugResult = {
-  success: boolean;
-  error: unknown;
-  data: CategoryTypes | null;
-};
-
-async function getAllCategoriesFromDb() {
-  return withRetry(() => db.select().from(categoryProductsSchema));
-}
-
-async function getCategoryBySlugFromDb(category_slug: CategoryTypes["category_slug"]) {
-  return withRetry(() =>
-    db
-      .select()
-      .from(categoryProductsSchema)
-      .where(eq(categoryProductsSchema.category_slug, category_slug)),
-  );
-}
-
+export type GetAllCategoriesResponse = Promise<
+  | {
+      success: boolean;
+      data: {
+        id: string;
+        name: string;
+        title_full: string;
+        description: string;
+        image: string;
+        category_slug: string;
+      }[];
+      error?: undefined;
+    }
+  | {
+      success: boolean;
+      error: unknown;
+      data: never[];
+    }
+>;
 export async function getAllCategoryProducts(): GetAllCategoriesResponse {
   "use cache";
   cacheTag(CACHE_TAGS.category.all);
   cacheLife("hours");
 
   try {
-    const result = await getAllCategoriesFromDb();
+    const result = await db.select().from(categoryProductsSchema);
 
     return {
       success: true,
       data: result,
     };
   } catch (error) {
-    console.error("[getAllCategoryProducts]", error);
-    throw error;
+    return { success: false, error, data: [] };
   }
 }
 
@@ -132,19 +122,16 @@ export async function updateCategoryProductsById(
   }
 }
 
-export async function getCategoryBySlug(
-  category_slug: CategoryTypes["category_slug"],
-): Promise<GetCategoryBySlugResult> {
+export async function getCategoryBySlug(category_slug: CategoryTypes["category_slug"]) {
   "use cache";
   cacheTag(CACHE_TAGS.category.bySlug(category_slug));
   try {
-    const fetchCategory = await getCategoryBySlugFromDb(category_slug);
+    const fetchCategory = await db.select().from(categoryProductsSchema).where(eq(categoryProductsSchema.category_slug, category_slug));
     if (fetchCategory.length === 0) {
       return { success: false, error: "Category not found", data: null };
     }
     return { success: true, error: null, data: fetchCategory[0] };
   } catch (error) {
-    console.error("[getCategoryBySlug]", error);
-    throw error;
+    return { success: false, error, data: null };
   }
 }

@@ -2,7 +2,7 @@ import Script from "next/script";
 import Image from "next/image";
 import Link from "next/link";
 
-import type { GetAllCategoriesResponse } from "@/app/actions/category/category-actions";
+import { GetAllCategoriesResponse } from "@/app/actions/category/category-actions";
 import { baseUrl } from "@/types/baseUrl";
 
 import styles from "./category.module.css";
@@ -20,15 +20,7 @@ export default async function ListCategories({
 }) {
   const { data, success } = await categories;
 
-  if (!success) {
-    return (
-      <p className="py-10 text-center text-gray-400">
-        Le categorie sono temporaneamente non disponibili.
-      </p>
-    );
-  }
-
-  if (!data || data.length === 0) {
+  if (!data || data.length === 0 || !success) {
     return <p className="py-10 text-center text-gray-400">Nessuna categoria disponibile.</p>;
   }
 

@@ -4,37 +4,9 @@ import { db } from "@/db/db";
 import { brandProductsSchema } from "@/db/schemas/brand-products.schema";
 import { BrandTypes } from "@/types/brands.types";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
-import { withRetry } from "@/utils/with-retry";
 
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
-
-export type GetAllBrandsResult = {
-  success: boolean;
-  data: BrandTypes[];
-  error?: unknown;
-};
-
-export type GetAllBrandsResponse = Promise<GetAllBrandsResult>;
-
-type GetBrandBySlugResult = {
-  success: boolean;
-  error: unknown;
-  data: BrandTypes | null;
-};
-
-async function getAllBrandsFromDb() {
-  return withRetry(() => db.select().from(brandProductsSchema));
-}
-
-async function getBrandBySlugFromDb(brand_slug: BrandTypes["brand_slug"]) {
-  return withRetry(() =>
-    db
-      .select()
-      .from(brandProductsSchema)
-      .where(eq(brandProductsSchema.brand_slug, brand_slug)),
-  );
-}
 
 export async function createBrand(brand: BrandTypes) {
   try {
@@ -50,19 +22,18 @@ export async function createBrand(brand: BrandTypes) {
   }
 }
 
-export async function getAllBrands(): GetAllBrandsResponse {
+export async function getAllBrands() {
   "use cache";
   cacheTag(CACHE_TAGS.brand.all);
   cacheLife("hours");
   try {
-    const result = await getAllBrandsFromDb();
+    const result = await  db.select().from(brandProductsSchema);
     return {
       success: true,
       data: result,
     };
   } catch (error) {
-    console.error("[getAllBrands]", error);
-    throw error;
+    return { success: false, error, data: [] };
   }
 }
 
@@ -130,19 +101,16 @@ export async function updateBrandById(
   }
 }
 
-export async function getBrandBySlug(
-  brand_slug: BrandTypes["brand_slug"],
-): Promise<GetBrandBySlugResult> {
+export async function getBrandBySlug(brand_slug: BrandTypes["brand_slug"]) {
   "use cache";
   cacheTag(CACHE_TAGS.brand.bySlug(brand_slug));
   try {
-    const fetchBrand = await getBrandBySlugFromDb(brand_slug);
+    const fetchBrand = await db.select().from(brandProductsSchema).where(eq(brandProductsSchema.brand_slug, brand_slug));
     if (fetchBrand.length === 0) {
       return { success: false, error: "Brand not found", data: null };
     }
     return { success: true, error: null, data: fetchBrand[0] };
   } catch (error) {
-    console.error("[getBrandBySlug]", error);
-    throw error;
+    return { success: false, error, data: null };
   }
 }
