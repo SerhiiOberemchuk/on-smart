@@ -9,10 +9,15 @@ import {
   OrderTypes,
   paymentsSchema,
 } from "@/db/schemas/orders.schema";
+import { isBuildPhase } from "@/utils/guard-build";
+import { withRetrySelective } from "@/utils/with-retry-selective";
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { CACHE_TAG_GET_ORDER_INFO } from "./cache-tags";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
+
+const ORDERS_READ_RETRY_OPTIONS = { tries: 10, delayMs: 800, linearBackoffMs: 250 } as const;
+const BUILD_PHASE_SKIP_ERROR = "skipped: build phase";
 
 export type GetOrderResponseType = Promise<{
   success: boolean;
@@ -77,44 +82,56 @@ export type OrderListItem = OrderTypes & {
   orderTotal: number;
 };
 
-export async function getOrdersAllAction(): GetOrdersAllActionResponseType {
+async function getOrdersAllCachedCore(): Promise<OrderListItem[]> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("seconds");
   cacheTag(CACHE_TAG_GET_ORDER_INFO);
-  try {
-    const [orders, orderItems] = await Promise.all([
-      db.select().from(ordersSchema),
-      db
-        .select({
-          orderId: orderItemsSchema.orderId,
-          quantity: orderItemsSchema.quantity,
-          unitPrice: orderItemsSchema.unitPrice,
-        })
-        .from(orderItemsSchema),
-    ]);
 
-    const subtotalByOrderId = new Map<string, number>();
+  const [orders, orderItems] = await withRetrySelective(
+    () =>
+      Promise.all([
+        db.select().from(ordersSchema),
+        db
+          .select({
+            orderId: orderItemsSchema.orderId,
+            quantity: orderItemsSchema.quantity,
+            unitPrice: orderItemsSchema.unitPrice,
+          })
+          .from(orderItemsSchema),
+      ]),
+    ORDERS_READ_RETRY_OPTIONS,
+  );
 
-    for (const item of orderItems) {
-      const price = Number(item.unitPrice) || 0;
-      const quantity = Number(item.quantity) || 0;
-      const nextSubtotal = (subtotalByOrderId.get(item.orderId) ?? 0) + price * quantity;
-      subtotalByOrderId.set(item.orderId, nextSubtotal);
-    }
+  const subtotalByOrderId = new Map<string, number>();
 
-    const enrichedOrders: OrderListItem[] = orders.map((order) => {
-      const itemsSubtotal = subtotalByOrderId.get(order.id) ?? 0;
-      const delivery = order.deliveryMethod === "RITIRO_NEGOZIO" ? 0 : Number(order.deliveryPrice) || 0;
+  for (const item of orderItems) {
+    const price = Number(item.unitPrice) || 0;
+    const quantity = Number(item.quantity) || 0;
+    const nextSubtotal = (subtotalByOrderId.get(item.orderId) ?? 0) + price * quantity;
+    subtotalByOrderId.set(item.orderId, nextSubtotal);
+  }
 
-      return {
-        ...order,
-        itemsSubtotal,
-        orderTotal: itemsSubtotal + delivery,
-      };
-    });
+  return orders.map((order) => {
+    const itemsSubtotal = subtotalByOrderId.get(order.id) ?? 0;
+    const delivery = order.deliveryMethod === "RITIRO_NEGOZIO" ? 0 : Number(order.deliveryPrice) || 0;
 
     return {
-      orders: enrichedOrders,
+      ...order,
+      itemsSubtotal,
+      orderTotal: itemsSubtotal + delivery,
+    };
+  });
+}
+
+export async function getOrdersAllAction(): GetOrdersAllActionResponseType {
+  if (isBuildPhase()) {
+    return { orders: [], error: BUILD_PHASE_SKIP_ERROR };
+  }
+
+  try {
+    const orders = await getOrdersAllCachedCore();
+    return {
+      orders,
       error: null,
     };
   } catch (error) {

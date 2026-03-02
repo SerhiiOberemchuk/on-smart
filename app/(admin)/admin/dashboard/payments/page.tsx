@@ -3,8 +3,9 @@ import Spiner from "@/components/Spiner";
 import { Suspense } from "react";
 import PaymentClientComponent from "./PaymentsClientComponent";
 
-export default function Page() {
-  const payments = getAllOrdersPaymentAction();
+export default async function Page() {
+  const payments = await getAllOrdersPaymentAction();
+
   return (
     <Suspense fallback={<Spiner />}>
       <PaymentClientComponent payments={payments} />

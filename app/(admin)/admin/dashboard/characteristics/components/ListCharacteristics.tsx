@@ -1,8 +1,10 @@
 "use client";
 
-import { deleteCharacteristic } from "@/app/actions/product-characteristic/create-product-characteristic";
+import {
+  deleteCharacteristic,
+  type GetAllCharacteristicsWithMetaResponse,
+} from "@/app/actions/product-characteristic/create-product-characteristic";
 import ButtonYellow from "@/components/BattonYellow";
-import { use } from "react";
 import ButtonXDellete from "../../ButtonXDellete";
 import { useCharacteristicStore } from "../store/useCharacteristicStore";
 
@@ -51,26 +53,7 @@ function getFlags(item: CharacteristicListItem) {
 export default function ListCharacteristics({
   data,
 }: {
-  data:
-    | {
-        success: boolean;
-        data: {
-          id: string;
-          name: string;
-          category_id: string | null;
-          category_name: string | null;
-          in_filter: number;
-          is_required: boolean;
-          is_multiple: boolean;
-          values: string[];
-        }[];
-        error?: undefined;
-      }
-    | {
-        success: boolean;
-        error: unknown;
-        data?: undefined;
-      };
+  data: Awaited<GetAllCharacteristicsWithMetaResponse>;
 }) {
   const { openEdit } = useCharacteristicStore();
 
