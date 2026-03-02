@@ -1,7 +1,9 @@
 "use client";
 
 import {
-  GetAllCategoriesResponse,
+  GetAllCategoriesFailure,
+  
+  GetAllCategoriesSuccess,
   removeCategoryProductsById,
 } from "@/app/actions/category/category-actions";
 import { deleteFileFromS3 } from "@/app/actions/files/uploadFile";
@@ -28,7 +30,7 @@ function CategoryRowActions({
       <button
         type="button"
         onClick={() => onEdit(category)}
-        className="admin-btn-secondary !px-3 !py-1.5 !text-xs"
+        className="admin-btn-secondary px-3! py-1.5! text-xs!"
       >
         Редагувати
       </button>
@@ -36,7 +38,7 @@ function CategoryRowActions({
       <button
         type="button"
         onClick={() => onDelete({ id: category.id, image: category.image })}
-        className="admin-btn-danger !px-3 !py-1.5 !text-xs"
+        className="admin-btn-danger px-3! py-1.5! text-xs!"
         disabled={isDeleting}
       >
         {isDeleting ? "Видалення..." : "Видалити"}
@@ -46,11 +48,10 @@ function CategoryRowActions({
 }
 
 export default function CategoriesClientPage({
-  initialDataPromise,
+  initialData,
 }: {
-  initialDataPromise: GetAllCategoriesResponse;
+  initialData: GetAllCategoriesSuccess | GetAllCategoriesFailure;
 }) {
-  const initialData = use(initialDataPromise);
   const [categories, setCategories] = useState<CategoryTypes[]>(initialData.data || []);
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState<CategoryTypes | null>(null);
