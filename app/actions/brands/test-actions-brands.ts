@@ -45,6 +45,21 @@ export type StrategyResult = {
   note: string | null;
 };
 
+function buildPhaseSkip(strategy: string, note: string): StrategyResult {
+  return {
+    strategy,
+    ok: true,
+    count: null,
+    buildPhase: true,
+    error: "skipped: build phase",
+    tookMs: 0,
+    checkedAt: BUILD_PHASE_MARK,
+    cachedAt: null,
+    attempts: 0,
+    note,
+  };
+}
+
 async function measure<T>(fn: () => Promise<T>) {
   const startedAt = performance.now();
 
@@ -73,6 +88,9 @@ async function fetchBrandsCountOnce() {
 
 export async function brands_noCache_throw(): Promise<StrategyResult> {
   const buildPhase = isBuildPhase();
+  if (buildPhase) {
+    return buildPhaseSkip("noCache_throw", "Build-safe skip before DB call");
+  }
   let attempts = 0;
 
   const r = await measure(async () => {
@@ -96,6 +114,9 @@ export async function brands_noCache_throw(): Promise<StrategyResult> {
 
 export async function brands_noCache_retryThrow(): Promise<StrategyResult> {
   const buildPhase = isBuildPhase();
+  if (buildPhase) {
+    return buildPhaseSkip("noCache_retryThrow", "Build-safe skip before DB call");
+  }
   let attempts = 0;
 
   const r = await measure(async () => {
@@ -136,6 +157,9 @@ async function brands_cached_count(): Promise<CachedCountPayload> {
 
 export async function brands_cache_throw(): Promise<StrategyResult> {
   const buildPhase = isBuildPhase();
+  if (buildPhase) {
+    return buildPhaseSkip("cache_throw", "Build-safe skip before cached DB call");
+  }
   const r = await measure(() => brands_cached_count());
 
   return {
@@ -175,6 +199,9 @@ async function brands_cached_retry_count(): Promise<CachedCountPayload> {
 
 export async function brands_cache_retryThrow(): Promise<StrategyResult> {
   const buildPhase = isBuildPhase();
+  if (buildPhase) {
+    return buildPhaseSkip("cache_retryThrow", "Build-safe skip before cached DB call");
+  }
   const r = await measure(() => brands_cached_retry_count());
 
   return {
@@ -195,18 +222,7 @@ export async function brands_guardOutsideCache(): Promise<StrategyResult> {
   const buildPhase = isBuildPhase();
 
   if (buildPhase) {
-    return {
-      strategy: "guard_outside_cache",
-      ok: true,
-      count: null,
-      buildPhase: true,
-      error: "skipped: build phase",
-      tookMs: 0,
-      checkedAt: BUILD_PHASE_MARK,
-      cachedAt: null,
-      attempts: 0,
-      note: "Guard is outside cache",
-    };
+    return buildPhaseSkip("guard_outside_cache", "Guard is outside cache");
   }
 
   const r = await measure(() => brands_cached_count());
@@ -229,18 +245,7 @@ export async function brands_guardOutsideCache_retryThrow(): Promise<StrategyRes
   const buildPhase = isBuildPhase();
 
   if (buildPhase) {
-    return {
-      strategy: "guard_outside_cache_retryThrow",
-      ok: true,
-      count: null,
-      buildPhase: true,
-      error: "skipped: build phase",
-      tookMs: 0,
-      checkedAt: BUILD_PHASE_MARK,
-      cachedAt: null,
-      attempts: 0,
-      note: "Recommended for build without DB",
-    };
+    return buildPhaseSkip("guard_outside_cache_retryThrow", "Recommended for build without DB");
   }
 
   const r = await measure(() => brands_cached_retry_count());
@@ -285,6 +290,9 @@ async function brands_cached_guardInside(): Promise<CachedGuardInsidePayload> {
 
 export async function brands_guardInsideCache(): Promise<StrategyResult> {
   const buildPhase = isBuildPhase();
+  if (buildPhase) {
+    return buildPhaseSkip("guard_inside_cache", "Build-safe skip before cached function");
+  }
   const r = await measure(() => brands_cached_guardInside());
 
   if (!r.ok) {
@@ -354,6 +362,9 @@ async function brands_cached_retry_catchReturn(): Promise<CachedCatchPayload> {
 
 export async function brands_cache_catchReturn(): Promise<StrategyResult> {
   const buildPhase = isBuildPhase();
+  if (buildPhase) {
+    return buildPhaseSkip("cache_catchReturn", "Build-safe skip before cached function");
+  }
   const r = await measure(() => brands_cached_retry_catchReturn());
 
   if (!r.ok) {
