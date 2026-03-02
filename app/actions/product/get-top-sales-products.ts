@@ -67,7 +67,7 @@ async function getTopSalesProductsCached(limit = 12): Promise<ProductType[]> {
 }
 
 export async function getTopSalesProducts(limit = 12): Promise<ProductType[]> {
-  if (isProductionBuild) {
+  if (isProductionBuild()) {
     return [];
   }
 

@@ -43,10 +43,7 @@ async function getAllBrandsCached(): Promise<BrandTypes[]> {
 
 async function getBrandBySlugFromDb(brand_slug: BrandTypes["brand_slug"]) {
   return withRetry(() =>
-    db
-      .select()
-      .from(brandProductsSchema)
-      .where(eq(brandProductsSchema.brand_slug, brand_slug)),
+    db.select().from(brandProductsSchema).where(eq(brandProductsSchema.brand_slug, brand_slug)),
   );
 }
 
@@ -65,7 +62,7 @@ export async function createBrand(brand: BrandTypes) {
 }
 
 export async function getAllBrands(): GetAllBrandsResponse {
-  if (isProductionBuild) {
+  if (isProductionBuild()) {
     return { success: true, data: [] };
   }
   try {
