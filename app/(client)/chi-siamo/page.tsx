@@ -34,7 +34,10 @@ export const metadata: Metadata = {
 };
 
 export default async function CarrelloPage() {
-  const brands = await getAllBrands();
+  const brands = await getAllBrands().catch((error) => {
+    console.error("[ChiSiamoPage:getAllBrands]", error);
+    return { success: false, data: [], error };
+  });
   return (
     <>
       <section className="py-16">
@@ -87,7 +90,7 @@ export default async function CarrelloPage() {
           <p className="H4M max-w-[680px]">
             Nel catalogo sono presenti prodotti appartenenti a marchi noti e apprezzati nel settore:
           </p>
-          {brands.data && (
+          {brands.success && brands.data.length > 0 && (
             <ul className="flex flex-wrap justify-center gap-3">
               {brands.data.map((brand) => (
                 <li key={brand.id} className="flex items-center justify-center">
@@ -102,6 +105,11 @@ export default async function CarrelloPage() {
                 </li>
               ))}
             </ul>
+          )}
+          {!brands.success && (
+            <p className="H4M text-text-grey">
+              I marchi sono temporaneamente non disponibili.
+            </p>
           )}
           <p className="H4M">e altri marchi selezionati in base alla qualità e all’affidabilità.</p>
         </div>

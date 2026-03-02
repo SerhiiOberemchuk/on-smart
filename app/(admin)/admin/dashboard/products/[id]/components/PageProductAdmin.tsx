@@ -135,27 +135,37 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
 
   useEffect(() => {
     startTransitionCategory(async () => {
-      const res = await getAllCategoryProducts();
-      if (!res.success) {
-        toast.error("Помилка завантаження категорій");
-        console.error(res.error);
-        return;
-      }
+      try {
+        const res = await getAllCategoryProducts();
+        if (!res.success) {
+          toast.error("Failed to load categories");
+          console.error(res.error);
+          return;
+        }
 
-      setCategories(res.data);
+        setCategories(res.data);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to load categories");
+      }
     });
   }, []);
 
   useEffect(() => {
     startTransitionBrands(async () => {
-      const res = await getAllBrands();
-      if (!res.success) {
-        toast.error("Помилка завантаження брендів");
-        console.error(res.error);
-        return;
-      }
+      try {
+        const res = await getAllBrands();
+        if (!res.success) {
+          toast.error("Failed to load brands");
+          console.error(res.error);
+          return;
+        }
 
-      setBrands(res.data);
+        setBrands(res.data);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to load brands");
+      }
     });
   }, []);
 
@@ -505,3 +515,4 @@ export default function PageProductAdmin({ dataAction }: { dataAction: Promise<P
     </section>
   );
 }
+

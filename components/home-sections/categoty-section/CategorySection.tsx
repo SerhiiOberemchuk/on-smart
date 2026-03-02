@@ -7,7 +7,10 @@ import CategoryListFallback from "./CategoryListFallback";
 import ListCategories from "./ListCategories";
 
 export default function CategorySection() {
-  const categoriesPromise = getAllCategoryProducts();
+  const categoriesPromise = getAllCategoryProducts().catch((error) => {
+    console.error("[CategorySection]", error);
+    return { success: false, data: [], error };
+  });
   const headingId = "category-section-heading";
 
   return (
