@@ -63,7 +63,7 @@ async function getCategoryBySlugFromDb(category_slug: CategoryTypes["category_sl
 }
 
 export async function getAllCategoryProducts(): GetAllCategoriesResponse {
-  if (isProductionBuild) {
+  if (isProductionBuild()) {
     return { success: true, data: [] };
   }
 
