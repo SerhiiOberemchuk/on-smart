@@ -1,4 +1,3 @@
-import Script from "next/script";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -80,7 +79,7 @@ export default async function ListCategories({
           </li>
         ))}
       </ul>
-      <Script
+      <script
         id="category-section-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

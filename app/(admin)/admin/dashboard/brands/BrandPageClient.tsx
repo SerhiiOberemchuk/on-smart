@@ -25,7 +25,7 @@ function BrandRowActions({
       <button
         type="button"
         onClick={() => onEdit(brand)}
-        className="admin-btn-secondary !px-3 !py-1.5 !text-xs"
+        className="admin-btn-secondary px-3! py-1.5! text-xs!"
       >
         Редагувати
       </button>
@@ -33,7 +33,7 @@ function BrandRowActions({
       <button
         type="button"
         onClick={() => onDelete({ id: brand.id, image: brand.image })}
-        className="admin-btn-danger !px-3 !py-1.5 !text-xs"
+        className="admin-btn-danger px-3! py-1.5! text-xs!"
         disabled={isDeleting}
       >
         {isDeleting ? "Видалення..." : "Видалити"}
@@ -127,7 +127,7 @@ export default function BrandsPageClient({ brandsData }: { brandsData: BrandType
                           alt={brand.name}
                           width={66}
                           height={66}
-                          className="h-16 w-16 rounded-md border border-slate-600/55 object-cover p-1"
+                          className="h-16 w-16 rounded-md border border-slate-600/55 object-contain object-center p-1"
                         />
                       </Link>
                     </td>

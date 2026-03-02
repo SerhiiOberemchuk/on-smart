@@ -49,9 +49,9 @@ function getFlags(item: CharacteristicListItem) {
 }
 
 export default function ListCharacteristics({
-  action,
+  data,
 }: {
-  action: Promise<
+  data:
     | {
         success: boolean;
         data: {
@@ -70,10 +70,8 @@ export default function ListCharacteristics({
         success: boolean;
         error: unknown;
         data?: undefined;
-      }
-  >;
+      };
 }) {
-  const data = use(action);
   const { openEdit } = useCharacteristicStore();
 
   const handleDelete = async (id: string) => {
@@ -107,7 +105,9 @@ export default function ListCharacteristics({
                   <div className="admin-characteristic-head">
                     <p className="admin-characteristic-name">{item.name}</p>
                     <div className="admin-characteristic-meta">
-                      <span className="admin-chip admin-characteristic-count">{item.values.length} знач.</span>
+                      <span className="admin-chip admin-characteristic-count">
+                        {item.values.length} знач.
+                      </span>
                       {getFlags(item).map((flag) => (
                         <span key={flag} className="admin-chip admin-characteristic-flag-chip">
                           {flag}

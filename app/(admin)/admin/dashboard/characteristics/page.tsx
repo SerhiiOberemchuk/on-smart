@@ -4,8 +4,8 @@ import { CharacteristicModal } from "./components/CharacteristicModal";
 import { Suspense } from "react";
 import { getAllCharacteristicsWithMeta } from "@/app/actions/product-characteristic/create-product-characteristic";
 
-export default function OrderPage() {
-  const get = getAllCharacteristicsWithMeta();
+export default async function OrderPage() {
+  const get = await getAllCharacteristicsWithMeta();
   return (
     <Suspense>
       <section className="admin-page">
@@ -20,7 +20,7 @@ export default function OrderPage() {
           <ButtonAddCharacteristic />
         </Suspense>
         <Suspense fallback={<p>Завантаження...</p>}>
-          <ListCharacteristics action={get} />
+          <ListCharacteristics data={get} />
         </Suspense>
         <Suspense fallback={<p>Завантаження...</p>}>
           <CharacteristicModal />

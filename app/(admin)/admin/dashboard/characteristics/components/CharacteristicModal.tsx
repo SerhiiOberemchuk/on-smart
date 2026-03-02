@@ -169,9 +169,21 @@ export function CharacteristicModal() {
               />
 
               <div className="admin-grid-3">
-                <InputAdminStyle type="checkbox" {...register("in_filter")} input_title="Використовувати у фільтрах" />
-                <InputAdminStyle type="checkbox" {...register("is_required")} input_title="Обов'язкова" />
-                <InputAdminStyle type="checkbox" {...register("is_multiple")} input_title="Кілька значень" />
+                <InputAdminStyle
+                  type="checkbox"
+                  {...register("in_filter")}
+                  input_title="Використовувати у фільтрах"
+                />
+                <InputAdminStyle
+                  type="checkbox"
+                  {...register("is_required")}
+                  input_title="Обов'язкова"
+                />
+                <InputAdminStyle
+                  type="checkbox"
+                  {...register("is_multiple")}
+                  input_title="Кілька значень"
+                />
               </div>
 
               <SelectComponentAdmin
@@ -199,17 +211,29 @@ export function CharacteristicModal() {
                       className="admin-input"
                       placeholder="Наприклад: 4 MP"
                     />
-                    <ButtonXDellete type="button" className="h-8 w-8" onClick={() => remove(index)} />
+                    <ButtonXDellete
+                      type="button"
+                      className="h-8 w-8"
+                      onClick={() => remove(index)}
+                    />
                   </div>
                 ))}
 
-                <ButtonYellow type="button" className="admin-btn-secondary w-fit !text-xs" onClick={() => append({ value: "", id: "" })}>
+                <ButtonYellow
+                  type="button"
+                  className="admin-btn-secondary w-fit text-xs!"
+                  onClick={() => append({ value: "", id: "" })}
+                >
                   Додати значення
                 </ButtonYellow>
               </div>
 
               <div className="admin-actions justify-end">
-                <ButtonYellow disabled={loading} type="submit" className="admin-btn-primary !px-4 !py-2 !text-sm">
+                <ButtonYellow
+                  disabled={loading}
+                  type="submit"
+                  className="admin-btn-primary px-4! py-2! text-sm!"
+                >
                   {mode === "create" ? "Створити" : "Зберегти"}
                 </ButtonYellow>
               </div>

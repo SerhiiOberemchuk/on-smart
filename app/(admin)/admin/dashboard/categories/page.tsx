@@ -3,11 +3,11 @@ import CategoriesClientPage from "./CategoryClientPage";
 import { Suspense } from "react";
 
 export default async function CategoriesPage() {
-  const res = getAllCategoryProducts();
+  const res = await getAllCategoryProducts();
 
   return (
     <Suspense>
-      <CategoriesClientPage initialDataPromise={res} />
+      <CategoriesClientPage initialData={res} />
     </Suspense>
   );
 }

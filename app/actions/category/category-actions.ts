@@ -14,13 +14,13 @@ const BUILD_PHASE_SKIP_ERROR = "skipped: build phase";
 
 type CategoryRow = typeof categoryProductsSchema.$inferSelect;
 
-type GetAllCategoriesSuccess = {
+export type GetAllCategoriesSuccess = {
   success: true;
   data: CategoryRow[];
   error: null;
 };
 
-type GetAllCategoriesFailure = {
+export type GetAllCategoriesFailure = {
   success: false;
   error: unknown;
   data: [];
@@ -55,7 +55,10 @@ async function getAllCategoryProductsCachedCore(): Promise<CategoryRow[]> {
   cacheTag(CACHE_TAGS.category.all);
   cacheLife("hours");
 
-  return withRetrySelective(() => db.select().from(categoryProductsSchema), CATEGORY_READ_RETRY_OPTIONS);
+  return withRetrySelective(
+    () => db.select().from(categoryProductsSchema),
+    CATEGORY_READ_RETRY_OPTIONS,
+  );
 }
 
 async function getCategoryBySlugCachedCore(categorySlug: string): Promise<CategoryRow | null> {
