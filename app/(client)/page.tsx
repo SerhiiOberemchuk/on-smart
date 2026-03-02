@@ -9,9 +9,16 @@ import Script from "next/script";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import { Suspense } from "react";
 import FallbackHeroSection from "@/components/home-sections/hero-section/FallbackHeroSection";
+import {
+  BrandSectionFallback,
+  CategorySectionFallback,
+  FeedbackFormSectionFallback,
+  GoogleReviewSectionFallback,
+  TopSalesSectionFallback,
+} from "@/components/home-sections/fallbacks/HomeSectionFallbacks";
 
 export const metadata: Metadata = {
-  title: "OnSmart — Elettronica, Videosorveglianza, Smart Home al miglior prezzo",
+  title: "OnSmart - Elettronica, Videosorveglianza, Smart Home al miglior prezzo",
   description:
     "Acquista online elettronica, sistemi di videosorveglianza, smart home e accessori per la sicurezza. Consegna veloce, prezzi competitivi e supporto professionale.",
   keywords: [
@@ -27,8 +34,20 @@ export const metadata: Metadata = {
   alternates: {
     canonical: `${CONTACTS_ADDRESS.BASE_URL}`,
   },
+  robots: {
+    index: true,
+    follow: true,
+    noarchive: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   openGraph: {
-    title: "OnSmart — Elettronica & Sicurezza per la tua casa",
+    title: "OnSmart - Elettronica e Sicurezza per la tua casa",
     description:
       "Camere di sicurezza, sistemi smart home, accessori e molto altro. I migliori prezzi e spedizione rapida.",
     url: CONTACTS_ADDRESS.BASE_URL,
@@ -44,27 +63,37 @@ export const metadata: Metadata = {
     locale: "it_IT",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "OnSmart - Elettronica e Sicurezza per la tua casa",
+    description:
+      "Camere di sicurezza, sistemi smart home, accessori e molto altro. I migliori prezzi e spedizione rapida.",
+    images: [`${CONTACTS_ADDRESS.BASE_URL}/og-image.png`],
+  },
 };
 
 export default async function Home() {
   return (
     <>
+      <h1 className="sr-only">
+        OnSmart: elettronica, videosorveglianza, sistemi smart home e sicurezza per casa e azienda
+      </h1>
       <Suspense fallback={<FallbackHeroSection />}>
         <HeroSection />
       </Suspense>
-      <Suspense>
+      <Suspense fallback={<TopSalesSectionFallback />}>
         <TopSalesSection />
       </Suspense>
-      <Suspense>
+      <Suspense fallback={<CategorySectionFallback />}>
         <CategorySection />
       </Suspense>
-      <Suspense>
+      <Suspense fallback={<BrandSectionFallback />}>
         <BrandSection />
       </Suspense>
-      <Suspense>
+      <Suspense fallback={<GoogleReviewSectionFallback />}>
         <GoogleReviewSection />
       </Suspense>
-      <Suspense>
+      <Suspense fallback={<FeedbackFormSectionFallback />}>
         <FeedbackFormSection />
       </Suspense>
       <Script
@@ -75,9 +104,12 @@ export default async function Home() {
             "@context": "https://schema.org",
             "@type": "Organization",
             name: "OnSmart",
+            description:
+              "E-commerce di elettronica, videosorveglianza e smart home per casa e azienda.",
             legalName: CONTACTS_ADDRESS.OWNER.COMPANY_NAME,
             url: CONTACTS_ADDRESS.BASE_URL,
             logo: `${CONTACTS_ADDRESS.BASE_URL}/logo.png`,
+            inLanguage: "it-IT",
             sameAs: ["https://www.facebook.com/onsmart", "https://www.instagram.com/onsmart"],
             address: {
               "@type": "PostalAddress",
@@ -92,6 +124,19 @@ export default async function Home() {
               contactType: "customer service",
               availableLanguage: "Italian",
             },
+          }),
+        }}
+      />
+      <Script
+        id="home_page_website"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "OnSmart",
+            url: CONTACTS_ADDRESS.BASE_URL,
+            inLanguage: "it-IT",
           }),
         }}
       />

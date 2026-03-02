@@ -30,15 +30,11 @@ export async function getProductDetailsById(id: string): Promise<Product_Details
     characteristics_specifiche: {
       title: specifiche?.data?.title ?? "Specifiche",
       images: specifiche?.data?.images?.length ? specifiche.data.images : ["/logo.png"],
-      groups: specifiche?.data?.groups?.length
-        ? specifiche.data.groups
-        : [{ name: "-", value: "-", position: 0 }],
+      groups: specifiche?.data?.groups?.length ? specifiche.data.groups : [],
     },
 
     characteristics_documenti: {
-      documents: documents?.data?.documents?.length
-        ? documents.data.documents
-        : [{ title: "Document example", link: "/logo.png" }],
+      documents: documents?.data?.documents?.length ? documents.data.documents : [],
     },
 
     characteristics_valutazione: reviews.reviews ? reviews.reviews : [],

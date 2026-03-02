@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { getAllProducts } from "@/app/actions/product/get-all-products";
 import Script from "next/script";
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
 import { baseUrl } from "@/types/baseUrl";
@@ -8,27 +7,69 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import LinkYellow from "@/components/YellowLink";
-import { Suspense } from "react";
+import { getAllProductsFiltered } from "@/app/actions/product/get-all-products-filtered";
+import { ProductType } from "@/db/schemas/product.schema";
 
 type Props = { params: Promise<{ categoria: string }> };
+
+const CATEGORY_PRODUCTS_LIMIT = 24;
+
+function buildProductHref(product: ProductType): string {
+  if (product.productType === "bundle") {
+    return `/catalogo/${product.category_slug}/${product.brand_slug}/bundle/${product.slug}`;
+  }
+
+  return `/catalogo/${product.category_slug}/${product.brand_slug}/${product.slug}`;
+}
+
+function normalizeCategoryDescription(description: string): string {
+  return description.replace(/\|/g, ". ").replace(/\s+/g, " ").trim();
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { categoria } = await params;
   const categoryInfo = await getCategoryBySlug(categoria);
 
   if (!categoryInfo.success || !categoryInfo.data) {
-    return {
-      title: "Categoria non trovata",
-      robots: "noindex",
-    };
+    notFound();
   }
 
+  const description = normalizeCategoryDescription(categoryInfo.data.description);
+  const canonical = `${baseUrl}/categoria/${categoryInfo.data.category_slug}`;
+  const title = `Categoria ${categoryInfo.data.title_full} | OnSmart`;
+
   return {
-    title: `Categoria ${categoryInfo.data?.title_full} | OnSmart`,
-    description:
-      categoryInfo.data?.description ?? `Prodotti della categoria ${categoryInfo.data?.name}.`,
+    title,
+    description,
     alternates: {
-      canonical: `${baseUrl}/categoria/${categoria}`,
+      canonical,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      noarchive: false,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      siteName: "OnSmart",
+      locale: "it_IT",
+      images: [
+        {
+          url: categoryInfo.data.image || `${baseUrl}/og-image.png`,
+          width: 1200,
+          height: 630,
+          alt: categoryInfo.data.title_full,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [categoryInfo.data.image || `${baseUrl}/og-image.png`],
     },
   };
 }
@@ -36,37 +77,49 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PageCategoria({ params }: Props) {
   const { categoria } = await params;
 
-  const { success, data } = await getCategoryBySlug(categoria);
+  const [categoryResponse, productsResponse] = await Promise.all([
+    getCategoryBySlug(categoria),
+    getAllProductsFiltered({
+      categorySlugs: [categoria],
+      mode: "parentsOnly",
+      limit: CATEGORY_PRODUCTS_LIMIT,
+      sort: "new",
+    }),
+  ]);
 
-  if (!success || !data) {
+  if (!categoryResponse.success || !categoryResponse.data) {
     notFound();
   }
-  const products = await getAllProducts();
-  if (!products.data) {
-    return;
-  }
+
+  const category = categoryResponse.data;
+  const products = productsResponse.data;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: `Categoria ${data?.name}`,
-    description: data?.description,
-    url: `${baseUrl}/categoria/${categoria}`,
-    hasPart: {
+    name: `Categoria ${category.name}`,
+    description: category.description,
+    url: `${baseUrl}/categoria/${category.category_slug}`,
+    inLanguage: "it-IT",
+    mainEntity: {
       "@type": "ItemList",
-      itemListElement: products.data?.map((p, i) => ({
+      name: `Prodotti della categoria ${category.name}`,
+      numberOfItems: productsResponse.meta.total,
+      itemListOrder: "https://schema.org/ItemListOrderAscending",
+      itemListElement: products.map((product, index) => ({
         "@type": "ListItem",
-        position: i + 1,
+        position: index + 1,
         item: {
           "@type": "Product",
-          name: p.name,
-          image: p.imgSrc,
-          brand: p.brand_slug,
+          name: product.name,
+          image: product.imgSrc,
+          brand: product.brand_slug,
           offers: {
             "@type": "Offer",
             priceCurrency: "EUR",
-            price: p.price,
+            price: product.price,
             availability: "https://schema.org/InStock",
-            url: `${baseUrl}/catalogo/${p.category_slug}/${p.brand_slug}/${p.slug}`,
+            url: `${baseUrl}${buildProductHref(product)}`,
           },
         },
       })),
@@ -83,45 +136,58 @@ export default async function PageCategoria({ params }: Props) {
             </Link>
           </li>
           <li>
-            /<span className="text-white"> {data.name}</span>
+            /<span className="text-white"> {category.name}</span>
           </li>
         </ul>
       </nav>
       <section className="bg-background">
         <div className="container">
-          <h1 className="H2 py-3 text-left uppercase">{data.name}</h1>
+          <h1 className="H2 py-3 text-left uppercase">{category.name}</h1>
           <div className="flex flex-col gap-5 py-3 xl:flex-row">
             <Image
-              src={data.image}
+              src={category.image}
               width={492}
               height={270}
-              alt={data.name + "- Logo"}
+              alt={`${category.name} - Categoria`}
               quality={100}
               className="h-[270px] w-[492px] object-contain object-center xl:px-6"
             />
             <ul className="flex flex-col gap-3">
-              {data.description.split("|").map((desc, index) => (
-                <li key={index}>
-                  <p className="text_R"> {desc}</p>
-                </li>
-              ))}
+              {category.description.split("|").map((desc, index) => {
+                const trimmed = desc.trim();
+                if (!trimmed) return null;
+                return (
+                  <li key={`${trimmed}-${index}`}>
+                    <p className="text_R">{trimmed}</p>
+                  </li>
+                );
+              })}
               <LinkYellow
                 title="Mostra tutto"
-                href={`/catalogo?categoria=${data.category_slug}`}
+                href={`/catalogo?categoria=${category.category_slug}`}
                 className="mr-auto flex"
               />
             </ul>
           </div>
         </div>
       </section>
-      <Suspense>
+
+      {products.length > 0 ? (
         <ProductRowListSection
-          productsList={products.data}
+          productsList={products}
           idSection="categoria_section"
-          title={`Prodotti della categoria ${data?.name}`}
+          title={`Prodotti della categoria ${category.name}`}
           isBottomLink={false}
         />
-      </Suspense>
+      ) : (
+        <section className="py-8">
+          <div className="container rounded-sm border border-stroke-grey p-4">
+            <p className="text_R text-text-grey">
+              Nessun prodotto disponibile al momento in questa categoria.
+            </p>
+          </div>
+        </section>
+      )}
 
       <Script
         id="category-jsonld"

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getProductBySlug } from "@/app/actions/product/get-product-by-slug";
 import { baseUrl } from "@/types/baseUrl";
 import PageSlug from "./PageSlug";
 import { Suspense } from "react";
+import ProductPageFallback from "./ProductPageFallback";
 
 export async function generateMetadata({
   params,
@@ -46,6 +47,7 @@ export async function generateMetadata({
     robots: {
       index: true,
       follow: true,
+      noarchive: false,
       googleBot: {
         index: true,
         follow: true,
@@ -58,6 +60,9 @@ export async function generateMetadata({
       title: data.name,
       description: descriptionWithEan,
       url: canonicalUrl,
+      type: "website",
+      siteName: "OnSmart",
+      locale: "it_IT",
       images: [
         {
           url: data.imgSrc,
@@ -82,15 +87,29 @@ async function CategoryBrandSlugContent({
 }: {
   params: Promise<{ category: string; brand: string; slug: string }>;
 }) {
-  const { slug } = await params;
-  return <PageSlug slug={slug} />;
+  const { category, brand, slug } = await params;
+
+  const productResponse = await getProductBySlug(slug);
+  const product = productResponse.data;
+
+  if (!productResponse.success || !product) {
+    notFound();
+  }
+
+  if (product.category_slug !== category || product.brand_slug !== brand) {
+    permanentRedirect(
+      `/catalogo/${encodeURIComponent(product.category_slug)}/${encodeURIComponent(product.brand_slug)}/${encodeURIComponent(product.slug)}`,
+    );
+  }
+
+  return <PageSlug slug={slug} initialProduct={product} />;
 }
 
 export default function CategoryBrandSlugIdPage({
   params,
 }: PageProps<"/catalogo/[category]/[brand]/[slug]">) {
   return (
-    <Suspense fallback={<p>Carico...</p>}>
+    <Suspense fallback={<ProductPageFallback />}>
       <CategoryBrandSlugContent params={params} />
     </Suspense>
   );

@@ -13,11 +13,10 @@ export default function MobileFilterSection({
 }) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   useEffect(() => {
-    if (isFilterOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
+    document.body.style.overflow = isFilterOpen ? "hidden" : "auto";
+    return () => {
       document.body.style.overflow = "auto";
-    }
+    };
   }, [isFilterOpen]);
   return (
     <div className="container py-2 lg:hidden">

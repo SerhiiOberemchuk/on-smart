@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const canonical = `${CONTACTS_ADDRESS.BASE_URL}/brand/${brand_slug}`;
-  const title = `${data.name} – Prodotti ufficiali OnSmart`;
+  const title = `${data.name} - Prodotti ufficiali OnSmart`;
   const description = `Scopri i migliori prodotti del brand ${data.name}: videosorveglianza, accessori e soluzioni professionali disponibili su OnSmart.`;
 
   return {
@@ -25,17 +25,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: {
       canonical,
     },
+    robots: {
+      index: true,
+      follow: true,
+      noarchive: false,
+    },
     openGraph: {
       title,
       description,
       url: canonical,
       type: "website",
       siteName: "OnSmart",
+      locale: "it_IT",
       images: [
         {
           url: data.image,
-          width: 600,
-          height: 400,
+          width: 1200,
+          height: 630,
           alt: `${data.name} Logo`,
         },
       ],

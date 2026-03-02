@@ -6,7 +6,7 @@ import { BrandTypes } from "@/types/brands.types";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 import { eq } from "drizzle-orm";
-import { cacheTag, updateTag } from "next/cache";
+import { cacheLife, cacheTag, updateTag } from "next/cache";
 
 export async function createBrand(brand: BrandTypes) {
   try {
@@ -25,6 +25,7 @@ export async function createBrand(brand: BrandTypes) {
 export async function getAllBrands() {
   "use cache";
   cacheTag(CACHE_TAGS.brand.all);
+  cacheLife("hours");
   try {
     const result = await  db.select().from(brandProductsSchema);
     return {

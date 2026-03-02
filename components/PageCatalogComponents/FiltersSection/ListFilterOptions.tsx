@@ -6,8 +6,8 @@ import icon_arrow_top from "@/assets/icons/arrow-top.svg";
 import { use, useEffect, useRef, useState } from "react";
 import { LabelInput } from "./sub-component/LabelInput";
 import { InputRange } from "./sub-component/InputRange";
-import { usePathname, useRouter } from "next/navigation";
 import { FilterGroup } from "@/types/catalog-filter-options.types";
+import ResetCatalogFiltersButton from "./ResetCatalogFiltersButton";
 
 export default function ListFiltereOptions({
   className,
@@ -17,8 +17,6 @@ export default function ListFiltereOptions({
   filtersAction: Promise<FilterGroup[]>;
 }) {
   const filters = use(filtersAction);
-  const router = useRouter();
-  const pathname = usePathname();
 
   return (
     <ul className={twMerge("flex w-full max-w-[264px] flex-col", className)}>
@@ -28,15 +26,7 @@ export default function ListFiltereOptions({
         </li>
       ))}
       <li>
-        <button
-          type="button"
-          className="input_M_18 mx-auto flex pt-2 pb-4 text-center underline"
-          onClick={() => {
-            router.push(pathname, { scroll: false });
-          }}
-        >
-          Azzera filtri
-        </button>
+        <ResetCatalogFiltersButton />
       </li>
     </ul>
   );
@@ -51,7 +41,7 @@ export function ItemFilteredOptions(props: FilterGroup) {
     if (ulRef.current) {
       setScrollHeight(ulRef.current.scrollHeight);
     }
-  }, [scrollHeight]);
+  }, [isOpen]);
   return (
     <fieldset className="">
       <legend

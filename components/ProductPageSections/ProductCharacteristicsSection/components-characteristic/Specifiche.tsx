@@ -4,12 +4,21 @@ import { twMerge } from "tailwind-merge";
 
 export default function Specifiche({
   data,
+  isDescriptionEmpty = false,
   className,
 }: {
   data: Product_Details["characteristics_specifiche"];
+  isDescriptionEmpty?: boolean;
   className?: string;
 }) {
-  const imagesToRender = data.images.length > 1 ? data.images.slice(0, 4) : data.images;
+  const imagesToRender = data.images
+    .filter((img) => img && img !== "/logo.png")
+    .slice(0, 4);
+  const groupsToRender = data.groups
+    .filter((item) => item.name.trim() !== "" && item.value.trim() !== "")
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  const showUnavailableMessage = isDescriptionEmpty && groupsToRender.length === 0;
+
   return (
     <div className={twMerge("flex flex-col gap-3 xl:flex-row xl:items-start xl:gap-6", className)}>
       {imagesToRender.length === 1 && (
@@ -37,10 +46,13 @@ export default function Specifiche({
       )}
       <div className="flex flex-1 flex-col gap-3 rounded-sm bg-background p-3">
         <h2 className="H4M">{data.title}</h2>
-        <ul className="mt-1 flex flex-col gap-3">
-          {data.groups
-            .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
-            .map((item, index) => (
+        {showUnavailableMessage ? (
+          <p className="text_R mt-1 text-text-grey">
+            I dati corrispondenti non sono ancora disponibili.
+          </p>
+        ) : (
+          <ul className="mt-1 flex flex-col gap-3">
+            {groupsToRender.map((item, index) => (
               <li
                 key={item.name + index}
                 className="text_R flex justify-between px-1 py-2 odd:bg-grey-hover-stroke even:bg-transparent"
@@ -49,7 +61,8 @@ export default function Specifiche({
                 <span className="uppercase">{item.value}</span>
               </li>
             ))}
-        </ul>
+          </ul>
+        )}
       </div>
     </div>
   );

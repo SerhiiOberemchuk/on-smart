@@ -19,9 +19,10 @@ export default function ProductsList({
 }) {
   return (
     <Swiper
+      aria-label={`Lista prodotti per la sezione ${idSection}`}
       slidesPerView={"auto"}
       spaceBetween={20}
-      id="top_products_list_slider"
+      id={`${idSection}_products_slider`}
       freeMode={true}
       modules={[Navigation, FreeMode]}
       navigation={{
@@ -30,12 +31,8 @@ export default function ProductsList({
       }}
       className="top_products_list"
     >
-      {initialProducts.map((product, index) => (
-        <SwiperSlide
-          id="top-products-item"
-          // className="transition-all duration-300 hover:scale-105"
-          key={index}
-        >
+      {initialProducts.map((product) => (
+        <SwiperSlide key={product.id}>
           <CardProduct {...product} className="" />
         </SwiperSlide>
       ))}

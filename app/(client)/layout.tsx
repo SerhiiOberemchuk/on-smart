@@ -6,7 +6,6 @@ import "../styles/globals.css";
 
 import Header from "@/layout-components/Header/Header";
 import Footer from "@/layout-components/Footer";
-import Head from "next/head";
 import CardDialog from "@/components/ProductCard/dialog-add-to-cart/CardDialog";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ToastContainer } from "react-toastify";
@@ -23,7 +22,7 @@ const fixelFont = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL("https://on-smart.it"),
   title: { default: "OnSmart", template: "%s | OnSmart" },
-  description: "La videosorveglianza è uno dei modi più affidabili per proteggere la tua proprietà",
+  description: "La videosorveglianza e uno dei modi piu affidabili per proteggere la tua proprieta.",
   icons: {
     icon: [
       { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
@@ -38,17 +37,6 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="it-IT">
-      <Head>
-        <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="shortcut icon" href="/favicon.ico" />
-        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <meta name="apple-mobile-web-app-title" content="ON SMART" />
-        <link rel="preload" as="image" property="high" href="/hero-baner/Baner 1 Antifurto.png" />
-        <link rel="preload" as="image" href="/brands/ajax.png" />
-      </Head>
-
       <body className={clsx(fixelFont.className, "flex min-h-svh flex-col")}>
         <NuqsAdapter>
           <Header />

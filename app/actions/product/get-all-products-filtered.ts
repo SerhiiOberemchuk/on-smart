@@ -4,19 +4,26 @@ import { db } from "@/db/db";
 import { productsSchema } from "@/db/schemas/product.schema";
 import { productCharacteristicProductSchema } from "@/db/schemas/product_characteristic_product.schema";
 import { and, asc, desc, gte, inArray, isNull, lte, sql, type SQL } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
+export type CatalogSort = "price-asc" | "price-desc" | "new";
 export type CatalogQueryPayload = {
   categorySlugs?: string[];
   brandSlugs?: string[];
   characteristics?: Record<string, string[]>;
   price?: { min?: number; max?: number };
-  sort?: "price-asc" | "price-desc" | "new";
+  sort?: CatalogSort;
   page?: number;
   limit?: number;
   mode?: "parentsOnly" | "all";
 };
 
 export async function getAllProductsFiltered(payload: CatalogQueryPayload) {
+  "use cache";
+  cacheTag(CACHE_TAGS.product.all);
+  cacheLife("minutes");
+
   const {
     categorySlugs,
     brandSlugs,
@@ -27,6 +34,10 @@ export async function getAllProductsFiltered(payload: CatalogQueryPayload) {
     limit = 20,
     mode = "all",
   } = payload;
+
+  const safeSort: CatalogSort =
+    sort === "price-asc" || sort === "price-desc" || sort === "new" ? sort : "new";
+  const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.min(Math.trunc(limit), 100) : 20;
 
   const effectiveProductId = sql<string>`
     COALESCE(${productsSchema.parent_product_id}, ${productsSchema.id})
@@ -63,9 +74,9 @@ export async function getAllProductsFiltered(payload: CatalogQueryPayload) {
 
   const whereClause = where.length ? and(...where) : undefined;
   const orderBy =
-    sort === "price-asc"
+    safeSort === "price-asc"
       ? asc(productsSchema.price)
-      : sort === "price-desc"
+      : safeSort === "price-desc"
       ? desc(productsSchema.price)
       : desc(productsSchema.id);
 
@@ -75,27 +86,27 @@ export async function getAllProductsFiltered(payload: CatalogQueryPayload) {
     .where(whereClause);
 
   const normalizedPage = Number.isFinite(page) && page > 0 ? Math.trunc(page) : 1;
-  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const totalPages = Math.max(1, Math.ceil(total / safeLimit));
   const safePage = Math.min(normalizedPage, totalPages);
-  const offset = (safePage - 1) * limit;
+  const safeOffset = (safePage - 1) * safeLimit;
 
   const data = await db
     .select()
     .from(productsSchema)
     .where(whereClause)
     .orderBy(orderBy)
-    .limit(limit)
-    .offset(offset);
+    .limit(safeLimit)
+    .offset(safeOffset);
 
   return {
     data,
     meta: {
       page: safePage,
-      limit,
+      limit: safeLimit,
       total,
       totalPages,
       mode,
-      sort,
+      sort: safeSort,
     },
   };
 }

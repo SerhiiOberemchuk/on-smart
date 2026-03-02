@@ -22,7 +22,7 @@ export function LabelInput(option: FilterOption & Pick<FilterGroup, "param">) {
       : [...(sortParam || []), option.value];
     setSortParam(
       updatedSortParam.length > 0 ? updatedSortParam : null,
-      //  {      limitUrlUpdates: debounce(1000),    }
+      { scroll: false, shallow: false },
     );
   };
   const idLabel = `${option.param}__${option.value}`;

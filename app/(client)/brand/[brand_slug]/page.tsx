@@ -5,7 +5,7 @@ type Props = { params: Promise<{ brand_slug: string }> };
 export default function Page({ params }: Props) {
   return (
     <Suspense>
-      <PageBrandSlug params={params} />;
+      <PageBrandSlug params={params} />
     </Suspense>
   );
 }

@@ -35,6 +35,11 @@ export default function ProductCharacteristicsSection({
     characteristics_documenti,
     characteristics_valutazione,
   } = productDetail;
+  const isDescriptionEmpty =
+    !characteristics_descrizione.description.trim() &&
+    (characteristics_descrizione.title.trim().length === 0 ||
+      characteristics_descrizione.title.trim().toLowerCase() === "no title") &&
+    !characteristics_descrizione.images.some((img) => img && img !== "/logo.png");
 
   const [currentTab, setCurrentTab] = useState<TabTypeCaracteristics>(DEFAULT_TAB_CHARACTERISTICS);
 
@@ -107,7 +112,11 @@ export default function ProductCharacteristicsSection({
             </SwiperSlide>
 
             <SwiperSlide>
-              <Specifiche data={characteristics_specifiche} className="w-full" />
+              <Specifiche
+                data={characteristics_specifiche}
+                isDescriptionEmpty={isDescriptionEmpty}
+                className="w-full"
+              />
             </SwiperSlide>
 
             <SwiperSlide>

@@ -26,6 +26,7 @@ export default function Carousel() {
   return (
     <div className="xl:container">
       <Swiper
+        aria-label="Banner principali con promozioni e categorie in evidenza"
         slidesPerView={1}
         spaceBetween={0}
         autoplay={{
@@ -41,31 +42,33 @@ export default function Carousel() {
         onAutoplayTimeLeft={onAutoplayTimeLeft}
         className="hero_swiper"
       >
-        {slidesBanners.map((baner, i) => (
+        {slidesBanners.map((banner, i) => (
           <SwiperSlide key={i} className="relative bg-white">
             <div className="title_home_carousel px-4 md:max-w-[60%] md:pl-10">
-              <h2 className="H1 mb-6 max-w-[580px] text-pretty text-black">{baner.title}</h2>
-              <LinkYellow href="/catalogo" title="Vai allo shop" />
+              <h2 className="H1 mb-6 max-w-[580px] text-pretty text-black">{banner.title}</h2>
+              <LinkYellow href={banner.href} title="Vai allo shop" ariaLabel={banner.ariaLabel} />
             </div>
-            <div className="absolute top-0 right-0 bottom-0 left-0"></div>
+            <div aria-hidden className="absolute top-0 right-0 bottom-0 left-0"></div>
             <Image
-              src={baner.src}
+              src={banner.src}
               width={1440}
               height={677}
-              alt={baner.title}
+              alt={banner.title}
               priority={i === 0}
               fetchPriority={i === 0 ? "high" : "auto"}
               loading={i === 0 ? "eager" : "lazy"}
+              sizes="(min-width: 1280px) 1280px, 100vw"
               className="mx-auto hidden h-[677px] w-auto object-cover object-center md:block"
             />
             <Image
-              src={baner.srcMob}
+              src={banner.srcMob}
               width={760}
               height={580}
-              alt={baner.title}
+              alt={banner.title}
               priority={i === 0}
               fetchPriority={i === 0 ? "high" : "auto"}
               loading={i === 0 ? "eager" : "lazy"}
+              sizes="100vw"
               className="mx-auto h-[580px] object-cover object-bottom md:hidden"
             />
           </SwiperSlide>

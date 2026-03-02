@@ -10,6 +10,7 @@ import { DialogProductCard } from "./components/DialogProductCard";
 import PricesBox from "@/components/PricesBox";
 import { twMerge } from "tailwind-merge";
 import { getSupportProductById } from "@/app/actions/product/get-support-product-by-id";
+import { getProductById } from "@/app/actions/product/get-product-by-id";
 import { useCardDialogStore } from "@/store/card-dialog-store";
 import { useBasketStore } from "@/store/basket-store";
 import ProductQuantityInputButtons from "@/components/ProductQuantityInputButtons";
@@ -102,19 +103,36 @@ export default function CardDialog() {
         setSelectedProduct({ ...product, qnt: 1 } as ProductType & { qnt: number });
     };
     setPreselectedProduct();
-    if (!product?.variants || product.variants.length === 0) {
-      return;
-    }
 
     const fetchVariants = async () => {
       try {
-        if (product?.variants?.length === 0 || !product?.variants || product.variants === undefined)
-          return;
-        const variantsData = await getProductsByIds([product.id, ...product.variants]);
+        if (!product?.id) return;
 
-        if (variantsData.data && variantsData.data?.length > 0) {
-          setVariantsOfProduct(variantsData.data);
+        let idsToFetch: string[] = [];
+
+        if (product.parent_product_id && product.parent_product_id !== "NULL") {
+          const parentResponse = await getProductById(product.parent_product_id);
+          const parentProduct = parentResponse.data;
+          if (parentProduct) {
+            idsToFetch = [parentProduct.id, ...(parentProduct.variants ?? [])];
+          }
+        } else {
+          idsToFetch = [product.id, ...(product.variants ?? [])];
         }
+
+        const uniqueIds = Array.from(new Set(idsToFetch.filter(Boolean)));
+        if (uniqueIds.length === 0) {
+          setVariantsOfProduct(null);
+          return;
+        }
+
+        const variantsData = await getProductsByIds(uniqueIds, { includeOutOfStock: true });
+        if (variantsData.data && variantsData.data.length > 0) {
+          setVariantsOfProduct(variantsData.data);
+          return;
+        }
+
+        setVariantsOfProduct(null);
       } catch (error) {
         console.error({ error });
       }
@@ -127,7 +145,11 @@ export default function CardDialog() {
     const fetchSupportProducts = async () => {
       try {
         if (!product?.id) return;
-        const supportProductsData = await getSupportProductById(product.id);
+        const supportSourceId =
+          product.parent_product_id && product.parent_product_id !== "NULL"
+            ? product.parent_product_id
+            : product.id;
+        const supportProductsData = await getSupportProductById(supportSourceId);
         if (supportProductsData && supportProductsData.length > 0) {
           setSupportProducts(supportProductsData);
         }
@@ -196,7 +218,7 @@ export default function CardDialog() {
               <div className="min-h-fit flex-1 rounded-sm bg-background px-4 py-3 xl:px-3">
                 <h2 className="H3 text-white">{selectedProduct?.name}</h2>
                 <div id="product`s variants" className="mt-4 flex flex-col gap-3 xl:mt-6">
-                  {product?.variants && product.variants.length > 0 && (
+                  {(variantsOfProduct?.length ?? 0) > 1 && (
                     <>
                       {variantsOfProduct && variantsOfProduct.length > 0 ? (
                         <>

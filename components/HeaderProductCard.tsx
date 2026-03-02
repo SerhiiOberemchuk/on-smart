@@ -5,9 +5,10 @@ import { twMerge } from "tailwind-merge";
 export default function HeaderProductCard({
   oldPrice,
   inStock,
+  isOnOrder,
   // id,
   className,
-}: Pick<ProductType, "id" | "oldPrice" | "inStock"> & { className?: string }) {
+}: Pick<ProductType, "id" | "oldPrice" | "inStock" | "isOnOrder"> & { className?: string }) {
   return (
     <header
       className={twMerge(
@@ -16,7 +17,10 @@ export default function HeaderProductCard({
       )}
     >
       {oldPrice && <span className="helper_XXS mr-2 bg-offerta-color px-2 py-1">offerta</span>}
-      {!inStock && <span className="helper_XXS bg-blue px-2 py-1">in arrivo</span>}
+      { isOnOrder && (
+        <span className="helper_XXS bg-blue px-2 py-1">su ordinazione</span>
+      )}
+      {!inStock  && <span className="helper_XXS bg-blue px-2 py-1">in arrivo</span>}
       {/* <ButtonComparison id={id} /> */}
     </header>
   );

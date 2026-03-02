@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 type Props = { category?: string; brand?: string; productName?: string; carello?: string };
 export default function Breadcrumbs({ category, brand, productName, carello }: Props) {
@@ -19,7 +20,7 @@ export default function Breadcrumbs({ category, brand, productName, carello }: P
         {category && (
           <li>
             /{" "}
-            <Link href={`/catalogo?categoria=${category}`} className="hover:text-white">
+            <Link href={`/categoria/${encodeURIComponent(category)}`} className="hover:text-white">
               {category}
             </Link>
           </li>
@@ -27,10 +28,7 @@ export default function Breadcrumbs({ category, brand, productName, carello }: P
         {brand && (
           <li>
             /{" "}
-            <Link
-              href={`/catalogo?categoria=${category}&brand=${brand}`}
-              className="hover:text-white"
-            >
+            <Link href={`/brand/${encodeURIComponent(brand)}`} className="hover:text-white">
               {brand}
             </Link>
           </li>

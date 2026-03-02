@@ -5,7 +5,7 @@ import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
 import { CategoryTypes } from "@/types/category.types";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
-import { cacheTag, updateTag } from "next/cache";
+import { cacheLife, cacheTag, updateTag } from "next/cache";
 
 export async function createCategoryProducts(category: Omit<CategoryTypes, "id">) {
   try {
@@ -42,6 +42,7 @@ export type GetAllCategoriesResponse = Promise<
 export async function getAllCategoryProducts(): GetAllCategoriesResponse {
   "use cache";
   cacheTag(CACHE_TAGS.category.all);
+  cacheLife("hours");
 
   try {
     const result = await db.select().from(categoryProductsSchema);

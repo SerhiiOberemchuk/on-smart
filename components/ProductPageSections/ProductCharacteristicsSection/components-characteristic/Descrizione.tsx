@@ -9,7 +9,14 @@ export default function Descrizione({
   data: Product_Details["characteristics_descrizione"];
   className?: string;
 }) {
-  const imagesToRender = data.images.length > 1 ? data.images.slice(0, 1) : data.images;
+  const imagesToRender = data.images
+    .filter((img) => img && img !== "/logo.png")
+    .slice(0, 4);
+  const hasDescriptionText = data.description.trim().length > 0;
+  const title = data.title.trim();
+  const displayTitle = title.length > 0 && title.toLowerCase() !== "no title" ? title : "Descrizione";
+  const showUnavailableMessage = !hasDescriptionText;
+
   return (
     <div className={twMerge("flex flex-col gap-3 xl:flex-row xl:items-start xl:gap-6", className)}>
       {imagesToRender.length === 1 && (
@@ -37,8 +44,12 @@ export default function Descrizione({
         </ul>
       )}
       <div className="flex flex-1 flex-col gap-3 rounded-sm bg-background p-3 xl:h-auto xl:gap-6">
-        <h3 className="H4M">{data.title}</h3>
-        <p className="text_R">{data.description}</p>
+        <h3 className="H4M">{displayTitle}</h3>
+        {showUnavailableMessage ? (
+          <p className="text_R text-text-grey">I dati corrispondenti non sono ancora disponibili.</p>
+        ) : (
+          <p className="text_R">{data.description}</p>
+        )}
       </div>
     </div>
   );
