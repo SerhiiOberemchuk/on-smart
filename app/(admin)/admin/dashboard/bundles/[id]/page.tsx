@@ -16,14 +16,8 @@ export default async function AdminBundleEditPage({ params }: Props) {
   const [bundleResponse, productsResponse, categoriesResponse, brandsResponse, galleryResponse] = await Promise.all([
     getBundleById(id),
     getAllProducts(),
-    getAllCategoryProducts().catch((error) => {
-      console.error("[AdminBundleEditPage:getAllCategoryProducts]", error);
-      return { success: false, data: [], error };
-    }),
-    getAllBrands().catch((error) => {
-      console.error("[AdminBundleEditPage:getAllBrands]", error);
-      return { success: false, data: [], error };
-    }),
+    getAllCategoryProducts(),
+    getAllBrands(),
     getFotoFromGallery({ parent_product_id: id }),
   ]);
 

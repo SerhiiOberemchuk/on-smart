@@ -90,35 +90,23 @@ export default function ModalAddNewPrduct() {
 
   useEffect(() => {
     startTransitionCategory(async () => {
-      try {
-        const res = await getAllCategoryProducts();
-        if (!res.success) {
-          toast.error("Failed to load categories");
-          return;
-        }
-
-        setCategories(res.data);
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to load categories");
+      const res = await getAllCategoryProducts();
+      if (!res.success) {
+        toast.error("Помилка завантаження категорій");
+        return;
       }
+      setCategories(res.data);
     });
   }, []);
 
   useEffect(() => {
     startTransitionBrands(async () => {
-      try {
-        const res = await getAllBrands();
-        if (!res.success) {
-          toast.error("Failed to load brands");
-          return;
-        }
-
-        setBrands(res.data);
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to load brands");
+      const res = await getAllBrands();
+      if (!res.success) {
+        toast.error("Помилка завантаження брендів");
+        return;
       }
+      setBrands(res.data);
     });
   }, []);
 
@@ -337,4 +325,3 @@ export default function ModalAddNewPrduct() {
     </div>
   );
 }
-

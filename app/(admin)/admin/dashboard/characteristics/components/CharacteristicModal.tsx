@@ -48,13 +48,8 @@ export function CharacteristicModal() {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      try {
-        const res = await getAllCategoryProducts();
-        if (res.success) setCategories(res.data);
-      } catch (error) {
-        console.error(error);
-        toast.error("Не вдалося завантажити категорії");
-      }
+      const res = await getAllCategoryProducts();
+      if (res.success) setCategories(res.data);
     };
 
     fetchCategories();

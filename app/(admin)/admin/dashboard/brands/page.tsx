@@ -4,10 +4,7 @@ import { Suspense } from "react";
 
 export default async function BrandsPage() {
   "use cache";
-  const res = await getAllBrands().catch((error) => {
-    console.error("[AdminBrandsPage:getAllBrands]", error);
-    return { success: false, data: [], error };
-  });
+  const res = await getAllBrands();
 
   return (
     <Suspense>

@@ -11,14 +11,8 @@ import ClientPageAllBundles from "./PageAllBundles";
 export default function BundlesPage() {
   const bundlesAction: Promise<BundleFetchResult> = getAllBundles();
   const productsAction: Promise<ProductFetchResult> = getAllProducts();
-  const categoriesAction: GetAllCategoriesResponse = getAllCategoryProducts().catch((error) => {
-    console.error("[AdminBundlesPage:getAllCategoryProducts]", error);
-    return { success: false, data: [], error };
-  });
-  const brandsAction = getAllBrands().catch((error) => {
-    console.error("[AdminBundlesPage:getAllBrands]", error);
-    return { success: false, data: [], error };
-  });
+  const categoriesAction: GetAllCategoriesResponse = getAllCategoryProducts();
+  const brandsAction = getAllBrands();
 
   return (
     <Suspense fallback={<p className="admin-muted">Завантаження...</p>}>
