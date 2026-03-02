@@ -1,10 +1,12 @@
 import ButtonAddCharacteristic from "./components/ButtonAddCharacteristic";
 import ListCharacteristics from "./components/ListCharacteristics";
 import { CharacteristicModal } from "./components/CharacteristicModal";
+import { headers } from "next/headers";
 import { Suspense } from "react";
 import { getAllCharacteristicsWithMeta } from "@/app/actions/product-characteristic/create-product-characteristic";
 
 export default async function OrderPage() {
+  await headers();
   const get = await getAllCharacteristicsWithMeta();
   return (
     <Suspense>

@@ -53,7 +53,7 @@ function refreshCategoryCacheTags(categorySlug?: string) {
 async function getAllCategoryProductsCachedCore(): Promise<CategoryRow[]> {
   "use cache";
   cacheTag(CACHE_TAGS.category.all);
-  cacheLife("hours");
+  cacheLife("minutes");
 
   return withRetrySelective(
     () => db.select().from(categoryProductsSchema),
@@ -64,7 +64,7 @@ async function getAllCategoryProductsCachedCore(): Promise<CategoryRow[]> {
 async function getCategoryBySlugCachedCore(categorySlug: string): Promise<CategoryRow | null> {
   "use cache";
   cacheTag(CACHE_TAGS.category.bySlug(categorySlug));
-  cacheLife("hours");
+  cacheLife("minutes");
 
   const rows = await withRetrySelective(
     () =>

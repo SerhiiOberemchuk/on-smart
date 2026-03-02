@@ -2,6 +2,8 @@
 
 import { db } from "@/db/db";
 import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
+import { isBuildPhase } from "@/utils/guard-build";
+import { withRetrySelective } from "@/utils/with-retry-selective";
 import {
   productCharacteristicsSchema,
   ProductCharacteristicType,
@@ -12,7 +14,75 @@ import {
 } from "@/db/schemas/product_characteristic_values.schema";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq, sql } from "drizzle-orm";
-import { cacheTag, updateTag } from "next/cache";
+import { cacheLife, cacheTag, updateTag } from "next/cache";
+
+const CHARACTERISTICS_READ_RETRY_OPTIONS = {
+  tries: 10,
+  delayMs: 800,
+  linearBackoffMs: 250,
+} as const;
+const BUILD_PHASE_SKIP_ERROR = "skipped: build phase";
+
+export type CharacteristicMetaItem = {
+  id: string;
+  name: string;
+  category_id: string | null;
+  category_name: string | null;
+  in_filter: number;
+  is_required: boolean;
+  is_multiple: boolean;
+  values: string[];
+};
+
+export type GetAllCharacteristicsWithMetaResponse = Promise<
+  | {
+      success: true;
+      data: CharacteristicMetaItem[];
+      error: null;
+    }
+  | {
+      success: false;
+      error: unknown;
+      data: [];
+    }
+>;
+
+async function getAllCharacteristicsWithMetaCachedCore(): Promise<CharacteristicMetaItem[]> {
+  "use cache";
+  cacheTag(CACHE_TAGS.characteristics.allWithMeta);
+  cacheLife("minutes");
+
+  return withRetrySelective(
+    async () =>
+      db
+        .select({
+          id: productCharacteristicsSchema.id,
+          name: productCharacteristicsSchema.name,
+          category_id: productCharacteristicsSchema.category_id,
+          category_name: categoryProductsSchema.name,
+          in_filter: productCharacteristicsSchema.in_filter,
+          is_required: productCharacteristicsSchema.is_required,
+          is_multiple: productCharacteristicsSchema.is_multiple,
+          values: sql<string[]>`
+            COALESCE(
+              JSON_ARRAYAGG(${productCharacteristicValuesSchema.value}),
+              JSON_ARRAY()
+            )
+          `,
+        })
+        .from(productCharacteristicsSchema)
+        .leftJoin(
+          categoryProductsSchema,
+          eq(categoryProductsSchema.id, productCharacteristicsSchema.category_id),
+        )
+        .leftJoin(
+          productCharacteristicValuesSchema,
+          eq(productCharacteristicValuesSchema.characteristic_id, productCharacteristicsSchema.id),
+        )
+        .groupBy(productCharacteristicsSchema.id, categoryProductsSchema.name),
+    CHARACTERISTICS_READ_RETRY_OPTIONS,
+  );
+}
 
 export async function createCharacteristic(params: Omit<ProductCharacteristicType, "id">) {
   try {
@@ -36,40 +106,16 @@ export async function getAllCharacteristic() {
   }
 }
 
-export async function getAllCharacteristicsWithMeta() {
-  "use cache";
-  cacheTag(CACHE_TAGS.characteristics.allWithMeta);
-  try {
-    const data = await db
-      .select({
-        id: productCharacteristicsSchema.id,
-        name: productCharacteristicsSchema.name,
-        category_id: productCharacteristicsSchema.category_id,
-        category_name: categoryProductsSchema.name,
-        in_filter: productCharacteristicsSchema.in_filter,
-        is_required: productCharacteristicsSchema.is_required,
-        is_multiple: productCharacteristicsSchema.is_multiple,
-        values: sql<string[]>`
-          COALESCE(
-            JSON_ARRAYAGG(${productCharacteristicValuesSchema.value}),
-            JSON_ARRAY()
-          )
-        `,
-      })
-      .from(productCharacteristicsSchema)
-      .leftJoin(
-        categoryProductsSchema,
-        eq(categoryProductsSchema.id, productCharacteristicsSchema.category_id),
-      )
-      .leftJoin(
-        productCharacteristicValuesSchema,
-        eq(productCharacteristicValuesSchema.characteristic_id, productCharacteristicsSchema.id),
-      )
-      .groupBy(productCharacteristicsSchema.id, categoryProductsSchema.name);
+export async function getAllCharacteristicsWithMeta(): GetAllCharacteristicsWithMetaResponse {
+  if (isBuildPhase()) {
+    return { success: false, error: BUILD_PHASE_SKIP_ERROR, data: [] };
+  }
 
-    return { success: true, data };
+  try {
+    const data = await getAllCharacteristicsWithMetaCachedCore();
+    return { success: true, data, error: null };
   } catch (error) {
-    return { success: false, error };
+    return { success: false, error, data: [] };
   }
 }
 

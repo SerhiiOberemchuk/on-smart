@@ -3,7 +3,7 @@
 import type { GetOrdersAllActionResponseType, OrderListItem } from "@/app/actions/orders/get-order";
 import { OrderTypes } from "@/db/schemas/orders.schema";
 import Link from "next/link";
-import { use, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { URL_DASHBOARD } from "../dashboard-admin.types";
 import { getDeliveryMethodLabel, getOrderStatusLabel } from "./[id]/_order-details/formatters";
 
@@ -144,9 +144,9 @@ function getDeliveryPrice(order: OrderTypes) {
 export default function PageOrdersClient({
   serverActionOrders,
 }: {
-  serverActionOrders: GetOrdersAllActionResponseType;
+  serverActionOrders: Awaited<GetOrdersAllActionResponseType>;
 }) {
-  const { orders, error } = use(serverActionOrders);
+  const { orders, error } = serverActionOrders;
 
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<OrderStatus | "ALL">("ALL");

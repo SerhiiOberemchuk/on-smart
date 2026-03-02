@@ -2,8 +2,9 @@
 
 import { GetAllOrdersPaymentActionResponseTypes } from "@/app/actions/payments/payment-order-actions";
 import Link from "next/link";
-import { use } from "react";
 import { URL_DASHBOARD } from "../dashboard-admin.types";
+
+type PaymentsPageData = Awaited<GetAllOrdersPaymentActionResponseTypes>;
 
 function formatCurrency(amount: string, currency: string) {
   return new Intl.NumberFormat("uk-UA", {
@@ -73,9 +74,9 @@ function getStatusColor(status: string) {
 export default function PaymentClientComponent({
   payments,
 }: {
-  payments: GetAllOrdersPaymentActionResponseTypes;
+  payments: PaymentsPageData;
 }) {
-  const clientPayments = use(payments);
+  const clientPayments = payments;
 
   if (!clientPayments.payments?.length) {
     return (
