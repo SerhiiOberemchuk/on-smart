@@ -16,7 +16,7 @@ import {
 } from "@/lib/catalog/catalog-query";
 import { getCatalogFilters } from "@/lib/get-catalog-filters";
 import { baseUrl } from "@/types/baseUrl";
-import { isProductionBuild } from "@/utils/is-production-build";
+import Script from "next/script";
 import { Metadata } from "next/types";
 import { Suspense } from "react";
 
@@ -161,7 +161,7 @@ async function CatalogJsonLdContent({
   };
 
   return (
-    <script
+    <Script
       id="catalogo-jsonld"
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -211,17 +211,6 @@ function CatalogoContent({
 }
 
 export default function CatalogoPage(props: PageProps<"/catalogo">) {
-  if (isProductionBuild) {
-    // ✅ build не падає
-    // ✅ сторінка існує (для білду)
-    // ⚠️ але контент буде пустий у згенереному HTML
-    return (
-      <section className="pb-5 lg:pb-16">
-        <h1 className="sr-only">Catalogo prodotti OnSmart</h1>
-        {/* можна показати skeleton */}
-      </section>
-    );
-  }
   const filtersAction = getCatalogFilters();
 
   return (

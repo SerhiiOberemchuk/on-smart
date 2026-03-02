@@ -4,7 +4,6 @@ import { db } from "@/db/db";
 import { brandProductsSchema } from "@/db/schemas/brand-products.schema";
 import { BrandTypes } from "@/types/brands.types";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
-import { isProductionBuild } from "@/utils/is-production-build";
 import { withRetry } from "@/utils/with-retry";
 
 import { eq } from "drizzle-orm";
@@ -26,19 +25,6 @@ type GetBrandBySlugResult = {
 
 async function getAllBrandsFromDb() {
   return withRetry(() => db.select().from(brandProductsSchema));
-}
-
-async function getAllBrandsCached(): Promise<BrandTypes[]> {
-  "use cache";
-  cacheTag(CACHE_TAGS.brand.all);
-  cacheLife("hours");
-
-  try {
-    return await getAllBrandsFromDb();
-  } catch (e) {
-    console.error("[getAllBrandsCached]", e);
-    throw e;
-  }
 }
 
 async function getBrandBySlugFromDb(brand_slug: BrandTypes["brand_slug"]) {
@@ -65,11 +51,11 @@ export async function createBrand(brand: BrandTypes) {
 }
 
 export async function getAllBrands(): GetAllBrandsResponse {
-  if (isProductionBuild) {
-    return { success: true, data: [] };
-  }
+  "use cache";
+  cacheTag(CACHE_TAGS.brand.all);
+  cacheLife("hours");
   try {
-    const result = await getAllBrandsCached();
+    const result = await getAllBrandsFromDb();
     return {
       success: true,
       data: result,
