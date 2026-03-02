@@ -32,14 +32,20 @@ function buildVerdict(firstOpen: StrategyResult[], sameRequestReplay: StrategyRe
   const replayMap = toMap(sameRequestReplay);
   const recommended = firstMap[RECOMMENDED_STRATEGY];
   const allBuildPhase = firstOpen.every((item) => item.buildPhase);
+  const allChecks = [...firstOpen, ...sameRequestReplay];
+  const failedStrategies = Array.from(
+    new Set(allChecks.filter((item) => !item.ok || item.error !== null).map((item) => item.strategy)),
+  );
 
   return {
     executionContext: allBuildPhase ? "build-phase snapshot (runtime DB not tested)" : "runtime request",
     readyForRuntimeDecision: !allBuildPhase,
+    failurePathTested: failedStrategies.length > 0,
+    failurePathStrategies: failedStrategies,
     recommendedStrategy: RECOMMENDED_STRATEGY,
     recommendedNow: {
       ok: recommended?.ok ?? false,
-      error: recommended?.error ?? "missing",
+      error: recommended?.error ?? null,
       tookMs: recommended?.tookMs ?? null,
       attempts: recommended?.attempts ?? null,
       cachedAt: recommended?.cachedAt ?? null,
@@ -50,7 +56,7 @@ function buildVerdict(firstOpen: StrategyResult[], sameRequestReplay: StrategyRe
       return {
         strategy,
         ok: item?.ok ?? false,
-        error: item?.error ?? "missing",
+        error: item?.error ?? null,
         cachedAt: item?.cachedAt ?? null,
         note: item?.note ?? null,
       };
