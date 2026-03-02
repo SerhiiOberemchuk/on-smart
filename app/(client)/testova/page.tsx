@@ -9,6 +9,7 @@ import {
   brands_noCache_throw,
   type StrategyResult,
 } from "@/app/actions/brands/test-actions-brands";
+import { headers } from "next/headers";
 import { Suspense } from "react";
 
 const RECOMMENDED_STRATEGY = "guard_outside_cache_retryThrow";
@@ -30,8 +31,11 @@ function buildVerdict(firstOpen: StrategyResult[], sameRequestReplay: StrategyRe
   const firstMap = toMap(firstOpen);
   const replayMap = toMap(sameRequestReplay);
   const recommended = firstMap[RECOMMENDED_STRATEGY];
+  const allBuildPhase = firstOpen.every((item) => item.buildPhase);
 
   return {
+    executionContext: allBuildPhase ? "build-phase snapshot (runtime DB not tested)" : "runtime request",
+    readyForRuntimeDecision: !allBuildPhase,
     recommendedStrategy: RECOMMENDED_STRATEGY,
     recommendedNow: {
       ok: recommended?.ok ?? false,
@@ -71,6 +75,9 @@ function buildVerdict(firstOpen: StrategyResult[], sameRequestReplay: StrategyRe
 }
 
 async function ResultsPre() {
+  // Mark this subtree as request-dependent, so tests run at runtime instead of only at build.
+  await headers();
+
   const firstOpen = await Promise.all([
     brands_noCache_throw(),
     brands_noCache_retryThrow(),
