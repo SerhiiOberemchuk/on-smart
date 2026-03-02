@@ -4,6 +4,7 @@ import { db } from "@/db/db";
 import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
 import { CategoryTypes } from "@/types/category.types";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
+import { isProductionBuild } from "@/utils/is-production-build";
 import { withRetry } from "@/utils/with-retry";
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
@@ -39,6 +40,19 @@ async function getAllCategoriesFromDb() {
   return withRetry(() => db.select().from(categoryProductsSchema));
 }
 
+async function getAllCategoryProductsCached(): Promise<CategoryTypes[]> {
+  "use cache";
+  cacheTag(CACHE_TAGS.category.all);
+  cacheLife("hours");
+
+  try {
+    return await getAllCategoriesFromDb();
+  } catch (e) {
+    console.error("[getAllCategoryProductsCached]", e);
+    throw e;
+  }
+}
+
 async function getCategoryBySlugFromDb(category_slug: CategoryTypes["category_slug"]) {
   return withRetry(() =>
     db
@@ -49,12 +63,12 @@ async function getCategoryBySlugFromDb(category_slug: CategoryTypes["category_sl
 }
 
 export async function getAllCategoryProducts(): GetAllCategoriesResponse {
-  "use cache";
-  cacheTag(CACHE_TAGS.category.all);
-  cacheLife("hours");
+  if (isProductionBuild) {
+    return { success: true, data: [] };
+  }
 
   try {
-    const result = await getAllCategoriesFromDb();
+    const result = await getAllCategoryProductsCached();
 
     return {
       success: true,

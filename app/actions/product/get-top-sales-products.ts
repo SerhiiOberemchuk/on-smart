@@ -4,11 +4,12 @@ import { db } from "@/db/db";
 import { orderItemsSchema, ordersSchema } from "@/db/schemas/orders.schema";
 import { ProductType, productsSchema } from "@/db/schemas/product.schema";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
+import { isProductionBuild } from "@/utils/is-production-build";
 import { ORDER_STATUS_LIST } from "@/types/orders.types";
 import { and, desc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 
-export async function getTopSalesProducts(limit = 12): Promise<ProductType[]> {
+async function getTopSalesProductsCached(limit = 12): Promise<ProductType[]> {
   "use cache";
   cacheTag(CACHE_TAGS.product.topSales);
   cacheTag(CACHE_TAGS.product.all);
@@ -59,6 +60,19 @@ export async function getTopSalesProducts(limit = 12): Promise<ProductType[]> {
       .limit(safeLimit);
 
     return fallback;
+  } catch (e) {
+    console.error("[getTopSalesProductsCached]", e);
+    throw e;
+  }
+}
+
+export async function getTopSalesProducts(limit = 12): Promise<ProductType[]> {
+  if (isProductionBuild) {
+    return [];
+  }
+
+  try {
+    return await getTopSalesProductsCached(limit);
   } catch (error) {
     console.error("getTopSalesProducts error:", error);
     return [];
