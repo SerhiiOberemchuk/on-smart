@@ -4,12 +4,21 @@ import { headers } from "next/headers";
 import { Suspense } from "react";
 import PageOrdersClient from "./PageOrdersClient";
 
-export default async function Page() {
-  await headers();
-  const orders = await getOrdersAllAction();
+export default function OrdersPage() {
   return (
     <Suspense fallback={<Spiner />}>
-      <PageOrdersClient serverActionOrders={orders} />
+      <GetDataComponent />
     </Suspense>
   );
+}
+
+async function GetDataComponent() {
+  await headers();
+  const orders = await getOrdersAllAction();
+
+  if (orders.error) {
+    return <p className="admin-empty">Помилка завантаження даних</p>;
+  }
+
+  return <PageOrdersClient serverActionOrders={orders} />;
 }

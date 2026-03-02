@@ -131,6 +131,24 @@ async function CatalogProductsContent({
   );
 }
 
+async function CatalogMobileFiltersContent({
+  filtersAction,
+}: {
+  filtersAction: ReturnType<typeof getCatalogFilters>;
+}) {
+  const filters = await filtersAction;
+  return <MobileFilterSection filters={filters} />;
+}
+
+async function CatalogDesktopFiltersContent({
+  filtersAction,
+}: {
+  filtersAction: ReturnType<typeof getCatalogFilters>;
+}) {
+  const filters = await filtersAction;
+  return <ListFiltereOptions className="hidden lg:flex" filters={filters} />;
+}
+
 async function CatalogJsonLdContent({
   catalogProductsDataAction,
 }: {
@@ -189,12 +207,12 @@ function CatalogoContent({
 
       <div id="filters" className="xl:bg-background">
         <Suspense fallback={<CatalogMobileFiltersFallback />}>
-          <MobileFilterSection filtersAction={filtersAction} />
+          <CatalogMobileFiltersContent filtersAction={filtersAction} />
         </Suspense>
 
         <div className="container flex flex-col gap-5 lg:flex-row">
           <Suspense fallback={<CatalogDesktopFiltersFallback />}>
-            <ListFiltereOptions className="hidden lg:flex" filtersAction={filtersAction} />
+            <CatalogDesktopFiltersContent filtersAction={filtersAction} />
           </Suspense>
 
           <Suspense fallback={<CatalogProductsFallback />}>

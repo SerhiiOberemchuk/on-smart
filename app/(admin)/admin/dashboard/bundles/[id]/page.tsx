@@ -3,14 +3,24 @@ import { getBundleById } from "@/app/actions/bundles/get-bundle-by-id";
 import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
 import { getFotoFromGallery } from "@/app/actions/foto-galery/get-foto-from-gallery";
 import { getAllProducts } from "@/app/actions/product/get-all-products";
+import Spiner from "@/components/Spiner";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import PageEditBundle from "../PageEditBundle";
 
 type Props = {
   params: Promise<{ id: string }>;
 };
 
-export default async function AdminBundleEditPage({ params }: Props) {
+export default function AdminBundleEditPage({ params }: Props) {
+  return (
+    <Suspense fallback={<Spiner />}>
+      <GetDataComponent params={params} />
+    </Suspense>
+  );
+}
+
+async function GetDataComponent({ params }: Props) {
   const { id } = await params;
 
   const [bundleResponse, productsResponse, categoriesResponse, brandsResponse, galleryResponse] = await Promise.all([

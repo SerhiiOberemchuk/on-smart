@@ -1,4 +1,5 @@
 import { getProductById } from "@/app/actions/product/get-product-by-id";
+import Spiner from "@/components/Spiner";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import PageProductAdmin from "./components/PageProductAdmin";
@@ -18,7 +19,7 @@ export default async function AdminProductPage({ params }: Props) {
   });
 
   return (
-    <Suspense fallback={<p className="admin-muted">Завантаження...</p>}>
+    <Suspense fallback={<Spiner />}>
       <PageProductAdmin dataAction={productPromise} />
     </Suspense>
   );

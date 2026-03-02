@@ -1,9 +1,18 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { Suspense } from "react";
+import Spiner from "@/components/Spiner";
 
-export default async function AdminPage() {
+export default function AdminPage() {
+  return (
+    <Suspense fallback={<Spiner />}>
+      <DashboardDataComponent />
+    </Suspense>
+  );
+}
+
+async function DashboardDataComponent() {
   const session = await auth.api.getSession({ headers: await headers() });
-  console.log({ session });
 
   return (
     <section className="admin-page">

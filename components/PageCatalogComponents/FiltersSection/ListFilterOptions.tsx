@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { twMerge } from "tailwind-merge";
 import icon_arrow_top from "@/assets/icons/arrow-top.svg";
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LabelInput } from "./sub-component/LabelInput";
 import { InputRange } from "./sub-component/InputRange";
 import { FilterGroup } from "@/types/catalog-filter-options.types";
@@ -11,13 +11,11 @@ import ResetCatalogFiltersButton from "./ResetCatalogFiltersButton";
 
 export default function ListFiltereOptions({
   className,
-  filtersAction,
+  filters,
 }: {
   className?: string;
-  filtersAction: Promise<FilterGroup[]>;
+  filters: FilterGroup[];
 }) {
-  const filters = use(filtersAction);
-
   return (
     <ul className={twMerge("flex w-full max-w-[264px] flex-col", className)}>
       {filters.map((filter) => (
