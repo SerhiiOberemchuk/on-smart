@@ -2,36 +2,42 @@
 
 import { db } from "@/db/db";
 import { ProductType, productsSchema } from "@/db/schemas/product.schema";
-import { cacheLife } from "next/cache";
-import { cacheTag } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
+import { isProductionBuild } from "@/utils/is-production-build";
+import { withRetry } from "@/utils/with-retry";
 
-type Props = {
-  page?: number;
-  limit?: number;
-  brand_slug?: string;
-  category?: string;
-};
 export type ProductFetchResult = {
   success: boolean;
   data: ProductType[] | null;
   error: string | null;
 };
 
-export async function getAllProducts() {
+async function getAllProductsCached(): Promise<ProductType[]> {
   "use cache";
   cacheLife("seconds");
   cacheTag(CACHE_TAGS.product.all);
 
   try {
-    const response = await db.select().from(productsSchema);
-    return { success: true, data: response, error: null };
-  } catch (error) {
-    console.error("DB error:", error);
+    return await db.select().from(productsSchema);
+  } catch (e) {
+    console.error("[getAllProductsCached]", e);
+    throw e;
+  }
+}
+
+export async function getAllProducts(): Promise<ProductFetchResult> {
+  try {
+    const data = await withRetry(getAllProductsCached, {
+      guard: isProductionBuild,
+      onGuard: () => [],
+    });
+    return { success: true, data, error: null };
+  } catch (e) {
     return {
       success: false,
       data: null,
-      error: error instanceof Error ? error.message : String(error),
+      error: e instanceof Error ? e.message : String(e),
     };
   }
 }
