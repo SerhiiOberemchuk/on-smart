@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: path === "/" ? 1 : 0.8,
   }));
 
-  if (isProductionBuild()) {
+  if (isProductionBuild) {
     return staticEntries;
   }
 
@@ -99,11 +99,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  return [
-    ...staticEntries,
-    ...categoryEntries,
-    ...brandEntries,
-    ...productEntries,
-    ...bundleEntries,
-  ];
+  return [...staticEntries, ...categoryEntries, ...brandEntries, ...productEntries, ...bundleEntries];
 }
