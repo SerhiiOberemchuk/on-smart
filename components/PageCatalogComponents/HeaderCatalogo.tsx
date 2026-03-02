@@ -7,16 +7,18 @@ import { useQueryState } from "nuqs";
 import icon_arrow_top from "@/assets/icons/arrow-top.svg";
 import Image from "next/image";
 import { twMerge } from "tailwind-merge";
-import { useQntProductsFilteredStore } from "@/store/qnt-products-filtered";
 // import { testDbConnection } from "@/app/actions/test-db-conection";
 
-export default function HeaderCatalogo() {
+export default function HeaderCatalogo({
+  totalProducts,
+}: {
+  totalProducts: number;
+}) {
   const refUl = useRef<HTMLUListElement | null>(null);
-  const { qnt } = useQntProductsFilteredStore();
 
   const [sortParam, setSortParam] = useQueryState(SORT_OPTIONS_PARAMS.PARAM_NAME, {
     defaultValue: SORT_OPTIONS_PARAMS.options[0].value,
-    clearOnDefault: false,
+    clearOnDefault: true,
   });
 
   const [heightUl, setHeightUl] = useState(0);
@@ -39,7 +41,7 @@ export default function HeaderCatalogo() {
   return (
     <header className="bg-background">
       <div className="helper_text container flex w-full flex-wrap items-center justify-between gap-3 py-3 text-text-grey">
-        <span className="shrink-0">{qnt} prodotti</span>
+        <span className="shrink-0">{totalProducts} prodotti</span>
         <div className="relative">
           <button
             aria-expanded={isOpen}
@@ -76,8 +78,7 @@ export default function HeaderCatalogo() {
                 role="option"
                 aria-selected={sortParam === option.value}
                 onClick={() => {
-                  //   setSelectedSortOption(option);
-                  setSortParam(option.value);
+                  setSortParam(option.value, { scroll: false, shallow: false });
                   setIsOpen(false);
                 }}
                 className={twMerge(

@@ -33,10 +33,16 @@ export function InputRange({
     update();
   }, [range]);
 
+  const normalizeRange = (next: number[]) => {
+    const from = Math.max(safeMin, Math.min(next[0], safeMax));
+    const to = Math.max(from, Math.min(next[1], safeMax));
+    return [from, to];
+  };
+
   const update = (v: number[]) => {
-    setValues(v);
-    // setRange(v, { limitUrlUpdates: debounce(1000) });
-    setRange(v);
+    const normalized = normalizeRange(v);
+    setValues(normalized);
+    setRange(normalized, { scroll: false, shallow: false });
   };
   return (
     <div className="flex flex-col gap-3 overflow-x-visible pb-2">
@@ -46,14 +52,16 @@ export function InputRange({
           value={values[0]}
           className="h-11 w-24 rounded-sm border border-text-grey"
           onChange={(e) => update([+e.target.value, values[1]])}
-          max={safeMax}
+          min={safeMin}
+          max={values[1]}
         />
         <span>{" - "}</span>
         <input
           className="h-11 w-24 rounded-sm border border-text-grey"
           type="number"
           value={values[1]}
-          max={safeMin}
+          min={values[0]}
+          max={safeMax}
           onChange={(e) => update([values[0], +e.target.value])}
         />
       </div>

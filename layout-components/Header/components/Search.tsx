@@ -1,18 +1,37 @@
 "use client";
 
 import {
-  getGlobalSearchResults,
+  getHeaderGlobalSearchResults,
   type GlobalSearchResults,
 } from "@/app/actions/search/get-global-search-results";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState, useTransition, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, useTransition, type ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
+
+const PRODUCTS_PAGE_SIZE = 8;
+const BRANDS_PAGE_SIZE = 4;
+const CATEGORIES_PAGE_SIZE = 4;
 
 const EMPTY_RESULTS: GlobalSearchResults = {
   products: [],
   brands: [],
   categories: [],
+  meta: {
+    products: {
+      offset: 0,
+      limit: PRODUCTS_PAGE_SIZE,
+      hasMore: false,
+    },
+    brands: {
+      limit: BRANDS_PAGE_SIZE,
+      hasMore: false,
+    },
+    categories: {
+      limit: CATEGORIES_PAGE_SIZE,
+      hasMore: false,
+    },
+  },
 };
 const MAX_CACHED_SEARCHES = 50;
 
@@ -58,12 +77,17 @@ export default function Search({
   const router = useRouter();
   const pathname = usePathname();
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const listboxRef = useRef<HTMLDivElement | null>(null);
+  const productsLoadMoreRef = useRef<HTMLDivElement | null>(null);
   const requestIdRef = useRef(0);
+  const loadMoreRequestIdRef = useRef(0);
+  const activeQueryCacheKeyRef = useRef("");
   const cacheRef = useRef<Map<string, GlobalSearchResults>>(new Map());
   const [isPending, startTransition] = useTransition();
 
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoadingMoreProducts, setIsLoadingMoreProducts] = useState(false);
   const [results, setResults] = useState<GlobalSearchResults>(EMPTY_RESULTS);
   const [activeIndex, setActiveIndex] = useState(-1);
 
@@ -71,6 +95,7 @@ export default function Search({
     (() => {
       setIsOpen(false);
       setActiveIndex(-1);
+      setIsLoadingMoreProducts(false);
     })();
   }, [pathname]);
 
@@ -90,16 +115,21 @@ export default function Search({
   useEffect(() => {
     const normalizedQuery = query.trim();
     const cacheKey = normalizedQuery.toLowerCase();
+    activeQueryCacheKeyRef.current = cacheKey;
     if (normalizedQuery.length < 2) {
       (() => {
         setIsOpen(false);
         setResults(EMPTY_RESULTS);
         setActiveIndex(-1);
+        setIsLoadingMoreProducts(false);
+        activeQueryCacheKeyRef.current = "";
       })();
 
       return;
     }
 
+    loadMoreRequestIdRef.current += 1;
+    setIsLoadingMoreProducts(false);
     setActiveIndex(-1);
     const currentRequestId = ++requestIdRef.current;
     const timeoutId = setTimeout(() => {
@@ -111,7 +141,11 @@ export default function Search({
           return;
         }
 
-        const response = await getGlobalSearchResults(normalizedQuery);
+        const response = await getHeaderGlobalSearchResults(normalizedQuery, {
+          productsLimit: PRODUCTS_PAGE_SIZE,
+          brandsLimit: BRANDS_PAGE_SIZE,
+          categoriesLimit: CATEGORIES_PAGE_SIZE,
+        });
         if (currentRequestId !== requestIdRef.current) return;
 
         if (!response.success) {
@@ -136,6 +170,97 @@ export default function Search({
 
     return () => clearTimeout(timeoutId);
   }, [query]);
+
+  const loadMoreProducts = useCallback(() => {
+    const normalizedQuery = query.trim();
+    const cacheKey = normalizedQuery.toLowerCase();
+
+    if (
+      normalizedQuery.length < 2 ||
+      !isOpen ||
+      isPending ||
+      isLoadingMoreProducts ||
+      !results.meta.products.hasMore
+    ) {
+      return;
+    }
+
+    const productsOffset = results.products.length;
+    const requestId = ++loadMoreRequestIdRef.current;
+    setIsLoadingMoreProducts(true);
+
+    startTransition(async () => {
+      try {
+        const response = await getHeaderGlobalSearchResults(normalizedQuery, {
+          productsLimit: results.meta.products.limit || PRODUCTS_PAGE_SIZE,
+          productsOffset,
+          includeBrandsAndCategories: false,
+        });
+
+        if (requestId !== loadMoreRequestIdRef.current) return;
+        if (activeQueryCacheKeyRef.current !== cacheKey) return;
+        if (!response.success) return;
+
+        setResults((prev) => {
+          const existedIds = new Set(prev.products.map((product) => product.id));
+          const mergedProducts = [...prev.products];
+
+          response.data.products.forEach((product) => {
+            if (!existedIds.has(product.id)) {
+              mergedProducts.push(product);
+              existedIds.add(product.id);
+            }
+          });
+
+          const nextResults: GlobalSearchResults = {
+            ...prev,
+            products: mergedProducts,
+            meta: {
+              ...prev.meta,
+              products: response.data.meta.products,
+            },
+          };
+
+          cacheRef.current.set(cacheKey, nextResults);
+          return nextResults;
+        });
+      } finally {
+        if (requestId === loadMoreRequestIdRef.current) {
+          setIsLoadingMoreProducts(false);
+        }
+      }
+    });
+  }, [
+    isLoadingMoreProducts,
+    isOpen,
+    isPending,
+    query,
+    results.meta.products.hasMore,
+    results.meta.products.limit,
+    results.products.length,
+    startTransition,
+  ]);
+
+  useEffect(() => {
+    if (!isOpen || !results.meta.products.hasMore || !listboxRef.current || !productsLoadMoreRef.current) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          loadMoreProducts();
+        }
+      },
+      {
+        root: listboxRef.current,
+        rootMargin: "120px 0px",
+      },
+    );
+
+    observer.observe(productsLoadMoreRef.current);
+    return () => observer.disconnect();
+  }, [isOpen, loadMoreProducts, results.meta.products.hasMore]);
 
   const allResultItems = [
     ...results.products.map((item) => ({
@@ -267,6 +392,7 @@ export default function Search({
 
       {isOpen ? (
         <div
+          ref={listboxRef}
           id={`${inputId}-search-results`}
           role="listbox"
           className="absolute top-full right-0 left-0 z-1100 mt-2 max-h-[70vh] overflow-auto rounded border border-neutral-700 bg-neutral-900 shadow-xl"
@@ -305,6 +431,25 @@ export default function Search({
                   );
                 })}
               />
+              {results.meta.products.hasMore || isLoadingMoreProducts ? (
+                <div className="border-y border-neutral-800 px-3 py-2">
+                  <p className="text-xs text-neutral-400">
+                    {isLoadingMoreProducts
+                      ? "Caricamento altri prodotti..."
+                      : `Mostrati ${results.products.length} prodotti. Scorri per vedere altri risultati.`}
+                  </p>
+                  {results.meta.products.hasMore && !isLoadingMoreProducts ? (
+                    <button
+                      type="button"
+                      className="mt-1 text-xs text-yellow-400 underline hover:text-yellow-300"
+                      onClick={loadMoreProducts}
+                    >
+                      Mostra altri prodotti
+                    </button>
+                  ) : null}
+                  <div ref={productsLoadMoreRef} className="h-1 w-full" aria-hidden />
+                </div>
+              ) : null}
 
               <SearchSection
                 title="Brand"

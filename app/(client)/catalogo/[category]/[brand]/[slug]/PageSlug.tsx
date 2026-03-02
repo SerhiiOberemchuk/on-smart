@@ -12,7 +12,6 @@ import ProductRowListSection from "@/components/ProductRowListSection/ProductRow
 import type { ProductType } from "@/db/schemas/product.schema";
 import { baseUrl } from "@/types/baseUrl";
 import { notFound } from "next/navigation";
-import Script from "next/script";
 
 function toAbsoluteUrl(url: string) {
   return /^https?:\/\//i.test(url) ? url : `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
@@ -32,7 +31,7 @@ async function getVariantsForProduct(product: ProductType): Promise<ProductType[
       return null;
     }
 
-    const variantsResponse = await getProductsByIds(ids);
+    const variantsResponse = await getProductsByIds(ids, { includeOutOfStock: true });
     const list = (variantsResponse.data ?? []) as ProductType[];
     return list.length > 0 ? list : null;
   }
@@ -42,20 +41,27 @@ async function getVariantsForProduct(product: ProductType): Promise<ProductType[
   }
 
   const ids = Array.from(new Set([...(product.variants ?? []), product.id]));
-  const variantsResponse = await getProductsByIds(ids);
+  const variantsResponse = await getProductsByIds(ids, { includeOutOfStock: true });
   const list = (variantsResponse.data ?? []) as ProductType[];
   return list.length > 0 ? list : null;
 }
 
-export default async function PageSlug({ slug }: { slug: string }) {
-  const productResponse = await getProductBySlug(slug);
-  const product = productResponse.data;
+export default async function PageSlug({
+  slug,
+  initialProduct,
+}: {
+  slug: string;
+  initialProduct?: ProductType;
+}) {
+  const product = initialProduct ?? (await getProductBySlug(slug)).data;
 
   if (!product) {
     notFound();
   }
 
-  const id = product.parent_product_id || product.id;
+  const parentProductId =
+    product.parent_product_id && product.parent_product_id !== "NULL" ? product.parent_product_id : null;
+  const id = parentProductId ?? product.id;
 
   const [productDetails, supportProductsRaw, galleryResponse, brandResponse, variantsProduct] =
     await Promise.all([
@@ -73,11 +79,16 @@ export default async function PageSlug({ slug }: { slug: string }) {
   const galleryImages = galleryResponse.success ? (galleryResponse.data?.images ?? []) : [];
   const sliderImages = Array.from(new Set([product.imgSrc, ...galleryImages].filter(Boolean)));
   const brandDisplayName = brandResponse.data?.name || product.brand_slug.replace(/[-_]+/g, " ").trim();
+  const categoryDisplayName = product.category_slug.replace(/[-_]+/g, " ").trim();
   const brandLogo = brandResponse.data?.image || "/logo.png";
 
   const productUrl = `${baseUrl}/catalogo/${product.category_slug}/${product.brand_slug}/${product.slug}`;
+  const categoryUrl = `${baseUrl}/categoria/${product.category_slug}`;
+  const brandUrl = `${baseUrl}/brand/${product.brand_slug}`;
   const eanValue = product.ean?.trim();
   const productImages = sliderImages.map((url) => toAbsoluteUrl(url));
+  const reviews = productDetails?.characteristics_valutazione ?? [];
+  const reviewCount = reviews.length;
   const eanSchemaField = eanValue
     ? eanValue.length === 13
       ? { gtin13: eanValue }
@@ -96,7 +107,18 @@ export default async function PageSlug({ slug }: { slug: string }) {
     sku: product.id,
     productID: eanValue ?? product.id,
     mpn: product.id,
-    category: product.category_slug,
+    category: categoryDisplayName,
+    identifier: eanValue
+      ? {
+          "@type": "PropertyValue",
+          propertyID: "EAN",
+          value: eanValue,
+        }
+      : {
+          "@type": "PropertyValue",
+          propertyID: "SKU",
+          value: product.id,
+        },
     ...eanSchemaField,
     brand: {
       "@type": "Brand",
@@ -111,16 +133,16 @@ export default async function PageSlug({ slug }: { slug: string }) {
       availability: product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
     },
 
-    ...(product.rating && {
+    ...(product.rating && reviewCount > 0 && {
       aggregateRating: {
         "@type": "AggregateRating",
         ratingValue: product.rating,
-        reviewCount: productDetails?.characteristics_valutazione?.length ?? 0,
+        reviewCount,
       },
     }),
 
-    review:
-      productDetails?.characteristics_valutazione?.map((r) => ({
+    ...(reviewCount > 0 && {
+      review: reviews.map((r) => ({
         "@type": "Review",
         author: r.client_name,
         reviewBody: r.comment,
@@ -129,7 +151,8 @@ export default async function PageSlug({ slug }: { slug: string }) {
           ratingValue: r.rating,
           bestRating: 5,
         },
-      })) || [],
+      })),
+    }),
   };
 
   const breadcrumbsJsonLd = {
@@ -145,14 +168,14 @@ export default async function PageSlug({ slug }: { slug: string }) {
       {
         "@type": "ListItem",
         position: 2,
-        name: product.category_slug,
-        item: `${baseUrl}/catalogo/${product.category_slug}`,
+        name: categoryDisplayName,
+        item: categoryUrl,
       },
       {
         "@type": "ListItem",
         position: 3,
-        name: product.brand_slug,
-        item: `${baseUrl}/catalogo/${product.category_slug}/${product.brand_slug}`,
+        name: brandDisplayName,
+        item: brandUrl,
       },
       {
         "@type": "ListItem",
@@ -182,14 +205,14 @@ export default async function PageSlug({ slug }: { slug: string }) {
           isBottomLink={false}
         />
       ) : null}
-      <Script
+      <script
         id="product-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(productJsonLd),
         }}
       />
-      <Script
+      <script
         id="product-breadcrumbs-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{

@@ -32,7 +32,7 @@ export default function Valutazione({
         </div>
         <div className="sr-only flex flex-wrap gap-4 xl:not-sr-only">
           {data.map((recensione) => (
-            <RecensioneCard key={recensione.client_name} {...recensione} />
+            <RecensioneCard key={recensione.id} {...recensione} />
           ))}
         </div>
         <div
@@ -50,7 +50,7 @@ export default function Valutazione({
             className="reviews-product-swiper"
           >
             {data.map((recensione) => (
-              <SwiperSlide key={recensione.client_name} className="" style={{ width: 288 }}>
+              <SwiperSlide key={recensione.id} className="" style={{ width: 288 }}>
                 <RecensioneCard {...recensione} />
               </SwiperSlide>
             ))}
@@ -73,10 +73,7 @@ function RecensioneCard({
   comment,
 }: Product_Details["characteristics_valutazione"][0]) {
   return (
-    <div
-      key={client_name}
-      className="mb-2 flex w-full max-w-[312px] flex-col gap-3 rounded-sm border border-stroke-grey p-3"
-    >
+    <div className="mb-2 flex w-full max-w-[312px] flex-col gap-3 rounded-sm border border-stroke-grey p-3">
       <div className="flex items-center justify-between">
         <h4 className="input_R_18">{client_name}</h4>
         <span className="helper_text text-text-grey">{created_at.toLocaleDateString()}</span>

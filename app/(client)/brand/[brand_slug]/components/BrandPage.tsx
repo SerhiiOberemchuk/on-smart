@@ -1,54 +1,78 @@
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
 import Image from "next/image";
 import LinkYellow from "@/components/YellowLink";
-import { getAllProducts } from "@/app/actions/product/get-all-products";
 import { baseUrl } from "@/types/baseUrl";
 import Script from "next/script";
 import { BrandTypes } from "@/types/brands.types";
 import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getAllProductsFiltered } from "@/app/actions/product/get-all-products-filtered";
+import { ProductType } from "@/db/schemas/product.schema";
+
+const BRAND_PRODUCTS_LIMIT = 24;
+
+function buildProductHref(product: ProductType): string {
+  if (product.productType === "bundle") {
+    return `/catalogo/${product.category_slug}/${product.brand_slug}/bundle/${product.slug}`;
+  }
+
+  return `/catalogo/${product.category_slug}/${product.brand_slug}/${product.slug}`;
+}
 
 export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes["brand_slug"] }) {
-  const products = await getAllProducts();
-  const { success, data } = await getBrandBySlug(brand_slug);
-  if (!success || !data || !products.data) {
+  const [brandResponse, productsResponse] = await Promise.all([
+    getBrandBySlug(brand_slug),
+    getAllProductsFiltered({
+      brandSlugs: [brand_slug],
+      mode: "parentsOnly",
+      limit: BRAND_PRODUCTS_LIMIT,
+      sort: "new",
+    }),
+  ]);
+
+  if (!brandResponse.success || !brandResponse.data) {
     notFound();
   }
+
+  const brand = brandResponse.data;
+  const products = productsResponse.data;
+
   const brandJsonLd = {
     "@context": "https://schema.org",
     "@type": "Brand",
-    name: data.name,
-    logo: data.image,
+    name: brand.name,
+    logo: brand.image,
     url: `${baseUrl}/brand/${brand_slug}`,
-    description: data.description,
+    description: brand.description,
   };
 
   const productsJsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `Prodotti del brand ${data.name}`,
+    name: `Prodotti del brand ${brand.name}`,
     itemListOrder: "https://schema.org/ItemListOrderAscending",
-    numberOfItems: products.data?.length,
-    itemListElement: products.data?.map((p, i) => ({
+    numberOfItems: productsResponse.meta.total,
+    itemListElement: products.map((product, index) => ({
       "@type": "ListItem",
-      position: i + 1,
+      position: index + 1,
       item: {
         "@type": "Product",
-        name: p.name,
-        image: p.imgSrc,
-        brand: p.brand_slug,
-        description: p.nameFull,
+        name: product.name,
+        image: product.imgSrc,
+        brand: product.brand_slug,
+        description: product.nameFull,
         offers: {
           "@type": "Offer",
           priceCurrency: "EUR",
-          price: p.price,
-          url: `${baseUrl}/catalogo/${p.category_slug}/${p.brand_slug}/${p.id}`,
+          price: product.price,
+          url: `${baseUrl}${buildProductHref(product)}`,
           availability: "https://schema.org/InStock",
         },
       },
     })),
   };
+
   return (
     <>
       <nav className="py-3 text-sm text-text-grey">
@@ -59,43 +83,57 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
             </Link>
           </li>
           <li>
-            /<span className="text-white"> {data.name}</span>
+            /<span className="text-white"> {brand.name}</span>
           </li>
         </ul>
       </nav>
       <section className="bg-background">
         <div className="container">
-          <h1 className="H2 py-3 text-left uppercase">{data.name}</h1>
+          <h1 className="H2 py-3 text-left uppercase">{brand.name}</h1>
           <div className="flex flex-col gap-5 py-3 xl:flex-row">
             <Image
-              src={data.image}
+              src={brand.image}
               width={492}
               height={270}
-              alt={data.name + "- Logo"}
+              alt={`${brand.name} - Logo`}
               quality={100}
               className="h-[270px] w-[492px] object-contain object-center xl:px-6"
             />
             <ul className="flex flex-col gap-3">
-              {data.description.split("|").map((desc, index) => (
-                <li key={index}>
-                  <p className="text_R"> {desc}</p>
-                </li>
-              ))}
+              {brand.description.split("|").map((desc, index) => {
+                const trimmed = desc.trim();
+                if (!trimmed) return null;
+                return (
+                  <li key={`${trimmed}-${index}`}>
+                    <p className="text_R">{trimmed}</p>
+                  </li>
+                );
+              })}
               <LinkYellow
                 title="Mostra tutto"
-                href={`/catalogo?brand=${data.brand_slug}`}
+                href={`/catalogo?brand=${brand.brand_slug}`}
                 className="mr-auto flex"
               />
             </ul>
           </div>
         </div>
       </section>
-      <ProductRowListSection
-        productsList={products.data}
-        title="I best seller del marchio"
-        idSection="brand_best_sellers"
-        isBottomLink={true}
-      />
+      {products.length > 0 ? (
+        <ProductRowListSection
+          productsList={products}
+          title="I best seller del marchio"
+          idSection="brand_best_sellers"
+          isBottomLink={true}
+        />
+      ) : (
+        <section className="py-8">
+          <div className="container rounded-sm border border-stroke-grey p-4">
+            <p className="text_R text-text-grey">
+              Nessun prodotto disponibile al momento per questo brand.
+            </p>
+          </div>
+        </section>
+      )}
       <Script
         id="brand-jsonld"
         type="application/ld+json"

@@ -34,9 +34,20 @@ export default function FormFeedback({
     type === "product-review" ? "Modulo recensione prodotto" : "Modulo richiesta consulenza";
   const successText =
     type === "product-review" ? "Grazie! Recensione inviata." : "Grazie! Messaggio inviato.";
+  const stateRecord = state as Record<string, unknown>;
+  const errorText = !state.success
+    ? typeof stateRecord.message === "string"
+      ? stateRecord.message
+      : typeof stateRecord.messaggio === "string"
+        ? stateRecord.messaggio
+        : null
+    : null;
 
   useEffect(() => {
-    if (!state.success) return;
+    if (!state.success) {
+      setShowSuccess(false);
+      return;
+    }
 
     setShowSuccess(true);
     const timeout = setTimeout(() => {
@@ -89,6 +100,11 @@ export default function FormFeedback({
       {showSuccess ? (
         <p className="text-green-600" aria-live="polite">
           {successText}
+        </p>
+      ) : null}
+      {errorText ? (
+        <p className="text-red" aria-live="polite">
+          {errorText}
         </p>
       ) : null}
 

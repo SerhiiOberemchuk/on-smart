@@ -28,22 +28,84 @@ export type GlobalSearchCategoryResult = {
   category_slug: string;
 };
 
+export type GlobalSearchResultsMeta = {
+  products: {
+    offset: number;
+    limit: number;
+    hasMore: boolean;
+  };
+  brands: {
+    limit: number;
+    hasMore: boolean;
+  };
+  categories: {
+    limit: number;
+    hasMore: boolean;
+  };
+};
+
 export type GlobalSearchResults = {
   products: GlobalSearchProductResult[];
   brands: GlobalSearchBrandResult[];
   categories: GlobalSearchCategoryResult[];
+  meta: GlobalSearchResultsMeta;
 };
 
-const EMPTY_RESULTS: GlobalSearchResults = {
-  products: [],
-  brands: [],
-  categories: [],
+export type GlobalSearchQueryOptions = {
+  productsLimit?: number;
+  productsOffset?: number;
+  brandsLimit?: number;
+  categoriesLimit?: number;
+  includeBrandsAndCategories?: boolean;
 };
+
+const DEFAULT_PRODUCTS_LIMIT = 8;
+const DEFAULT_BRANDS_LIMIT = 4;
+const DEFAULT_CATEGORIES_LIMIT = 4;
+const MAX_PRODUCTS_LIMIT = 24;
+const MAX_TAXONOMY_LIMIT = 10;
+
 const EAN_LIKE_QUERY = /^[\d\s-]+$/;
-
 const TRANSIENT_DB_ERRORS = ["too many connections", "er_con_count_error", "connection", "timeout"];
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+function buildEmptyResults({
+  productsLimit,
+  productsOffset,
+  brandsLimit,
+  categoriesLimit,
+}: {
+  productsLimit: number;
+  productsOffset: number;
+  brandsLimit: number;
+  categoriesLimit: number;
+}): GlobalSearchResults {
+  return {
+    products: [],
+    brands: [],
+    categories: [],
+    meta: {
+      products: {
+        offset: productsOffset,
+        limit: productsLimit,
+        hasMore: false,
+      },
+      brands: {
+        limit: brandsLimit,
+        hasMore: false,
+      },
+      categories: {
+        limit: categoriesLimit,
+        hasMore: false,
+      },
+    },
+  };
+}
 
 function getErrorFingerprint(error: unknown) {
   if (!error || typeof error !== "object") {
@@ -81,10 +143,38 @@ async function withRetry<T>(queryFn: () => Promise<T>, retries = 2): Promise<T> 
   }
 }
 
-export async function getGlobalSearchResults(query: string) {
+export async function getHeaderGlobalSearchResults(
+  query: string,
+  options: GlobalSearchQueryOptions = {},
+) {
   const normalized = query.trim();
+
+  const productsLimit = clamp(
+    Math.trunc(options.productsLimit ?? DEFAULT_PRODUCTS_LIMIT),
+    1,
+    MAX_PRODUCTS_LIMIT,
+  );
+  const productsOffset = Math.max(0, Math.trunc(options.productsOffset ?? 0));
+  const brandsLimit = clamp(
+    Math.trunc(options.brandsLimit ?? DEFAULT_BRANDS_LIMIT),
+    1,
+    MAX_TAXONOMY_LIMIT,
+  );
+  const categoriesLimit = clamp(
+    Math.trunc(options.categoriesLimit ?? DEFAULT_CATEGORIES_LIMIT),
+    1,
+    MAX_TAXONOMY_LIMIT,
+  );
+
+  const emptyResults = buildEmptyResults({
+    productsLimit,
+    productsOffset,
+    brandsLimit,
+    categoriesLimit,
+  });
+
   if (normalized.length < 2) {
-    return { success: true, data: EMPTY_RESULTS, error: null };
+    return { success: true, data: emptyResults, error: null };
   }
 
   const searchTerm = `%${normalized.replace(/\s+/g, "%")}%`;
@@ -92,11 +182,11 @@ export async function getGlobalSearchResults(query: string) {
   const eanNormalized = normalized.replace(/\D/g, "");
   const eanSearchTerm = eanNormalized.length ? `%${eanNormalized}%` : null;
   const isEanLikeQuery = EAN_LIKE_QUERY.test(normalized) && eanNormalized.length >= 3;
-  const shouldQueryBrandsAndCategories = !isEanLikeQuery && normalized.length >= 3;
+  const includeBrandsAndCategories =
+    options.includeBrandsAndCategories ?? (!isEanLikeQuery && normalized.length >= 3);
 
   try {
-    // Run queries sequentially to avoid opening multiple DB connections per keystroke.
-    const products = await withRetry(() =>
+    const rawProducts = await withRetry(() =>
       db
         .select({
           id: productsSchema.id,
@@ -115,14 +205,34 @@ export async function getGlobalSearchResults(query: string) {
               sql`LOWER(${productsSchema.name}) LIKE ${searchTermLower}`,
               sql`LOWER(${productsSchema.nameFull}) LIKE ${searchTermLower}`,
               sql`LOWER(${productsSchema.slug}) LIKE ${searchTermLower}`,
+              sql`LOWER(${productsSchema.brand_slug}) LIKE ${searchTermLower}`,
+              sql`LOWER(${productsSchema.category_slug}) LIKE ${searchTermLower}`,
+              sql`LOWER(${productsSchema.id}) LIKE ${searchTermLower}`,
               ...(eanSearchTerm ? [like(productsSchema.ean, eanSearchTerm)] : []),
+              ...(eanSearchTerm
+                ? [sql`REPLACE(REPLACE(${productsSchema.ean}, '-', ''), ' ', '') LIKE ${eanSearchTerm}`]
+                : []),
             ),
           ),
         )
-        .limit(6),
+        .orderBy(
+          sql`CASE
+                WHEN ${eanNormalized.length > 0 ? sql`REPLACE(REPLACE(${productsSchema.ean}, '-', ''), ' ', '') = ${eanNormalized}` : sql`FALSE`} THEN 0
+                WHEN ${eanNormalized.length > 0 ? sql`REPLACE(REPLACE(${productsSchema.ean}, '-', ''), ' ', '') LIKE ${`${eanNormalized}%`}` : sql`FALSE`} THEN 1
+                WHEN LOWER(${productsSchema.slug}) = ${normalized.toLowerCase()} THEN 2
+                WHEN LOWER(${productsSchema.name}) LIKE ${searchTermLower} THEN 3
+                ELSE 4
+              END`,
+          sql`${productsSchema.inStock} DESC`,
+        )
+        .limit(productsLimit + 1)
+        .offset(productsOffset),
     );
 
-    const brands = shouldQueryBrandsAndCategories
+    const productsHasMore = rawProducts.length > productsLimit;
+    const products = productsHasMore ? rawProducts.slice(0, productsLimit) : rawProducts;
+
+    const rawBrands = includeBrandsAndCategories
       ? await withRetry(() =>
           db
             .select({
@@ -138,11 +248,14 @@ export async function getGlobalSearchResults(query: string) {
                 like(brandProductsSchema.brand_slug, searchTerm),
               ),
             )
-            .limit(4),
+            .limit(brandsLimit + 1),
         )
       : [];
 
-    const categories = shouldQueryBrandsAndCategories
+    const brandsHasMore = rawBrands.length > brandsLimit;
+    const brands = brandsHasMore ? rawBrands.slice(0, brandsLimit) : rawBrands;
+
+    const rawCategories = includeBrandsAndCategories
       ? await withRetry(() =>
           db
             .select({
@@ -158,9 +271,12 @@ export async function getGlobalSearchResults(query: string) {
                 like(categoryProductsSchema.category_slug, searchTerm),
               ),
             )
-            .limit(4),
+            .limit(categoriesLimit + 1),
         )
       : [];
+
+    const categoriesHasMore = rawCategories.length > categoriesLimit;
+    const categories = categoriesHasMore ? rawCategories.slice(0, categoriesLimit) : rawCategories;
 
     return {
       success: true,
@@ -168,18 +284,33 @@ export async function getGlobalSearchResults(query: string) {
         products,
         brands,
         categories,
+        meta: {
+          products: {
+            offset: productsOffset,
+            limit: productsLimit,
+            hasMore: productsHasMore,
+          },
+          brands: {
+            limit: brandsLimit,
+            hasMore: brandsHasMore,
+          },
+          categories: {
+            limit: categoriesLimit,
+            hasMore: categoriesHasMore,
+          },
+        },
       } satisfies GlobalSearchResults,
       error: null,
     };
   } catch (error) {
     if (isTransientDbError(error)) {
-      console.error("[getGlobalSearchResults] transient DB error", error);
-      return { success: true, data: EMPTY_RESULTS, error: null };
+      console.error("[getHeaderGlobalSearchResults] transient DB error", error);
+      return { success: true, data: emptyResults, error: null };
     }
 
     return {
       success: false,
-      data: EMPTY_RESULTS,
+      data: emptyResults,
       error,
     };
   }
