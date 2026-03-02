@@ -3,8 +3,6 @@ import { brandProductsSchema } from "@/db/schemas/brand-products.schema";
 import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
 import { productsSchema } from "@/db/schemas/product.schema";
 import { baseUrl } from "@/types/baseUrl";
-import { isProductionBuild } from "@/utils/is-production-build";
-import { withRetry } from "@/utils/with-retry";
 import { and, eq, isNull } from "drizzle-orm";
 import type { MetadataRoute } from "next";
 
@@ -12,6 +10,7 @@ const STATIC_PATHS = [
   "/",
   "/catalogo",
   "/chi-siamo",
+  "/carrello",
   "/cookies",
   "/garanzia",
   "/informativa-sulla-privacy",
@@ -21,55 +20,44 @@ const STATIC_PATHS = [
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+
+  const [products, bundles, brands, categories] = await Promise.all([
+    db
+      .select({
+        slug: productsSchema.slug,
+        brand_slug: productsSchema.brand_slug,
+        category_slug: productsSchema.category_slug,
+      })
+      .from(productsSchema)
+      .where(
+        and(eq(productsSchema.productType, "product"), isNull(productsSchema.parent_product_id)),
+      ),
+    db
+      .select({
+        slug: productsSchema.slug,
+        brand_slug: productsSchema.brand_slug,
+        category_slug: productsSchema.category_slug,
+      })
+      .from(productsSchema)
+      .where(eq(productsSchema.productType, "bundle")),
+    db
+      .select({
+        brand_slug: brandProductsSchema.brand_slug,
+      })
+      .from(brandProductsSchema),
+    db
+      .select({
+        category_slug: categoryProductsSchema.category_slug,
+      })
+      .from(categoryProductsSchema),
+  ]);
+
   const staticEntries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({
     url: `${baseUrl}${path}`,
     lastModified: now,
     changeFrequency: "weekly",
     priority: path === "/" ? 1 : 0.8,
   }));
-
-  if (isProductionBuild) {
-    return staticEntries;
-  }
-
-  const [products, bundles, brands, categories] = await Promise.all([
-    withRetry(() =>
-      db
-        .select({
-          slug: productsSchema.slug,
-          brand_slug: productsSchema.brand_slug,
-          category_slug: productsSchema.category_slug,
-        })
-        .from(productsSchema)
-        .where(
-          and(eq(productsSchema.productType, "product"), isNull(productsSchema.parent_product_id)),
-        ),
-    ),
-    withRetry(() =>
-      db
-        .select({
-          slug: productsSchema.slug,
-          brand_slug: productsSchema.brand_slug,
-          category_slug: productsSchema.category_slug,
-        })
-        .from(productsSchema)
-        .where(eq(productsSchema.productType, "bundle")),
-    ),
-    withRetry(() =>
-      db
-        .select({
-          brand_slug: brandProductsSchema.brand_slug,
-        })
-        .from(brandProductsSchema),
-    ),
-    withRetry(() =>
-      db
-        .select({
-          category_slug: categoryProductsSchema.category_slug,
-        })
-        .from(categoryProductsSchema),
-    ),
-  ]);
 
   const categoryEntries: MetadataRoute.Sitemap = categories.map((item) => ({
     url: `${baseUrl}/categoria/${encodeURIComponent(item.category_slug)}`,

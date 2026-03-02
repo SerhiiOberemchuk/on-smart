@@ -1,9 +1,7 @@
-type RetryOptions<T> = {
+type RetryOptions = {
   tries?: number;
   baseDelayMs?: number;
   backoffFactor?: number;
-  guard?: boolean;
-  onGuard?: () => T | Promise<T>;
 };
 
 const DEFAULT_TRIES = 3;
@@ -16,21 +14,8 @@ function delay(ms: number) {
 
 export async function withRetry<T>(
   fn: () => Promise<T>,
-  {
-    tries = DEFAULT_TRIES,
-    baseDelayMs = DEFAULT_BASE_DELAY_MS,
-    backoffFactor = DEFAULT_BACKOFF_FACTOR,
-    guard = false,
-    onGuard,
-  }: RetryOptions<T> = {},
+  { tries = DEFAULT_TRIES, baseDelayMs = DEFAULT_BASE_DELAY_MS, backoffFactor = DEFAULT_BACKOFF_FACTOR }: RetryOptions = {},
 ): Promise<T> {
-  if (guard) {
-    if (!onGuard) {
-      throw new Error("withRetry: `onGuard` is required when `guard` is true");
-    }
-    return await onGuard();
-  }
-
   const safeTries = Math.max(1, Math.trunc(tries));
   let lastError: unknown;
 
