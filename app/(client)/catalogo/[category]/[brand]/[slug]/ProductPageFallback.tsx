@@ -1,7 +1,9 @@
 import { twMerge } from "tailwind-merge";
 
 function Skeleton({ className }: { className?: string }) {
-  return <div aria-hidden className={twMerge("animate-pulse rounded-sm bg-stroke-grey/70", className)} />;
+  return (
+    <div aria-hidden className={twMerge("animate-pulse rounded-sm bg-stroke-grey/70", className)} />
+  );
 }
 
 export default function ProductPageFallback() {
@@ -27,7 +29,7 @@ export default function ProductPageFallback() {
             </div>
 
             <div className="w-full max-w-[532px]">
-              <Skeleton className="h-[320px] w-full md:h-[532px]" />
+              <Skeleton className="h-80 w-full md:h-[532px]" />
               <Skeleton className="mx-auto mt-5 h-6 w-40" />
               <Skeleton className="mx-auto mt-2 h-4 w-56" />
               <Skeleton className="mx-auto mt-2 h-6 w-[80%]" />

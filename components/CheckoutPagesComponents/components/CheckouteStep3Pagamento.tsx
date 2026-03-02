@@ -6,15 +6,16 @@ import { useState } from "react";
 import ButtonYellow from "@/components/BattonYellow";
 import { MetodsPayment, PAYMENT_METHODS } from "@/types/bonifico.data";
 import { useCheckoutStore } from "@/store/checkout-store";
-import { redirect } from "next/navigation";
+import {  useRouter } from "next/navigation";
 import BonificoDati from "./BonificoDati";
 import RiepilogoDatiCliente from "./RiepilogoDatiCliente";
 import RiepilogoDatiConsegna from "./RepilogoDatiConsegna";
+import { PAGES } from "@/types/pages.types";
 
 export default function CheckouteStep3Pagamento() {
   const { setDataCheckoutStepPagamento, setStep, dataCheckoutStepPagamento } = useCheckoutStore();
   // const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-
+const router = useRouter();
   const [paymentMethod, setPaymentMethod] = useState<MetodsPayment["paymentMethod"] | undefined>(
     dataCheckoutStepPagamento?.paymentMethod,
   );
@@ -23,7 +24,8 @@ export default function CheckouteStep3Pagamento() {
     // setIsButtonDisabled(true);
     setDataCheckoutStepPagamento(PAYMENT_METHODS.find((m) => m.paymentMethod === paymentMethod)!);
     setStep(4);
-    redirect("/checkout/riepilogo");
+    router.push(PAGES.CHECKOUT_PAGES.SUMMARY);
+   
   };
 
   return (

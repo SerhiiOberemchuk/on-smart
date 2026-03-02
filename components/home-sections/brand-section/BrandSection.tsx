@@ -7,7 +7,10 @@ import BrandListFallback from "./BrandListFallback";
 import ListBrends from "./ListBrends";
 
 export default function BrandSection() {
-  const brandsPromise = getAllBrands();
+  const brandsPromise = getAllBrands().catch((error) => {
+    console.error("[BrandSection]", error);
+    return { success: false, data: [], error };
+  });
   const headingId = "brand-section-heading";
 
   return (
