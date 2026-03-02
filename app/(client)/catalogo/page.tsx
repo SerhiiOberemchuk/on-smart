@@ -211,7 +211,7 @@ function CatalogoContent({
 }
 
 export default function CatalogoPage(props: PageProps<"/catalogo">) {
-  if (isProductionBuild()) {
+  if (isProductionBuild) {
     // ✅ build не падає
     // ✅ сторінка існує (для білду)
     // ⚠️ але контент буде пустий у згенереному HTML

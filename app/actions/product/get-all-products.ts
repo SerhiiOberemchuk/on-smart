@@ -29,7 +29,7 @@ async function getAllProductsCached(): Promise<ProductType[]> {
 export async function getAllProducts(): Promise<ProductFetchResult> {
   try {
     const data = await withRetry(getAllProductsCached, {
-      guard: isProductionBuild(),
+      guard: isProductionBuild,
       onGuard: () => [],
     });
     return { success: true, data, error: null };
