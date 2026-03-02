@@ -7,9 +7,9 @@ import ListFiltereOptions from "./ListFilterOptions";
 import { FilterGroup } from "@/types/catalog-filter-options.types";
 
 export default function MobileFilterSection({
-  filtersAction,
+  filters,
 }: {
-  filtersAction: Promise<FilterGroup[]>;
+  filters: FilterGroup[];
 }) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function MobileFilterSection({
             </button>
           </header>
           <main className="flex-1 overflow-y-scroll">
-            <ListFiltereOptions filtersAction={filtersAction} className="w-full max-w-full" />
+            <ListFiltereOptions filters={filters} className="w-full max-w-full" />
           </main>
           <footer className="py-6">
             <button

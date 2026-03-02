@@ -1,15 +1,24 @@
 "use server";
+
+import slugify from "@sindresorhus/slugify";
+import { eq, inArray } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
+
 import { getAllBrands } from "@/app/actions/brands/brand-actions";
 import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
-import { FilterGroup, FilterOption } from "@/types/catalog-filter-options.types";
-
 import { db } from "@/db/db";
-import { eq } from "drizzle-orm";
-import { productCharacteristicValuesSchema } from "@/db/schemas/product_characteristic_values.schema";
 import { productCharacteristicsSchema } from "@/db/schemas/product_characteristic.schema";
-import slugify from "@sindresorhus/slugify";
-import { cacheTag } from "next/cache";
+import { productCharacteristicValuesSchema } from "@/db/schemas/product_characteristic_values.schema";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
+import { FilterGroup, FilterOption } from "@/types/catalog-filter-options.types";
+import { isBuildPhase } from "@/utils/guard-build";
+import { withRetrySelective } from "@/utils/with-retry-selective";
+
+const CATALOG_FILTERS_READ_RETRY_OPTIONS = {
+  tries: 10,
+  delayMs: 800,
+  linearBackoffMs: 250,
+} as const;
 
 function withUniqueParams(filters: FilterGroup[]): FilterGroup[] {
   const usedParams = new Set<string>();
@@ -34,68 +43,19 @@ function withUniqueParams(filters: FilterGroup[]): FilterGroup[] {
   });
 }
 
-export const getCatalogCharacteristicFilters = async (): Promise<FilterGroup[]> => {
-  "use cache";
-  cacheTag(CACHE_TAGS.catalog.characteristicFilters);
-  try {
-    const characteristics = await db
-      .select()
-      .from(productCharacteristicsSchema)
-      .where(eq(productCharacteristicsSchema.in_filter, 1));
-
-    if (!characteristics.length) return [];
-
-    const values = await db.select().from(productCharacteristicValuesSchema);
-
-    const valuesMap = new Map<string, FilterOption[]>();
-
-    for (const v of values) {
-      if (!valuesMap.has(v.characteristic_id)) {
-        valuesMap.set(v.characteristic_id, []);
-      }
-
-      valuesMap.get(v.characteristic_id)!.push({
-        value: slugify(v.value),
-        label: v.value,
-        characteristic_value_id: v.id,
-      });
-    }
-
-    return characteristics
-      .map((c) => {
-        const options = valuesMap.get(c.id) ?? [];
-        if (!options.length) return null;
-
-        return {
-          param: slugify(c.name),
-          title: c.name,
-          type: "checkbox",
-          options,
-        } as FilterGroup;
-      })
-      .filter(Boolean) as FilterGroup[];
-  } catch (error) {
-    console.error(
-      "[getCatalogCharacteristicFilters] Failed to load characteristic filters:",
-      error,
-    );
-
-    return [];
-  }
-};
-
-export const getCatalogFilters = async (): Promise<FilterGroup[]> => {
-  "use cache";
-  cacheTag(CACHE_TAGS.catalog.filters);
-  const categories = await getAllCategoryProducts();
-  const brands = await getAllBrands();
-
-  const staticFilters: FilterGroup[] = [
+function buildStaticFilters({
+  categories,
+  brands,
+}: {
+  categories: Array<{ category_slug: string; name: string }>;
+  brands: Array<{ brand_slug: string; name: string }>;
+}): FilterGroup[] {
+  return [
     {
       param: "categoria",
       title: "Categoria",
       type: "checkbox",
-      options: categories.data.map((item) => ({
+      options: categories.map((item) => ({
         value: item.category_slug,
         label: item.name,
       })),
@@ -104,7 +64,7 @@ export const getCatalogFilters = async (): Promise<FilterGroup[]> => {
       param: "brand",
       title: "Brand",
       type: "checkbox",
-      options: brands.data.map((item) => ({
+      options: brands.map((item) => ({
         value: item.brand_slug,
         label: item.name,
       })),
@@ -117,8 +77,125 @@ export const getCatalogFilters = async (): Promise<FilterGroup[]> => {
       max: 99999,
     },
   ];
+}
 
-  const dynamicFilters = await getCatalogCharacteristicFilters();
+function getBuildSafeFilters(): FilterGroup[] {
+  return withUniqueParams(
+    buildStaticFilters({
+      categories: [],
+      brands: [],
+    }),
+  );
+}
+
+async function getCatalogCharacteristicFiltersCachedCore(): Promise<FilterGroup[]> {
+  "use cache";
+  cacheTag(CACHE_TAGS.catalog.characteristicFilters);
+  cacheLife("minutes");
+
+  const characteristics = await withRetrySelective(
+    () =>
+      db
+        .select()
+        .from(productCharacteristicsSchema)
+        .where(eq(productCharacteristicsSchema.in_filter, 1)),
+    CATALOG_FILTERS_READ_RETRY_OPTIONS,
+  );
+
+  if (!characteristics.length) return [];
+
+  const characteristicIds = characteristics.map((characteristic) => characteristic.id);
+
+  const values = await withRetrySelective(
+    () =>
+      db
+        .select()
+        .from(productCharacteristicValuesSchema)
+        .where(inArray(productCharacteristicValuesSchema.characteristic_id, characteristicIds)),
+    CATALOG_FILTERS_READ_RETRY_OPTIONS,
+  );
+
+  const valuesMap = new Map<string, FilterOption[]>();
+
+  for (const valueItem of values) {
+    if (!valuesMap.has(valueItem.characteristic_id)) {
+      valuesMap.set(valueItem.characteristic_id, []);
+    }
+
+    valuesMap.get(valueItem.characteristic_id)!.push({
+      value: slugify(valueItem.value),
+      label: valueItem.value,
+      characteristic_value_id: valueItem.id,
+    });
+  }
+
+  return characteristics
+    .map((characteristic) => {
+      const options = valuesMap.get(characteristic.id) ?? [];
+      if (!options.length) return null;
+
+      return {
+        param: slugify(characteristic.name),
+        title: characteristic.name,
+        type: "checkbox",
+        options,
+      } as FilterGroup;
+    })
+    .filter(Boolean) as FilterGroup[];
+}
+
+export const getCatalogCharacteristicFilters = async (): Promise<FilterGroup[]> => {
+  if (isBuildPhase()) {
+    return [];
+  }
+
+  try {
+    return await getCatalogCharacteristicFiltersCachedCore();
+  } catch (error) {
+    console.error(
+      "[getCatalogCharacteristicFilters] Failed to load characteristic filters:",
+      error,
+    );
+    return [];
+  }
+};
+
+async function getCatalogFiltersCachedCore(): Promise<FilterGroup[]> {
+  "use cache";
+  cacheTag(CACHE_TAGS.catalog.filters);
+  cacheLife("minutes");
+
+  const [categories, brands, dynamicFilters] = await Promise.all([
+    getAllCategoryProducts(),
+    getAllBrands(),
+    getCatalogCharacteristicFiltersCachedCore(),
+  ]);
+
+  if (!categories.success) {
+    throw new Error(`[getCatalogFilters] categories failed: ${String(categories.error)}`);
+  }
+
+  if (!brands.success) {
+    throw new Error(`[getCatalogFilters] brands failed: ${String(brands.error)}`);
+  }
+
+  const staticFilters = buildStaticFilters({
+    categories: categories.data,
+    brands: brands.data,
+  });
 
   return withUniqueParams([...staticFilters, ...dynamicFilters]);
+}
+
+export const getCatalogFilters = async (): Promise<FilterGroup[]> => {
+  if (isBuildPhase()) {
+    return getBuildSafeFilters();
+  }
+
+  try {
+    return await getCatalogFiltersCachedCore();
+  } catch (error) {
+    console.error("[getCatalogFilters] Failed to load catalog filters:", error);
+    return getBuildSafeFilters();
+  }
 };
