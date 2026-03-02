@@ -6,7 +6,7 @@ import {
 } from "@/app/actions/search/get-global-search-results";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, useTransition, type ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 
 const EMPTY_RESULTS: GlobalSearchResults = {
@@ -14,6 +14,7 @@ const EMPTY_RESULTS: GlobalSearchResults = {
   brands: [],
   categories: [],
 };
+const MAX_CACHED_SEARCHES = 50;
 
 function getProductHref(product: GlobalSearchResults["products"][number]) {
   if (product.productType === "bundle") {
@@ -64,9 +65,13 @@ export default function Search({
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [results, setResults] = useState<GlobalSearchResults>(EMPTY_RESULTS);
+  const [activeIndex, setActiveIndex] = useState(-1);
 
   useEffect(() => {
-    (() => setIsOpen(false))();
+    (() => {
+      setIsOpen(false);
+      setActiveIndex(-1);
+    })();
   }, [pathname]);
 
   useEffect(() => {
@@ -74,6 +79,7 @@ export default function Search({
       if (!rootRef.current) return;
       if (!rootRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setActiveIndex(-1);
       }
     };
 
@@ -83,19 +89,22 @@ export default function Search({
 
   useEffect(() => {
     const normalizedQuery = query.trim();
+    const cacheKey = normalizedQuery.toLowerCase();
     if (normalizedQuery.length < 2) {
       (() => {
         setIsOpen(false);
         setResults(EMPTY_RESULTS);
+        setActiveIndex(-1);
       })();
 
       return;
     }
 
+    setActiveIndex(-1);
     const currentRequestId = ++requestIdRef.current;
     const timeoutId = setTimeout(() => {
       startTransition(async () => {
-        const cached = cacheRef.current.get(normalizedQuery);
+        const cached = cacheRef.current.get(cacheKey);
         if (cached) {
           setResults(cached);
           setIsOpen(true);
@@ -112,37 +121,90 @@ export default function Search({
         }
 
         const nextResults = response.data ?? EMPTY_RESULTS;
-        cacheRef.current.set(normalizedQuery, nextResults);
+        cacheRef.current.set(cacheKey, nextResults);
+        if (cacheRef.current.size > MAX_CACHED_SEARCHES) {
+          const firstInsertedKey = cacheRef.current.keys().next().value;
+          if (firstInsertedKey) {
+            cacheRef.current.delete(firstInsertedKey);
+          }
+        }
         setResults(nextResults);
         setIsOpen(true);
+        setActiveIndex(-1);
       });
-    }, 420);
+    }, 500);
 
     return () => clearTimeout(timeoutId);
   }, [query]);
 
-  const hasResults = useMemo(
-    () => results.products.length > 0 || results.brands.length > 0 || results.categories.length > 0,
-    [results],
-  );
+  const allResultItems = [
+    ...results.products.map((item) => ({
+      key: item.id,
+      href: getProductHref(item),
+    })),
+    ...results.brands.map((item) => ({
+      key: item.id,
+      href: getBrandHref(item.brand_slug),
+    })),
+    ...results.categories.map((item) => ({
+      key: item.id,
+      href: getCategoryHref(item.category_slug),
+    })),
+  ];
+  const hasResults = allResultItems.length > 0;
 
-  const firstResultHref = useMemo(() => {
-    if (results.products[0]) return getProductHref(results.products[0]);
-    if (results.brands[0]) return getBrandHref(results.brands[0].brand_slug);
-    if (results.categories[0]) return getCategoryHref(results.categories[0].category_slug);
-    return null;
-  }, [results]);
+  const firstResultHref = allResultItems[0]?.href ?? null;
+  const currentActiveHref =
+    activeIndex >= 0 && activeIndex < allResultItems.length
+      ? allResultItems[activeIndex].href
+      : null;
 
   const handleNavigate = () => {
     setIsOpen(false);
+    setActiveIndex(-1);
     setQuery("");
     onNavigate?.();
   };
 
+  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape") {
+      setIsOpen(false);
+      setActiveIndex(-1);
+      return;
+    }
+
+    if (!allResultItems.length) {
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setIsOpen(true);
+      setActiveIndex((prev) => (prev >= allResultItems.length - 1 ? 0 : prev + 1));
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setIsOpen(true);
+      setActiveIndex((prev) => (prev <= 0 ? allResultItems.length - 1 : prev - 1));
+      return;
+    }
+
+    if (event.key === "Enter" && isOpen) {
+      event.preventDefault();
+      const targetHref = currentActiveHref || firstResultHref;
+      if (!targetHref) return;
+      router.push(targetHref);
+      handleNavigate();
+    }
+  };
+
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!firstResultHref) return;
-    router.push(firstResultHref);
+    const targetHref = currentActiveHref || firstResultHref;
+    if (!targetHref) return;
+    router.push(targetHref);
     handleNavigate();
   };
 
@@ -181,6 +243,12 @@ export default function Search({
           Cerca prodotti, brand e categorie
         </label>
         <input
+          role="combobox"
+          aria-expanded={isOpen}
+          aria-controls={`${inputId}-search-results`}
+          aria-activedescendant={
+            activeIndex >= 0 ? `${inputId}-search-option-${activeIndex}` : undefined
+          }
           type="text"
           id={inputId}
           name="search"
@@ -192,64 +260,108 @@ export default function Search({
           onFocus={() => {
             if (query.trim().length >= 2) setIsOpen(true);
           }}
+          onKeyDown={handleInputKeyDown}
           onChange={(event) => setQuery(event.target.value)}
         />
       </form>
 
       {isOpen ? (
-        <div className="absolute top-full right-0 left-0 z-[1100] mt-2 max-h-[70vh] overflow-auto rounded border border-neutral-700 bg-neutral-900 shadow-xl">
+        <div
+          id={`${inputId}-search-results`}
+          role="listbox"
+          className="absolute top-full right-0 left-0 z-1100 mt-2 max-h-[70vh] overflow-auto rounded border border-neutral-700 bg-neutral-900 shadow-xl"
+        >
           {isPending ? (
             <p className="px-3 py-3 text-sm text-neutral-300">Ricerca in corso...</p>
           ) : hasResults ? (
             <div className="divide-y divide-neutral-800">
               <SearchSection
                 title="Prodotti"
-                items={results.products.map((item) => (
-                  <li key={item.id}>
-                    <Link
-                      href={getProductHref(item)}
-                      className="block px-3 py-2 hover:bg-neutral-800"
-                      onClick={handleNavigate}
+                items={results.products.map((item, index) => {
+                  const listIndex = index;
+                  const isActive = activeIndex === listIndex;
+                  return (
+                    <li
+                      key={item.id}
+                      id={`${inputId}-search-option-${listIndex}`}
+                      role="option"
+                      aria-selected={isActive}
                     >
-                      <p className="text-sm font-medium text-white">{item.name}</p>
-                      <p className="text-xs text-neutral-400">
-                        {item.category_slug} | {item.brand_slug}
-                      </p>
-                    </Link>
-                  </li>
-                ))}
+                      <Link
+                        href={getProductHref(item)}
+                        className={twMerge(
+                          "block px-3 py-2 hover:bg-neutral-800",
+                          isActive && "bg-neutral-800",
+                        )}
+                        onMouseEnter={() => setActiveIndex(listIndex)}
+                        onClick={handleNavigate}
+                      >
+                        <p className="text-sm font-medium text-white">{item.name}</p>
+                        <p className="text-xs text-neutral-400">
+                          {item.category_slug} | {item.brand_slug} | EAN: {item.ean}
+                        </p>
+                      </Link>
+                    </li>
+                  );
+                })}
               />
 
               <SearchSection
                 title="Brand"
-                items={results.brands.map((item) => (
-                  <li key={item.id}>
-                    <Link
-                      href={getBrandHref(item.brand_slug)}
-                      className="block px-3 py-2 hover:bg-neutral-800"
-                      onClick={handleNavigate}
+                items={results.brands.map((item, index) => {
+                  const listIndex = results.products.length + index;
+                  const isActive = activeIndex === listIndex;
+                  return (
+                    <li
+                      key={item.id}
+                      id={`${inputId}-search-option-${listIndex}`}
+                      role="option"
+                      aria-selected={isActive}
                     >
-                      <p className="text-sm font-medium text-white">{item.name}</p>
-                      <p className="text-xs text-neutral-400">Brand: {item.brand_slug}</p>
-                    </Link>
-                  </li>
-                ))}
+                      <Link
+                        href={getBrandHref(item.brand_slug)}
+                        className={twMerge(
+                          "block px-3 py-2 hover:bg-neutral-800",
+                          isActive && "bg-neutral-800",
+                        )}
+                        onMouseEnter={() => setActiveIndex(listIndex)}
+                        onClick={handleNavigate}
+                      >
+                        <p className="text-sm font-medium text-white">{item.name}</p>
+                        <p className="text-xs text-neutral-400">Brand: {item.brand_slug}</p>
+                      </Link>
+                    </li>
+                  );
+                })}
               />
 
               <SearchSection
                 title="Categorie"
-                items={results.categories.map((item) => (
-                  <li key={item.id}>
-                    <Link
-                      href={getCategoryHref(item.category_slug)}
-                      className="block px-3 py-2 hover:bg-neutral-800"
-                      onClick={handleNavigate}
+                items={results.categories.map((item, index) => {
+                  const listIndex = results.products.length + results.brands.length + index;
+                  const isActive = activeIndex === listIndex;
+                  return (
+                    <li
+                      key={item.id}
+                      id={`${inputId}-search-option-${listIndex}`}
+                      role="option"
+                      aria-selected={isActive}
                     >
-                      <p className="text-sm font-medium text-white">{item.name}</p>
-                      <p className="text-xs text-neutral-400">Categoria: {item.category_slug}</p>
-                    </Link>
-                  </li>
-                ))}
+                      <Link
+                        href={getCategoryHref(item.category_slug)}
+                        className={twMerge(
+                          "block px-3 py-2 hover:bg-neutral-800",
+                          isActive && "bg-neutral-800",
+                        )}
+                        onMouseEnter={() => setActiveIndex(listIndex)}
+                        onClick={handleNavigate}
+                      >
+                        <p className="text-sm font-medium text-white">{item.name}</p>
+                        <p className="text-xs text-neutral-400">Categoria: {item.category_slug}</p>
+                      </Link>
+                    </li>
+                  );
+                })}
               />
             </div>
           ) : (

@@ -27,7 +27,7 @@ export default function ProductSlider({
   brandLogo: string;
   brandName: string;
 }) {
-  const { id, inStock, oldPrice, brand_slug, nameFull } = product;
+  const { id, inStock, isOnOrder, oldPrice, brand_slug, nameFull } = product;
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperTypes | null>(null);
   const brandLabel = useMemo(() => brand_slug.replace(/[-_]+/g, " ").trim(), [brand_slug]);
   const displayBrandName = brandName || brandLabel;
@@ -62,6 +62,7 @@ export default function ProductSlider({
           <HeaderProductCard
             id={id}
             inStock={inStock}
+            isOnOrder={isOnOrder}
             oldPrice={oldPrice}
             className="absolute top-0 left-0 pr-0 pl-4 md:pr-2 md:pl-5 lg:pr-0 xl:pr-0"
           />

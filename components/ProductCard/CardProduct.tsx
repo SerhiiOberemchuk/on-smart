@@ -24,6 +24,7 @@ export default function CardProduct({
     oldPrice,
     rating,
     inStock,
+    isOnOrder,
     nameFull,
     productType,
   } = product;
@@ -34,7 +35,7 @@ export default function CardProduct({
 
   return (
     <article className={clsx(styles.card, className)}>
-      <HeaderProductCard oldPrice={oldPrice} inStock={inStock} id={id} />
+      <HeaderProductCard oldPrice={oldPrice} inStock={inStock} isOnOrder={isOnOrder} id={id} />
       <figure className="">
         <Link href={productHref} aria-label={name} prefetch={false}>
           <Image

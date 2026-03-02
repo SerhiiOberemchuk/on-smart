@@ -9,6 +9,10 @@ export default function FallbackHeroSection() {
         width={1440}
         height={677}
         alt={slidesBanners[0].title}
+        priority
+        fetchPriority="high"
+        loading="eager"
+        sizes="(min-width: 1280px) 1280px, 100vw"
         className="mx-auto h-[580px] object-cover object-bottom md:h-[677px] md:object-center"
       />
     </div>

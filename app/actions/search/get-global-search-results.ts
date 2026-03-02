@@ -4,11 +4,12 @@ import { db } from "@/db/db";
 import { brandProductsSchema } from "@/db/schemas/brand-products.schema";
 import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
 import { productsSchema } from "@/db/schemas/product.schema";
-import { and, eq, gt, isNull, like, or } from "drizzle-orm";
+import { and, gt, like, or, sql } from "drizzle-orm";
 
 export type GlobalSearchProductResult = {
   id: string;
   name: string;
+  ean: string;
   slug: string;
   brand_slug: string;
   category_slug: string;
@@ -38,6 +39,7 @@ const EMPTY_RESULTS: GlobalSearchResults = {
   brands: [],
   categories: [],
 };
+const EAN_LIKE_QUERY = /^[\d\s-]+$/;
 
 const TRANSIENT_DB_ERRORS = ["too many connections", "er_con_count_error", "connection", "timeout"];
 
@@ -86,8 +88,11 @@ export async function getGlobalSearchResults(query: string) {
   }
 
   const searchTerm = `%${normalized.replace(/\s+/g, "%")}%`;
+  const searchTermLower = `%${normalized.toLowerCase().replace(/\s+/g, "%")}%`;
   const eanNormalized = normalized.replace(/\D/g, "");
   const eanSearchTerm = eanNormalized.length ? `%${eanNormalized}%` : null;
+  const isEanLikeQuery = EAN_LIKE_QUERY.test(normalized) && eanNormalized.length >= 3;
+  const shouldQueryBrandsAndCategories = !isEanLikeQuery && normalized.length >= 3;
 
   try {
     // Run queries sequentially to avoid opening multiple DB connections per keystroke.
@@ -96,6 +101,7 @@ export async function getGlobalSearchResults(query: string) {
         .select({
           id: productsSchema.id,
           name: productsSchema.name,
+          ean: productsSchema.ean,
           slug: productsSchema.slug,
           brand_slug: productsSchema.brand_slug,
           category_slug: productsSchema.category_slug,
@@ -104,12 +110,11 @@ export async function getGlobalSearchResults(query: string) {
         .from(productsSchema)
         .where(
           and(
-            or(gt(productsSchema.inStock, 0), eq(productsSchema.isOnOrder, true)),
-            isNull(productsSchema.parent_product_id),
+            gt(productsSchema.inStock, 0),
             or(
-              like(productsSchema.name, searchTerm),
-              like(productsSchema.nameFull, searchTerm),
-              like(productsSchema.slug, searchTerm),
+              sql`LOWER(${productsSchema.name}) LIKE ${searchTermLower}`,
+              sql`LOWER(${productsSchema.nameFull}) LIKE ${searchTermLower}`,
+              sql`LOWER(${productsSchema.slug}) LIKE ${searchTermLower}`,
               ...(eanSearchTerm ? [like(productsSchema.ean, eanSearchTerm)] : []),
             ),
           ),
@@ -117,41 +122,45 @@ export async function getGlobalSearchResults(query: string) {
         .limit(6),
     );
 
-    const brands = await withRetry(() =>
-      db
-        .select({
-          id: brandProductsSchema.id,
-          name: brandProductsSchema.name,
-          brand_slug: brandProductsSchema.brand_slug,
-        })
-        .from(brandProductsSchema)
-        .where(
-          or(
-            like(brandProductsSchema.name, searchTerm),
-            like(brandProductsSchema.title_full, searchTerm),
-            like(brandProductsSchema.brand_slug, searchTerm),
-          ),
+    const brands = shouldQueryBrandsAndCategories
+      ? await withRetry(() =>
+          db
+            .select({
+              id: brandProductsSchema.id,
+              name: brandProductsSchema.name,
+              brand_slug: brandProductsSchema.brand_slug,
+            })
+            .from(brandProductsSchema)
+            .where(
+              or(
+                like(brandProductsSchema.name, searchTerm),
+                like(brandProductsSchema.title_full, searchTerm),
+                like(brandProductsSchema.brand_slug, searchTerm),
+              ),
+            )
+            .limit(4),
         )
-        .limit(4),
-    );
+      : [];
 
-    const categories = await withRetry(() =>
-      db
-        .select({
-          id: categoryProductsSchema.id,
-          name: categoryProductsSchema.name,
-          category_slug: categoryProductsSchema.category_slug,
-        })
-        .from(categoryProductsSchema)
-        .where(
-          or(
-            like(categoryProductsSchema.name, searchTerm),
-            like(categoryProductsSchema.title_full, searchTerm),
-            like(categoryProductsSchema.category_slug, searchTerm),
-          ),
+    const categories = shouldQueryBrandsAndCategories
+      ? await withRetry(() =>
+          db
+            .select({
+              id: categoryProductsSchema.id,
+              name: categoryProductsSchema.name,
+              category_slug: categoryProductsSchema.category_slug,
+            })
+            .from(categoryProductsSchema)
+            .where(
+              or(
+                like(categoryProductsSchema.name, searchTerm),
+                like(categoryProductsSchema.title_full, searchTerm),
+                like(categoryProductsSchema.category_slug, searchTerm),
+              ),
+            )
+            .limit(4),
         )
-        .limit(4),
-    );
+      : [];
 
     return {
       success: true,

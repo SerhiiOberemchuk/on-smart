@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import ButtonsScrollSwiper from "../ButtonsScrollSwiper";
 import LinkYellow from "../YellowLink";
 import ProductsList from "./ProductList/ProductsList";
@@ -17,13 +16,21 @@ export default function ProductRowListSection({
   title,
   isBottomLink,
 }: ProductRowListSectionProps) {
+  const headingId = `${idSection}_heading`;
+
   return (
-    <section id={idSection} className="flex flex-col gap-4 py-8 xl:gap-8 xl:py-16">
+    <section
+      id={idSection}
+      aria-labelledby={headingId}
+      className="flex flex-col gap-4 py-8 xl:gap-8 xl:py-16"
+    >
       <div className="bg-background">
         <div className="container flex items-center justify-between py-3">
-          <h2 className="H2">{title}</h2>
+          <h2 id={headingId} className="H2">
+            {title}
+          </h2>
           <p className="sr-only">
-            Esplora i prodotti più venduti di OnSmart: articoli scelti dai nostri clienti, in pronta
+            Esplora i prodotti piu venduti di OnSmart: articoli scelti dai nostri clienti, in pronta
             consegna.
           </p>
 
@@ -34,11 +41,14 @@ export default function ProductRowListSection({
           />
         </div>
       </div>
-      <Suspense>
-        <ProductsList initialProducts={productsList} idSection={idSection} />
-      </Suspense>
+      <ProductsList initialProducts={productsList} idSection={idSection} />
       {isBottomLink && (
-        <LinkYellow href="/catalogo" title="Vai allo shop" className="mx-auto flex w-fit" />
+        <LinkYellow
+          href="/catalogo"
+          title="Vai al catalogo completo"
+          ariaLabel="Apri il catalogo completo dei prodotti OnSmart"
+          className="mx-auto flex w-fit"
+        />
       )}
     </section>
   );

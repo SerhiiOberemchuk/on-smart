@@ -16,6 +16,7 @@ import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
 
 export const DialogProductCard = ({
   inStock,
+  isOnOrder,
   oldPrice,
   price,
   brand_slug,
@@ -28,6 +29,7 @@ export const DialogProductCard = ({
 }: Pick<
   ProductType,
   | "inStock"
+  | "isOnOrder"
   | "oldPrice"
   | "price"
   | "nameFull"
@@ -97,6 +99,7 @@ export const DialogProductCard = ({
       <HeaderProductCard
         id={id}
         inStock={inStock}
+        isOnOrder={isOnOrder}
         oldPrice={oldPrice}
         className="static pr-0 pl-4 md:pr-2 md:pl-5 lg:pr-0 xl:pr-0"
       />
