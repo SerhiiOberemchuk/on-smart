@@ -17,6 +17,22 @@ function toAbsoluteUrl(url: string) {
   return /^https?:\/\//i.test(url) ? url : `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
 }
 
+function normalizeSlugLabel(value: unknown) {
+  return typeof value === "string" ? value.replace(/[-_]+/g, " ").trim() : "";
+}
+
+function normalizeOptionalText(value: unknown) {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function normalizeImageList(values: unknown[]) {
+  return values.filter(
+    (value): value is string => typeof value === "string" && value.trim().length > 0,
+  );
+}
+
 async function getVariantsForProduct(product: ProductType): Promise<ProductType[] | null> {
   if (product.parent_product_id && product.parent_product_id !== "NULL") {
     const parentResponse = await getProductById(product.parent_product_id);
@@ -77,15 +93,18 @@ export default async function PageSlug({
   );
 
   const galleryImages = galleryResponse.success ? (galleryResponse.data?.images ?? []) : [];
-  const sliderImages = Array.from(new Set([product.imgSrc, ...galleryImages].filter(Boolean)));
-  const brandDisplayName = brandResponse.data?.name || product.brand_slug.replace(/[-_]+/g, " ").trim();
-  const categoryDisplayName = product.category_slug.replace(/[-_]+/g, " ").trim();
-  const brandLogo = brandResponse.data?.image || "/logo.png";
+  const sliderImages = Array.from(new Set(normalizeImageList([product.imgSrc, ...galleryImages])));
+  const brandDisplayName = brandResponse.data?.name || normalizeSlugLabel(product.brand_slug);
+  const categoryDisplayName = normalizeSlugLabel(product.category_slug);
+  const brandLogo =
+    typeof brandResponse.data?.image === "string" && brandResponse.data.image.trim().length > 0
+      ? brandResponse.data.image
+      : "/logo.png";
 
   const productUrl = `${baseUrl}/catalogo/${product.category_slug}/${product.brand_slug}/${product.slug}`;
   const categoryUrl = `${baseUrl}/categoria/${product.category_slug}`;
   const brandUrl = `${baseUrl}/brand/${product.brand_slug}`;
-  const eanValue = product.ean?.trim();
+  const eanValue = normalizeOptionalText(product.ean);
   const productImages = sliderImages.map((url) => toAbsoluteUrl(url));
   const reviews = productDetails?.characteristics_valutazione ?? [];
   const reviewCount = reviews.length;

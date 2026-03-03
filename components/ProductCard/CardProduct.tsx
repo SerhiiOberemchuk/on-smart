@@ -46,9 +46,9 @@ export default function CardProduct({
             alt={name}
           />
         </Link>
-        <figcaption className="mt-2 px-1 md:mt-3 md:px-2 xl:px-3">
+        <figcaption className="relative mt-2 px-1 md:mt-3 md:px-2 xl:px-3">
           {isBundle && (
-            <span className="helper_XXS mb-2 inline-flex w-fit rounded-sm border border-yellow-500 bg-yellow-500/15 px-2 py-1 uppercase tracking-wide text-yellow-400">
+            <span className="helper_XXS absolute -top-1/5 left-0 w-fit rounded-sm border border-yellow-500 bg-yellow-500 px-2 py-1 tracking-wide text-white uppercase">
               Kit
             </span>
           )}

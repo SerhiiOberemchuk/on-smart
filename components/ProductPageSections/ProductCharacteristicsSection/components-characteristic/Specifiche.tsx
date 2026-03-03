@@ -12,10 +12,18 @@ export default function Specifiche({
   className?: string;
 }) {
   const imagesToRender = data.images
-    .filter((img) => img && img !== "/logo.png")
+    .filter(
+      (img): img is string =>
+        typeof img === "string" && img.trim().length > 0 && img !== "/logo.png",
+    )
     .slice(0, 4);
   const groupsToRender = data.groups
-    .filter((item) => item.name.trim() !== "" && item.value.trim() !== "")
+    .map((item) => ({
+      name: typeof item?.name === "string" ? item.name.trim() : "",
+      value: typeof item?.value === "string" ? item.value.trim() : "",
+      position: typeof item?.position === "number" ? item.position : 0,
+    }))
+    .filter((item) => item.name !== "" && item.value !== "")
     .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
   const showUnavailableMessage = isDescriptionEmpty && groupsToRender.length === 0;
 

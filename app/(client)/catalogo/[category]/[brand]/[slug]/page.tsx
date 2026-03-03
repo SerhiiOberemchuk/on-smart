@@ -6,6 +6,20 @@ import PageSlug from "./PageSlug";
 import { Suspense } from "react";
 import ProductPageFallback from "./ProductPageFallback";
 
+function normalizeSlugLabel(value: unknown) {
+  return typeof value === "string" ? value.replace(/[-_]+/g, " ").trim() : "";
+}
+
+function normalizeOptionalText(value: unknown) {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function normalizeImageUrl(value: unknown, fallback: string) {
+  return typeof value === "string" && value.trim().length > 0 ? value : fallback;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -19,9 +33,11 @@ export async function generateMetadata({
     notFound();
   }
 
-  const eanValue = data.ean?.trim();
-  const brandLabel = data.brand_slug.replace(/[-_]+/g, " ").trim();
-  const categoryLabel = data.category_slug.replace(/[-_]+/g, " ").trim();
+  const eanValue = normalizeOptionalText(data.ean);
+  const brandLabel = normalizeSlugLabel(data.brand_slug);
+  const categoryLabel = normalizeSlugLabel(data.category_slug);
+  const slugLabel = normalizeSlugLabel(data.slug);
+  const metadataImageUrl = normalizeImageUrl(data.imgSrc, "/logo.png");
   const descriptionWithEan = eanValue
     ? `${data.nameFull ?? ""}. Brand: ${brandLabel}. Categoria: ${categoryLabel}. EAN: ${eanValue}.`.trim()
     : `${data.nameFull ?? ""}. Brand: ${brandLabel}. Categoria: ${categoryLabel}.`.trim();
@@ -30,7 +46,7 @@ export async function generateMetadata({
     data.nameFull,
     brandLabel,
     categoryLabel,
-    data.slug.replace(/[-_]+/g, " ").trim(),
+    slugLabel,
     eanValue ? `EAN ${eanValue}` : undefined,
     eanValue,
   ].filter(Boolean) as string[];
@@ -65,7 +81,7 @@ export async function generateMetadata({
       locale: "it_IT",
       images: [
         {
-          url: data.imgSrc,
+          url: metadataImageUrl,
           width: 1200,
           height: 630,
           alt: data.nameFull,
@@ -76,7 +92,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: data.name,
       description: descriptionWithEan,
-      images: [data.imgSrc],
+      images: [metadataImageUrl],
     },
     other: eanValue ? { "product:ean": eanValue } : undefined,
   };

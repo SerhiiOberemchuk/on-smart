@@ -11,14 +11,20 @@ export default function Documenti({
   data: Product_Details["characteristics_documenti"];
   className?: string;
 }) {
-  const hasDocuments = (data?.documents?.length ?? 0) > 0;
+  const documentsToRender = (Array.isArray(data?.documents) ? data.documents : [])
+    .map((item) => ({
+      title: typeof item?.title === "string" ? item.title.trim() : "",
+      link: typeof item?.link === "string" ? item.link.trim() : "",
+    }))
+    .filter((item) => item.title.length > 0 && item.link.length > 0);
+  const hasDocuments = documentsToRender.length > 0;
 
   return (
     <div className={twMerge("flex flex-col gap-3", className)}>
       {!hasDocuments ? <p className="text_R text-text-grey">Nessun documento disponibile.</p> : null}
 
       {hasDocuments
-        ? data.documents.map((item) => {
+        ? documentsToRender.map((item) => {
             return (
               <Link
                 href={item.link}
