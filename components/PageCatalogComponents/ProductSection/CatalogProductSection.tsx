@@ -24,7 +24,9 @@ export default function CatalogProductSection({
       {products.length > 0 ? (
         <ul className={styles.list}>
           {products.map((product) => (
-            <CardProduct key={product.id} {...product} className={styles.card} />
+            <li key={product.id}>
+              <CardProduct {...product} className={styles.card} />
+            </li>
           ))}
         </ul>
       ) : (
