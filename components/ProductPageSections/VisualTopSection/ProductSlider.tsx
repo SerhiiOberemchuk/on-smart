@@ -29,10 +29,22 @@ export default function ProductSlider({
 }) {
   const { id, inStock, isOnOrder, oldPrice, brand_slug, nameFull } = product;
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperTypes | null>(null);
-  const brandLabel = useMemo(() => brand_slug.replace(/[-_]+/g, " ").trim(), [brand_slug]);
+  const brandLabel = useMemo(
+    () => (typeof brand_slug === "string" ? brand_slug.replace(/[-_]+/g, " ").trim() : ""),
+    [brand_slug],
+  );
   const displayBrandName = brandName || brandLabel;
-  const sliderImageAlt = `${nameFull} - ${displayBrandName}`;
-  const sliderImages = images.length > 0 ? images : [product.imgSrc || "/logo.svg"];
+  const displayNameFull =
+    typeof nameFull === "string" && nameFull.trim().length > 0 ? nameFull : product.name;
+  const sliderImageAlt = `${displayNameFull} - ${displayBrandName}`;
+  const normalizedImages = images.filter(
+    (image) => typeof image === "string" && image.trim().length > 0,
+  );
+  const fallbackImage =
+    typeof product.imgSrc === "string" && product.imgSrc.trim().length > 0
+      ? product.imgSrc
+      : "/logo.svg";
+  const sliderImages = normalizedImages.length > 0 ? normalizedImages : [fallbackImage];
 
   return (
     <div className="flex w-full max-w-[670px] justify-around gap-6 rounded-sm bg-background p-3 xl:flex-1 xl:justify-between">
@@ -104,7 +116,9 @@ export default function ProductSlider({
           placeholder="empty"
           className="mx-auto mt-5 h-6 object-contain object-center"
         />
-        <h2 className="helper_text mt-2 text-center text-text-grey capitalize">{displayBrandName}</h2>
+        <h2 className="helper_text mt-2 text-center text-text-grey capitalize">
+          {displayBrandName}
+        </h2>
         <p className="H4 mt-2 text-center text-white">{nameFull}</p>
       </div>
     </div>

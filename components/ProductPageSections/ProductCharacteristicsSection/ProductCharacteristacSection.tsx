@@ -35,11 +35,20 @@ export default function ProductCharacteristicsSection({
     characteristics_documenti,
     characteristics_valutazione,
   } = productDetail;
+  const descriptionText =
+    typeof characteristics_descrizione.description === "string"
+      ? characteristics_descrizione.description.trim()
+      : "";
+  const descriptionTitle =
+    typeof characteristics_descrizione.title === "string"
+      ? characteristics_descrizione.title.trim()
+      : "";
   const isDescriptionEmpty =
-    !characteristics_descrizione.description.trim() &&
-    (characteristics_descrizione.title.trim().length === 0 ||
-      characteristics_descrizione.title.trim().toLowerCase() === "no title") &&
-    !characteristics_descrizione.images.some((img) => img && img !== "/logo.png");
+    !descriptionText &&
+    (descriptionTitle.length === 0 || descriptionTitle.toLowerCase() === "no title") &&
+    !characteristics_descrizione.images.some(
+      (img) => typeof img === "string" && img.length > 0 && img !== "/logo.png",
+    );
 
   const [currentTab, setCurrentTab] = useState<TabTypeCaracteristics>(DEFAULT_TAB_CHARACTERISTICS);
 

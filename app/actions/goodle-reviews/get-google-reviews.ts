@@ -4,11 +4,13 @@ import { ApifyClient } from "apify-client";
 import { cacheLife } from "next/cache";
 
 import { GoogleReview } from "@/types/google-reviews.types";
+import { isBuildPhase } from "@/utils/guard-build";
 
 const APIFY_TOKEN = process.env.APIFY_API_TOKEN;
 const APIFY_TASK_ID = process.env.APIFY_TASK_ID;
 const DEFAULT_GOOGLE_REVIEW_URL = "https://g.page/r/CRhuErfSy0siEAE/review";
 const MAX_REVIEWS = 20;
+const BUILD_PHASE_SKIP_ERROR = "skipped: build phase";
 
 const client = new ApifyClient({
   token: APIFY_TOKEN,
@@ -51,25 +53,31 @@ function normalizeReview(item: ApifyReviewItem, index: number): GoogleReview | n
   };
 }
 
-export async function getGoogleReviewsAction() {
+async function getGoogleReviewsCachedCore(taskId: string): Promise<GoogleReview[]> {
   "use cache";
   cacheLife("hours");
+  const run = await client.task(taskId).call();
+  const { items } = await client.dataset(run.defaultDatasetId).listItems({
+    limit: MAX_REVIEWS,
+    fields: ["name", "reviewId", "reviewUrl", "stars", "text", "publishedAtDate"],
+  });
+
+  return (items as ApifyReviewItem[])
+    .map((item, index) => normalizeReview(item, index))
+    .filter((item): item is GoogleReview => Boolean(item));
+}
+
+export async function getGoogleReviewsAction() {
+  if (isBuildPhase()) {
+    return { success: false, error: BUILD_PHASE_SKIP_ERROR, reviews: [] };
+  }
 
   if (!APIFY_TOKEN || !APIFY_TASK_ID) {
     return { success: false, error: "APIFY_TOKEN or APIFY_TASK_ID is not defined", reviews: [] };
   }
 
   try {
-    const run = await client.task(APIFY_TASK_ID).call();
-    const { items } = await client.dataset(run.defaultDatasetId).listItems({
-      limit: MAX_REVIEWS,
-      fields: ["name", "reviewId", "reviewUrl", "stars", "text", "publishedAtDate"],
-    });
-
-    const reviews = (items as ApifyReviewItem[])
-      .map((item, index) => normalizeReview(item, index))
-      .filter((item): item is GoogleReview => Boolean(item));
-
+    const reviews = await getGoogleReviewsCachedCore(APIFY_TASK_ID);
     return {
       success: true,
       reviews,

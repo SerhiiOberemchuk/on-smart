@@ -10,10 +10,15 @@ export default function Descrizione({
   className?: string;
 }) {
   const imagesToRender = data.images
-    .filter((img) => img && img !== "/logo.png")
+    .filter(
+      (img): img is string =>
+        typeof img === "string" && img.trim().length > 0 && img !== "/logo.png",
+    )
     .slice(0, 4);
-  const hasDescriptionText = data.description.trim().length > 0;
-  const title = data.title.trim();
+  const descriptionText =
+    typeof data.description === "string" ? data.description.trim() : "";
+  const hasDescriptionText = descriptionText.length > 0;
+  const title = typeof data.title === "string" ? data.title.trim() : "";
   const displayTitle = title.length > 0 && title.toLowerCase() !== "no title" ? title : "Descrizione";
   const showUnavailableMessage = !hasDescriptionText;
 
@@ -48,7 +53,7 @@ export default function Descrizione({
         {showUnavailableMessage ? (
           <p className="text_R text-text-grey">I dati corrispondenti non sono ancora disponibili.</p>
         ) : (
-          <p className="text_R">{data.description}</p>
+          <p className="text_R">{descriptionText}</p>
         )}
       </div>
     </div>
