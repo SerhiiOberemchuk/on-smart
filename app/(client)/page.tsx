@@ -8,6 +8,7 @@ import TopSalesSection from "@/components/home-sections/top-sales-section/TopSal
 import Script from "next/script";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import { Suspense } from "react";
+import { headers } from "next/headers";
 import FallbackHeroSection from "@/components/home-sections/hero-section/FallbackHeroSection";
 import {
   BrandSectionFallback,
@@ -72,7 +73,25 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Home() {
+function HomePageFallback() {
+  return (
+    <>
+      <h1 className="sr-only">
+        OnSmart: elettronica, videosorveglianza, sistemi smart home e sicurezza per casa e azienda
+      </h1>
+      <FallbackHeroSection />
+      <TopSalesSectionFallback />
+      <CategorySectionFallback />
+      <BrandSectionFallback />
+      <GoogleReviewSectionFallback />
+      <FeedbackFormSectionFallback />
+    </>
+  );
+}
+
+async function HomeContent() {
+  await headers();
+
   return (
     <>
       <h1 className="sr-only">
@@ -141,5 +160,13 @@ export default async function Home() {
         }}
       />
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<HomePageFallback />}>
+      <HomeContent />
+    </Suspense>
   );
 }
