@@ -1,26 +1,16 @@
-import { getAllCharacteristicsWithMeta } from "@/app/actions/product-characteristic/create-product-characteristic";
+import {
+  getAllCharacteristicsWithMeta,
+  type GetAllCharacteristicsWithMetaResponse,
+} from "@/app/actions/product-characteristic/create-product-characteristic";
 import Spiner from "@/components/Spiner";
-import { headers } from "next/headers";
 import { Suspense } from "react";
 import ButtonAddCharacteristic from "./components/ButtonAddCharacteristic";
 import { CharacteristicModal } from "./components/CharacteristicModal";
 import ListCharacteristics from "./components/ListCharacteristics";
 
 export default function CharacteristicsPage() {
-  return (
-    <Suspense fallback={<Spiner />}>
-      <GetDataComponent />
-    </Suspense>
-  );
-}
-
-async function GetDataComponent() {
-  await headers();
-  const response = await getAllCharacteristicsWithMeta();
-
-  if (response.error) {
-    return <p className="admin-empty">Помилка завантаження даних</p>;
-  }
+  const characteristicsPromise: GetAllCharacteristicsWithMetaResponse =
+    getAllCharacteristicsWithMeta();
 
   return (
     <section className="admin-page">
@@ -35,7 +25,7 @@ async function GetDataComponent() {
         <ButtonAddCharacteristic />
       </Suspense>
       <Suspense fallback={<Spiner />}>
-        <ListCharacteristics data={response} />
+        <ListCharacteristics dataPromise={characteristicsPromise} />
       </Suspense>
       <Suspense fallback={<Spiner />}>
         <CharacteristicModal />

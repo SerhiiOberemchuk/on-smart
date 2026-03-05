@@ -1,13 +1,12 @@
 "use client";
 
 import {
-  GetAllCategoriesFailure,
-  
-  GetAllCategoriesSuccess,
+  type GetAllCategoriesResponse,
   removeCategoryProductsById,
 } from "@/app/actions/category/category-actions";
 import { deleteFileFromS3 } from "@/app/actions/files/uploadFile";
 import { CategoryTypes } from "@/types/category.types";
+import { assertPromiseLike } from "@/utils/assert-promise-like";
 import Image from "next/image";
 import Link from "next/link";
 import { use, useState, useTransition } from "react";
@@ -48,15 +47,24 @@ function CategoryRowActions({
 }
 
 export default function CategoriesClientPage({
-  initialData,
+  initialDataPromise,
 }: {
-  initialData: GetAllCategoriesSuccess | GetAllCategoriesFailure;
+  initialDataPromise: GetAllCategoriesResponse;
 }) {
+  assertPromiseLike<Awaited<GetAllCategoriesResponse>>(
+    initialDataPromise,
+    "CategoriesClientPage.initialDataPromise",
+  );
+  const initialData = use(initialDataPromise);
   const [categories, setCategories] = useState<CategoryTypes[]>(initialData.data || []);
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState<CategoryTypes | null>(null);
   const [idToDelete, setIdToDelete] = useState<string | null>(null);
   const [isPendingDell, startTransitionDell] = useTransition();
+
+  if (initialData.error) {
+    return <p className="admin-empty">Помилка завантаження даних</p>;
+  }
 
   const openModal = (data: CategoryTypes | null = null) => {
     setEditData(data);

@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "docker:build": "docker build -t serhiioberemchuk/on-smart:latest .",
+    "docker:push": "docker push serhiioberemchuk/on-smart:latest",
+    "docker:deploy": "npm run docker:build && npm run docker:push"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.999.0",
@@ -31,6 +34,7 @@
     "next-sitemap": "^4.2.3",
     "nodemailer": "^8.0.1",
     "nuqs": "^2.8.8",
+    "p-retry": "^7.1.1",
     "pg": "^8.19.0",
     "postgres": "^3.4.8",
     "react": "^19.2.4",

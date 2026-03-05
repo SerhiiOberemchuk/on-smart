@@ -1,24 +1,17 @@
-import { getAllOrdersPaymentAction } from "@/app/actions/payments/payment-order-actions";
+import {
+  getAllOrdersPaymentAction,
+  type GetAllOrdersPaymentActionResponseTypes,
+} from "@/app/actions/payments/payment-order-actions";
 import Spiner from "@/components/Spiner";
-import { headers } from "next/headers";
 import { Suspense } from "react";
 import PaymentClientComponent from "./PaymentsClientComponent";
 
 export default function PagePayments() {
+  const paymentsPromise: GetAllOrdersPaymentActionResponseTypes = getAllOrdersPaymentAction();
+
   return (
     <Suspense fallback={<Spiner />}>
-      <GetDataComponent />
+      <PaymentClientComponent paymentsPromise={paymentsPromise} />
     </Suspense>
   );
-}
-
-async function GetDataComponent() {
-  await headers();
-  const payments = await getAllOrdersPaymentAction();
-
-  if (payments.error) {
-    return <p className="admin-empty">Помилка завантаження даних</p>;
-  }
-
-  return <PaymentClientComponent payments={payments} />;
 }

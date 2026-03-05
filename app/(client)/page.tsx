@@ -5,10 +5,8 @@ import FeedbackFormSection from "@/components/home-sections/feedback-form-sectio
 import GoogleReviewSection from "@/components/home-sections/google-review-section/GoogleReviewSection";
 import HeroSection from "@/components/home-sections/hero-section/HeroSection";
 import TopSalesSection from "@/components/home-sections/top-sales-section/TopSalesSection";
-import Script from "next/script";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import { Suspense } from "react";
-import { headers } from "next/headers";
 import FallbackHeroSection from "@/components/home-sections/hero-section/FallbackHeroSection";
 import {
   BrandSectionFallback,
@@ -73,25 +71,7 @@ export const metadata: Metadata = {
   },
 };
 
-function HomePageFallback() {
-  return (
-    <>
-      <h1 className="sr-only">
-        OnSmart: elettronica, videosorveglianza, sistemi smart home e sicurezza per casa e azienda
-      </h1>
-      <FallbackHeroSection />
-      <TopSalesSectionFallback />
-      <CategorySectionFallback />
-      <BrandSectionFallback />
-      <GoogleReviewSectionFallback />
-      <FeedbackFormSectionFallback />
-    </>
-  );
-}
-
-async function HomeContent() {
-  await headers();
-
+export default function Home() {
   return (
     <>
       <h1 className="sr-only">
@@ -115,7 +95,7 @@ async function HomeContent() {
       <Suspense fallback={<FeedbackFormSectionFallback />}>
         <FeedbackFormSection />
       </Suspense>
-      <Script
+      <script
         id="home_page_main"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -146,7 +126,7 @@ async function HomeContent() {
           }),
         }}
       />
-      <Script
+      <script
         id="home_page_website"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -160,13 +140,5 @@ async function HomeContent() {
         }}
       />
     </>
-  );
-}
-
-export default function Home() {
-  return (
-    <Suspense fallback={<HomePageFallback />}>
-      <HomeContent />
-    </Suspense>
   );
 }

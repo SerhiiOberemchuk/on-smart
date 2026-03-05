@@ -1,20 +1,5 @@
 import { sleep } from "./sleep";
-
-const RETRYABLE_DB_ERROR_CODES = [
-  "ECONNREFUSED",
-  "ETIMEDOUT",
-  "EAI_AGAIN",
-  "ECONNRESET",
-  "PROTOCOL_CONNECTION_LOST",
-  "PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR",
-] as const;
-
-export function isRetryableDbError(e: unknown) {
-  const code =
-    typeof e === "object" && e !== null && "code" in e ? String((e as { code?: unknown }).code ?? "") : "";
-  const msg = e instanceof Error ? e.message : String(e);
-  return RETRYABLE_DB_ERROR_CODES.some((retryCode) => code === retryCode || msg.includes(retryCode));
-}
+import { isRetryableDbError } from "./retry-db";
 
 export async function withRetrySelective<T>(
   fn: () => Promise<T>,

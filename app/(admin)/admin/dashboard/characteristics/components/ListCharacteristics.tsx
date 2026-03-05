@@ -5,6 +5,8 @@ import {
   type GetAllCharacteristicsWithMetaResponse,
 } from "@/app/actions/product-characteristic/create-product-characteristic";
 import ButtonYellow from "@/components/BattonYellow";
+import { assertPromiseLike } from "@/utils/assert-promise-like";
+import { use } from "react";
 import ButtonXDellete from "../../ButtonXDellete";
 import { useCharacteristicStore } from "../store/useCharacteristicStore";
 
@@ -51,10 +53,15 @@ function getFlags(item: CharacteristicListItem) {
 }
 
 export default function ListCharacteristics({
-  data,
+  dataPromise,
 }: {
-  data: Awaited<GetAllCharacteristicsWithMetaResponse>;
+  dataPromise: GetAllCharacteristicsWithMetaResponse;
 }) {
+  assertPromiseLike<Awaited<GetAllCharacteristicsWithMetaResponse>>(
+    dataPromise,
+    "ListCharacteristics.dataPromise",
+  );
+  const data = use(dataPromise);
   const { openEdit } = useCharacteristicStore();
 
   const handleDelete = async (id: string) => {

@@ -11,7 +11,6 @@ import { productCharacteristicsSchema } from "@/db/schemas/product_characteristi
 import { productCharacteristicValuesSchema } from "@/db/schemas/product_characteristic_values.schema";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { FilterGroup, FilterOption } from "@/types/catalog-filter-options.types";
-import { isBuildPhase } from "@/utils/guard-build";
 import { withRetrySelective } from "@/utils/with-retry-selective";
 
 const CATALOG_FILTERS_READ_RETRY_OPTIONS = {
@@ -145,10 +144,6 @@ async function getCatalogCharacteristicFiltersCachedCore(): Promise<FilterGroup[
 }
 
 export const getCatalogCharacteristicFilters = async (): Promise<FilterGroup[]> => {
-  if (isBuildPhase()) {
-    return [];
-  }
-
   try {
     return await getCatalogCharacteristicFiltersCachedCore();
   } catch (error) {
@@ -188,10 +183,6 @@ async function getCatalogFiltersCachedCore(): Promise<FilterGroup[]> {
 }
 
 export const getCatalogFilters = async (): Promise<FilterGroup[]> => {
-  if (isBuildPhase()) {
-    return getBuildSafeFilters();
-  }
-
   try {
     return await getCatalogFiltersCachedCore();
   } catch (error) {

@@ -2,7 +2,6 @@
 
 import { db } from "@/db/db";
 import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
-import { isBuildPhase } from "@/utils/guard-build";
 import { withRetrySelective } from "@/utils/with-retry-selective";
 import {
   productCharacteristicsSchema,
@@ -21,7 +20,6 @@ const CHARACTERISTICS_READ_RETRY_OPTIONS = {
   delayMs: 800,
   linearBackoffMs: 250,
 } as const;
-const BUILD_PHASE_SKIP_ERROR = "skipped: build phase";
 
 export type CharacteristicMetaItem = {
   id: string;
@@ -107,10 +105,6 @@ export async function getAllCharacteristic() {
 }
 
 export async function getAllCharacteristicsWithMeta(): GetAllCharacteristicsWithMetaResponse {
-  if (isBuildPhase()) {
-    return { success: false, error: BUILD_PHASE_SKIP_ERROR, data: [] };
-  }
-
   try {
     const data = await getAllCharacteristicsWithMetaCachedCore();
     return { success: true, data, error: null };

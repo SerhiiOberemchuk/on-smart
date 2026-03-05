@@ -1,11 +1,12 @@
 "use client";
 
-import { removeBrandById } from "@/app/actions/brands/brand-actions";
+import { type GetAllBrandsResponse, removeBrandById } from "@/app/actions/brands/brand-actions";
 import { deleteFileFromS3 } from "@/app/actions/files/uploadFile";
 import { BrandTypes } from "@/types/brands.types";
+import { assertPromiseLike } from "@/utils/assert-promise-like";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { use, useState, useTransition } from "react";
 import { toast } from "react-toastify";
 import ModalBrandForm from "./ModalBrandForm";
 
@@ -42,12 +43,22 @@ function BrandRowActions({
   );
 }
 
-export default function BrandsPageClient({ brandsData }: { brandsData: BrandTypes[] }) {
-  const [brands, setBrands] = useState<BrandTypes[]>(brandsData);
+export default function BrandsPageClient({
+  brandsPromise,
+}: {
+  brandsPromise: GetAllBrandsResponse;
+}) {
+  assertPromiseLike<Awaited<GetAllBrandsResponse>>(brandsPromise, "BrandsPageClient.brandsPromise");
+  const response = use(brandsPromise);
+  const [brands, setBrands] = useState<BrandTypes[]>(response.success ? response.data : []);
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState<BrandTypes | null>(null);
   const [idToDelete, setIdToDelete] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  if (response.error) {
+    return <p className="admin-empty">Помилка завантаження даних</p>;
+  }
 
   const openModal = (data: BrandTypes | null = null) => {
     setEditData(data);

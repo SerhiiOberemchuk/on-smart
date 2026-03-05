@@ -2,15 +2,11 @@
 
 import { db } from "@/db/db";
 import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
-import { isBuildPhase } from "@/utils/guard-build";
-import { withRetrySelective } from "@/utils/with-retry-selective";
+import { retryDb } from "@/utils/retry-db";
 import { CategoryTypes } from "@/types/category.types";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
-
-const CATEGORY_READ_RETRY_OPTIONS = { tries: 10, delayMs: 800, linearBackoffMs: 250 } as const;
-const BUILD_PHASE_SKIP_ERROR = "skipped: build phase";
 
 type CategoryRow = typeof categoryProductsSchema.$inferSelect;
 
@@ -55,10 +51,7 @@ async function getAllCategoryProductsCachedCore(): Promise<CategoryRow[]> {
   cacheTag(CACHE_TAGS.category.all);
   cacheLife("minutes");
 
-  return withRetrySelective(
-    () => db.select().from(categoryProductsSchema),
-    CATEGORY_READ_RETRY_OPTIONS,
-  );
+  return retryDb(() => db.select().from(categoryProductsSchema));
 }
 
 async function getCategoryBySlugCachedCore(categorySlug: string): Promise<CategoryRow | null> {
@@ -66,13 +59,12 @@ async function getCategoryBySlugCachedCore(categorySlug: string): Promise<Catego
   cacheTag(CACHE_TAGS.category.bySlug(categorySlug));
   cacheLife("minutes");
 
-  const rows = await withRetrySelective(
+  const rows = await retryDb(
     () =>
       db
         .select()
         .from(categoryProductsSchema)
         .where(eq(categoryProductsSchema.category_slug, categorySlug)),
-    CATEGORY_READ_RETRY_OPTIONS,
   );
 
   return rows[0] ?? null;
@@ -93,10 +85,6 @@ export async function createCategoryProducts(category: Omit<CategoryTypes, "id">
 }
 
 export async function getAllCategoryProducts(): GetAllCategoriesResponse {
-  if (isBuildPhase()) {
-    return { success: false, error: BUILD_PHASE_SKIP_ERROR, data: [] };
-  }
-
   try {
     const result = await getAllCategoryProductsCachedCore();
     return {
@@ -174,10 +162,6 @@ export async function updateCategoryProductsById(
 export async function getCategoryBySlug(
   category_slug: CategoryTypes["category_slug"],
 ): GetCategoryBySlugResponse {
-  if (isBuildPhase()) {
-    return { success: false, error: BUILD_PHASE_SKIP_ERROR, data: null };
-  }
-
   try {
     const fetchCategory = await getCategoryBySlugCachedCore(category_slug);
 

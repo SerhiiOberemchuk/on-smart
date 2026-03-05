@@ -2,8 +2,9 @@
 
 import type { GetOrdersAllActionResponseType, OrderListItem } from "@/app/actions/orders/get-order";
 import { OrderTypes } from "@/db/schemas/orders.schema";
+import { assertPromiseLike } from "@/utils/assert-promise-like";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { use, useMemo, useState } from "react";
 import { URL_DASHBOARD } from "../dashboard-admin.types";
 import { getDeliveryMethodLabel, getOrderStatusLabel } from "./[id]/_order-details/formatters";
 
@@ -142,10 +143,15 @@ function getDeliveryPrice(order: OrderTypes) {
 }
 
 export default function PageOrdersClient({
-  serverActionOrders,
+  serverActionOrdersPromise,
 }: {
-  serverActionOrders: Awaited<GetOrdersAllActionResponseType>;
+  serverActionOrdersPromise: GetOrdersAllActionResponseType;
 }) {
+  assertPromiseLike<Awaited<GetOrdersAllActionResponseType>>(
+    serverActionOrdersPromise,
+    "PageOrdersClient.serverActionOrdersPromise",
+  );
+  const serverActionOrders = use(serverActionOrdersPromise);
   const { orders, error } = serverActionOrders;
 
   const [query, setQuery] = useState("");

@@ -1,24 +1,14 @@
-import { getOrdersAllAction } from "@/app/actions/orders/get-order";
+import { getOrdersAllAction, type GetOrdersAllActionResponseType } from "@/app/actions/orders/get-order";
 import Spiner from "@/components/Spiner";
-import { headers } from "next/headers";
 import { Suspense } from "react";
 import PageOrdersClient from "./PageOrdersClient";
 
 export default function OrdersPage() {
+  const ordersPromise: GetOrdersAllActionResponseType = getOrdersAllAction();
+
   return (
     <Suspense fallback={<Spiner />}>
-      <GetDataComponent />
+      <PageOrdersClient serverActionOrdersPromise={ordersPromise} />
     </Suspense>
   );
-}
-
-async function GetDataComponent() {
-  await headers();
-  const orders = await getOrdersAllAction();
-
-  if (orders.error) {
-    return <p className="admin-empty">Помилка завантаження даних</p>;
-  }
-
-  return <PageOrdersClient serverActionOrders={orders} />;
 }

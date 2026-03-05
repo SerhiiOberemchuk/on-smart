@@ -9,7 +9,6 @@ import {
   OrderTypes,
   paymentsSchema,
 } from "@/db/schemas/orders.schema";
-import { isBuildPhase } from "@/utils/guard-build";
 import { withRetrySelective } from "@/utils/with-retry-selective";
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
@@ -17,7 +16,6 @@ import { CACHE_TAG_GET_ORDER_INFO } from "./cache-tags";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 const ORDERS_READ_RETRY_OPTIONS = { tries: 10, delayMs: 800, linearBackoffMs: 250 } as const;
-const BUILD_PHASE_SKIP_ERROR = "skipped: build phase";
 
 export type GetOrderResponseType = Promise<{
   success: boolean;
@@ -124,10 +122,6 @@ async function getOrdersAllCachedCore(): Promise<OrderListItem[]> {
 }
 
 export async function getOrdersAllAction(): GetOrdersAllActionResponseType {
-  if (isBuildPhase()) {
-    return { orders: [], error: BUILD_PHASE_SKIP_ERROR };
-  }
-
   try {
     const orders = await getOrdersAllCachedCore();
     return {

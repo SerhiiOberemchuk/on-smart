@@ -1,7 +1,9 @@
 "use client";
 
 import { GetAllOrdersPaymentActionResponseTypes } from "@/app/actions/payments/payment-order-actions";
+import { assertPromiseLike } from "@/utils/assert-promise-like";
 import Link from "next/link";
+import { use } from "react";
 import { URL_DASHBOARD } from "../dashboard-admin.types";
 
 type PaymentsPageData = Awaited<GetAllOrdersPaymentActionResponseTypes>;
@@ -72,11 +74,15 @@ function getStatusColor(status: string) {
 }
 
 export default function PaymentClientComponent({
-  payments,
+  paymentsPromise,
 }: {
-  payments: PaymentsPageData;
+  paymentsPromise: GetAllOrdersPaymentActionResponseTypes;
 }) {
-  const clientPayments = payments;
+  assertPromiseLike<Awaited<GetAllOrdersPaymentActionResponseTypes>>(
+    paymentsPromise,
+    "PaymentClientComponent.paymentsPromise",
+  );
+  const clientPayments: PaymentsPageData = use(paymentsPromise);
 
   if (!clientPayments.payments?.length) {
     return (
