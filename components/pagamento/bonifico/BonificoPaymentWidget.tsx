@@ -78,8 +78,14 @@ export default function BonificoPaymentWidget() {
   ]);
 
   useEffect(() => {
-    if (stateOrder.error) console.error(stateOrder.error);
-  }, [stateOrder.error]);
+    if (!stateOrder.error) return;
+
+    console.error(stateOrder.error);
+    toast.error(
+      "Pagamento non riuscito. Prova piu tardi oppure scegli un altro metodo di pagamento.",
+    );
+    router.push(`${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=bonifico_order_create_failed`);
+  }, [router, stateOrder.error]);
 
   return (
     <>

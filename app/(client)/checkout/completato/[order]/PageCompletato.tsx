@@ -57,11 +57,11 @@ export default function CompletatoPage({
         {orderInfo.order?.deliveryMethod === "CONSEGNA_CORRIERE" && (
           <>
             <p className="btn_small">
-              Totale: <span className="body_R_20">{paymantInfoState.paymentInfo?.amount} в‚¬</span>
+              Totale: <span className="body_R_20">{paymantInfoState.paymentInfo?.amount} E </span>
             </p>
             <p className="btn_small">
               Consegna:{" "}
-              <span className="body_R_20">{orderInfo.order?.deliveryPrice.toFixed(2)} в‚¬</span>
+              <span className="body_R_20">{orderInfo.order?.deliveryPrice.toFixed(2)} E </span>
             </p>
           </>
         )}
@@ -70,7 +70,7 @@ export default function CompletatoPage({
             <p className="btn_small">
               Totale:{" "}
               <span className="body_R_20">
-                {Number(paymantInfoState.paymentInfo?.amount).toFixed(2)} в‚¬
+                {Number(paymantInfoState.paymentInfo?.amount).toFixed(2)} E
               </span>
             </p>
             <p className="btn_small">Ritiro presto negozzio</p>
@@ -103,4 +103,3 @@ export default function CompletatoPage({
     </section>
   );
 }
-

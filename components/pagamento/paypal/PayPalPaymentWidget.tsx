@@ -39,7 +39,7 @@ export default function PayPalPaymentWidget() {
           // buyerCountry: "it",
           // intent: "capture",
           components: ["messages", "buttons"],
-          // environment: payPalENV,
+          environment: payPalENV,
           // debug: true,
           enableFunding: "paylater",
         }}

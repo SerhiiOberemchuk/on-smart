@@ -6,6 +6,11 @@ import { BasceketStoreStateType } from "@/store/basket-store";
 import { CheckoutTypesDataFirstStep, CheckoutTypesDataStepConsegna } from "@/store/checkout-store";
 import { PAGES } from "@/types/pages.types";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+type PlaceKlarnaOrderResult =
+  | { success: true; orderId: string; redirectUrl: string }
+  | { success: false; error: string; status?: number };
+
 export async function placeKlarnaOrder({
   authorizationToken,
   orderNumber,
@@ -22,7 +27,8 @@ export async function placeKlarnaOrder({
   productsInBasket: ProductType[];
   totalPrice: number;
   basket: BasceketStoreStateType["basket"];
-}) {
+}): Promise<PlaceKlarnaOrderResult> {
+  const safeOrderNumber = orderNumber || "NO-ORDER-NUMBER";
   const payload = {
     purchase_country: "IT",
     purchase_currency: "EUR",
@@ -41,9 +47,9 @@ export async function placeKlarnaOrder({
       };
     }),
     merchant_urls: {
-      confirmation: `${siteUrl}${PAGES.CHECKOUT_PAGES.COMPLETED}`,
+      confirmation: `${siteUrl}${PAGES.CHECKOUT_PAGES.COMPLETED}/${safeOrderNumber}`,
     },
-    merchant_reference1: orderNumber || "NO-ORDER-NUMBER",
+    merchant_reference1: safeOrderNumber,
     billing_address: {
       given_name: dataFirstStep.nome,
       family_name: dataFirstStep.cognome,
@@ -94,14 +100,14 @@ export async function placeKlarnaOrder({
 
   if (!res.ok) {
     const text = await res.text();
-    return { success: false, error: text };
+    return { success: false, error: text, status: res.status };
   }
 
-  const data = await res.json();
+  const data = (await res.json()) as { order_id?: string; redirect_url?: string };
 
-  if (data.redirect_url) {
-    return { redirectUrl: data.redirect_url };
+  if (!data.order_id || !data.redirect_url) {
+    return { success: false, error: "Klarna response missing order_id or redirect_url" };
   }
 
-  return { success: true };
+  return { success: true, orderId: data.order_id, redirectUrl: data.redirect_url };
 }

@@ -45,10 +45,13 @@ export default function ProductSlider({
       ? product.imgSrc
       : "/logo.svg";
   const sliderImages = normalizedImages.length > 0 ? normalizedImages : [fallbackImage];
+  const resolvedThumbsSwiper =
+    thumbsSwiper && !thumbsSwiper.destroyed && thumbsSwiper.el ? thumbsSwiper : null;
 
   return (
     <div className="flex w-full max-w-[670px] justify-around gap-6 rounded-sm bg-background p-3 xl:flex-1 xl:justify-between">
       <Swiper
+        key={`thumbs-${id}`}
         direction={"vertical"}
         onSwiper={setThumbsSwiper}
         spaceBetween={0}
@@ -80,6 +83,7 @@ export default function ProductSlider({
           />
 
           <Swiper
+            key={`main-${id}`}
             loop={true}
             spaceBetween={0}
             slidesPerView={1}
@@ -88,7 +92,7 @@ export default function ProductSlider({
               disableOnInteraction: false,
             }}
             thumbs={{
-              swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null,
+              swiper: resolvedThumbsSwiper,
             }}
             modules={[Thumbs, Autoplay, FreeMode]}
             className="relative ml-5 max-w-[532px]"

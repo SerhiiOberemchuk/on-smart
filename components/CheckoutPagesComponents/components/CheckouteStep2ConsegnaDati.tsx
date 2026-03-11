@@ -105,7 +105,7 @@ export default function CheckouteStep2ConsegnaDati() {
           </label>
           <span className="helper_text text-grey">
             {getDeliveryPrice(totalPrice)
-              ? `${getDeliveryPrice(totalPrice).toFixed(2)} в‚¬`
+              ? `${getDeliveryPrice(totalPrice).toFixed(2)} €`
               : "Gratis"}
           </span>
         </div>
@@ -123,7 +123,7 @@ export default function CheckouteStep2ConsegnaDati() {
                   onChange={() => setSameAsBilling(!dataCheckoutStepConsegna.sameAsBilling)}
                   id="sameAsBilling"
                 />
-                LвЂ™indirizzo di spedizione coincide con lвЂ™indirizzo di fatturazione
+                L'indirizzo di spedizione coincide con l'indirizzo di fatturazione
               </label>
               {!sameAsBilling && (
                 <div className="flex flex-col gap-3 py-3 pl-12">
@@ -222,4 +222,3 @@ export default function CheckouteStep2ConsegnaDati() {
     </div>
   );
 }
-

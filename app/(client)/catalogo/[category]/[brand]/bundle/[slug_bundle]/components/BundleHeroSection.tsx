@@ -13,6 +13,11 @@ type BundleHeroSectionProps = {
   discountPercent: number;
   bundleDescription: string;
   advantages: string[];
+  includedItems: Array<{
+    id: string;
+    name: string;
+    quantity: number;
+  }>;
 };
 
 export default function BundleHeroSection({
@@ -24,6 +29,7 @@ export default function BundleHeroSection({
   discountPercent,
   bundleDescription,
   advantages,
+  includedItems,
 }: BundleHeroSectionProps) {
   return (
     <section>
@@ -43,7 +49,6 @@ export default function BundleHeroSection({
             <p className="helper_text mt-2 text-text-grey capitalize">
               {bundle.category_name} / {bundle.brand_name}
             </p>
-
             <div className="mt-4">
               <PricesBox
                 price={bundle.price}
@@ -51,21 +56,17 @@ export default function BundleHeroSection({
                 place="dialog-cart-product-footer"
               />
             </div>
-
             {discountValue > 0 ? (
               <p className="helper_text mt-2 text-yellow-500">
                 Risparmi {discountValue.toFixed(2)} EUR ({discountPercent}%)
               </p>
             ) : null}
-
             <p className={`helper_text mt-3 ${availability.className}`}>{availability.label}</p>
-
             <BundleAddToCartButton
               bundleId={bundle.id}
               inStock={bundle.inStock}
               disabled={bundle.inStock <= 0 && !bundle.isOnOrder}
             />
-
             <div className="mt-4 grid grid-cols-1 gap-2 text-sm text-text-grey md:grid-cols-2">
               <p>EAN: {bundle.ean}</p>
               <p>
@@ -73,31 +74,48 @@ export default function BundleHeroSection({
               </p>
               <p>Peso (kg): {bundle.weightKg}</p>
             </div>
-
             {bundleDescription ? (
-              <div className="mt-4 border-t border-stroke-grey pt-4">
+              <div className="mt-4 border-t border-stroke-grey py-4">
                 <h2 className="H4">Descrizione del Kit</h2>
-                <p className="text_R mt-2 whitespace-pre-line text-text-grey">{bundleDescription}</p>
+                <p className="text_R mt-2 whitespace-pre-line text-text-grey">
+                  {bundleDescription}
+                </p>
               </div>
+            ) : null}{" "}
+            {includedItems.length > 0 ? (
+              <section className={advantages.length > 0 ? "mt-0 mb-6" : "mt-4 mb-6"}>
+                <div className="border-t border-stroke-grey bg-background pt-4">
+                  <h2 className="H4">Incluso:</h2>
+                  <ul className="mt-3 list-disc space-y-2 pl-5 text-text-grey">
+                    {includedItems.map((item) => (
+                      <li key={item.id} className="text_R">
+                        {item.name}
+                        {" - "} {item.quantity} pz
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </section>
             ) : null}
           </div>
-          {advantages.length > 0 ? (
-            <section className="mt-4 mb-6">
-              <div className="rounded-sm border border-yellow-500/40 bg-yellow-500/8 p-4 md:p-6">
-                <h2 className="H4">Vantaggi del Kit</h2>
-                <ul className="mt-3 flex flex-col gap-2">
-                  {advantages.map((item, index) => (
-                    <li key={`${item}-${index}`} className="body_R_20 flex items-start gap-2">
-                      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-yellow-500" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </section>
-          ) : null}
         </div>
-      </div>
+      </div>{" "}
+      {advantages.length > 0 ? (
+        <section className="mt-4 mb-6">
+          <div className="container">
+            <div className="rounded-sm bg-background p-4 md:p-6">
+              <h2 className="H4">Vantaggi del Kit</h2>
+              <ul className="mt-3 list-disc space-y-2 pl-5 text-text-grey">
+                {advantages.map((item, index) => (
+                  <li key={`${item}-${index}`} className="text_R">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      ) : null}
     </section>
   );
 }
