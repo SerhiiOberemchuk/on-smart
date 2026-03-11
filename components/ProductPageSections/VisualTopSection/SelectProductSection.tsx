@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import StarsRating from "../../StarsRating";
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import styles from "./style.module.css";
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import PricesBox from "../../PricesBox";
 import ProductQuantityInputButtons from "../../ProductQuantityInputButtons";
 import { useCalcTotalSum } from "@/utils/useCalcTotalSum";
@@ -80,7 +80,7 @@ export default function SelectProductSection({
                         onChange={() => setSelectedProduct({ ...variant, qnt: 1 })}
                       />
 
-                      <Image
+                      <SmartImage
                         src={variant.imgSrc || "/logo.svg"}
                         alt={variant.name}
                         width={80}
@@ -137,3 +137,4 @@ export default function SelectProductSection({
     </section>
   );
 }
+

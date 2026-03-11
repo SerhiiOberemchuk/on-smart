@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import iconSuccess from "@/assets/icons/icon_success.svg";
 import { useBasketStore } from "@/store/basket-store";
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import { useEffect } from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -29,8 +29,9 @@ export default function InfoPopupAddedToBasket({ className }: { className?: stri
         className,
       )}
     >
-      <Image src={iconSuccess} alt="Success" aria-hidden="true" className="size-4 xl:size-6" />
+      <SmartImage src={iconSuccess} alt="Success" aria-hidden="true" className="size-4 xl:size-6" />
       <span className="">Aggiunto al carrello({qntToShow} pz.)</span>
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import SmartImage from "@/components/SmartImage";
 import icon_email from "@/assets/icons/icon_email.svg";
 import { twMerge } from "tailwind-merge";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -53,7 +53,7 @@ export default function CheckouteStep1FormClientData() {
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
         <h2 className="H5 flex gap-2">
-          <Image src={icon_email} alt="I tuoi dati" />
+          <SmartImage src={icon_email} alt="I tuoi dati" />
           <span>I tuoi dati</span>
         </h2>
         <div className="flex flex-wrap items-center gap-2">
@@ -191,7 +191,7 @@ export default function CheckouteStep1FormClientData() {
 
         <div className="flex flex-wrap gap-3">
           <InputBlock
-            title="Città *"
+            title="CittГ  *"
             {...register("citta")}
             required
             type="text"
@@ -229,7 +229,7 @@ export default function CheckouteStep1FormClientData() {
           </Link>{" "}
           e{" "}
           <Link href="/informativa-sulla-privacy" className="underline">
-            l’Informativa sulla privacy
+            lвЂ™Informativa sulla privacy
           </Link>
           , e acconsento a ricevere notizie e offerte esclusive.
         </p>
@@ -282,3 +282,4 @@ export default function CheckouteStep1FormClientData() {
     </>
   );
 }
+

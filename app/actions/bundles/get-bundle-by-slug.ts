@@ -24,7 +24,7 @@ export type BundleBySlugResult = {
 
 export async function getBundleBySlug(slug: ProductType["slug"]): Promise<BundleBySlugResult> {
   "use cache";
-  cacheLife("seconds");
+  cacheLife("minutes");
   cacheTag(CACHE_TAGS.bundle.all);
   cacheTag(CACHE_TAGS.bundle.bySlug(slug));
 
@@ -42,10 +42,7 @@ export async function getBundleBySlug(slug: ProductType["slug"]): Promise<Bundle
         brand_image: brandProductsSchema.image,
       })
       .from(productsSchema)
-      .innerJoin(
-        categoryProductsSchema,
-        eq(productsSchema.category_id, categoryProductsSchema.id),
-      )
+      .innerJoin(categoryProductsSchema, eq(productsSchema.category_id, categoryProductsSchema.id))
       .innerJoin(brandProductsSchema, eq(productsSchema.brand_slug, brandProductsSchema.brand_slug))
       .leftJoin(bundleMetaSchema, eq(bundleMetaSchema.bundle_id, productsSchema.id))
       .where(and(eq(productsSchema.slug, slug), eq(productsSchema.productType, "bundle")))

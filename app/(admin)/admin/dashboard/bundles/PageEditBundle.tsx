@@ -1,10 +1,13 @@
-"use client";
+﻿"use client";
 
 import { updateBundle } from "@/app/actions/bundles/update-bundle";
+import { deleteBundleReview } from "@/app/actions/bundles/delete-bundle-review";
 import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
 import ButtonYellow from "@/components/BattonYellow";
 import {
+  type BundleMetaDocument,
   type BundleMetaIncludedProduct,
+  type BundleMetaReview,
   type BundleMetaType,
 } from "@/db/schemas/bundle-meta.schema";
 import type { ProductInsertType, ProductType } from "@/db/schemas/product.schema";
@@ -14,7 +17,7 @@ import slugify from "@sindresorhus/slugify";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { type SubmitErrorHandler, type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { FILE_MAX_SIZE } from "../categories/ModalCategoryForm";
@@ -51,6 +54,49 @@ type IncludedProductMetaDraft = {
   quantity: number;
   shortDescription: string;
 };
+
+function parseArrayFromUnknown(value: unknown): unknown[] {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+function normalizeDocuments(value: unknown): BundleMetaDocument[] {
+  return parseArrayFromUnknown(value)
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const raw = item as Record<string, unknown>;
+      return {
+        title: String(raw.title ?? ""),
+        link: String(raw.link ?? ""),
+      };
+    })
+    .filter(Boolean) as BundleMetaDocument[];
+}
+
+function normalizeReviews(value: unknown): BundleMetaReview[] {
+  return parseArrayFromUnknown(value)
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const raw = item as Record<string, unknown>;
+      return {
+        id: String(raw.id ?? ""),
+        client_name: String(raw.client_name ?? ""),
+        email: String(raw.email ?? ""),
+        rating: Number(raw.rating ?? 5),
+        comment: String(raw.comment ?? ""),
+        created_at: String(raw.created_at ?? ""),
+      };
+    })
+    .filter((item): item is BundleMetaReview => Boolean(item && item.id.trim().length > 0));
+}
 
 function buildIncludedMetaById(
   productIds: string[],
@@ -97,8 +143,20 @@ export default function PageEditBundle({
     (bundleMeta?.advantages ?? []).join("\n"),
   );
   const [descriptionText, setDescriptionText] = useState(() => bundleMeta?.description ?? "");
+  const [documents, setDocuments] = useState<BundleMetaDocument[]>(() =>
+    normalizeDocuments(bundleMeta?.documents),
+  );
+  const [reviews, setReviews] = useState<BundleMetaReview[]>(() =>
+    normalizeReviews(bundleMeta?.reviews),
+  );
+  const [uploadingDocumentCount, setUploadingDocumentCount] = useState(0);
+  const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null);
   const [existingImages, setExistingImages] = useState<string[]>(initialImages);
   const [newFiles, setNewFiles] = useState<SelectedFile[]>([]);
+  const initialDocumentLinksRef = useRef<Set<string>>(
+    new Set(normalizeDocuments(bundleMeta?.documents).map((item) => item.link.trim()).filter(Boolean)),
+  );
+  const uploadedDocumentLinksRef = useRef<Set<string>>(new Set());
 
   const { register, handleSubmit, setValue, watch } = useForm<BundleFormValues>({
     defaultValues: {
@@ -219,7 +277,114 @@ export default function PageEditBundle({
     });
   };
 
+  const handleAddDocument = () => {
+    setDocuments((prev) => [...prev, { title: "", link: "" }]);
+  };
+
+  const handleChangeDocument = (
+    index: number,
+    field: keyof BundleMetaDocument,
+    value: string,
+  ) => {
+    setDocuments((prev) =>
+      prev.map((item, itemIndex) => (itemIndex === index ? { ...item, [field]: value } : item)),
+    );
+  };
+
+  const handleRemoveDocument = async (index: number) => {
+    const targetLink = documents[index]?.link?.trim() ?? "";
+    setDocuments((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
+
+    if (targetLink && uploadedDocumentLinksRef.current.has(targetLink)) {
+      await deleteFileFromS3(targetLink);
+      uploadedDocumentLinksRef.current.delete(targetLink);
+    }
+  };
+
+  const handleUploadDocumentFile = async (index: number, file?: File) => {
+    if (!file) return;
+    const previousLink = documents[index]?.link?.trim() ?? "";
+    setUploadingDocumentCount((prev) => prev + 1);
+    try {
+      const response = await uploadFile({ file, sub_bucket: "files" });
+      if (!response.fileUrl) {
+        toast.error("Не вдалося завантажити документ");
+        return;
+      }
+
+      if (previousLink && previousLink !== response.fileUrl && uploadedDocumentLinksRef.current.has(previousLink)) {
+        await deleteFileFromS3(previousLink);
+        uploadedDocumentLinksRef.current.delete(previousLink);
+      }
+
+      uploadedDocumentLinksRef.current.add(response.fileUrl);
+
+      setDocuments((prev) =>
+        prev.map((item, itemIndex) =>
+          itemIndex === index
+            ? {
+                ...item,
+                title: item.title.trim() || file.name.replace(/\.[^/.]+$/, ""),
+                link: response.fileUrl,
+              }
+            : item,
+        ),
+      );
+      toast.success("Документ завантажено");
+    } catch (error) {
+      console.error(error);
+      toast.error("Не вдалося завантажити документ");
+    } finally {
+      setUploadingDocumentCount((prev) => Math.max(0, prev - 1));
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!reviewId) return;
+    setDeletingReviewId(reviewId);
+    try {
+      const response = await deleteBundleReview({ bundleId: bundle.id, reviewId });
+      if (!response.success) {
+        toast.error(response.error || "Не вдалося видалити відгук");
+        return;
+      }
+
+      setReviews((prev) => prev.filter((item) => item.id !== reviewId));
+      toast.success("Відгук видалено");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      toast.error("Не вдалося видалити відгук");
+    } finally {
+      setDeletingReviewId(null);
+    }
+  };
+
+  const cleanupUnsavedDocumentUploads = async () => {
+    const uploadedLinks = Array.from(uploadedDocumentLinksRef.current);
+    if (uploadedLinks.length === 0) return;
+
+    await Promise.allSettled(uploadedLinks.map((url) => deleteFileFromS3(url)));
+    uploadedDocumentLinksRef.current.clear();
+  };
+
+  const handleCancel = async () => {
+    await cleanupUnsavedDocumentUploads();
+
+    for (const item of newFiles) {
+      URL.revokeObjectURL(item.preview);
+    }
+
+    router.push("/admin/dashboard/bundles");
+    router.refresh();
+  };
+
   const onSubmit: SubmitHandler<BundleFormValues> = (data) => {
+    if (uploadingDocumentCount > 0) {
+      toast.warning("Дочекайтеся завершення завантаження документів");
+      return;
+    }
+
     if (selectedProductIds.length === 0) {
       toast.warning("Оберіть хоча б один товар для комплекту");
       return;
@@ -257,7 +422,21 @@ export default function PageEditBundle({
           .split("\n")
           .map((item) => item.trim())
           .filter(Boolean);
-
+        const normalizedDocuments = documents
+          .map((item) => ({
+            title: item.title.trim(),
+            link: item.link.trim(),
+          }))
+          .filter((item) => item.title.length > 0 && item.link.length > 0);
+        const hasIncompleteDocuments = documents.some((item) => {
+          const hasTitle = item.title.trim().length > 0;
+          const hasLink = item.link.trim().length > 0;
+          return (hasTitle || hasLink) && !(hasTitle && hasLink);
+        });
+        if (hasIncompleteDocuments) {
+          toast.warning("Для кожного документа заповніть і назву, і посилання");
+          return;
+        }
         const response = await updateBundle({
           id: bundle.id,
           ...bundleData,
@@ -268,6 +447,8 @@ export default function PageEditBundle({
             includedProducts: normalizedIncludedProducts,
             advantages,
             description: descriptionText.trim(),
+            documents: normalizedDocuments,
+            reviews,
           },
         });
 
@@ -285,6 +466,16 @@ export default function PageEditBundle({
         if (removedImages.length > 0) {
           await Promise.allSettled(removedImages.map((imageUrl) => deleteFileFromS3(imageUrl)));
         }
+
+        const currentDocumentLinks = new Set(normalizedDocuments.map((item) => item.link.trim()).filter(Boolean));
+        const removedPersistedDocumentLinks = Array.from(initialDocumentLinksRef.current).filter(
+          (link) => !currentDocumentLinks.has(link),
+        );
+        if (removedPersistedDocumentLinks.length > 0) {
+          await Promise.allSettled(removedPersistedDocumentLinks.map((link) => deleteFileFromS3(link)));
+        }
+
+        uploadedDocumentLinksRef.current.clear();
 
         for (const item of newFiles) {
           URL.revokeObjectURL(item.preview);
@@ -315,7 +506,14 @@ export default function PageEditBundle({
           <p className="admin-subtitle">{bundle.nameFull}</p>
         </div>
 
-        <Link href="/admin/dashboard/bundles" className="admin-btn-secondary px-4! py-2! text-sm!">
+        <Link
+          href="/admin/dashboard/bundles"
+          className="admin-btn-secondary px-4! py-2! text-sm!"
+          onClick={(event) => {
+            event.preventDefault();
+            void handleCancel();
+          }}
+        >
           До списку комплектів
         </Link>
       </div>
@@ -673,6 +871,108 @@ export default function PageEditBundle({
                 placeholder="Детально опишіть призначення комплекту, ключові переваги та сценарії використання."
               />
             </div>
+
+            <div className="mt-4 rounded-lg border border-slate-600/55 bg-slate-950/35 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-slate-100">Документи комплекту</p>
+                <ButtonYellow
+                  type="button"
+                  className="admin-btn-secondary px-3! py-1.5! text-xs!"
+                  onClick={handleAddDocument}
+                >
+                  Додати документ
+                </ButtonYellow>
+              </div>
+
+              {documents.length > 0 ? (
+                <div className="mt-3 space-y-3">
+                  {documents.map((document, index) => (
+                    <div
+                      key={`bundle-document-${index}`}
+                      className="rounded border border-slate-600/55 p-3"
+                    >
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+                        <InputAdminStyle
+                          input_title="Назва документа"
+                          value={document.title}
+                          onChange={(event) => handleChangeDocument(index, "title", event.target.value)}
+                        />
+                        <InputAdminStyle
+                          input_title="Посилання на документ"
+                          value={document.link}
+                          onChange={(event) => handleChangeDocument(index, "link", event.target.value)}
+                          placeholder="https://..."
+                        />
+                        <InputAdminStyle
+                          input_title="Файл"
+                          type="file"
+                          onChange={(event) =>
+                            handleUploadDocumentFile(index, event.target.files?.[0])
+                          }
+                        />
+                      </div>
+                      <div className="mt-2 flex justify-between gap-2">
+                        <p className="text-xs text-slate-400">
+                          {uploadingDocumentCount > 0 ? "Завантаження..." : " "}
+                        </p>
+                        <ButtonYellow
+                          type="button"
+                          className="admin-btn-secondary px-3! py-1.5! text-xs!"
+                          onClick={() => void handleRemoveDocument(index)}
+                        >
+                          Видалити
+                        </ButtonYellow>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-3 text-xs text-slate-400">Документи ще не додані.</p>
+              )}
+            </div>
+
+            <div className="mt-4 rounded-lg border border-slate-600/55 bg-slate-950/35 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-slate-100">Список відгуків комплекту</p>
+              </div>
+
+              {reviews.length > 0 ? (
+                <div className="mt-3 space-y-3">
+                  {reviews.map((review, index) => (
+                    <div key={review.id || `bundle-review-${index}`} className="rounded border border-slate-600/55 p-3">
+                      <div className="grid grid-cols-1 gap-2 text-sm text-slate-300 md:grid-cols-2">
+                        <p>
+                          <span className="text-slate-400">Ім'я:</span> {review.client_name}
+                        </p>
+                        <p>
+                          <span className="text-slate-400">Email:</span> {review.email}
+                        </p>
+                        <p>
+                          <span className="text-slate-400">Оцінка:</span> {review.rating}/5
+                        </p>
+                        <p>
+                          <span className="text-slate-400">Дата:</span>{" "}
+                          {new Date(review.created_at).toLocaleDateString("uk-UA")}
+                        </p>
+                      </div>
+                      <p className="mt-3 text-sm text-slate-100">{review.comment}</p>
+                      <div className="mt-2 flex justify-end">
+                        <ButtonYellow
+                          type="button"
+                          className="admin-btn-secondary px-3! py-1.5! text-xs!"
+                          onClick={() => handleDeleteReview(review.id)}
+                          disabled={deletingReviewId === review.id}
+                        >
+                          {deletingReviewId === review.id ? "Видалення..." : "Видалити"}
+                        </ButtonYellow>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-3 text-xs text-slate-400">Відгуки ще не додані.</p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -680,6 +980,10 @@ export default function PageEditBundle({
           <Link
             href="/admin/dashboard/bundles"
             className="admin-btn-secondary px-4! py-2! text-sm!"
+            onClick={(event) => {
+              event.preventDefault();
+              void handleCancel();
+            }}
           >
             Скасувати
           </Link>
@@ -687,7 +991,7 @@ export default function PageEditBundle({
           <ButtonYellow
             type="submit"
             className="admin-btn-primary px-4! py-2! text-sm!"
-            disabled={isPending}
+            disabled={isPending || uploadingDocumentCount > 0}
           >
             {isPending ? "Оновлення..." : "Зберегти зміни"}
           </ButtonYellow>

@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import iconBack from "@/assets/icons/arrow_back.svg";
 import iconClose from "@/assets/icons/icon-close.svg";
 import styles from "./style.module.css";
@@ -201,7 +201,7 @@ export default function CardDialog() {
                 className="flex items-center gap-2.5 text-white"
                 onClick={handleCloseDialog}
               >
-                <Image src={iconBack} alt="Pulsante indietro" aria-hidden />
+                <SmartImage src={iconBack} alt="Pulsante indietro" aria-hidden />
                 <span className="H5">Indietro</span>
               </button>
               <button
@@ -209,7 +209,7 @@ export default function CardDialog() {
                 onClick={handleCloseDialog}
                 className="rounded-sm border border-yellow-500 p-2.5 xl:hidden"
               >
-                <Image src={iconClose} aria-hidden alt="Pulsante chiudre" />
+                <SmartImage src={iconClose} aria-hidden alt="Pulsante chiudre" />
               </button>
             </div>
             <div className="flex flex-1 flex-col gap-2 overflow-y-scroll bg-black px-3 lg:px-5 xl:max-h-[680px] xl:flex-row">
@@ -249,7 +249,7 @@ export default function CardDialog() {
                                     }}
                                   />
 
-                                  <Image
+                                  <SmartImage
                                     src={variant.imgSrc || "/logo.svg"}
                                     alt={variant.name}
                                     width={80}
@@ -321,7 +321,7 @@ export default function CardDialog() {
                           // className="sr-only"
                         />
 
-                        <Image
+                        <SmartImage
                           src={supportProductItem.imgSrc || "/logo.svg"}
                           alt={supportProductItem.name}
                           width={80}
@@ -364,3 +364,4 @@ export default function CardDialog() {
     </>
   );
 }
+

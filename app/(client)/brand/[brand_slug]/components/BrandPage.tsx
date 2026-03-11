@@ -1,5 +1,5 @@
-import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
-import Image from "next/image";
+﻿import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
+import SmartImage from "@/components/SmartImage";
 import LinkYellow from "@/components/YellowLink";
 import { baseUrl } from "@/types/baseUrl";
 import Script from "next/script";
@@ -91,7 +91,7 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
         <div className="container">
           <h1 className="H2 py-3 text-left uppercase">{brand.name}</h1>
           <div className="flex flex-col gap-5 py-3 xl:flex-row">
-            <Image
+            <SmartImage
               src={brand.image}
               width={492}
               height={270}
@@ -147,3 +147,4 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
     </>
   );
 }
+

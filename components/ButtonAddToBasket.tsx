@@ -1,5 +1,5 @@
-"use client";
-import Image from "next/image";
+﻿"use client";
+import SmartImage from "@/components/SmartImage";
 import iconCart from "@/assets/icons/carrello.svg";
 import { twMerge } from "tailwind-merge";
 import { HtmlHTMLAttributes } from "react";
@@ -21,8 +21,9 @@ export default function ButtonAddToBasket({
       )}
       {...props}
     >
-      <Image src={iconCart} alt="Pulsante aggiungi" />
+      <SmartImage src={iconCart} alt="Pulsante aggiungi" />
       <span>Aggiungi</span>
     </button>
   );
 }
+

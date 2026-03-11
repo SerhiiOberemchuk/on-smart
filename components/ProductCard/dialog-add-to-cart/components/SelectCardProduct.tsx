@@ -1,4 +1,4 @@
-// import Image from "next/image";
+﻿// import SmartImage from "@/components/SmartImage";
 // import { twMerge } from "tailwind-merge";
 // import PricesBox from "@/components/PricesBox";
 // import styles from "../../ProductCard.module.css";
@@ -20,7 +20,7 @@
 //         onChange={() => setSelectedProduct(variant)}
 //         className="sr-only"
 //       />
-//       <Image
+//       <SmartImage
 //         src={variant.imgSrc || variant.images?.[0] || "/logo.svg"}
 //         alt={variant.name}
 //         width={80}
@@ -37,3 +37,4 @@
 //     </label>
 //   );
 // }
+

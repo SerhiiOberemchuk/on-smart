@@ -1,10 +1,10 @@
-import { slidesBanners } from "@/types/main-page-hero-banners.data";
-import Image from "next/image";
+﻿import { slidesBanners } from "@/types/main-page-hero-banners.data";
+import SmartImage from "@/components/SmartImage";
 
 export default function FallbackHeroSection() {
   return (
     <div className="h-[580px] md:h-[677px]">
-      <Image
+      <SmartImage
         src={slidesBanners[0].src}
         width={1440}
         height={677}
@@ -18,3 +18,4 @@ export default function FallbackHeroSection() {
     </div>
   );
 }
+

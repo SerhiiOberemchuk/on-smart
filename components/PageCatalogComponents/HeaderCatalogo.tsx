@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import { SORT_OPTIONS_PARAMS } from "@/types/catalog-filter-options.types";
 import { useEffect, useRef, useState } from "react";
 import { useQueryState } from "nuqs";
 
 import icon_arrow_top from "@/assets/icons/arrow-top.svg";
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import { twMerge } from "tailwind-merge";
 // import { testDbConnection } from "@/app/actions/test-db-conection";
 
@@ -55,7 +55,7 @@ export default function HeaderCatalogo({
               {SORT_OPTIONS_PARAMS.options.find((option) => option.value === sortParam)?.label ||
                 SORT_OPTIONS_PARAMS.options[0].label}
             </span>
-            <Image
+            <SmartImage
               src={icon_arrow_top}
               alt="arrow top"
               className={twMerge(
@@ -97,3 +97,4 @@ export default function HeaderCatalogo({
     </header>
   );
 }
+

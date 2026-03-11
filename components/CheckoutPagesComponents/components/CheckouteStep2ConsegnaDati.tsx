@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import icon_delivery from "@/assets/icons/icon_delivery.svg";
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import { InputBlock } from "@/components/InputBloc";
 import { SubmitHandler, useForm } from "react-hook-form";
 import ButtonYellow from "@/components/BattonYellow";
@@ -82,7 +82,7 @@ export default function CheckouteStep2ConsegnaDati() {
       <RiepilogoDatiCliente />
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3" id="form_consegna">
         <div className="flex items-center gap-2">
-          <Image src={icon_delivery} alt="icon delivery" aria-label="icon delivery" />
+          <SmartImage src={icon_delivery} alt="icon delivery" aria-label="icon delivery" />
           <legend className="H5">Scegli il metodo di consegna</legend>
         </div>
         <div className="flex items-center justify-between">
@@ -105,7 +105,7 @@ export default function CheckouteStep2ConsegnaDati() {
           </label>
           <span className="helper_text text-grey">
             {getDeliveryPrice(totalPrice)
-              ? `${getDeliveryPrice(totalPrice).toFixed(2)} €`
+              ? `${getDeliveryPrice(totalPrice).toFixed(2)} в‚¬`
               : "Gratis"}
           </span>
         </div>
@@ -123,7 +123,7 @@ export default function CheckouteStep2ConsegnaDati() {
                   onChange={() => setSameAsBilling(!dataCheckoutStepConsegna.sameAsBilling)}
                   id="sameAsBilling"
                 />
-                L’indirizzo di spedizione coincide con l’indirizzo di fatturazione
+                LвЂ™indirizzo di spedizione coincide con lвЂ™indirizzo di fatturazione
               </label>
               {!sameAsBilling && (
                 <div className="flex flex-col gap-3 py-3 pl-12">
@@ -162,7 +162,7 @@ export default function CheckouteStep2ConsegnaDati() {
                   <div className="flex flex-wrap gap-3">
                     <InputBlock
                       {...register("deliveryAdress.citta")}
-                      title="Città*"
+                      title="CittГ *"
                       required
                       className="helper_text min-w-60 flex-1"
                       type="text"
@@ -222,3 +222,4 @@ export default function CheckouteStep2ConsegnaDati() {
     </div>
   );
 }
+

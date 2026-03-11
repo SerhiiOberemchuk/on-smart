@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import { SwiperSlide, Swiper } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -85,7 +85,7 @@ export const DialogProductCard = ({
         <ul className="hidden w-fit flex-col gap-3.5 bg-background md:flex">
           {images.map((image) => (
             <li key={image} className="w-fit">
-              <Image
+              <SmartImage
                 src={image}
                 width={96}
                 height={96}
@@ -113,7 +113,7 @@ export const DialogProductCard = ({
       >
         {images?.map((image) => (
           <SwiperSlide key={image} className="pb-5">
-            <Image
+            <SmartImage
               src={image}
               width={428}
               height={322}
@@ -143,7 +143,7 @@ export const DialogProductCard = ({
           place === "product-page" && "bg-background pt-5",
         )}
       >
-        <Image
+        <SmartImage
           src={brandLogo}
           width={428}
           height={24}
@@ -159,3 +159,4 @@ export const DialogProductCard = ({
     </div>
   );
 };
+

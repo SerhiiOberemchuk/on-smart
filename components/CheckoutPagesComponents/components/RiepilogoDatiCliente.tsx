@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import icon_email_confirmed from "@/assets/icons/icon_email_confirm.svg";
 import icon_pencil from "@/assets/icons/icon_add_review.svg";
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
 import { CheckoutTypesDataFirstStep, useCheckoutStore } from "@/store/checkout-store";
 
@@ -43,14 +43,14 @@ export default function RiepilogoDatiCliente({
   return (
     <div>
       <div className="flex items-center gap-2">
-        <Image src={icon_email_confirmed} alt="icon email confirmed" />
+        <SmartImage src={icon_email_confirmed} alt="icon email confirmed" />
         <h3 className="H5">I tuoi dati</h3>
         {isModifica && (
           <Link
             href="/checkout/informazioni"
             className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
           >
-            <Image src={icon_pencil} alt="icon pencil" /> Modifica
+            <SmartImage src={icon_pencil} alt="icon pencil" /> Modifica
           </Link>
         )}
       </div>
@@ -85,3 +85,4 @@ export default function RiepilogoDatiCliente({
     </div>
   );
 }
+

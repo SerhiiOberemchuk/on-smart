@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -43,7 +43,7 @@ export default function ReviewList({ reviews }: { reviews: GoogleReview[] }) {
                   className="absolute inset-0 z-10 cursor-pointer"
                   aria-label={`Leggi la recensione di ${item.clientName} su Google`}
                 />
-                <Image src={iconQuote} alt="Quote Icon" width={26} height={23} aria-hidden />
+                <SmartImage src={iconQuote} alt="Quote Icon" width={26} height={23} aria-hidden />
 
                 <div className="flex flex-col">
                   <p className="helper_text text-text-grey">{formatDate(item.date)}</p>
@@ -69,3 +69,4 @@ export default function ReviewList({ reviews }: { reviews: GoogleReview[] }) {
     </Swiper>
   );
 }
+

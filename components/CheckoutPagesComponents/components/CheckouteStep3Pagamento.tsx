@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import SmartImage from "@/components/SmartImage";
 
 import icon_card from "@/assets/icons/icon_card.svg";
 import { InputBlock } from "@/components/InputBloc";
@@ -32,7 +32,7 @@ export default function CheckouteStep3Pagamento() {
       <RiepilogoDatiConsegna />
       <div>
         <div className="flex items-center gap-2">
-          <Image src={icon_card} alt="icon banca " aria-label="icon banca " />
+          <SmartImage src={icon_card} alt="icon banca " aria-label="icon banca " />
           <h3 className="H5">Scegli il metodo di pagamento</h3>
         </div>
         <ul className="mt-3 pl-8">
@@ -66,3 +66,4 @@ export default function CheckouteStep3Pagamento() {
     </div>
   );
 }
+

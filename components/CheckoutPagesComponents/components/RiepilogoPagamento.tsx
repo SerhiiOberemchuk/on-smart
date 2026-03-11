@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import icon_card_success from "@/assets/icons/icon_card_success.svg";
 import icon_pencil from "@/assets/icons/icon_add_review.svg";
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
 import { useCheckoutStore } from "@/store/checkout-store";
 import BonificoDati from "./BonificoDati";
@@ -23,7 +23,7 @@ export default function RiepilogoDatiPagamento({
   return (
     <div>
       <div className="flex items-center gap-2">
-        <Image
+        <SmartImage
           src={icon_card_success}
           alt="icon email confirmed"
           aria-label="icon email confirmed"
@@ -34,7 +34,7 @@ export default function RiepilogoDatiPagamento({
             href={PAGES.CHECKOUT_PAGES.PAYMENT}
             className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
           >
-            <Image src={icon_pencil} alt="icon pencil" aria-label="icon pencil" /> Modifica
+            <SmartImage src={icon_pencil} alt="icon pencil" aria-label="icon pencil" /> Modifica
           </Link>
         )}
       </div>
@@ -61,3 +61,4 @@ export default function RiepilogoDatiPagamento({
     </div>
   );
 }
+

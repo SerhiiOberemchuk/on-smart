@@ -1,16 +1,19 @@
 ﻿"use client";
 
 import { createBundle } from "@/app/actions/bundles/create-bundle";
-import { uploadFile } from "@/app/actions/files/uploadFile";
+import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
 import ButtonYellow from "@/components/BattonYellow";
-import { type BundleMetaIncludedProduct } from "@/db/schemas/bundle-meta.schema";
+import {
+  type BundleMetaDocument,
+  type BundleMetaIncludedProduct,
+} from "@/db/schemas/bundle-meta.schema";
 import type { ProductInsertType, ProductType } from "@/db/schemas/product.schema";
 import type { BrandTypes } from "@/types/brands.types";
 import { CategoryTypes } from "@/types/category.types";
 import slugify from "@sindresorhus/slugify";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { type SubmitErrorHandler, type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import ButtonXDellete from "../ButtonXDellete";
@@ -68,7 +71,10 @@ export default function ModalCreateBundle({
   >({});
   const [advantagesText, setAdvantagesText] = useState("");
   const [descriptionText, setDescriptionText] = useState("");
+  const [documents, setDocuments] = useState<BundleMetaDocument[]>([]);
+  const [uploadingDocumentCount, setUploadingDocumentCount] = useState(0);
   const [files, setFiles] = useState<SelectedFile[]>([]);
+  const uploadedDocumentLinksRef = useRef<Set<string>>(new Set());
 
   const { register, handleSubmit, setValue, watch, reset } = useForm<BundleFormValues>({
     defaultValues: {
@@ -115,7 +121,15 @@ export default function ModalCreateBundle({
     [products, selectedProductIds],
   );
 
-  const closeModal = () => {
+  const closeModal = async ({ preserveUploadedDocuments = false }: { preserveUploadedDocuments?: boolean } = {}) => {
+    if (!preserveUploadedDocuments) {
+      const uploadedLinks = Array.from(uploadedDocumentLinksRef.current);
+      if (uploadedLinks.length > 0) {
+        await Promise.allSettled(uploadedLinks.map((url) => deleteFileFromS3(url)));
+      }
+      uploadedDocumentLinksRef.current.clear();
+    }
+
     for (const item of files) {
       URL.revokeObjectURL(item.preview);
     }
@@ -125,6 +139,7 @@ export default function ModalCreateBundle({
     setIncludedMetaByProductId({});
     setAdvantagesText("");
     setDescriptionText("");
+    setDocuments([]);
     reset();
     onClose();
   };
@@ -201,7 +216,73 @@ export default function ModalCreateBundle({
     });
   };
 
+  const handleAddDocument = () => {
+    setDocuments((prev) => [...prev, { title: "", link: "" }]);
+  };
+
+  const handleChangeDocument = (
+    index: number,
+    field: keyof BundleMetaDocument,
+    value: string,
+  ) => {
+    setDocuments((prev) =>
+      prev.map((item, itemIndex) => (itemIndex === index ? { ...item, [field]: value } : item)),
+    );
+  };
+
+  const handleRemoveDocument = async (index: number) => {
+    const targetLink = documents[index]?.link?.trim() ?? "";
+    setDocuments((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
+
+    if (targetLink && uploadedDocumentLinksRef.current.has(targetLink)) {
+      await deleteFileFromS3(targetLink);
+      uploadedDocumentLinksRef.current.delete(targetLink);
+    }
+  };
+
+  const handleUploadDocumentFile = async (index: number, file?: File) => {
+    if (!file) return;
+    const previousLink = documents[index]?.link?.trim() ?? "";
+    setUploadingDocumentCount((prev) => prev + 1);
+    try {
+      const response = await uploadFile({ file, sub_bucket: "files" });
+      if (!response.fileUrl) {
+        toast.error("Не вдалося завантажити документ");
+        return;
+      }
+
+      if (previousLink && previousLink !== response.fileUrl && uploadedDocumentLinksRef.current.has(previousLink)) {
+        await deleteFileFromS3(previousLink);
+        uploadedDocumentLinksRef.current.delete(previousLink);
+      }
+
+      uploadedDocumentLinksRef.current.add(response.fileUrl);
+      setDocuments((prev) =>
+        prev.map((item, itemIndex) =>
+          itemIndex === index
+            ? {
+                ...item,
+                title: item.title.trim() || file.name.replace(/\.[^/.]+$/, ""),
+                link: response.fileUrl,
+              }
+            : item,
+        ),
+      );
+      toast.success("Документ завантажено");
+    } catch (error) {
+      console.error(error);
+      toast.error("Не вдалося завантажити документ");
+    } finally {
+      setUploadingDocumentCount((prev) => Math.max(0, prev - 1));
+    }
+  };
+
   const onSubmit: SubmitHandler<BundleFormValues> = (data) => {
+    if (uploadingDocumentCount > 0) {
+      toast.warning("Дочекайтеся завершення завантаження документів");
+      return;
+    }
+
     if (selectedProductIds.length === 0) {
       toast.warning("Оберіть хоча б один товар для комплекту");
       return;
@@ -240,7 +321,21 @@ export default function ModalCreateBundle({
           .split("\n")
           .map((item) => item.trim())
           .filter(Boolean);
-
+        const normalizedDocuments = documents
+          .map((item) => ({
+            title: item.title.trim(),
+            link: item.link.trim(),
+          }))
+          .filter((item) => item.title.length > 0 && item.link.length > 0);
+        const hasIncompleteDocuments = documents.some((item) => {
+          const hasTitle = item.title.trim().length > 0;
+          const hasLink = item.link.trim().length > 0;
+          return (hasTitle || hasLink) && !(hasTitle && hasLink);
+        });
+        if (hasIncompleteDocuments) {
+          toast.warning("Для кожного документа заповніть і назву, і посилання");
+          return;
+        }
         const response = await createBundle({
           ...bundleData,
           productIds: selectedProductIds,
@@ -250,6 +345,7 @@ export default function ModalCreateBundle({
             includedProducts: normalizedIncludedProducts,
             advantages,
             description: descriptionText.trim(),
+            documents: normalizedDocuments,
           },
         });
 
@@ -259,7 +355,7 @@ export default function ModalCreateBundle({
         }
 
         toast.success("Комплект створено");
-        closeModal();
+        await closeModal({ preserveUploadedDocuments: true });
         router.refresh();
       } catch (error) {
         console.error(error);
@@ -277,7 +373,7 @@ export default function ModalCreateBundle({
       <div className="admin-modal max-w-6xl">
         <div className="admin-modal-header">
           <h2 className="text-base font-semibold">Створити новий комплект</h2>
-          <ButtonXDellete type="button" onClick={closeModal} className="h-8 w-8" />
+          <ButtonXDellete type="button" onClick={() => void closeModal()} className="h-8 w-8" />
         </div>
 
         <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="admin-modal-content">
@@ -614,6 +710,72 @@ export default function ModalCreateBundle({
                     placeholder="Детально опишіть призначення комплекту, ключові переваги та сценарії використання."
                   />
                 </div>
+
+                <div className="mt-4 rounded-lg border border-slate-600/55 bg-slate-950/35 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-slate-100">Документи комплекту</p>
+                    <ButtonYellow
+                      type="button"
+                      className="admin-btn-secondary px-3! py-1.5! text-xs!"
+                      onClick={handleAddDocument}
+                    >
+                      Додати документ
+                    </ButtonYellow>
+                  </div>
+
+                  {documents.length > 0 ? (
+                    <div className="mt-3 space-y-3">
+                      {documents.map((document, index) => (
+                        <div
+                          key={`bundle-document-${index}`}
+                          className="rounded border border-slate-600/55 p-3"
+                        >
+                          <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+                        <InputAdminStyle
+                          input_title="Назва документа"
+                          value={document.title}
+                          onChange={(event) =>
+                            handleChangeDocument(index, "title", event.target.value)
+                          }
+                        />
+                        <InputAdminStyle
+                          input_title="Посилання на документ"
+                          value={document.link}
+                          onChange={(event) =>
+                            handleChangeDocument(index, "link", event.target.value)
+                          }
+                          placeholder="https://..."
+                        />
+                        <InputAdminStyle
+                          input_title="Файл"
+                          type="file"
+                          onChange={(event) =>
+                            handleUploadDocumentFile(index, event.target.files?.[0])
+                          }
+                        />
+                      </div>
+                          <div className="mt-2 flex justify-between gap-2">
+                            <p className="text-xs text-slate-400">
+                              {uploadingDocumentCount > 0 ? "Завантаження..." : " "}
+                            </p>
+                            <div className="flex justify-end">
+                            <ButtonYellow
+                              type="button"
+                              className="admin-btn-secondary px-3! py-1.5! text-xs!"
+                              onClick={() => void handleRemoveDocument(index)}
+                            >
+                              Видалити
+                            </ButtonYellow>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-xs text-slate-400">Документи ще не додані.</p>
+                  )}
+                </div>
+
               </div>
             </div>
           </div>
@@ -622,7 +784,7 @@ export default function ModalCreateBundle({
             <ButtonYellow
               type="button"
               className="admin-btn-secondary px-4! py-2! text-sm!"
-              onClick={closeModal}
+              onClick={() => void closeModal()}
             >
               Скасувати
             </ButtonYellow>
@@ -630,7 +792,7 @@ export default function ModalCreateBundle({
             <ButtonYellow
               type="submit"
               className="admin-btn-primary px-4! py-2! text-sm!"
-              disabled={isPending}
+              disabled={isPending || uploadingDocumentCount > 0}
             >
               {isPending ? "Створення..." : "Створити комплект"}
             </ButtonYellow>

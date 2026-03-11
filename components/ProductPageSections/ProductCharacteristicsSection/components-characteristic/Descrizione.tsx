@@ -1,5 +1,5 @@
 import { Product_Details } from "@/types/product.types";
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import { twMerge } from "tailwind-merge";
 
 export default function Descrizione({
@@ -18,6 +18,7 @@ export default function Descrizione({
   const descriptionText =
     typeof data.description === "string" ? data.description.trim() : "";
   const hasDescriptionText = descriptionText.length > 0;
+  const descriptionLines = descriptionText.split(/\r?\n/);
   const title = typeof data.title === "string" ? data.title.trim() : "";
   const displayTitle = title.length > 0 && title.toLowerCase() !== "no title" ? title : "Descrizione";
   const showUnavailableMessage = !hasDescriptionText;
@@ -25,7 +26,7 @@ export default function Descrizione({
   return (
     <div className={twMerge("flex flex-col gap-3 xl:flex-row xl:items-start xl:gap-6", className)}>
       {imagesToRender.length === 1 && (
-        <Image
+        <SmartImage
           src={imagesToRender[0]}
           className="mx-auto rounded-sm"
           alt={data.title}
@@ -37,7 +38,7 @@ export default function Descrizione({
         <ul className="mx-auto grid flex-1 grid-cols-2 grid-rows-2 gap-1 xl:gap-5">
           {imagesToRender.map((image) => (
             <li key={image}>
-              <Image
+              <SmartImage
                 src={image}
                 className="mx-auto rounded-sm"
                 alt={data.title}
@@ -53,7 +54,17 @@ export default function Descrizione({
         {showUnavailableMessage ? (
           <p className="text_R text-text-grey">I dati corrispondenti non sono ancora disponibili.</p>
         ) : (
-          <p className="text_R">{descriptionText}</p>
+          <div className="space-y-3">
+            {descriptionLines.map((line, index) =>
+              line.trim().length > 0 ? (
+                <p key={`description-line-${index}`} className="text_R">
+                  {line}
+                </p>
+              ) : (
+                <div key={`description-gap-${index}`} className="h-1" aria-hidden="true" />
+              ),
+            )}
+          </div>
         )}
       </div>
     </div>
