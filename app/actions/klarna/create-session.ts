@@ -36,6 +36,7 @@ export async function createKlarnaSessionAction({
   basket: BasceketStoreStateType["basket"];
 }): Promise<KlarnaSessionResponseType> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const safeOrderNumber = orderNumber || "NO-ORDER-NUMBER";
 
   const payload = {
     billing_address: {
@@ -89,11 +90,11 @@ export async function createKlarnaSessionAction({
       };
     }),
 
-    merchant_reference1: orderNumber || "NO-ORDER-NUMBER",
+    merchant_reference1: safeOrderNumber,
     merchant_urls: {
       //   terms: `${siteUrl}/termini-condizioni`,
       //   checkout: `${siteUrl}/checkout`,
-      confirmation: `${siteUrl}${PAGES.CHECKOUT_PAGES.COMPLETED}`,
+      confirmation: `${siteUrl}${PAGES.CHECKOUT_PAGES.COMPLETED}/${safeOrderNumber}`,
     },
   };
 

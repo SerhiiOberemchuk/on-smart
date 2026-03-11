@@ -67,6 +67,11 @@ export default async function BundlePageContent({
       };
     })
     .filter(Boolean) as IncludedBundleProduct[];
+  const includedItems = includedProducts.map((item) => ({
+    id: item.product.id,
+    name: item.product.nameFull,
+    quantity: item.quantity,
+  }));
 
   const galleryImages =
     galleryResponse.success && galleryResponse.data ? galleryResponse.data.images : [];
@@ -152,6 +157,7 @@ export default async function BundlePageContent({
         discountPercent={discountPercent}
         bundleDescription={bundleDescription}
         advantages={advantages}
+        includedItems={includedItems}
       />
       <BundleDetailsTabsSection
         includedProducts={includedProducts}

@@ -73,6 +73,13 @@ export default function KlarnaPaymentWidget() {
     [sessionData],
   );
 
+  const redirectToKlarnaErrorState = (reason: string) => {
+    toast.error(
+      "Pagamento Klarna non riuscito. Riprova piu tardi o scegli un altro metodo di pagamento.",
+    );
+    router.push(`${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=${encodeURIComponent(reason)}`);
+  };
+
   const canPay = useMemo<boolean>(() => {
     return (
       priceToPay > 0 &&
@@ -188,12 +195,19 @@ export default function KlarnaPaymentWidget() {
       async (res: KlarnaAuthorizeResponse) => {
         try {
           if (!res.approved || !res.authorization_token) {
+            await updateOrderPaymentAction({
+              orderNumber,
+              data: {
+                status: "CANCELED",
+                notes: "Klarna authorization was not approved",
+              },
+            });
             await deleteOrderByOrderId({ id: created.orderId });
-            toast.info("Pagamento annullato");
+            redirectToKlarnaErrorState("klarna_authorization_not_approved");
             return;
           }
 
-          await placeKlarnaOrder({
+          const placedOrder = await placeKlarnaOrder({
             authorizationToken: res.authorization_token,
             orderNumber,
             dataFirstStep,
@@ -203,11 +217,24 @@ export default function KlarnaPaymentWidget() {
             basket,
           });
 
+          if (!placedOrder.success) {
+            await updateOrderPaymentAction({
+              orderNumber,
+              data: {
+                status: "FAILED",
+                notes: `Klarna place order failed: ${placedOrder.error}`,
+              },
+            });
+            await deleteOrderByOrderId({ id: created.orderId });
+            redirectToKlarnaErrorState("klarna_place_order_failed");
+            return;
+          }
+
           await updateOrderPaymentAction({
             orderNumber,
             data: {
               status: "PAYED",
-              providerOrderId: res.authorization_token,
+              providerOrderId: placedOrder.orderId,
             },
           });
           await updateOrderInfoByOrderIDAction({
@@ -224,11 +251,23 @@ export default function KlarnaPaymentWidget() {
             }
           }
 
+          if (placedOrder.redirectUrl) {
+            window.location.assign(placedOrder.redirectUrl);
+            return;
+          }
+
           router.push(`${PAGES.CHECKOUT_PAGES.COMPLETED}/${orderNumber}`);
         } catch (e) {
           console.error(e);
+          await updateOrderPaymentAction({
+            orderNumber,
+            data: {
+              status: "FAILED",
+              notes: e instanceof Error ? e.message : "Unexpected Klarna payment error",
+            },
+          });
           await deleteOrderByOrderId({ id: created.orderId });
-          toast.error("Errore pagamento Klarna");
+          redirectToKlarnaErrorState("klarna_runtime_error");
         } finally {
           isCreatingRef.current = false;
           setIsPaying(false);
@@ -239,7 +278,7 @@ export default function KlarnaPaymentWidget() {
 
   return (
     <div className="space-y-4 py-5">
-      <Script src="https://x.klarnacdn.net/kp/lib/v1/api.js" strategy="afterInteractive" />;
+      <Script src="https://x.klarnacdn.net/kp/lib/v1/api.js" strategy="afterInteractive" />
       <h2 className="text-xl font-semibold">Pagamento con Klarna</h2>
       {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>}
       <div id={containerId} className="min-h-[180px] rounded-md border bg-amber-50 p-3" />

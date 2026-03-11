@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PayPalButtons, PayPalMessages, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 import type { PayPalButtonsComponentOptions } from "@paypal/paypal-js";
@@ -16,7 +16,6 @@ import { PAGES } from "@/types/pages.types";
 import { getTotalPriceToPay } from "@/utils/get-prices";
 import { makeOrderNumber } from "@/utils/order-number";
 import { ulid } from "ulid";
-import { toast } from "react-toastify";
 import { updateOrderInfoByOrderIDAction } from "@/app/actions/orders/udate-order-info";
 import { notifyOrderById } from "@/app/actions/notify-order-by-id/notify-order-by-id";
 
@@ -38,6 +37,7 @@ export default function PayPalButtonsClient(props: Props) {
 
   const [priceToPay, setPriceToPay] = useState("0.00");
   const [showMessages, setShowMessages] = useState(false);
+  const [isProcessingPayPal, setIsProcessingPayPal] = useState(false);
 
   const [internalOrderNumber, setInternalOrderNumber] = useState(() => makeOrderNumber("OS"));
   const [internalOrderId, setInternalOrderId] = useState(() => ulid());
@@ -45,10 +45,25 @@ export default function PayPalButtonsClient(props: Props) {
   const createdDbRef = useRef<CreatedOrderRef | null>(null);
 
   const isCreatingRef = useRef(false);
-
   const didNotifyRef = useRef(false);
 
   const currency = "EUR";
+
+  const resetDraftOrderIdentity = useCallback(() => {
+    setInternalOrderNumber(makeOrderNumber("OS"));
+    setInternalOrderId(ulid());
+    createdDbRef.current = null;
+    didNotifyRef.current = false;
+    isCreatingRef.current = false;
+    setIsProcessingPayPal(false);
+  }, []);
+
+  const redirectToPayPalErrorState = useCallback(
+    (reason: string) => {
+      router.push(`${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=${encodeURIComponent(reason)}`);
+    },
+    [router],
+  );
 
   useEffect(() => {
     if (!totalPrice) return;
@@ -62,14 +77,8 @@ export default function PayPalButtonsClient(props: Props) {
 
     setPriceToPay(next);
     setShowMessages(true);
-
-    setInternalOrderNumber(makeOrderNumber("OS"));
-    setInternalOrderId(ulid());
-
-    createdDbRef.current = null;
-    didNotifyRef.current = false;
-    isCreatingRef.current = false;
-  }, [totalPrice, dataFirstStep.deliveryMethod, basket]);
+    resetDraftOrderIdentity();
+  }, [totalPrice, dataFirstStep.deliveryMethod, basket, resetDraftOrderIdentity]);
 
   const canPay = useMemo(() => {
     const amount = Number(priceToPay);
@@ -103,16 +112,13 @@ export default function PayPalButtonsClient(props: Props) {
       <PayPalButtons
         {...props}
         forceReRender={[priceToPay, currency]}
-        disabled={!canPay || isSdkPending}
+        disabled={!canPay || isSdkPending || isProcessingPayPal}
         createOrder={async () => {
-          if (!canPay) {
-            toast.error("PayPal createOrder blocked: invalid state");
-            throw new Error("PayPal createOrder blocked: invalid state");
-          }
-          if (isCreatingRef.current)
-            throw new Error("PayPal createOrder blocked: already creating");
+          if (!canPay) throw new Error("PayPal createOrder blocked: invalid state");
+          if (isCreatingRef.current) throw new Error("PayPal createOrder blocked: already creating");
 
           isCreatingRef.current = true;
+          setIsProcessingPayPal(true);
 
           const created = await createOrderAction({
             customOrderNumberId: { id: internalOrderId, number: internalOrderNumber },
@@ -132,8 +138,7 @@ export default function PayPalButtonsClient(props: Props) {
           });
 
           if (!created?.success || !created.orderId || !created.orderNumber) {
-            isCreatingRef.current = false;
-            toast.error("Impossibile creare l’ordine. Riprova.");
+            resetDraftOrderIdentity();
             throw new Error(`Create internal order failed: ${String(created?.error ?? "")}`);
           }
 
@@ -156,11 +161,9 @@ export default function PayPalButtonsClient(props: Props) {
             } catch (e) {
               console.error("Rollback deleteOrderByOrderId failed:", e);
             } finally {
-              createdDbRef.current = null;
-              isCreatingRef.current = false;
+              resetDraftOrderIdentity();
             }
 
-            toast.error("Errore durante la creazione del pagamento. Riprova.");
             throw new Error(`Create PayPal order failed: ${String(pp.error ?? "")}`);
           }
 
@@ -184,7 +187,8 @@ export default function PayPalButtonsClient(props: Props) {
           const created = createdDbRef.current;
 
           if (!ppOrderId || !created?.orderNumber) {
-            console.error("onApprove missing ppOrderId or internal order ref");
+            resetDraftOrderIdentity();
+            redirectToPayPalErrorState("paypal_missing_order_ref");
             return;
           }
 
@@ -208,7 +212,8 @@ export default function PayPalButtonsClient(props: Props) {
             } catch (e) {
               console.error("updateOrderPaymentAction FAILED after capture fail:", e);
             }
-            toast.error("Pagamento non riuscito. Riprova o scegli un altro metodo.");
+            resetDraftOrderIdentity();
+            redirectToPayPalErrorState("paypal_capture_failed");
             return;
           }
 
@@ -237,44 +242,35 @@ export default function PayPalButtonsClient(props: Props) {
             }
           }
 
-          createdDbRef.current = null;
-          isCreatingRef.current = false;
-
+          resetDraftOrderIdentity();
           router.push(`${PAGES.CHECKOUT_PAGES.COMPLETED}/${referenceId}`);
         }}
         onCancel={async () => {
-          isCreatingRef.current = false;
-
           const created = createdDbRef.current;
-          if (!created?.orderId) return;
-
-          try {
-            await deleteOrderByOrderId({ id: created.orderId });
-            toast.info("Pagamento annullato.");
-          } catch (e) {
-            console.error("deleteOrderByOrderId onCancel failed:", e);
-          } finally {
-            createdDbRef.current = null;
-            didNotifyRef.current = false;
+          if (created?.orderId) {
+            try {
+              await deleteOrderByOrderId({ id: created.orderId });
+            } catch (e) {
+              console.error("deleteOrderByOrderId onCancel failed:", e);
+            }
           }
+
+          resetDraftOrderIdentity();
+          redirectToPayPalErrorState("paypal_canceled");
         }}
         onError={async (err) => {
-          isCreatingRef.current = false;
-
           const created = createdDbRef.current;
           if (created?.orderId) {
             try {
               await deleteOrderByOrderId({ id: created.orderId });
             } catch (e) {
               console.error("deleteOrderByOrderId onError failed:", e);
-            } finally {
-              createdDbRef.current = null;
-              didNotifyRef.current = false;
             }
           }
 
           console.error("PayPal error", err);
-          toast.error("Errore durante la creazione del pagamento. Riprova tra poco.");
+          resetDraftOrderIdentity();
+          redirectToPayPalErrorState("paypal_runtime_error");
         }}
       />
     </div>

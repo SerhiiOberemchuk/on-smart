@@ -25,8 +25,13 @@ export default function BundleTabComponents({
 
   return (
     <div className={twMerge("flex flex-col gap-3 md:gap-4", className)}>
-      {includedProducts.map(
-        ({ product, quantity, shortDescription, characteristicTitle, characteristics }) => (
+      {includedProducts.map(({ product, shortDescription, characteristicTitle, characteristics }) => {
+        const descriptionParagraphs = (shortDescription ?? "")
+          .split(/\r?\n/)
+          .map((paragraph) => paragraph.trim())
+          .filter(Boolean);
+
+        return (
           <article key={product.id} className="rounded-sm bg-background p-3 md:p-4">
             <div className="flex flex-col gap-4 md:flex-row">
               <Link
@@ -50,32 +55,24 @@ export default function BundleTabComponents({
                   {product.nameFull}
                 </Link>
 
-                <ul className="mt-3 flex flex-col gap-2">
-                  <li className="text_R flex items-center justify-between px-2 py-2 odd:bg-grey-hover-stroke">
-                    <span className="text-text-grey">Quantita nel kit:</span>
-                    <span>x{quantity}</span>
-                  </li>
-                  <li className="text_R flex items-center justify-between px-2 py-2 odd:bg-grey-hover-stroke">
-                    <span className="text-text-grey">EAN:</span>
-                    <span>{product.ean || "-"}</span>
-                  </li>
-                  <li className="text_R flex items-center justify-between px-2 py-2 odd:bg-grey-hover-stroke">
-                    <span className="text-text-grey">Dimensioni (cm):</span>
-                    <span>
-                      {product.lengthCm} x {product.widthCm} x {product.heightCm}
-                    </span>
-                  </li>
-                  <li className="text_R flex items-center justify-between px-2 py-2 odd:bg-grey-hover-stroke">
-                    <span className="text-text-grey">Peso (kg):</span>
-                    <span>{product.weightKg}</span>
-                  </li>
-                </ul>
-
                 <div className="mt-3 rounded-sm border border-stroke-grey p-3">
-                  <h3 className="input_R_18">Descrizione nel kit</h3>
-                  <p className="text_R mt-2 text-text-grey">
-                    {shortDescription || "Descrizione non disponibile per questo componente."}
-                  </p>
+                  <h3 className="input_R_18">Descrizione</h3>
+                  <div className="mt-2">
+                    {descriptionParagraphs.length > 0 ? (
+                      descriptionParagraphs.map((paragraph, index) => (
+                        <p
+                          key={`${product.id}-description-${index}`}
+                          className={twMerge("text_R text-text-grey", index > 0 ? "mt-2" : "")}
+                        >
+                          {paragraph}
+                        </p>
+                      ))
+                    ) : (
+                      <p className="text_R text-text-grey">
+                        Descrizione non disponibile per questo componente.
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <details
@@ -86,9 +83,9 @@ export default function BundleTabComponents({
                     <span className="input_R_18">
                       {characteristicTitle || "Caratteristiche prodotto"}
                     </span>
-                    <span className="text-sm text-yellow-500 transition-transform duration-200 group-open:rotate-180">
-                      в–ѕ
-                    </span>
+                    {/* <span className="text-sm text-yellow-500 transition-transform duration-200 group-open:rotate-180">
+                      &#9660;
+                    </span> */}
                   </summary>
 
                   <div className="border-t border-stroke-grey p-3">
@@ -114,9 +111,8 @@ export default function BundleTabComponents({
               </div>
             </div>
           </article>
-        ),
-      )}
+        );
+      })}
     </div>
   );
 }
-

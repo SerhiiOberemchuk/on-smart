@@ -9,8 +9,6 @@ import { createSumUpCheckout, deactivateCheckoutSumUp } from "@/app/actions/sumu
 import { createOrderAction } from "@/app/actions/orders/create-order";
 import { updateOrderPaymentAction } from "@/app/actions/payments/payment-order-actions";
 
-import { updateOrderInfoByOrderIDAction } from "@/app/actions/orders/udate-order-info";
-
 import { PAGES } from "@/types/pages.types";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useBasketStore } from "@/store/basket-store";
@@ -32,6 +30,7 @@ export default function SumUpModalButton() {
   const [open, setOpen] = useState(false);
   const [attempt, setAttempt] = useState(1);
   const [checkoutId, setCheckoutId] = useState<string | null>(null);
+  const [isProcessingResponse, setIsProcessingResponse] = useState(false);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const createdRef = useRef<CreatedOrderRef | null>(null);
@@ -69,6 +68,16 @@ export default function SumUpModalButton() {
     if (containerRef.current) containerRef.current.innerHTML = "";
   }, [checkoutId]);
 
+  const redirectToSumUpErrorState = useCallback(
+    (reason: string) => {
+      toast.error(
+        "Pagamento non riuscito. Prova piu tardi oppure scegli un altro metodo di pagamento.",
+      );
+      router.push(`${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=${encodeURIComponent(reason)}`);
+    },
+    [router],
+  );
+
   useEffect(() => {
     if (!open || !checkoutId) return;
 
@@ -87,75 +96,74 @@ export default function SumUpModalButton() {
       id: "sumUpIdContainer",
       checkoutId,
       onResponse: async (type, body) => {
-        console.log("SumUp response:", { type, body });
-        const created = createdRef.current;
-        if (!created) return;
+        if (isProcessingResponse) return;
+        setIsProcessingResponse(true);
 
-        const status = body?.status;
-
-        if (type === "error") {
-          toast.error("Pagamento non riuscito. Riprova o scegli un altro metodo.");
-
-          try {
-            await updateOrderPaymentAction({
-              orderNumber: created.orderNumber,
-              data: {
-                status: "FAILED",
-                providerOrderId: checkoutId,
-              },
-            });
-
-            await deactivateCheckoutSumUp({ id: checkoutId });
-          } catch (e) {
-            console.error("Errore post-failed:", e);
+        try {
+          console.log("SumUp response:", { type, body });
+          const created = createdRef.current;
+          if (!created) {
+            redirectToSumUpErrorState("sumup_missing_order_ref");
+            return;
           }
 
-          await close();
-          return;
-        }
+          const status = body?.status;
 
-        if (type === "success" || status === "PAID") {
-          try {
+          if (type === "error") {
+            try {
+              await updateOrderPaymentAction({
+                orderNumber: created.orderNumber,
+                data: {
+                  status: "FAILED",
+                  providerOrderId: checkoutId,
+                  notes: "SumUp widget returned error",
+                },
+              });
+
+              await deactivateCheckoutSumUp({ id: checkoutId });
+            } catch (e) {
+              console.error("Errore post-failed:", e);
+            }
+
+            await close();
+            redirectToSumUpErrorState("sumup_widget_error");
+            return;
+          }
+
+          if (type === "success" || status === "PAID" || status === "PENDING") {
             await updateOrderPaymentAction({
               orderNumber: created.orderNumber,
               data: {
-                status: "SUCCESS",
+                status: "PENDING",
                 providerOrderId: checkoutId,
+                notes: `SumUp widget response: ${String(status ?? type)}`,
               },
-            });
-
-            await updateOrderInfoByOrderIDAction({
-              orderId: created.orderId,
-              dataToUpdate: { orderStatus: "PAID" },
             });
 
             await close();
             router.push(
               `${PAGES.CHECKOUT_PAGES.COMPLETED}/${created.orderNumber}/sumup?${SUM_UP_CONSTANTS.SEARCH_PARAM_CHECKOUT_ID.TITLE}=${checkoutId}&order_id=${created.orderId}`,
             );
-          } catch (e) {
-            console.error(e);
-            toast.error("Errore post pagamento");
+            return;
           }
 
-          return;
-        }
-
-        if (status === "PENDING") {
-          toast.info("Pagamento in verifica…");
+          await close();
+          redirectToSumUpErrorState("sumup_unexpected_response");
+        } catch (e) {
+          console.error("SumUp response handling error:", e);
+          await close();
+          redirectToSumUpErrorState("sumup_response_handler_error");
+        } finally {
+          setIsProcessingResponse(false);
         }
       },
     });
   }, [
     open,
     checkoutId,
-    router,
-    dataFirstStep,
-    basket,
-    productsInBasket,
-    priceToPay,
-    dataCheckoutStepConsegna,
     close,
+    isProcessingResponse,
+    redirectToSumUpErrorState,
   ]);
 
   const openAndCreate = async () => {
@@ -183,7 +191,7 @@ export default function SumUpModalButton() {
         });
 
         if (!created?.success || !created.orderId || !created.orderNumber) {
-          toast.error(`Errore: ${created?.error ?? ""}`);
+          toast.error(`Errore: ${String(created?.error ?? "")}`);
           return;
         }
 
@@ -194,6 +202,7 @@ export default function SumUpModalButton() {
       }
 
       startTransition(async () => {
+        setIsProcessingResponse(false);
         setOpen(true);
 
         const created = createdRef.current!;
@@ -209,8 +218,9 @@ export default function SumUpModalButton() {
         });
 
         if (!checkout.success) {
-          toast.error("Prova più tardi");
+          toast.error("Prova piu tardi");
           await close();
+          redirectToSumUpErrorState("sumup_checkout_creation_failed");
           return;
         }
 
@@ -236,10 +246,10 @@ export default function SumUpModalButton() {
       <button
         type="button"
         onClick={openAndCreate}
-        disabled={pending || startingRef.current}
+        disabled={pending || startingRef.current || open || isProcessingResponse}
         className="w-full rounded-xl bg-[#F2C94C] px-6 py-3 font-semibold text-black disabled:opacity-60"
       >
-        {pending ? "Apro…" : "Paga e procedi avanti"}
+        {pending ? "Apro..." : "Paga e procedi avanti"}
       </button>
 
       {open && (
@@ -258,7 +268,7 @@ export default function SumUpModalButton() {
               className="absolute top-3 right-3 rounded-lg px-3 py-1 text-sm text-black/70 hover:bg-black/5"
               aria-label="Chiudi"
             >
-              ✕
+              x
             </button>
 
             <div id="sumUpIdContainer" ref={containerRef} className="pb-4" />
