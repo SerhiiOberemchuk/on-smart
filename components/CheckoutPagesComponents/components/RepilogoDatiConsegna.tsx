@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import icon_delivery_success from "@/assets/icons/icon_delivery_success.svg";
 import icon_pencil from "@/assets/icons/icon_add_review.svg";
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
 import {
   CheckoutTypesDataFirstStep,
@@ -40,7 +40,7 @@ export default function RiepilogoDatiConsegna({
   return (
     <div>
       <div className="flex items-center gap-2">
-        <Image
+        <SmartImage
           src={icon_delivery_success}
           alt="icon email confirmed"
           aria-label="icon email confirmed"
@@ -51,7 +51,7 @@ export default function RiepilogoDatiConsegna({
             href="/checkout/consegna"
             className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
           >
-            <Image src={icon_pencil} alt="icon pencil" aria-label="icon pencil" /> Modifica
+            <SmartImage src={icon_pencil} alt="icon pencil" aria-label="icon pencil" /> Modifica
           </Link>
         )}
       </div>
@@ -94,3 +94,4 @@ export default function RiepilogoDatiConsegna({
     </div>
   );
 }
+

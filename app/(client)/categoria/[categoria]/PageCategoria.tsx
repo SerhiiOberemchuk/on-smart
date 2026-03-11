@@ -1,10 +1,10 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import Script from "next/script";
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
 import { baseUrl } from "@/types/baseUrl";
 import { getCategoryBySlug } from "@/app/actions/category/category-actions";
 import { notFound } from "next/navigation";
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
 import LinkYellow from "@/components/YellowLink";
 import { getAllProductsFiltered } from "@/app/actions/product/get-all-products-filtered";
@@ -144,7 +144,7 @@ export default async function PageCategoria({ params }: Props) {
         <div className="container">
           <h1 className="H2 py-3 text-left uppercase">{category.name}</h1>
           <div className="flex flex-col gap-5 py-3 xl:flex-row">
-            <Image
+            <SmartImage
               src={category.image}
               width={492}
               height={270}
@@ -197,3 +197,4 @@ export default async function PageCategoria({ params }: Props) {
     </>
   );
 }
+

@@ -1,5 +1,5 @@
-"use client";
-import Image from "next/image";
+﻿"use client";
+import SmartImage from "@/components/SmartImage";
 import icon_coupon from "@/assets/icons/icon_coupon.svg";
 import icon_arrov from "@/assets/icons/arrow-top.svg";
 import { useState } from "react";
@@ -14,9 +14,9 @@ export default function InputSconto() {
         onClick={() => setIsOpenInput((prev) => !prev)}
         className="input_M_18 flex cursor-pointer items-center gap-2 hover:text-yellow-500"
       >
-        <Image src={icon_coupon} alt="coupon icon" />
+        <SmartImage src={icon_coupon} alt="coupon icon" />
         <span>Codici sconto (opzionale) </span>
-        <Image
+        <SmartImage
           src={icon_arrov}
           alt="arrow icon"
           className={twMerge(
@@ -42,3 +42,4 @@ export default function InputSconto() {
     </div>
   );
 }
+

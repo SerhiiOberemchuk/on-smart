@@ -1,5 +1,5 @@
 import { Product_Details } from "@/types/product.types";
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import { twMerge } from "tailwind-merge";
 
 export default function Specifiche({
@@ -30,7 +30,7 @@ export default function Specifiche({
   return (
     <div className={twMerge("flex flex-col gap-3 xl:flex-row xl:items-start xl:gap-6", className)}>
       {imagesToRender.length === 1 && (
-        <Image
+        <SmartImage
           src={imagesToRender[0]}
           className="mx-auto rounded-sm"
           alt={data.title}
@@ -41,7 +41,7 @@ export default function Specifiche({
       {imagesToRender.length > 1 && (
         <ul className="grid grid-cols-2 gap-x-5 gap-y-6 xl:flex-1">
           {imagesToRender.map((img, idx) => (
-            <Image
+            <SmartImage
               key={img + idx}
               src={img}
               className="flex-1 rounded-sm"

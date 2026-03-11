@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { MAX_RATING } from "@/constans";
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import starfull from "@/assets/icons/star-full.svg";
 import starempty from "@/assets/icons/star-empty.svg";
 import { useState } from "react";
@@ -26,7 +26,7 @@ export default function InputsRating() {
                 onChange={() => setChecked(index + 1)}
                 checked={checked === index + 1}
               />
-              <Image alt="empty star" src={checked >= index + 1 ? starfull : starempty} />
+              <SmartImage alt="empty star" src={checked >= index + 1 ? starfull : starempty} />
             </label>
           ),
         )}
@@ -35,3 +35,4 @@ export default function InputsRating() {
     </div>
   );
 }
+

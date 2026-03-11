@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { use, useEffect } from "react";
 
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import icon_success from "@/assets/icons/icon_success.svg";
 
 import { GetOrderResponseType } from "@/app/actions/orders/get-order";
@@ -41,7 +41,7 @@ export default function CompletatoPage({
     <section className="flex flex-col gap-4 rounded-sm bg-background p-4">
       <div className="flex flex-col items-center gap-1">
         <div className="flex items-center justify-center gap-2">
-          <Image src={icon_success} alt="success icon" />
+          <SmartImage src={icon_success} alt="success icon" />
           <h1 className="H3 text-green">Ordine Completato</h1>
         </div>
 
@@ -57,11 +57,11 @@ export default function CompletatoPage({
         {orderInfo.order?.deliveryMethod === "CONSEGNA_CORRIERE" && (
           <>
             <p className="btn_small">
-              Totale: <span className="body_R_20">{paymantInfoState.paymentInfo?.amount} €</span>
+              Totale: <span className="body_R_20">{paymantInfoState.paymentInfo?.amount} в‚¬</span>
             </p>
             <p className="btn_small">
               Consegna:{" "}
-              <span className="body_R_20">{orderInfo.order?.deliveryPrice.toFixed(2)} €</span>
+              <span className="body_R_20">{orderInfo.order?.deliveryPrice.toFixed(2)} в‚¬</span>
             </p>
           </>
         )}
@@ -70,14 +70,14 @@ export default function CompletatoPage({
             <p className="btn_small">
               Totale:{" "}
               <span className="body_R_20">
-                {Number(paymantInfoState.paymentInfo?.amount).toFixed(2)} €
+                {Number(paymantInfoState.paymentInfo?.amount).toFixed(2)} в‚¬
               </span>
             </p>
             <p className="btn_small">Ritiro presto negozzio</p>
           </>
         )}
         <p className="helper_text mt-2 w-full text-left text-text-grey">
-          L`Ordine è stato correttamente inviato. Riceverai una mail di conferma con i dettagli
+          L`Ordine ГЁ stato correttamente inviato. Riceverai una mail di conferma con i dettagli
           dell`ordine e la fattura. Per qualsiasi domanda o assistenza, non esitare a contattarci.
         </p>
       </div>
@@ -103,3 +103,4 @@ export default function CompletatoPage({
     </section>
   );
 }
+

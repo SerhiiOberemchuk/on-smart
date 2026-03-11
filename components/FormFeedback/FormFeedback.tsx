@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useActionState, useEffect, useId, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
+import { createBundleReview } from "@/app/actions/bundles/create-bundle-review";
 import { sendMailAssistance } from "@/app/actions/mail/mail-assistance";
 import { createProductReview } from "@/app/actions/product-reviews/create-review";
 
@@ -12,18 +13,25 @@ import InputsRating from "./InputsRating";
 import TextArea from "./TextArea";
 import styles from "./form.module.css";
 
-type FormFeedbackType = "general-feedback" | "product-review";
+type FormFeedbackType = "general-feedback" | "product-review" | "bundle-review";
 
 export default function FormFeedback({
   productId,
+  bundleId,
   className,
   type,
 }: {
   productId?: string;
+  bundleId?: string;
   className?: string;
   type: FormFeedbackType;
 }) {
-  const action = type === "product-review" ? createProductReview : sendMailAssistance;
+  const action =
+    type === "product-review"
+      ? createProductReview
+      : type === "bundle-review"
+        ? createBundleReview
+        : sendMailAssistance;
   const [state, formAction, isPending] = useActionState(action, { success: false });
   const [showSuccess, setShowSuccess] = useState(false);
   const formUid = useId();
@@ -31,9 +39,15 @@ export default function FormFeedback({
   const emailId = `${formUid}-email`;
   const messageId = `${formUid}-message`;
   const formAriaLabel =
-    type === "product-review" ? "Modulo recensione prodotto" : "Modulo richiesta consulenza";
+    type === "product-review"
+      ? "Modulo recensione prodotto"
+      : type === "bundle-review"
+        ? "Modulo recensione bundle"
+        : "Modulo richiesta consulenza";
   const successText =
-    type === "product-review" ? "Grazie! Recensione inviata." : "Grazie! Messaggio inviato.";
+    type === "product-review" || type === "bundle-review"
+      ? "Grazie! Recensione inviata."
+      : "Grazie! Messaggio inviato.";
   const stateRecord = state as Record<string, unknown>;
   const errorText = !state.success
     ? typeof stateRecord.message === "string"
@@ -65,12 +79,13 @@ export default function FormFeedback({
         styles.form,
         "mx-auto flex flex-col p-3",
         type === "general-feedback" && "w-full max-w-[640px] lg:mx-0",
-        type === "product-review" && "mx-auto mt-4 p-0",
+        (type === "product-review" || type === "bundle-review") && "mx-auto mt-4 p-0",
         className,
       )}
     >
       {type === "product-review" ? <input type="hidden" name="productId" value={productId} /> : null}
-      {type === "product-review" ? <InputsRating /> : null}
+      {type === "bundle-review" ? <input type="hidden" name="bundleId" value={bundleId} /> : null}
+      {type === "product-review" || type === "bundle-review" ? <InputsRating /> : null}
 
       <div className="flex flex-col gap-3 lg:flex-row">
         <label htmlFor={nameId} className="helper_text flex flex-1 flex-col">

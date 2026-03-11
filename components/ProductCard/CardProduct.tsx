@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
 import TitleTooltip from "./card-components/TitleTooltip";
 import HeaderProductCard from "../HeaderProductCard";
@@ -38,7 +38,7 @@ export default function CardProduct({
       <HeaderProductCard oldPrice={oldPrice} inStock={inStock} isOnOrder={isOnOrder} id={id} />
       <figure className="">
         <Link href={productHref} aria-label={name} prefetch={false}>
-          <Image
+          <SmartImage
             src={imgSrc}
             className="aspect-square object-contain object-center p-1 md:p-2 xl:p-3"
             width={310}
@@ -72,3 +72,4 @@ export default function CardProduct({
     </article>
   );
 }
+

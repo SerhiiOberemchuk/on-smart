@@ -1,5 +1,5 @@
-import LinkYellow from "@/components/YellowLink";
-import Image from "next/image";
+﻿import LinkYellow from "@/components/YellowLink";
+import SmartImage from "@/components/SmartImage";
 
 export default function BundleNotFound() {
   return (
@@ -7,7 +7,7 @@ export default function BundleNotFound() {
       <div className="mx-auto flex max-w-[600px] flex-col">
         <div className="mx-auto flex items-center text-9xl lg:text-[300px]">
           4
-          <Image src="/404.png" alt="Bundle Not Found" className="w-20 lg:w-44" width={176} height={176} />
+          <SmartImage src="/404.png" alt="Bundle Not Found" className="w-20 lg:w-44" width={176} height={176} />
           4
         </div>
 
@@ -22,3 +22,4 @@ export default function BundleNotFound() {
     </div>
   );
 }
+

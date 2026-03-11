@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useRef } from "react";
 import { Swiper, SwiperSlide, useSwiper } from "swiper/react";
 import type { Swiper as SwiperCore } from "swiper";
 
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
@@ -49,7 +49,7 @@ export default function Carousel() {
               <LinkYellow href={banner.href} title="Vai allo shop" ariaLabel={banner.ariaLabel} />
             </div>
             <div aria-hidden className="absolute top-0 right-0 bottom-0 left-0"></div>
-            <Image
+            <SmartImage
               src={banner.src}
               width={1440}
               height={677}
@@ -60,7 +60,7 @@ export default function Carousel() {
               sizes="(min-width: 1280px) 1280px, 100vw"
               className="mx-auto hidden h-[677px] w-auto object-cover object-center md:block"
             />
-            <Image
+            <SmartImage
               src={banner.srcMob}
               width={760}
               height={580}
@@ -101,3 +101,4 @@ const SlideButtons = () => {
     </div>
   );
 };
+

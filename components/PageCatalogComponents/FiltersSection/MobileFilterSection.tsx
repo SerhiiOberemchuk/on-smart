@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import icon_filter from "@/assets/icons/icon_filter.svg";
 import { useEffect, useState } from "react";
 import ListFiltereOptions from "./ListFilterOptions";
@@ -25,7 +25,7 @@ export default function MobileFilterSection({
         onClick={() => setIsFilterOpen(true)}
         className="flex w-full items-center justify-center gap-2 rounded-sm border border-yellow-500 py-2"
       >
-        <Image src={icon_filter} alt="filter icon" width={24} height={24} />
+        <SmartImage src={icon_filter} alt="filter icon" width={24} height={24} />
         <span>Filtra i risultati</span>
       </button>
       {isFilterOpen && (
@@ -56,3 +56,4 @@ export default function MobileFilterSection({
     </div>
   );
 }
+

@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import type { BundleListItem } from "@/app/actions/bundles/get-all-bundles";
 import { ProductType } from "@/db/schemas/product.schema";
 import type { BrandTypes } from "@/types/brands.types";
 import { CategoryTypes } from "@/types/category.types";
@@ -13,7 +14,7 @@ export default function ListBundlesAdmin({
   categories,
   brands,
 }: {
-  bundles: ProductType[];
+  bundles: BundleListItem[];
   products: ProductType[];
   categories: CategoryTypes[];
   brands: BrandTypes[];
@@ -36,6 +37,9 @@ export default function ListBundlesAdmin({
         const productIds = products
           .filter((product) => (product.bundleIds ?? []).includes(bundle.id))
           .map((product) => product.id);
+        const reviews = bundle.bundleMeta?.reviews ?? [];
+        const reviewCount = reviews.length;
+        const reviewsPreview = reviews.slice(0, 3);
         const photos = bundle.imgSrc ? [bundle.imgSrc] : [];
         const category = categoryById.get(bundle.category_id);
         const brand = brandBySlug.get(bundle.brand_slug);
@@ -78,12 +82,25 @@ export default function ListBundlesAdmin({
                   </span>
                   <span className="admin-chip">Вага, кг: {bundle.weightKg}</span>
                   <span className="admin-chip">Товарів у комплекті: {productIds.length}</span>
+                  <span className="admin-chip">Відгуків: {reviewCount}</span>
                 </div>
 
                 {items.length > 0 ? (
                   <p className="mt-2 text-xs text-slate-400">Містить: {items.map((item) => item.nameFull).join(", ")}</p>
                 ) : (
                   <p className="mt-2 text-xs text-slate-400">Список товарів недоступний.</p>
+                )}
+
+                {reviewsPreview.length > 0 ? (
+                  <ul className="mt-1 flex flex-col gap-1 text-xs text-slate-400">
+                    {reviewsPreview.map((review) => (
+                      <li key={review.id}>
+                        {review.client_name}: {review.rating}/5
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-1 text-xs text-slate-400">Відгуків поки немає.</p>
                 )}
               </div>
 

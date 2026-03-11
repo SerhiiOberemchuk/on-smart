@@ -17,5 +17,5 @@ export const auth = betterAuth({
     //  requireEmailVerification: true
   },
   plugins: [nextCookies(), admin()],
-  // secret: process.env.BETTER_AUTH_SECRET!,
+  secret: process.env.BETTER_AUTH_SECRET!,
 });

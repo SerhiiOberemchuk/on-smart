@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import { Swiper as SwiperTypes } from "swiper/types";
 
 import "swiper/css";
@@ -59,7 +59,7 @@ export default function ProductSlider({
       >
         {sliderImages.map((image, index) => (
           <SwiperSlide key={index} className="card_gradient rounded-sm">
-            <Image
+            <SmartImage
               src={image}
               alt={`${sliderImageAlt} (${index + 1})`}
               width={96}
@@ -95,7 +95,7 @@ export default function ProductSlider({
           >
             {sliderImages.map((image, index) => (
               <SwiperSlide key={index}>
-                <Image
+                <SmartImage
                   src={image}
                   alt={`${sliderImageAlt} (${index + 1})`}
                   width={532}
@@ -108,7 +108,7 @@ export default function ProductSlider({
             <SlidePrevButton />
           </Swiper>
         </div>
-        <Image
+        <SmartImage
           src={brandLogo || "/logo.png"}
           alt={`${displayBrandName} logo`}
           width={428}
@@ -124,3 +124,4 @@ export default function ProductSlider({
     </div>
   );
 }
+

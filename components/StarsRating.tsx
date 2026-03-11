@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import SmartImage from "@/components/SmartImage";
 import starfull from "@/assets/icons/star-full.svg";
 import starempty from "@/assets/icons/star-empty.svg";
 import { twMerge } from "tailwind-merge";
@@ -12,7 +12,7 @@ export default function StarsRating({
   return (
     <div className={twMerge("flex gap-1", className)}>
       {Array.from({ length: MAX_RATING }, (_, i) => (
-        <Image
+        <SmartImage
           src={Number(rating) >= i + 1 ? starfull : starempty}
           key={i}
           alt="Star "
@@ -22,3 +22,4 @@ export default function StarsRating({
     </div>
   );
 }
+

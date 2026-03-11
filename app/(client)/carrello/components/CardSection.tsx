@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
 import clsx from "clsx";
 import { toast } from "react-toastify";
@@ -50,7 +50,7 @@ export default function CartSection() {
       const products = data ?? [];
 
       if (products.length < ids.length) {
-        toast.warning("Alcuni prodotti non sono più disponibili.");
+        toast.warning("Alcuni prodotti non sono piГ№ disponibili.");
 
         const validIds = new Set(products.map((p) => p.id));
         basket
@@ -98,7 +98,7 @@ export default function CartSection() {
     if (item.quantity < prod.inStock) {
       updateBasket([{ productId, quantity: item.quantity + 1 }]);
     } else {
-      toast.info("Quantità massima disponibile.");
+      toast.info("QuantitГ  massima disponibile.");
     }
   };
 
@@ -144,10 +144,10 @@ export default function CartSection() {
                     onClick={() => removeFromBasketById(prod.id)}
                     className="absolute top-0 right-0"
                   >
-                    <Image src={icon_dell} alt="delete" />
+                    <SmartImage src={icon_dell} alt="delete" />
                   </button>
 
-                  <Image
+                  <SmartImage
                     src={prod.imgSrc}
                     alt="product"
                     width={230}
@@ -200,7 +200,7 @@ export default function CartSection() {
 
             {basket.length === 0 && (
               <li className="text-center">
-                Il carrello è vuoto{" "}
+                Il carrello ГЁ vuoto{" "}
                 <Link href="/catalogo" className="underline">
                   Vai al catalogo
                 </Link>
@@ -214,3 +214,4 @@ export default function CartSection() {
     </section>
   );
 }
+

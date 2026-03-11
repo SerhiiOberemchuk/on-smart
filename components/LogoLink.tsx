@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
 import { twMerge } from "tailwind-merge";
 
@@ -11,7 +11,7 @@ export default function LogoLink({
 }) {
   return (
     <Link href="/" className={twMerge("m-0 flex w-fit p-0", className)} aria-label="link a casa">
-      <Image
+      <SmartImage
         className={twMerge(
           footer === false && "h-[52px] w-[78px] md:h-[74px] md:w-[108px]",
           footer === true && "h-auto w-[98px] md:w-[178px]",
@@ -25,3 +25,4 @@ export default function LogoLink({
     </Link>
   );
 }
+

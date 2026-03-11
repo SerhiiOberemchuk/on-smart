@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
 import Script from "next/script";
 
@@ -67,7 +67,7 @@ export default async function ListBrends({
               title={name}
               aria-label={`Apri il brand ${name}`}
             >
-              <Image
+              <SmartImage
                 src={image}
                 className="h-auto w-fit object-contain object-center"
                 alt={`Logo del brand ${name}`}
@@ -88,3 +88,4 @@ export default async function ListBrends({
     </>
   );
 }
+

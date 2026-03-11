@@ -3,7 +3,9 @@
 import { db } from "@/db/db";
 import { brandProductsSchema } from "@/db/schemas/brand-products.schema";
 import {
+  type BundleMetaDocument,
   type BundleMetaIncludedProduct,
+  type BundleMetaReview,
   bundleMetaSchema,
 } from "@/db/schemas/bundle-meta.schema";
 import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
@@ -17,6 +19,8 @@ type BundleMetaPayload = {
   includedProducts?: BundleMetaIncludedProduct[];
   advantages?: string[];
   description?: string | null;
+  documents?: BundleMetaDocument[];
+  reviews?: BundleMetaReview[];
 };
 
 type UpdateBundlePayload = {
@@ -30,6 +34,10 @@ type UpdateBundlePayload = {
     imgSrc: string[];
     bundleMeta?: BundleMetaPayload;
   };
+
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
 function normalizeBundleMeta(productIds: string[], bundleMeta?: BundleMetaPayload) {
   const includedById = new Map((bundleMeta?.includedProducts ?? []).map((item) => [item.productId, item]));
@@ -45,11 +53,52 @@ function normalizeBundleMeta(productIds: string[], bundleMeta?: BundleMetaPayloa
 
   const advantages = (bundleMeta?.advantages ?? []).map((item) => item.trim()).filter(Boolean);
   const description = (bundleMeta?.description ?? "").trim();
+  const hasInvalidDocuments = (bundleMeta?.documents ?? []).some((item) => {
+    const title = item.title.trim();
+    const link = item.link.trim();
+    return (title.length > 0 || link.length > 0) && !(title.length > 0 && link.length > 0);
+  });
+
+  const documents = (bundleMeta?.documents ?? [])
+    .map((item) => ({
+      title: item.title.trim(),
+      link: item.link.trim(),
+    }))
+    .filter((item) => item.title.length > 0 && item.link.length > 0);
+  const reviews = (bundleMeta?.reviews ?? [])
+    .map((item, index) => {
+      const clientName = item.client_name?.trim() ?? "";
+      const email = item.email?.trim() ?? "";
+      const comment = item.comment?.trim() ?? "";
+      const ratingRaw = Number(item.rating);
+      const rating = Number.isFinite(ratingRaw)
+        ? Math.min(5, Math.max(1, Math.round(ratingRaw)))
+        : 5;
+      const createdAtRaw = item.created_at?.trim() ?? "";
+      const createdAt =
+        createdAtRaw && !Number.isNaN(Date.parse(createdAtRaw))
+          ? new Date(createdAtRaw).toISOString()
+          : new Date().toISOString();
+      const reviewId = item.id?.trim() || `bundle-review-${Date.now()}-${index}`;
+      if (!clientName || !comment || !isValidEmail(email)) return null;
+      return {
+        id: reviewId,
+        client_name: clientName,
+        email,
+        rating,
+        comment,
+        created_at: createdAt,
+      };
+    })
+    .filter(Boolean) as BundleMetaReview[];
 
   return {
     includedProducts,
     advantages,
     description,
+    documents,
+    reviews,
+    hasInvalidDocuments,
   };
 }
 
@@ -163,6 +212,9 @@ export async function updateBundle(formData: UpdateBundlePayload) {
     const [firstImage] = formData.imgSrc;
     const galleryImages = formData.imgSrc.slice(1);
     const normalizedBundleMeta = normalizeBundleMeta(uniqueProductIds, formData.bundleMeta);
+    if (normalizedBundleMeta.hasInvalidDocuments) {
+      return { success: false, error: "Для кожного документа заповніть і назву, і посилання" };
+    }
 
     const {
       id,
@@ -215,12 +267,16 @@ export async function updateBundle(formData: UpdateBundlePayload) {
           includedProducts: normalizedBundleMeta.includedProducts,
           advantages: normalizedBundleMeta.advantages,
           description: normalizedBundleMeta.description,
+          documents: normalizedBundleMeta.documents,
+          reviews: normalizedBundleMeta.reviews,
         })
         .onDuplicateKeyUpdate({
           set: {
             includedProducts: normalizedBundleMeta.includedProducts,
             advantages: normalizedBundleMeta.advantages,
             description: normalizedBundleMeta.description,
+            documents: normalizedBundleMeta.documents,
+            reviews: normalizedBundleMeta.reviews,
           },
         });
 

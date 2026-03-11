@@ -59,6 +59,7 @@ export default function Description({ id }: { id: string }) {
         const response = await uploadFile({
           file,
           sub_bucket: "products",
+          imagePreset: "content",
         });
 
         if (response?.fileUrl) {

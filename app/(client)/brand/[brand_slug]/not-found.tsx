@@ -1,5 +1,5 @@
-import LinkYellow from "@/components/YellowLink";
-import Image from "next/image";
+﻿import LinkYellow from "@/components/YellowLink";
+import SmartImage from "@/components/SmartImage";
 
 export default function ProductNotFound() {
   return (
@@ -7,7 +7,7 @@ export default function ProductNotFound() {
       <div className="mx-auto flex max-w-[600px] flex-col">
         <div className="mx-auto flex items-center text-9xl lg:text-[300px]">
           4
-          <Image
+          <SmartImage
             src="/404.png"
             alt="Product Not Found"
             className="w-20 lg:w-44"
@@ -20,7 +20,7 @@ export default function ProductNotFound() {
         <h1 className="H2 mt-8 text-center xl:mt-16">Brand non trovato.</h1>
 
         <p className="text_R mt-3 text-center">
-          Il brand che stai cercando potrebbe essere stato rimosso, rinominato o non è più
+          Il brand che stai cercando potrebbe essere stato rimosso, rinominato o non ГЁ piГ№
           disponibile nel nostro catalogo.
         </p>
 
@@ -29,3 +29,4 @@ export default function ProductNotFound() {
     </div>
   );
 }
+

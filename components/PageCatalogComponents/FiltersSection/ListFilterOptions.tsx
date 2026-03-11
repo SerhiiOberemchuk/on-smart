@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import { twMerge } from "tailwind-merge";
 import icon_arrow_top from "@/assets/icons/arrow-top.svg";
 import { useEffect, useRef, useState } from "react";
@@ -47,7 +47,7 @@ export function ItemFilteredOptions(props: FilterGroup) {
         className="input_M_18 flex w-full items-center justify-between py-3 hover:text-yellow-500"
       >
         <span>{props.title}</span>
-        <Image
+        <SmartImage
           src={icon_arrow_top}
           alt="arrow top"
           className={twMerge("transition-all duration-300", isOpen ? "rotate-x-0" : "rotate-x-180")}
@@ -77,3 +77,4 @@ export function ItemFilteredOptions(props: FilterGroup) {
     </fieldset>
   );
 }
+

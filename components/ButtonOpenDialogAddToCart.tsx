@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import Image from "next/image";
+import SmartImage from "@/components/SmartImage";
 import icon from "@/assets/icons/carrello.svg";
 
 import { useCardDialogStore } from "../store/card-dialog-store";
@@ -16,8 +16,9 @@ export default function ButtonOpenDialogAddToCart(product: ProductType) {
         className="flex size-12 items-center justify-center rounded-sm bg-green-600 hover:bg-green-700"
         onClick={() => openDialog(product)}
       >
-        <Image src={icon} alt="Aggiungi al carrello" />
+        <SmartImage src={icon} alt="Aggiungi al carrello" />
       </button>
     </>
   );
 }
+

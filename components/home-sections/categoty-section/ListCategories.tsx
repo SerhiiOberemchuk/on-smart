@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
 
 import { GetAllCategoriesResponse } from "@/app/actions/category/category-actions";
@@ -64,7 +64,7 @@ export default async function ListCategories({
               title={name}
               aria-label={`Apri la categoria ${name}`}
             >
-              <Image
+              <SmartImage
                 src={image}
                 className="mx-auto rounded-sm opacity-50"
                 width={355}
@@ -87,3 +87,4 @@ export default async function ListCategories({
     </>
   );
 }
+
