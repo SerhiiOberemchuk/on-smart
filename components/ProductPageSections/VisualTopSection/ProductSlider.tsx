@@ -10,7 +10,7 @@ import "swiper/css/free-mode";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
 import "./product-page.css";
-import { Autoplay, FreeMode, Thumbs } from "swiper/modules";
+import { Autoplay, FreeMode } from "swiper/modules";
 
 import HeaderProductCard from "@/components/HeaderProductCard";
 import { SlideNextButton, SlidePrevButton } from "@/components/SwiperButtonsReacr";
@@ -28,7 +28,8 @@ export default function ProductSlider({
   brandName: string;
 }) {
   const { id, inStock, isOnOrder, oldPrice, brand_slug, nameFull } = product;
-  const [thumbsSwiper, setThumbsSwiper] = useState<SwiperTypes | null>(null);
+  const [mainSwiper, setMainSwiper] = useState<SwiperTypes | null>(null);
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const brandLabel = useMemo(
     () => (typeof brand_slug === "string" ? brand_slug.replace(/[-_]+/g, " ").trim() : ""),
     [brand_slug],
@@ -45,23 +46,26 @@ export default function ProductSlider({
       ? product.imgSrc
       : "/logo.svg";
   const sliderImages = normalizedImages.length > 0 ? normalizedImages : [fallbackImage];
-  const resolvedThumbsSwiper =
-    thumbsSwiper && !thumbsSwiper.destroyed && thumbsSwiper.el ? thumbsSwiper : null;
 
   return (
     <div className="flex w-full max-w-[670px] justify-around gap-6 rounded-sm bg-background p-3 xl:flex-1 xl:justify-between">
       <Swiper
         key={`thumbs-${id}`}
         direction={"vertical"}
-        onSwiper={setThumbsSwiper}
         spaceBetween={0}
         slidesPerView={7}
         watchSlidesProgress={true}
-        modules={[Thumbs]}
+        modules={[FreeMode]}
         className="product_vertical_slider hidden w-24 md:block"
       >
         {sliderImages.map((image, index) => (
-          <SwiperSlide key={index} className="card_gradient rounded-sm">
+          <SwiperSlide
+            key={index}
+            className={`card_gradient cursor-pointer rounded-sm ${
+              index === activeSlideIndex ? "ring-1 ring-yellow-500/60" : ""
+            }`}
+            onClick={() => mainSwiper?.slideToLoop(index)}
+          >
             <SmartImage
               src={image}
               alt={`${sliderImageAlt} (${index + 1})`}
@@ -87,14 +91,18 @@ export default function ProductSlider({
             loop={true}
             spaceBetween={0}
             slidesPerView={1}
+            onSwiper={(swiper) => {
+              setMainSwiper(swiper);
+              setActiveSlideIndex(swiper.realIndex);
+            }}
+            onSlideChange={(swiper) => {
+              setActiveSlideIndex(swiper.realIndex);
+            }}
             autoplay={{
               delay: 4000,
               disableOnInteraction: false,
             }}
-            thumbs={{
-              swiper: resolvedThumbsSwiper,
-            }}
-            modules={[Thumbs, Autoplay, FreeMode]}
+            modules={[Autoplay, FreeMode]}
             className="relative ml-5 max-w-[532px]"
           >
             {sliderImages.map((image, index) => (

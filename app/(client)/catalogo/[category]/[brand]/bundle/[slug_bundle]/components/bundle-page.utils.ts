@@ -140,7 +140,20 @@ export function normalizeBundleReviews(value: unknown): BundleMetaReview[] {
 export function normalizeIncludedProductCharacteristics(
   specifiche: ProductSpecificheType | null | undefined,
 ): IncludedProductCharacteristic[] {
-  const groups = specifiche?.groups ?? [];
+  const groupsRaw = specifiche?.groups;
+  const groups = Array.isArray(groupsRaw)
+    ? groupsRaw
+    : typeof groupsRaw === "string"
+      ? (() => {
+          try {
+            const parsed = JSON.parse(groupsRaw);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        })()
+      : [];
+
   return groups
     .map((item) => ({
       name: String(item?.name ?? "").trim(),

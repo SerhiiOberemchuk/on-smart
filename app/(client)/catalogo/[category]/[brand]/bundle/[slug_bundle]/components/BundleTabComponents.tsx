@@ -25,94 +25,96 @@ export default function BundleTabComponents({
 
   return (
     <div className={twMerge("flex flex-col gap-3 md:gap-4", className)}>
-      {includedProducts.map(({ product, shortDescription, characteristicTitle, characteristics }) => {
-        const descriptionParagraphs = (shortDescription ?? "")
-          .split(/\r?\n/)
-          .map((paragraph) => paragraph.trim())
-          .filter(Boolean);
+      {includedProducts.map(
+        ({ product, shortDescription, characteristicTitle, characteristics }) => {
+          const descriptionParagraphs = (shortDescription ?? "")
+            .split(/\r?\n/)
+            .map((paragraph) => paragraph.trim())
+            .filter(Boolean);
 
-        return (
-          <article key={product.id} className="rounded-sm bg-background p-3 md:p-4">
-            <div className="flex flex-col gap-4 md:flex-row">
-              <Link
-                href={`/catalogo/${product.category_slug}/${product.brand_slug}/${product.slug}`}
-                className="block shrink-0"
-              >
-                <SmartImage
-                  src={product.imgSrc}
-                  alt={product.nameFull}
-                  width={148}
-                  height={148}
-                  className="aspect-square rounded-sm border border-stroke-grey object-contain p-2"
-                />
-              </Link>
-
-              <div className="min-w-0 flex-1">
+          return (
+            <article key={product.id} className="rounded-sm bg-background p-3 md:p-4">
+              <div className="flex flex-col gap-4 md:flex-row">
                 <Link
                   href={`/catalogo/${product.category_slug}/${product.brand_slug}/${product.slug}`}
-                  className="H4M line-clamp-2 hover:text-yellow-500"
+                  className="block shrink-0"
                 >
-                  {product.nameFull}
+                  <SmartImage
+                    src={product.imgSrc}
+                    alt={product.nameFull}
+                    width={148}
+                    height={148}
+                    className="aspect-square rounded-sm border border-stroke-grey object-contain p-2"
+                  />
                 </Link>
 
-                <div className="mt-3 rounded-sm border border-stroke-grey p-3">
-                  <h3 className="input_R_18">Descrizione</h3>
-                  <div className="mt-2">
-                    {descriptionParagraphs.length > 0 ? (
-                      descriptionParagraphs.map((paragraph, index) => (
-                        <p
-                          key={`${product.id}-description-${index}`}
-                          className={twMerge("text_R text-text-grey", index > 0 ? "mt-2" : "")}
-                        >
-                          {paragraph}
-                        </p>
-                      ))
-                    ) : (
-                      <p className="text_R text-text-grey">
-                        Descrizione non disponibile per questo componente.
-                      </p>
-                    )}
-                  </div>
-                </div>
+                <div className="min-w-0 flex-1">
+                  <Link
+                    href={`/catalogo/${product.category_slug}/${product.brand_slug}/${product.slug}`}
+                    className="H4M line-clamp-2 hover:text-yellow-500"
+                  >
+                    {product.nameFull}
+                  </Link>
 
-                <details
-                  className="group mt-3 rounded-sm border border-stroke-grey bg-grey-hover-stroke/40"
-                  onToggle={() => onContentResize?.()}
-                >
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2.5 select-none">
-                    <span className="input_R_18">
-                      {characteristicTitle || "Caratteristiche prodotto"}
-                    </span>
-                    {/* <span className="text-sm text-yellow-500 transition-transform duration-200 group-open:rotate-180">
+                  <div className="mt-3 rounded-sm border border-stroke-grey p-3">
+                    <h3 className="input_R_18">Descrizione</h3>
+                    <div className="mt-2">
+                      {descriptionParagraphs.length > 0 ? (
+                        descriptionParagraphs.map((paragraph, index) => (
+                          <p
+                            key={`${product.id}-description-${index}`}
+                            className={twMerge("text_R text-text-grey", index > 0 ? "mt-2" : "")}
+                          >
+                            {paragraph}
+                          </p>
+                        ))
+                      ) : (
+                        <p className="text_R text-text-grey">
+                          Descrizione non disponibile per questo componente.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <details
+                    className="group mt-3 rounded-sm border border-stroke-grey bg-grey-hover-stroke/40"
+                    onToggle={() => onContentResize?.()}
+                  >
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2.5 select-none">
+                      <span className="input_R_18">
+                        {characteristicTitle || "Caratteristiche prodotto"}
+                      </span>
+                      {/* <span className="text-sm text-yellow-500 transition-transform duration-200 group-open:rotate-180">
                       &#9660;
                     </span> */}
-                  </summary>
+                    </summary>
 
-                  <div className="border-t border-stroke-grey p-3">
-                    {characteristics.length > 0 ? (
-                      <ul className="flex flex-col gap-2">
-                        {characteristics.map((item, index) => (
-                          <li
-                            key={`${product.id}-characteristic-${item.name}-${index}`}
-                            className="text_R flex items-center justify-between gap-3 px-2 py-2 odd:bg-background even:bg-transparent"
-                          >
-                            <span className="text-text-grey">{item.name}:</span>
-                            <span className="text-right uppercase">{item.value}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text_R text-text-grey">
-                        Le caratteristiche di questo prodotto non sono ancora disponibili.
-                      </p>
-                    )}
-                  </div>
-                </details>
+                    <div className="border-t border-stroke-grey p-3">
+                      {characteristics.length > 0 ? (
+                        <ul className="flex flex-col gap-2">
+                          {characteristics.map((item, index) => (
+                            <li
+                              key={`${product.id}-characteristic-${item.name}-${index}`}
+                              className="text_R flex items-center justify-between gap-3 px-2 py-2 odd:bg-background even:bg-transparent"
+                            >
+                              <span className="text-text-grey">{item.name}:</span>
+                              <span className="text-right uppercase">{item.value}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text_R text-text-grey">
+                          Le caratteristiche di questo prodotto non sono ancora disponibili.
+                        </p>
+                      )}
+                    </div>
+                  </details>
+                </div>
               </div>
-            </div>
-          </article>
-        );
-      })}
+            </article>
+          );
+        },
+      )}
     </div>
   );
 }
