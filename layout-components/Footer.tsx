@@ -7,6 +7,7 @@ import icon_phone from "@/assets/icons/icon_phone.svg";
 import Image from "next/image";
 import { cacheLife, cacheTag } from "next/cache";
 import { Suspense } from "react";
+import ManageCookiesButton from "@/components/cookie-consent/ManageCookiesButton";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 
 export default async function Footer() {
@@ -56,7 +57,8 @@ export default async function Footer() {
             <CopyElement />
           </Suspense>
           <div>
-            <Link href="/informativa-sulla-privacy">Informativa sulla privacy</Link> |
+            <Link href="/informativa-sulla-privacy">Informativa sulla privacy</Link> |{" "}
+            <Link href="/cookies">Cookie Policy</Link> | <ManageCookiesButton /> |{" "}
             <Link href="/informativa-sulla-privacy">Termini e condizioni</Link>
           </div>
         </div>
