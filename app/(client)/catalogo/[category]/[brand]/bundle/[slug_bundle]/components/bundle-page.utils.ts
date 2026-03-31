@@ -27,6 +27,7 @@ export function mapBundleToProduct(bundle: BundlePageData): ProductType {
     weightKg: bundle.weightKg,
     inStock: bundle.inStock,
     isOnOrder: bundle.isOnOrder,
+    isHidden: bundle.isHidden,
     imgSrc: bundle.imgSrc || "/logo.svg",
     productType: "bundle",
     hasVariants: false,

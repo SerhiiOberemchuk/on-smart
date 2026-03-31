@@ -11,7 +11,9 @@ export async function deleteProductDescriptionById({ id }: { id: string }) {
       .select()
       .from(productDescriptionSchema)
       .where(eq(productDescriptionSchema.product_id, id));
-    await db.delete(productDescriptionSchema);
+    await db
+      .delete(productDescriptionSchema)
+      .where(eq(productDescriptionSchema.product_id, id));
     const images = response[0].images ?? [];
     if (images.length > 0) {
       const res = await Promise.allSettled(response[0].images.map((i) => deleteFileFromS3(i)));

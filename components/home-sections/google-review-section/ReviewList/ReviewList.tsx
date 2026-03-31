@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
@@ -10,9 +10,8 @@ import iconQuote from "@/assets/icons/symbol-quote.svg";
 import StarsRating from "@/components/StarsRating";
 import { GoogleReview } from "@/types/google-reviews.types";
 import { formatDate } from "@/utils/formatter-data";
+import "@/app/styles/swiper.css";
 
-import "swiper/css";
-import "swiper/css/pagination";
 import "./styles.css";
 
 export default function ReviewList({ reviews }: { reviews: GoogleReview[] }) {
@@ -69,4 +68,5 @@ export default function ReviewList({ reviews }: { reviews: GoogleReview[] }) {
     </Swiper>
   );
 }
+
 

@@ -30,7 +30,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
       .from(productsSchema)
       .where(
-        and(eq(productsSchema.productType, "product"), isNull(productsSchema.parent_product_id)),
+        and(
+          eq(productsSchema.productType, "product"),
+          isNull(productsSchema.parent_product_id),
+          eq(productsSchema.isHidden, false),
+        ),
       ),
     db
       .select({
@@ -39,7 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         category_slug: productsSchema.category_slug,
       })
       .from(productsSchema)
-      .where(eq(productsSchema.productType, "bundle")),
+      .where(and(eq(productsSchema.productType, "bundle"), eq(productsSchema.isHidden, false))),
     db
       .select({
         brand_slug: brandProductsSchema.brand_slug,

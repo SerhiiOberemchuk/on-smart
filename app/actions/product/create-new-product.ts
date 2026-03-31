@@ -22,6 +22,7 @@ export async function createNewProduct(formData: ProductType) {
     ...formData,
     ean: formData.ean.trim(),
     oldPrice: formData.oldPrice ? formData.oldPrice : null,
+    isHidden: formData.isHidden ?? false,
     productType: formData.productType ?? "product",
   };
 

@@ -15,9 +15,9 @@ import { CACHE_TAG_GET_ORDER_INFO } from "./cache-tags";
 export async function deleteOrderByOrderId({ id }: Pick<OrderTypes, "id">) {
   try {
     await db.transaction(async (tx) => {
-      await tx.delete(paymentsSchema).where(eq(paymentsSchema.id, id));
-      await tx.delete(ordersSchema).where(eq(ordersSchema.id, id));
       await tx.delete(orderItemsSchema).where(eq(orderItemsSchema.orderId, id));
+      await tx.delete(paymentsSchema).where(eq(paymentsSchema.orderId, id));
+      await tx.delete(ordersSchema).where(eq(ordersSchema.id, id));
     });
     updateTag(CACHE_TAG_GET_ORDER_INFO);
     updateTag(CACHE_TAGS.orders.byId(id));

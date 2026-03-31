@@ -4,7 +4,7 @@ import ProductSuspensedListCarello from "./ProductSuspensedListCarello";
 import { Suspense } from "react";
 
 export default function CarrelloPage() {
-  const products = getAllProducts();
+  const products = getAllProducts({ includeHidden: false });
 
   return (
     <>

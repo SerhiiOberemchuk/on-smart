@@ -11,7 +11,7 @@ import ClientPageAllBundles from "./PageAllBundles";
 
 export default function BundlesPage() {
   const bundlesAction: Promise<BundleFetchResult> = getAllBundles();
-  const productsAction: Promise<ProductFetchResult> = getAllProducts();
+  const productsAction: Promise<ProductFetchResult> = getAllProducts({ includeHidden: true });
   const categoriesAction: GetAllCategoriesResponse = getAllCategoryProducts();
   const brandsAction = getAllBrands();
 

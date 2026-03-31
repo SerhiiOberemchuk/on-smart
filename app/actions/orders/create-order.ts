@@ -10,6 +10,7 @@ import {
   paymentsSchema,
 } from "@/db/schemas/orders.schema";
 import { ProductType } from "@/db/schemas/product.schema";
+import { productsSchema } from "@/db/schemas/product.schema";
 import {
   BasketTypeUseCheckoutStore,
   CheckoutTypesDataFirstStep,
@@ -22,6 +23,7 @@ import { sendTelegramMessage } from "../telegram/send-message";
 import { updateTag } from "next/cache";
 import { CACHE_TAG_GET_ORDER_INFO } from "./cache-tags";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
+import { and, eq, inArray } from "drizzle-orm";
 
 export async function createOrderAction({
   dataFirstStep,
@@ -44,16 +46,40 @@ export async function createOrderAction({
   >;
 }) {
   if (!basket?.length) return { success: false, error: "Basket is empty" };
-  if (!productsInBasket?.length) return { success: false, error: "No products loaded" };
+
   const data: Omit<OrderTypes, "id" | "createdAt" | "updatedAt" | "orderNumber"> = {
     ...dataFirstStep,
     ...dataCheckoutStepConsegna,
   };
   const orderNumber = customOrderNumberId?.number || makeOrderNumber("OS");
   const orderId = customOrderNumberId?.id || ulid();
-  const basketMap = new Map(basket.map((item) => [item.productId, item.quantity]));
+  const basketMap = new Map<string, number>();
+  for (const item of basket) {
+    if (typeof item.productId !== "string") continue;
+    if (!Number.isFinite(item.quantity) || item.quantity <= 0) continue;
+    basketMap.set(item.productId, Math.trunc(item.quantity));
+  }
 
-  const orderItems: Omit<OrderItemsTypes, "id" | "createdAt" | "updatedAt">[] = productsInBasket
+  const productIds = Array.from(basketMap.keys());
+  if (!productIds.length) return { success: false, error: "Basket is empty" };
+
+  const dbProducts = await db
+    .select()
+    .from(productsSchema)
+    .where(and(inArray(productsSchema.id, productIds), eq(productsSchema.isHidden, false)));
+
+  if (dbProducts.length !== productIds.length) {
+    return { success: false, error: "Some products are unavailable" };
+  }
+
+  for (const product of dbProducts) {
+    const requestedQty = basketMap.get(product.id) ?? 0;
+    if (requestedQty > product.inStock) {
+      return { success: false, error: `Insufficient stock for: ${product.nameFull}` };
+    }
+  }
+
+  const orderItems: Omit<OrderItemsTypes, "id" | "createdAt" | "updatedAt">[] = dbProducts
     .filter((product) => basketMap.has(product.id))
     .map((product) => ({
       orderId,
@@ -70,11 +96,22 @@ export async function createOrderAction({
   if (!orderItems.length) {
     return { success: false, error: "Basket is empty" };
   }
+
+  const itemsSubtotal = orderItems.reduce(
+    (acc, item) => acc + Number(item.unitPrice) * Number(item.quantity),
+    0,
+  );
+  const delivery =
+    dataFirstStep.deliveryMethod === "CONSEGNA_CORRIERE" ? Number(dataFirstStep.deliveryPrice) : 0;
+  const amount = (itemsSubtotal + delivery).toFixed(2);
+
   try {
     await db.transaction(async (tx) => {
       await tx.insert(ordersSchema).values({ ...data, id: orderId, orderNumber });
       await tx.insert(orderItemsSchema).values(orderItems);
-      await tx.insert(paymentsSchema).values({ ...paymentData, orderId, orderNumber });
+      await tx
+        .insert(paymentsSchema)
+        .values({ ...paymentData, amount, orderId, orderNumber });
     });
     let isMailSended: boolean = false;
 
@@ -88,7 +125,7 @@ export async function createOrderAction({
             paymentMethod: paymentData.provider,
             title: paymentData.provider,
           },
-          productsInBasket,
+          productsInBasket: dbProducts,
           bascket: basket,
         });
         isMailSended = true;

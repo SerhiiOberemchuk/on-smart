@@ -27,7 +27,11 @@ async function getTopSalesProductsCachedCore(limit: number): Promise<ProductType
     .innerJoin(productsSchema, eq(orderItemsSchema.productId, productsSchema.id))
     .innerJoin(ordersSchema, eq(orderItemsSchema.orderId, ordersSchema.id))
     .where(
-      and(inArray(ordersSchema.orderStatus, ORDER_STATUS_LIST), gt(orderItemsSchema.quantity, 0)),
+      and(
+        inArray(ordersSchema.orderStatus, ORDER_STATUS_LIST),
+        gt(orderItemsSchema.quantity, 0),
+        eq(productsSchema.isHidden, false),
+      ),
     )
     .groupBy(effectiveProductId)
     .orderBy(desc(soldQty))
@@ -39,7 +43,7 @@ async function getTopSalesProductsCachedCore(limit: number): Promise<ProductType
     const products = await db
       .select()
       .from(productsSchema)
-      .where(inArray(productsSchema.id, topProductIds));
+      .where(and(inArray(productsSchema.id, topProductIds), eq(productsSchema.isHidden, false)));
 
     const productsById = new Map(products.map((item) => [item.id, item]));
     const ordered = topProductIds
@@ -54,7 +58,13 @@ async function getTopSalesProductsCachedCore(limit: number): Promise<ProductType
   const fallback = await db
     .select()
     .from(productsSchema)
-    .where(and(gt(productsSchema.inStock, 0), isNull(productsSchema.parent_product_id)))
+    .where(
+      and(
+        gt(productsSchema.inStock, 0),
+        isNull(productsSchema.parent_product_id),
+        eq(productsSchema.isHidden, false),
+      ),
+    )
     .orderBy(desc(productsSchema.id))
     .limit(safeLimit);
 

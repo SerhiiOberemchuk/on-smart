@@ -57,11 +57,11 @@ export default function CompletatoPage({
         {orderInfo.order?.deliveryMethod === "CONSEGNA_CORRIERE" && (
           <>
             <p className="btn_small">
-              Totale: <span className="body_R_20">{paymantInfoState.paymentInfo?.amount} E </span>
+              Totale: <span className="body_R_20">{paymantInfoState.paymentInfo?.amount} € </span>
             </p>
             <p className="btn_small">
               Consegna:{" "}
-              <span className="body_R_20">{orderInfo.order?.deliveryPrice.toFixed(2)} E </span>
+              <span className="body_R_20">{orderInfo.order?.deliveryPrice.toFixed(2)} € </span>
             </p>
           </>
         )}
@@ -70,14 +70,14 @@ export default function CompletatoPage({
             <p className="btn_small">
               Totale:{" "}
               <span className="body_R_20">
-                {Number(paymantInfoState.paymentInfo?.amount).toFixed(2)} E
+                {Number(paymantInfoState.paymentInfo?.amount).toFixed(2)} €
               </span>
             </p>
             <p className="btn_small">Ritiro presto negozzio</p>
           </>
         )}
         <p className="helper_text mt-2 w-full text-left text-text-grey">
-          L`Ordine ГЁ stato correttamente inviato. Riceverai una mail di conferma con i dettagli
+          L`Ordine è stato correttamente inviato. Riceverai una mail di conferma con i dettagli
           dell`ordine e la fattura. Per qualsiasi domanda o assistenza, non esitare a contattarci.
         </p>
       </div>

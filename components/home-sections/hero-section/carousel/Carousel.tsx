@@ -1,16 +1,14 @@
-﻿"use client";
+"use client";
 
 import { useRef } from "react";
 import { Swiper, SwiperSlide, useSwiper } from "swiper/react";
 import type { Swiper as SwiperCore } from "swiper";
 
 import SmartImage from "@/components/SmartImage";
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/effect-fade";
 
 import "./carousel.css";
 import { Autoplay, EffectFade, Pagination } from "swiper/modules";
+import "@/app/styles/swiper.css";
 import { ButtonArrow } from "@/components/ButtonArrows";
 import LinkYellow from "@/components/YellowLink";
 import { slidesBanners } from "@/types/main-page-hero-banners.data";
@@ -101,4 +99,5 @@ const SlideButtons = () => {
     </div>
   );
 };
+
 

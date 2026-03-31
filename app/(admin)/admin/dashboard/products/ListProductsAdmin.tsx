@@ -1,12 +1,14 @@
 "use client";
 
+import { copyProductById } from "@/app/actions/product/copy-product";
 import { deleteProductById } from "@/app/actions/product/delete-product";
 import { deleteProductVariant } from "@/app/actions/product/delete-product-variant";
 import LinkYellow from "@/components/YellowLink";
 import { ProductType } from "@/db/schemas/product.schema";
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "react-toastify";
 import ButtonXDellete from "../ButtonXDellete";
 import ModalAddVariant from "./ModalCreateVariant";
@@ -37,6 +39,9 @@ type SortType =
   | "variants_desc";
 
 export default function ListProductsAdmin({ products }: { products: ProductType[] }) {
+  const router = useRouter();
+  const [isCopyPending, startCopyTransition] = useTransition();
+  const [copyingId, setCopyingId] = useState<string | null>(null);
   const [openedProductIds, setOpenedProductIds] = useState<Set<string>>(new Set());
   const [variantModalOpen, setVariantModalOpen] = useState(false);
   const [parentProduct, setParentProduct] = useState<ProductType | null>(null);
@@ -63,12 +68,18 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
   }, [products]);
 
   const availableBrands = useMemo(
-    () => Array.from(new Set(parentProducts.map((product) => product.brand_slug))).sort((a, b) => a.localeCompare(b)),
+    () =>
+      Array.from(new Set(parentProducts.map((product) => product.brand_slug))).sort((a, b) =>
+        a.localeCompare(b),
+      ),
     [parentProducts],
   );
 
   const availableCategories = useMemo(
-    () => Array.from(new Set(parentProducts.map((product) => product.category_slug))).sort((a, b) => a.localeCompare(b)),
+    () =>
+      Array.from(new Set(parentProducts.map((product) => product.category_slug))).sort((a, b) =>
+        a.localeCompare(b),
+      ),
     [parentProducts],
   );
 
@@ -101,7 +112,8 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
       case "variants_desc":
         return list.sort(
           (a, b) =>
-            (variantsByParentId.get(b.id)?.length ?? 0) - (variantsByParentId.get(a.id)?.length ?? 0),
+            (variantsByParentId.get(b.id)?.length ?? 0) -
+            (variantsByParentId.get(a.id)?.length ?? 0),
         );
       case "default":
       default:
@@ -114,7 +126,6 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
     [sortedParentProducts],
   );
 
-  // Keep expanded state stable, but render only expanded items that are visible after filtering/sorting.
   const visibleOpenedProductIds = useMemo(() => {
     const next = new Set<string>();
     for (const openedId of openedProductIds) {
@@ -208,6 +219,28 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
     }
 
     toast.success("Варіант видалено");
+  };
+
+  const handleCopyProduct = (id: string) => {
+    setCopyingId(id);
+    startCopyTransition(async () => {
+      try {
+        const response = await copyProductById(id);
+        if (!response.success || !response.id) {
+          toast.error(response.error || "Не вдалося скопіювати товар");
+          return;
+        }
+
+        toast.success("Копію товару створено");
+        router.push(`/admin/dashboard/products/${response.id}`);
+        router.refresh();
+      } catch (error) {
+        console.error(error);
+        toast.error("Не вдалося скопіювати товар");
+      } finally {
+        setCopyingId(null);
+      }
+    });
   };
 
   return (
@@ -333,7 +366,7 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
                             aria-expanded={isOpened}
                             aria-controls={`variants-${item.id}`}
                           >
-                            <span aria-hidden>{isOpened ? "▾" : "▸"}</span>
+                            <span aria-hidden>{isOpened ? "?" : "?"}</span>
                             <span>{isOpened ? "Сховати варіанти" : "Показати варіанти"}</span>
                             <span className="rounded bg-yellow-500/20 px-1.5 py-0.5 text-[10px] leading-none">
                               {variants.length}
@@ -370,6 +403,15 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
                     onClick={() => openVariantModal(item)}
                   >
                     Додати варіант
+                  </button>
+
+                  <button
+                    type="button"
+                    className="admin-btn-secondary text-sm!"
+                    onClick={() => handleCopyProduct(item.id)}
+                    disabled={isCopyPending && copyingId === item.id}
+                  >
+                    {isCopyPending && copyingId === item.id ? "Копіювання..." : "Копіювати"}
                   </button>
 
                   {hasVariants ? (
@@ -433,6 +475,7 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
                                 title="Редагувати"
                                 className="admin-btn-primary px-3! py-2! text-xs!"
                               />
+
 
                               <ButtonXDellete
                                 type="button"

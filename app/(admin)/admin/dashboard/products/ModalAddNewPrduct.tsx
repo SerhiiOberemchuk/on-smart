@@ -309,6 +309,12 @@ export default function ModalAddNewPrduct() {
                 input_title="Товар під замовлення"
               />
 
+              <InputAdminStyle
+                {...register("isHidden")}
+                type="checkbox"
+                input_title="Приховати товар на сайті"
+              />
+
               <div className="admin-actions justify-end border-t border-slate-600/45 pt-3">
                 <ButtonYellow
                   type="submit"

@@ -25,7 +25,7 @@ async function GetDataComponent({ params }: Props) {
 
   const [bundleResponse, productsResponse, categoriesResponse, brandsResponse, galleryResponse] = await Promise.all([
     getBundleById(id),
-    getAllProducts(),
+    getAllProducts({ includeHidden: true }),
     getAllCategoryProducts(),
     getAllBrands(),
     getFotoFromGallery({ parent_product_id: id }),

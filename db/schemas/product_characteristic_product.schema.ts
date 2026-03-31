@@ -1,4 +1,4 @@
-import { mysqlTable, varchar, json, index } from "drizzle-orm/mysql-core";
+import { mysqlTable, varchar, json, index, uniqueIndex } from "drizzle-orm/mysql-core";
 import { ulid } from "ulid";
 
 export const productCharacteristicProductSchema = mysqlTable(
@@ -16,6 +16,7 @@ export const productCharacteristicProductSchema = mysqlTable(
   (t) => [
     index("idx_product").on(t.product_id),
     index("idx_characteristic").on(t.characteristic_id),
+    uniqueIndex("uniq_product_characteristic").on(t.product_id, t.characteristic_id),
   ],
 );
 

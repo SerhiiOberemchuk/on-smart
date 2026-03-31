@@ -16,12 +16,6 @@ import icon_dell from "@/assets/icons/icon_delete.svg";
 import { useBasketStore } from "@/store/basket-store";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
 import type { ProductType } from "@/db/schemas/product.schema";
-const btnBase =
-  "size-11 flex items-center justify-center rounded-sm border border-stroke-grey transition";
-
-const btnDisabled = "opacity-40 cursor-not-allowed";
-
-const btnActive = "hover:bg-grey-hover cursor-pointer";
 export default function CartSection() {
   const [fetchedProducts, setFetchedProducts] = useState<ProductType[]>([]);
 
@@ -31,8 +25,7 @@ export default function CartSection() {
   }, [fetchedProducts, setProductsInBasket]);
   useEffect(() => {
     if (basket.length === 0) {
-      const set = () => setFetchedProducts([]);
-      set();
+      setFetchedProducts([]);
       return;
     }
 
@@ -50,16 +43,18 @@ export default function CartSection() {
       const products = data ?? [];
 
       if (products.length < ids.length) {
-        toast.warning("Alcuni prodotti non sono piГ№ disponibili.");
+        toast.warning("Alcuni prodotti non sono più disponibili.");
 
         const validIds = new Set(products.map((p) => p.id));
-        basket
-          .filter((b) => {
-            if (typeof b.productId === "string") return !validIds.has(b.productId);
-          })
-          .forEach((b) => {
-            if (typeof b.productId === "string") return removeFromBasketById(b.productId);
-          });
+        const staleBasketItems = basket.filter(
+          (b) => typeof b.productId === "string" && !validIds.has(b.productId),
+        );
+
+        staleBasketItems.forEach((b) => {
+          if (typeof b.productId === "string") {
+            removeFromBasketById(b.productId);
+          }
+        });
       }
 
       products.forEach((prod) => {
@@ -98,7 +93,7 @@ export default function CartSection() {
     if (item.quantity < prod.inStock) {
       updateBasket([{ productId, quantity: item.quantity + 1 }]);
     } else {
-      toast.info("QuantitГ  massima disponibile.");
+      toast.info("Quantità massima disponibile.");
     }
   };
 
@@ -163,24 +158,30 @@ export default function CartSection() {
                     </div>
 
                     <div className="mt-2 flex items-center justify-between">
-                      <div className="flex gap-2 rounded-sm border border-stroke-grey p-2">
+                      <div className="flex h-11 w-[132px] items-center rounded-sm border border-stroke-grey text-[20px]">
                         <button
                           type="button"
                           disabled={!canDecrement}
-                          className={clsx(btnBase, !canDecrement ? btnDisabled : btnActive)}
+                          className={clsx(
+                            "flex-1 text-white transition hover:scale-110",
+                            !canDecrement && "cursor-not-allowed opacity-50",
+                          )}
                           onClick={() => canDecrement && decrementQnt(prod.id)}
                         >
                           -
                         </button>
 
-                        <div className="flex size-11 items-center justify-center">
+                        <div className="input_M_18 flex h-11 w-11 items-center justify-center text-white">
                           {item?.quantity ?? 0}
                         </div>
 
                         <button
                           type="button"
                           disabled={!canIncrement}
-                          className={clsx(btnBase, !canIncrement ? btnDisabled : btnActive)}
+                          className={clsx(
+                            "flex-1 text-white transition hover:scale-110",
+                            !canIncrement && "cursor-not-allowed opacity-50",
+                          )}
                           onClick={() => canIncrement && incrementQnt(prod.id)}
                         >
                           +
@@ -200,7 +201,7 @@ export default function CartSection() {
 
             {basket.length === 0 && (
               <li className="text-center">
-                Il carrello ГЁ vuoto{" "}
+                Il carrello è vuoto{" "}
                 <Link href="/catalogo" className="underline">
                   Vai al catalogo
                 </Link>

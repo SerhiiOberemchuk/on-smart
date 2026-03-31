@@ -8,6 +8,7 @@ import {
   CheckoutTypesDataStepConsegna,
 } from "@/store/checkout-store";
 import { MetodsPayment } from "@/types/bonifico.data";
+import { renderOrderEmailTemplate } from "./order-mail-template";
 
 type OrderMailPayload = {
   orderNumber: string;
@@ -16,16 +17,6 @@ type OrderMailPayload = {
   dataCheckoutStepPagamento: Partial<MetodsPayment>;
   productsInBasket: Partial<ProductType>[];
   bascket: BasketTypeUseCheckoutStore;
-};
-
-type TemplateProps = {
-  orderNumber: string;
-  customerData: CheckoutTypesDataFirstStep;
-  dataCheckoutStepConsegna: CheckoutTypesDataStepConsegna;
-  dataCheckoutStepPagamento: Partial<MetodsPayment>;
-  orderItems: { name: string; qnt: number; total: string }[];
-  grandTotal: string;
-  customerDisplayName: string;
 };
 
 export async function sendMailOrders({
@@ -37,14 +28,8 @@ export async function sendMailOrders({
   bascket,
 }: OrderMailPayload) {
   try {
-    const { email, nome, cognome, clientType, ragioneSociale } = customerData;
-
+    const { email } = customerData;
     if (!email) return { success: false, messaggio: "Email mancante" };
-
-    const customerDisplayName =
-      clientType === "azienda"
-        ? ragioneSociale || "Azienda"
-        : `${nome || ""} ${cognome || ""}`.trim() || "Cliente";
 
     const orderItems = bascket.map((item) => {
       const product = productsInBasket.find((p) => p.id === item.productId);
@@ -56,16 +41,12 @@ export async function sendMailOrders({
       };
     });
 
-    const grandTotal = orderItems.reduce((acc, item) => acc + parseFloat(item.total), 0).toFixed(2);
-
-    const htmlContent = generateOrderTemplate({
+    const { html, customerDisplayName } = renderOrderEmailTemplate({
       orderNumber,
       customerData,
       dataCheckoutStepConsegna,
-      dataCheckoutStepPagamento,
+      paymentTitle: dataCheckoutStepPagamento.title || dataCheckoutStepPagamento.paymentMethod || "",
       orderItems,
-      grandTotal,
-      customerDisplayName,
     });
 
     await transporterOrders.sendMail({
@@ -73,14 +54,14 @@ export async function sendMailOrders({
       to: process.env.MAIL_USER_ORDERS,
       replyTo: email,
       subject: `[NUOVO ORDINE] #${orderNumber} - ${customerDisplayName}`,
-      html: htmlContent,
+      html,
     });
 
     await transporterOrders.sendMail({
       from: `"On-Smart" <${process.env.MAIL_USER_ORDERS}>`,
       to: email,
-      subject: `Conferma Ordine #${orderNumber} – On-Smart`,
-      html: htmlContent,
+      subject: `Conferma Ordine #${orderNumber} - On-Smart`,
+      html,
     });
 
     return { success: true, messaggio: "email inviata con successo" };
@@ -88,108 +69,4 @@ export async function sendMailOrders({
     console.error("Mail Error:", error);
     return { success: false, messaggio: "Errore durante l'invio dell'email" };
   }
-}
-
-function generateOrderTemplate({
-  orderNumber,
-  customerData,
-  dataCheckoutStepConsegna,
-  dataCheckoutStepPagamento,
-  orderItems,
-  grandTotal,
-  customerDisplayName,
-}: TemplateProps) {
-  const isPickup = customerData.deliveryMethod === "RITIRO_NEGOZIO";
-
-  return `
-    <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee;">
-      <div style="background-color: #f8f8f8; padding: 20px; text-align: center; border-bottom: 3px solid #EAB308;">
-        <h1 style="margin: 0; color: #333; font-size: 24px;">On-Smart</h1>
-        <p style="margin: 5px 0 0; color: #666;">Conferma Ordine #${orderNumber}</p>
-      </div>
-
-      <div style="padding: 20px;">
-        <h2 style="font-size: 18px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Dati del Cliente</h2>
-        <p style="margin: 5px 0;"><strong>Cliente:</strong> ${customerDisplayName} (${customerData.clientType ?? ""})</p>
-        <p style="margin: 5px 0;"><strong>Email:</strong> ${customerData.email ?? ""}</p>
-        <p style="margin: 5px 0;"><strong>Telefono:</strong> ${customerData.numeroTelefono ?? ""}</p>
-        <p style="margin: 5px 0;"><strong>Citta:</strong> ${customerData.citta ?? ""}</p>
-        <p style="margin: 5px 0;"><strong>Indirizzo:</strong> ${customerData.indirizzo ?? ""}, ${customerData.numeroCivico}</p>
-        <p style="margin: 5px 0;"><strong>Provincia:</strong> ${customerData.provinciaRegione ?? ""}</p>
-             
-        ${customerData.codiceFiscale && customerData.requestInvoice ? `<p style="margin: 5px 0;"><strong>Il cliente richede invoce: </strong>Codice Fiscale ${customerData.codiceFiscale}</p>` : ""}
-        ${
-          customerData.clientType === "azienda"
-            ? `
-            <p style="margin: 5px 0;"><strong>Referente Contatto:</strong> ${customerData.referenteContatto}</p>
-            <p style="margin: 5px 0;"><strong>Ragione Sociale:</strong> ${customerData.ragioneSociale}</p>
-            <p style="margin: 5px 0;"><strong>Partita IVA:</strong> ${customerData.partitaIva}</p>
-            <p style="margin: 5px 0;"><strong>PEC:</strong> ${customerData.pecAzzienda ?? "--"}</p>
-            <p style="margin: 5px 0;"><strong>Codice UNICO:</strong> ${customerData.codiceUnico ?? "--"}</p>
-           `
-            : ""
-        }
-        
-        
-        <h2 style="font-size: 18px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 20px;">Spedizione e Pagamento</h2>
-        <p style="margin: 5px 0;"><strong>Metodo di Consegna:</strong> ${isPickup ? "Ritiro in Negozio" : "Corriere"}</p>
-        <p style="margin: 5px 0;"><strong>Metodo di Pagamento:</strong> ${dataCheckoutStepPagamento.title || dataCheckoutStepPagamento.paymentMethod || ""}</p>
-        
-        ${
-          !isPickup && !dataCheckoutStepConsegna.sameAsBilling
-            ? `
-          <p style="margin: 10px 0 5px;"><strong>Indirizzo di Spedizione:</strong></p>
-          <p style="margin: 5px 0;"><strong>Referente:</strong>${dataCheckoutStepConsegna.deliveryAdress?.referente_contatto ?? ""}</p>
-          <p style="margin: 5px 0;"><strong>Ragione sociale:</strong>${dataCheckoutStepConsegna.deliveryAdress?.ragione_sociale ?? ""}</p>
-          <p style="margin: 5px 0;"><strong>Indirizzo:</strong>${dataCheckoutStepConsegna.deliveryAdress?.indirizzo ?? ""}</p>
-          <p style="margin: 5px 0;"><strong>Citta:</strong>${dataCheckoutStepConsegna.deliveryAdress?.citta ?? ""}</p>
-          <p style="margin: 5px 0;"><strong>CAP:</strong>${dataCheckoutStepConsegna.deliveryAdress?.cap ?? ""}</p>
-          <p style="margin: 5px 0;"><strong>Nazione:</strong>${dataCheckoutStepConsegna.deliveryAdress?.nazione ?? ""}</p>
-          <p style="margin: 5px 0;"><strong>Provincia:</strong>${dataCheckoutStepConsegna.deliveryAdress?.provincia_regione ?? ""}</p>
-          `
-            : ""
-        }
-        ${
-          !isPickup && dataCheckoutStepConsegna.sameAsBilling
-            ? `<p style="margin: 10px 0 5px;"><strong>L’indirizzo di spedizione coincide con l’indirizzo di fatturazione</strong></p>`
-            : ""
-        }
-
-
-        ${isPickup ? `<p style="color: #EAB308;"><strong>Il cliente ritirerà l'ordine presso il punto vendita.</strong></p>` : ""}
-
-        <h2 style="font-size: 18px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 20px;">Riepilogo Prodotti</h2>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-          <thead>
-            <tr style="background-color: #f9f9f9;">
-              <th style="text-align: left; padding: 10px; border-bottom: 1px solid #eee;">Prodotto</th>
-              <th style="text-align: center; padding: 10px; border-bottom: 1px solid #eee;">Qtà</th>
-              <th style="text-align: right; padding: 10px; border-bottom: 1px solid #eee;">Totale</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${orderItems
-              .map(
-                (item) => `
-              <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #eee; font-size: 14px;">${item.name}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.qnt}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.total} €</td>
-              </tr>
-            `,
-              )
-              .join("")}
-          </tbody>
-        </table>
-
-        <div style="text-align: right; margin-top: 20px;">
-          <p style="font-size: 20px; margin: 0;"><strong>Totale Ordine: <span style="color: #EAB308;">${grandTotal} €</span></strong></p>
-        </div>
-      </div>
-
-      <div style="background-color: #f8f8f8; padding: 15px; text-align: center; font-size: 12px; color: #999;">
-        <p>© 2026 On-Smart. Tutti i diritti riservati.</p>
-      </div>
-    </div>
-  `;
 }
