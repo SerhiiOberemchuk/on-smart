@@ -1,16 +1,13 @@
-﻿"use client";
+"use client";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useMemo, useState } from "react";
 import SmartImage from "@/components/SmartImage";
 import { Swiper as SwiperTypes } from "swiper/types";
 
-import "swiper/css";
-import "swiper/css/free-mode";
-import "swiper/css/navigation";
-import "swiper/css/thumbs";
 import "./product-page.css";
 import { Autoplay, FreeMode } from "swiper/modules";
+import "@/app/styles/swiper.css";
 
 import HeaderProductCard from "@/components/HeaderProductCard";
 import { SlideNextButton, SlidePrevButton } from "@/components/SwiperButtonsReacr";
@@ -136,4 +133,5 @@ export default function ProductSlider({
     </div>
   );
 }
+
 

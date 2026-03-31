@@ -6,6 +6,8 @@ import {
   productCharacteristicProductSchema,
   ProductCharacteristicProductType,
 } from "@/db/schemas/product_characteristic_product.schema";
+import { updateTag } from "next/cache";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 export async function getProductCharacteristics(product_id: string) {
   try {
@@ -57,6 +59,12 @@ export async function upsertProductCharacteristic(
         value_ids: payload.value_ids,
       });
     }
+    updateTag(CACHE_TAGS.product.all);
+    updateTag(CACHE_TAGS.product.byId(payload.product_id));
+    updateTag(CACHE_TAGS.product.details.byId(payload.product_id));
+    updateTag(CACHE_TAGS.product.details.all);
+    updateTag(CACHE_TAGS.catalog.filters);
+    updateTag(CACHE_TAGS.catalog.characteristicFilters);
 
     return { success: true };
   } catch (error) {
@@ -75,6 +83,12 @@ export async function deleteProductCharacteristic(product_id: string, characteri
           eq(productCharacteristicProductSchema.characteristic_id, characteristic_id),
         ),
       );
+    updateTag(CACHE_TAGS.product.all);
+    updateTag(CACHE_TAGS.product.byId(product_id));
+    updateTag(CACHE_TAGS.product.details.byId(product_id));
+    updateTag(CACHE_TAGS.product.details.all);
+    updateTag(CACHE_TAGS.catalog.filters);
+    updateTag(CACHE_TAGS.catalog.characteristicFilters);
 
     return { success: true };
   } catch (error) {

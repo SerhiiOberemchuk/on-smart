@@ -1,8 +1,7 @@
-"use client";
+﻿"use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Control, useFieldArray, useForm, useWatch } from "react-hook-form";
-import { toast } from "react-toastify";
 import Image from "next/image";
 import { useDropzone } from "react-dropzone";
 
@@ -26,6 +25,21 @@ import { ProductSpecificheType } from "@/db/schemas/product-specifiche.schema";
 import { CategoryTypes } from "@/types/category.types";
 import { getProductSpecificheById } from "@/app/actions/product-specifiche/get-product-specifiche";
 import { updateOrCreateSpecifiche } from "@/app/actions/product-specifiche/update-or-create-specifiche";
+import {
+  PRODUCT_SAVE_ALL_EVENT,
+  reportProductSaveAllActivity,
+  reportProductSaveAllResult,
+} from "../save-all.helpers";
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type OrderedSelectItem = {
   kind: "select";
@@ -198,6 +212,52 @@ function OrderedRow({
   );
 }
 
+function SortableSpecificheImage({
+  url,
+  onDelete,
+}: {
+  url: string;
+  onDelete: (url: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: url,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={isDragging ? "opacity-70" : "relative mx-auto"}
+    >
+      <ButtonXDellete className="absolute top-2 right-2 h-8 w-8" onClick={() => onDelete(url)} />
+      <button
+        type="button"
+        className="absolute top-2 left-2 z-10 cursor-grab rounded bg-slate-900/80 px-1.5 py-0.5 text-[10px] text-slate-100 active:cursor-grabbing"
+        title="Перемістити фото"
+        aria-label="Перемістити фото"
+        {...attributes}
+        {...listeners}
+      >
+        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current" aria-hidden="true">
+          <circle cx="8" cy="6" r="1.7" />
+          <circle cx="8" cy="12" r="1.7" />
+          <circle cx="8" cy="18" r="1.7" />
+          <circle cx="16" cy="6" r="1.7" />
+          <circle cx="16" cy="12" r="1.7" />
+          <circle cx="16" cy="18" r="1.7" />
+        </svg>
+      </button>
+      <Image
+        src={url}
+        alt=""
+        width={160}
+        height={160}
+        className="h-32 w-full rounded-lg border border-slate-600/55 object-cover"
+      />
+    </div>
+  );
+}
+
 export default function SpecificheProductAdmin({
   product_id,
   category_id,
@@ -209,6 +269,9 @@ export default function SpecificheProductAdmin({
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   const { register, handleSubmit, reset, control, setValue } = useForm<FormValues>({
     defaultValues: { title: "", ordered: [], groups: [] },
@@ -347,7 +410,34 @@ export default function SpecificheProductAdmin({
     await updateOrCreateSpecifiche({ product_id, images: next });
   };
 
+  const handleImageDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = images.findIndex((item) => item === active.id);
+    const newIndex = images.findIndex((item) => item === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+
+    const prev = images;
+    const next = arrayMove(images, oldIndex, newIndex);
+    setImages(next);
+
+    try {
+      setIsReordering(true);
+      await updateOrCreateSpecifiche({ product_id, images: next });
+    } catch (error) {
+      console.error(error);
+      setImages(prev);
+    } finally {
+      setIsReordering(false);
+    }
+  };
+
   const onSubmit = async (data: FormValues) => {
+    reportProductSaveAllActivity({
+      emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+      delta: 1,
+    });
     setLoading(true);
 
     try {
@@ -396,41 +486,54 @@ export default function SpecificheProductAdmin({
         }
       }
 
-      toast.success("Збережено");
+      reportProductSaveAllResult({
+        emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+        status: "success",
+      });
     } catch (e) {
       console.error(e);
-      toast.error("Помилка збереження");
+      reportProductSaveAllResult({
+        emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+        status: "error",
+        message: "Не вдалося зберегти характеристики товару",
+      });
     } finally {
       setLoading(false);
+      reportProductSaveAllActivity({
+        emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+        delta: -1,
+      });
     }
   };
 
   const getTpl = (id: string) => charsById.get(id);
 
+  useEffect(() => {
+    const listener = () => formRef.current?.requestSubmit();
+    document.addEventListener(PRODUCT_SAVE_ALL_EVENT, listener);
+    return () => document.removeEventListener(PRODUCT_SAVE_ALL_EVENT, listener);
+  }, []);
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="admin-card admin-card-content flex flex-col gap-6">
+    <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="admin-card admin-card-content flex flex-col gap-6">
       <h2 className="text-lg font-semibold">Характеристики товару</h2>
 
       <div {...getRootProps()} className="admin-dropzone">
         <input {...getInputProps()} />
-        {uploading ? "Завантаження…" : "Перетягніть фото або клікніть"}
+        {uploading ? "Завантаження..." : "Перетягніть фото або клікніть"}
+        {isReordering ? <p className="mt-2 text-yellow-300">Оновлення порядку...</p> : null}
       </div>
 
       {images.length > 0 && (
-        <div className="admin-media-grid">
-          {images.map((img) => (
-            <div key={img} className="relative mx-auto">
-              <ButtonXDellete className="absolute top-2 right-2 h-8 w-8" onClick={() => deleteImage(img)} />
-              <Image
-                src={img}
-                alt=""
-                width={160}
-                height={160}
-                className="h-32 w-full rounded-lg border border-slate-600/55 object-cover"
-              />
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleImageDragEnd}>
+          <SortableContext items={images} strategy={rectSortingStrategy}>
+            <div className="admin-media-grid">
+              {images.map((img) => (
+                <SortableSpecificheImage key={img} url={img} onDelete={deleteImage} />
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       <InputAdminStyle
@@ -510,14 +613,10 @@ export default function SpecificheProductAdmin({
           </div>
         ))}
       </div>
-
-      <ButtonYellow
-        type="submit"
-        disabled={loading}
-        className="admin-btn-primary !px-4 !py-2 !text-sm"
-      >
-        {loading ? "Збереження…" : "Зберегти"}
-      </ButtonYellow>
+      {loading ? <p className="text-xs text-amber-300">Збереження...</p> : null}
     </form>
   );
 }
+
+
+

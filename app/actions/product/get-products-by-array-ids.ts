@@ -3,7 +3,7 @@
 import { db } from "@/db/db";
 import { productsSchema } from "@/db/schemas/product.schema";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
-import { inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 
 export async function getProductsByIds(
@@ -13,15 +13,20 @@ export async function getProductsByIds(
   },
 ) {
   "use cache";
+
+  const normalizedIds = Array.from(new Set(ids)).sort();
   cacheLife("seconds");
-  cacheTag(CACHE_TAGS.product.byIds(ids));
+  cacheTag(CACHE_TAGS.product.byIds(normalizedIds));
   cacheTag(CACHE_TAGS.product.all);
-  if (!ids || ids.length === 0) {
+  if (!normalizedIds.length) {
     return { data: [], error: "Please provide not empty array" };
   }
 
   try {
-    const res = await db.select().from(productsSchema).where(inArray(productsSchema.id, ids));
+    const res = await db
+      .select()
+      .from(productsSchema)
+      .where(and(inArray(productsSchema.id, normalizedIds), eq(productsSchema.isHidden, false)));
 
     const availableProducts = options?.includeOutOfStock ? res : res.filter((p) => p.inStock > 0);
 

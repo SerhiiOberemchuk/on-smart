@@ -1,4 +1,4 @@
-﻿import LinkYellow from "@/components/YellowLink";
+import LinkYellow from "@/components/YellowLink";
 import SmartImage from "@/components/SmartImage";
 
 export default function NotFound() {
@@ -12,7 +12,7 @@ export default function NotFound() {
         </div>
         <h1 className="H2 mt-8 text-center xl:mt-16">Oops! Pagina non trovata.</h1>
         <p className="text_R mt-3 text-center">
-          La pagina che stai cercando potrebbe essere stata spostata o non esiste piГ№. Torna alla
+          La pagina che stai cercando potrebbe essere stata spostata o non esiste più. Torna alla
           home per continuare a navigare tra i nostri prodotti.
         </p>
         <LinkYellow href="/" className="mx-auto mt-3 xl:mt-8" title="Torna alla home" />

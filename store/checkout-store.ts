@@ -116,13 +116,13 @@ export const useCheckoutStore = create<CheckoutStoreState>()(
         set((state) => ({
           dataFirstStep: {
             ...state.dataFirstStep,
-            request_invoice: false,
-            codice_fiscale: "",
+            requestInvoice: false,
+            codiceFiscale: null,
           },
         })),
 
       switchRequestInvoce: () =>
-        set(({dataFirstStep}) => ({
+        set(({ dataFirstStep }) => ({
           dataFirstStep: {
             ...dataFirstStep,
             requestInvoice: !dataFirstStep.requestInvoice,

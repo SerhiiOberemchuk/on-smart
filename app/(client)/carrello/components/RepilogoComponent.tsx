@@ -1,18 +1,18 @@
 "use client";
-import clsx from "clsx";
 
-// import InputSconto from "./InputSconto";
+import clsx from "clsx";
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+
+import ButtonYellow from "@/components/BattonYellow";
 import {
   BasketTypeUseCheckoutStore,
   TotalPriseTypeuseCheckoutStore,
   useCheckoutStore,
 } from "@/store/checkout-store";
-import { useRouter, usePathname } from "next/navigation";
-import ButtonYellow from "@/components/BattonYellow";
 import { PAGES } from "@/types/pages.types";
 import { getDeliveryPrice, getIvaValue, getTotalPriceToPay } from "@/utils/get-prices";
-import { toast } from "react-toastify";
-import { useEffect } from "react";
 
 export default function RepilogoComponent({
   totalPrice,
@@ -25,6 +25,7 @@ export default function RepilogoComponent({
   const { setCheckoutData, setStep, step, dataFirstStep, setDelyveryPrice } = useCheckoutStore();
   const path = usePathname();
   const router = useRouter();
+
   const handleProceedToOrder = () => {
     if (basket.length === 0) {
       toast.warn("Il carrello è vuoto");
@@ -34,14 +35,11 @@ export default function RepilogoComponent({
       setStep(1);
     }
     setCheckoutData({ totalPrice, basket });
-
     router.push(PAGES.CHECKOUT_PAGES.INFORMATION);
   };
-  useEffect(() => {
-    // console.log(totalPrice);
-    const deliveryValue = getDeliveryPrice(totalPrice);
-    // console.log(deliveryValue);
 
+  useEffect(() => {
+    const deliveryValue = getDeliveryPrice(totalPrice);
     setDelyveryPrice({ deliveryPrice: deliveryValue });
   }, [totalPrice, setDelyveryPrice]);
 
@@ -85,15 +83,9 @@ export default function RepilogoComponent({
             €
           </span>
         </div>
-        {/* {isInputSconto && totalPrice > 0 && <InputSconto />} */}
         {path === "/carrello" && (
-          <ButtonYellow
-            type="button"
-            disabled={basket.length === 0}
-            onClick={handleProceedToOrder}
-            // className="btn rounded-sm bg-yellow-500 p-3 text-black"
-          >
-            Procedi all’ordine
+          <ButtonYellow type="button" disabled={basket.length === 0} onClick={handleProceedToOrder}>
+            Procedi all'ordine
           </ButtonYellow>
         )}
       </div>

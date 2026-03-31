@@ -45,7 +45,13 @@ export async function getBundleBySlug(slug: ProductType["slug"]): Promise<Bundle
       .innerJoin(categoryProductsSchema, eq(productsSchema.category_id, categoryProductsSchema.id))
       .innerJoin(brandProductsSchema, eq(productsSchema.brand_slug, brandProductsSchema.brand_slug))
       .leftJoin(bundleMetaSchema, eq(bundleMetaSchema.bundle_id, productsSchema.id))
-      .where(and(eq(productsSchema.slug, slug), eq(productsSchema.productType, "bundle")))
+      .where(
+        and(
+          eq(productsSchema.slug, slug),
+          eq(productsSchema.productType, "bundle"),
+          eq(productsSchema.isHidden, false),
+        ),
+      )
       .limit(1);
 
     const row = rows[0];

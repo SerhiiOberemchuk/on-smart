@@ -14,6 +14,16 @@ import type { ProductInsertType, ProductType } from "@/db/schemas/product.schema
 import type { BrandTypes } from "@/types/brands.types";
 import { CategoryTypes } from "@/types/category.types";
 import slugify from "@sindresorhus/slugify";
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -24,6 +34,7 @@ import { FILE_MAX_SIZE } from "../categories/ModalCategoryForm";
 import InputAdminStyle from "../InputComponent";
 import SelectComponentAdmin from "../SelectComponent";
 import TextAreaAdminComponent from "../TextAreaAdminComponent";
+import { getBundleSaveButtonState } from "./bundle-save.helpers";
 
 type SelectedFile = {
   file: File;
@@ -54,6 +65,121 @@ type IncludedProductMetaDraft = {
   quantity: number;
   shortDescription: string;
 };
+
+function SortableExistingImage({
+  id,
+  src,
+  index,
+  onRemove,
+}: {
+  id: string;
+  src: string;
+  index: number;
+  onRemove: (index: number) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={isDragging ? "opacity-70" : "relative"}
+    >
+      <button
+        type="button"
+        className="absolute top-1 right-1 z-10 rounded bg-slate-900/80 px-1.5 py-0.5 text-xs text-slate-100"
+        onClick={() => onRemove(index)}
+      >
+        x
+      </button>
+      <button
+        type="button"
+        className="absolute top-1 left-1 z-10 cursor-grab rounded bg-slate-900/80 px-1.5 py-0.5 text-[10px] text-slate-100 active:cursor-grabbing"
+        title="Перемістити фото"
+        aria-label="Перемістити фото"
+        {...attributes}
+        {...listeners}
+      >
+        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current" aria-hidden="true">
+          <circle cx="8" cy="6" r="1.7" />
+          <circle cx="8" cy="12" r="1.7" />
+          <circle cx="8" cy="18" r="1.7" />
+          <circle cx="16" cy="6" r="1.7" />
+          <circle cx="16" cy="12" r="1.7" />
+          <circle cx="16" cy="18" r="1.7" />
+        </svg>
+      </button>
+      <Image
+        src={src}
+        alt={`Фото ${index + 1}`}
+        width={220}
+        height={220}
+        className="aspect-square w-full rounded border border-slate-600/60 object-cover"
+      />
+    </div>
+  );
+}
+
+function SortableNewImage({
+  id,
+  preview,
+  fileName,
+  index,
+  onRemove,
+}: {
+  id: string;
+  preview: string;
+  fileName: string;
+  index: number;
+  onRemove: (index: number) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={isDragging ? "opacity-70" : "relative"}
+    >
+      <button
+        type="button"
+        className="absolute top-1 right-1 z-10 rounded bg-slate-900/80 px-1.5 py-0.5 text-xs text-slate-100"
+        onClick={() => onRemove(index)}
+      >
+        x
+      </button>
+      <button
+        type="button"
+        className="absolute top-1 left-1 z-10 cursor-grab rounded bg-slate-900/80 px-1.5 py-0.5 text-[10px] text-slate-100 active:cursor-grabbing"
+        title="Перемістити фото"
+        aria-label="Перемістити фото"
+        {...attributes}
+        {...listeners}
+      >
+        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current" aria-hidden="true">
+          <circle cx="8" cy="6" r="1.7" />
+          <circle cx="8" cy="12" r="1.7" />
+          <circle cx="8" cy="18" r="1.7" />
+          <circle cx="16" cy="6" r="1.7" />
+          <circle cx="16" cy="12" r="1.7" />
+          <circle cx="16" cy="18" r="1.7" />
+        </svg>
+      </button>
+      <Image
+        src={preview}
+        alt={fileName}
+        width={220}
+        height={220}
+        unoptimized
+        className="aspect-square w-full rounded border border-slate-600/60 object-cover"
+      />
+    </div>
+  );
+}
 
 function parseArrayFromUnknown(value: unknown): unknown[] {
   if (Array.isArray(value)) return value;
@@ -153,6 +279,17 @@ export default function PageEditBundle({
   const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null);
   const [existingImages, setExistingImages] = useState<string[]>(initialImages);
   const [newFiles, setNewFiles] = useState<SelectedFile[]>([]);
+  const existingImageIds = useMemo(
+    () => existingImages.map((imageUrl, index) => `${index}::${imageUrl}`),
+    [existingImages],
+  );
+  const newFileIds = useMemo(
+    () => newFiles.map((item) => `${item.file.name}::${item.preview}`),
+    [newFiles],
+  );
+  const dndSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+  );
   const initialDocumentLinksRef = useRef<Set<string>>(
     new Set(normalizeDocuments(bundleMeta?.documents).map((item) => item.link.trim()).filter(Boolean)),
   );
@@ -498,6 +635,32 @@ export default function PageEditBundle({
     toast.warning("Заповніть обов'язкові поля");
   };
 
+  const handleExistingImageDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = existingImageIds.findIndex((item) => item === active.id);
+    const newIndex = existingImageIds.findIndex((item) => item === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+
+    setExistingImages((prev) => arrayMove(prev, oldIndex, newIndex));
+  };
+
+  const handleNewFileDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = newFileIds.findIndex((item) => item === active.id);
+    const newIndex = newFileIds.findIndex((item) => item === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+
+    setNewFiles((prev) => arrayMove(prev, oldIndex, newIndex));
+  };
+  const { isDisabled: isSaveDisabled, label: saveLabel } = getBundleSaveButtonState(
+    isPending,
+    uploadingDocumentCount,
+  );
+
   return (
     <section className="admin-page">
       <div className="admin-page-header">
@@ -519,6 +682,7 @@ export default function PageEditBundle({
       </div>
 
       <form
+        id="bundle-edit-form"
         onSubmit={handleSubmit(onSubmit, onInvalid)}
         className="admin-card admin-card-content space-y-4"
       >
@@ -687,26 +851,25 @@ export default function PageEditBundle({
               <p className="mb-2 text-sm font-semibold text-slate-100">Поточні фото</p>
 
               {existingImages.length > 0 ? (
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  {existingImages.map((imageUrl, index) => (
-                    <div key={`${imageUrl}-${index}`} className="relative">
-                      <button
-                        type="button"
-                        className="absolute top-1 right-1 z-10 rounded bg-slate-900/80 px-1.5 py-0.5 text-xs text-slate-100"
-                        onClick={() => handleRemoveExistingImage(index)}
-                      >
-                        x
-                      </button>
-                      <Image
-                        src={imageUrl}
-                        alt={`Фото ${index + 1}`}
-                        width={220}
-                        height={220}
-                        className="aspect-square w-full rounded border border-slate-600/60 object-cover"
-                      />
+                <DndContext
+                  sensors={dndSensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleExistingImageDragEnd}
+                >
+                  <SortableContext items={existingImageIds} strategy={rectSortingStrategy}>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      {existingImages.map((imageUrl, index) => (
+                        <SortableExistingImage
+                          key={existingImageIds[index]}
+                          id={existingImageIds[index]}
+                          src={imageUrl}
+                          index={index}
+                          onRemove={handleRemoveExistingImage}
+                        />
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </SortableContext>
+                </DndContext>
               ) : (
                 <p className="text-xs text-slate-400">Поточних фото немає.</p>
               )}
@@ -724,27 +887,26 @@ export default function PageEditBundle({
               />
 
               {newFiles.length > 0 ? (
-                <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  {newFiles.map((item, index) => (
-                    <div key={`${item.file.name}-${index}`} className="relative">
-                      <button
-                        type="button"
-                        className="absolute top-1 right-1 z-10 rounded bg-slate-900/80 px-1.5 py-0.5 text-xs text-slate-100"
-                        onClick={() => handleRemoveNewFile(index)}
-                      >
-                        x
-                      </button>
-                      <Image
-                        src={item.preview}
-                        alt={item.file.name}
-                        width={220}
-                        height={220}
-                        unoptimized
-                        className="aspect-square w-full rounded border border-slate-600/60 object-cover"
-                      />
+                <DndContext
+                  sensors={dndSensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleNewFileDragEnd}
+                >
+                  <SortableContext items={newFileIds} strategy={rectSortingStrategy}>
+                    <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      {newFiles.map((item, index) => (
+                        <SortableNewImage
+                          key={newFileIds[index]}
+                          id={newFileIds[index]}
+                          preview={item.preview}
+                          fileName={item.file.name}
+                          index={index}
+                          onRemove={handleRemoveNewFile}
+                        />
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </SortableContext>
+                </DndContext>
               ) : (
                 <p className="mt-2 text-xs text-slate-400">Нові фото не додані.</p>
               )}
@@ -795,12 +957,12 @@ export default function PageEditBundle({
                       className="rounded bg-slate-700 px-1.5 py-0.5 text-[10px] hover:bg-slate-600"
                       onClick={() => handleRemoveProduct(product.id)}
                     >
-                      Remove
+                      Видалити
                     </button>
                   </span>
                 ))
               ) : (
-                <p className="text-xs text-slate-400">No products selected yet.</p>
+                <p className="text-xs text-slate-400">Товари ще не обрані.</p>
               )}
             </div>
 
@@ -976,7 +1138,7 @@ export default function PageEditBundle({
           </div>
         </div>
 
-        <div className="admin-actions justify-end border-t border-slate-600/45 pt-3">
+        <div className="admin-actions sticky bottom-3 z-20 -mx-2 mt-2 justify-end rounded-lg border border-slate-600/60 bg-slate-950/90 p-2 backdrop-blur">
           <Link
             href="/admin/dashboard/bundles"
             className="admin-btn-secondary px-4! py-2! text-sm!"
@@ -987,16 +1149,19 @@ export default function PageEditBundle({
           >
             Скасувати
           </Link>
-
-          <ButtonYellow
-            type="submit"
-            className="admin-btn-primary px-4! py-2! text-sm!"
-            disabled={isPending || uploadingDocumentCount > 0}
-          >
-            {isPending ? "Оновлення..." : "Зберегти зміни"}
-          </ButtonYellow>
         </div>
       </form>
+
+      <div className="fixed right-4 bottom-4 z-50">
+        <ButtonYellow
+          type="submit"
+          form="bundle-edit-form"
+          className="admin-btn-primary px-4! py-2! text-sm! shadow-lg"
+          disabled={isSaveDisabled}
+        >
+          {saveLabel}
+        </ButtonYellow>
+      </div>
     </section>
   );
 }

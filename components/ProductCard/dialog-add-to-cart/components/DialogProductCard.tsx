@@ -1,10 +1,9 @@
-﻿"use client";
+"use client";
 
 import SmartImage from "@/components/SmartImage";
 import { SwiperSlide, Swiper } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
+import "@/app/styles/swiper.css";
 import HeaderProductCard from "@/components/HeaderProductCard";
 import PricesBox from "@/components/PricesBox";
 import { twMerge } from "tailwind-merge";
@@ -159,4 +158,5 @@ export const DialogProductCard = ({
     </div>
   );
 };
+
 

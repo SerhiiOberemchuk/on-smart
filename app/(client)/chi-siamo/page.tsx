@@ -1,4 +1,4 @@
-﻿import SmartImage from "@/components/SmartImage";
+import SmartImage from "@/components/SmartImage";
 import icon_punkt from "@/assets/icons/punkt.svg";
 import { getAllBrands } from "@/app/actions/brands/brand-actions";
 import icon_quote from "@/assets/icons/icon_quote.svg";
@@ -8,7 +8,7 @@ import { Metadata } from "next";
 import Script from "next/script";
 
 export const metadata: Metadata = {
-  title: "Chi siamo | On Smart вЂ“ Videosorveglianza, Sicurezza, Soluzioni Smart",
+  title: "Chi siamo | On Smart – Videosorveglianza, Sicurezza, Soluzioni Smart",
   description:
     "Scopri la mission di On Smart: videosorveglianza, dispositivi smart, UPS e soluzioni professionali per la sicurezza di case, negozi e aziende. Marchi affidabili, assistenza tecnica e supporto qualificato.",
   alternates: {
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
         url: "/images/chi_siamo_banner.jpg",
         width: 1200,
         height: 630,
-        alt: "On Smart вЂ“ Chi siamo",
+        alt: "On Smart – Chi siamo",
       },
     ],
     locale: "it_IT",
@@ -47,9 +47,9 @@ export default async function CarrelloPage() {
           />
           <ul className="body_R_20 flex max-w-[556px] min-w-[280px] flex-col gap-5">
             {[
-              "On Smart nasce con lвЂ™obiettivo di offrire soluzioni professionali di videosorveglianza, sicurezza e tecnologia smart, accessibili e affidabili per abitazioni e aziende.",
-              " Il progetto ГЁ il risultato di una lunga esperienza nel settore della videosorveglianza e dellвЂ™elettronica, unita allвЂ™attenzione verso prodotti di qualitГ  e assistenza chiara e trasparente.",
-              "LвЂ™idea alla base di On Smart ГЁ semplice: offrire strumenti tecnologici selezionati con cura, capaci di migliorare la protezione di abitazioni, negozi e spazi professionali, mantenendo sempre un equilibrio tra qualitГ , semplicitГ  e convenienza.",
+              "On Smart nasce con l'obiettivo di offrire soluzioni professionali di videosorveglianza, sicurezza e tecnologia smart, accessibili e affidabili per abitazioni e aziende.",
+              " Il progetto è il risultato di una lunga esperienza nel settore della videosorveglianza e dell'elettronica, unita all'attenzione verso prodotti di qualità e assistenza chiara e trasparente.",
+              "L'idea alla base di On Smart è semplice: offrire strumenti tecnologici selezionati con cura, capaci di migliorare la protezione di abitazioni, negozi e spazi professionali, mantenendo sempre un equilibrio tra qualità, semplicità e convenienza.",
             ].map((item, index) => (
               <li key={index}>{item}</li>
             ))}
@@ -66,7 +66,7 @@ export default async function CarrelloPage() {
                 "Sistemi di videosorveglianza IP e analogici",
                 "Soluzioni smart per la gestione degli ambienti",
                 "Dispositivi e accessori per installatori e professionisti",
-                "Sistemi di continuitГ  elettrica UPS (gruppi di continuitГ )",
+                "Sistemi di continuità elettrica UPS (gruppi di continuità)",
                 "Prodotti pensati per la sicurezza sia domestica che aziendale",
               ].map((item, index) => (
                 <li key={index} className="flex items-start gap-3">
@@ -75,7 +75,7 @@ export default async function CarrelloPage() {
               ))}
             </ul>
             <p className="body_R_20">
-              Ogni articolo viene scelto valutando prestazioni, stabilitГ , facilitГ  di
+              Ogni articolo viene scelto valutando prestazioni, stabilitГ , facilità di
               configurazione e compatibilitГ  con impianti moderni.
             </p>
           </div>
@@ -103,7 +103,7 @@ export default async function CarrelloPage() {
               ))}
             </ul>
           )}
-          <p className="H4M">e altri marchi selezionati in base alla qualitГ  e allвЂ™affidabilitГ .</p>
+          <p className="H4M">e altri marchi selezionati in base alla qualità e all'affidabilitГ .</p>
         </div>
       </section>
       <section className="py-16">
@@ -141,9 +141,9 @@ export default async function CarrelloPage() {
             <SmartImage src={icon_quote} width={34} height={24} alt="Quote icon" />
             <p className="H4M">
               Crediamo nelle soluzioni che facilitano la vita quotidiana, nel valore della
-              protezione degli spazi in cui viviamo e lavoriamo, e nellвЂ™importanza di unвЂ™assistenza
+              protezione degli spazi in cui viviamo e lavoriamo, e nell'importanza di un'assistenza
               che mette al centro le persone. Offriamo supporto con professionalitГ , attenzione e
-              disponibilitГ , cercando sempre la soluzione piГ№ adatta alle esigenze reali.
+              disponibilità, cercando sempre la soluzione più adatta alle esigenze reali.
             </p>
           </div>
         </div>
@@ -152,7 +152,7 @@ export default async function CarrelloPage() {
         <SectionHeader title="Assistenza" />
         <div className="container mt-8 flex flex-col gap-5">
           <h3 className="H4M max-w-[580px]">
-            Per richieste, informazioni sui prodotti o supporto tecnico, ГЁ possibile contattarci via
+            Per richieste, informazioni sui prodotti o supporto tecnico, è possibile contattarci via
             e-mail:
           </h3>
           <a href={`mailto:${CONTACTS_ADDRESS.EMAIL}`} className="H4M flex items-center gap-3">
@@ -190,7 +190,7 @@ export default async function CarrelloPage() {
                   "Sistemi di videosorveglianza IP e analogici",
                   "Soluzioni smart per la gestione degli ambienti",
                   "Dispositivi e accessori per installatori",
-                  "UPS e gruppi di continuitГ ",
+                  "UPS e gruppi di continuità",
                   "Prodotti per sicurezza domestica e professionale",
                 ],
               },
@@ -224,7 +224,7 @@ export default async function CarrelloPage() {
                     name: "Come posso contattare l'assistenza?",
                     acceptedAnswer: {
                       "@type": "Answer",
-                      text: `Puoi contattarci via e-mail allвЂ™indirizzo ${CONTACTS_ADDRESS.EMAIL}.`,
+                      text: `Puoi contattarci via e-mail all'indirizzo ${CONTACTS_ADDRESS.EMAIL}.`,
                     },
                   },
                 ],

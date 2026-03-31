@@ -9,7 +9,7 @@ import type { IncludedBundleProduct } from "./bundle-page.types";
 import BundleTabComponents from "./BundleTabComponents";
 import BundleTabDocuments from "./BundleTabDocuments";
 import BundleTabReviews from "./BundleTabReviews";
-import "swiper/css";
+import "@/app/styles/swiper.css";
 
 const BUNDLE_TABS = [
   { title: "Componenti", key: "componenti" },

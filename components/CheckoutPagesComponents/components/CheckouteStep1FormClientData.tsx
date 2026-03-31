@@ -191,7 +191,7 @@ export default function CheckouteStep1FormClientData() {
 
         <div className="flex flex-wrap gap-3">
           <InputBlock
-            title="CittГ  *"
+            title="Città *"
             {...register("citta")}
             required
             type="text"
@@ -229,7 +229,7 @@ export default function CheckouteStep1FormClientData() {
           </Link>{" "}
           e{" "}
           <Link href="/informativa-sulla-privacy" className="underline">
-            lвЂ™Informativa sulla privacy
+            l'Informativa sulla privacy
           </Link>
           , e acconsento a ricevere notizie e offerte esclusive.
         </p>

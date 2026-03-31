@@ -1,4 +1,4 @@
-﻿import LinkYellow from "@/components/YellowLink";
+import LinkYellow from "@/components/YellowLink";
 import SmartImage from "@/components/SmartImage";
 
 export default function ProductNotFound() {
@@ -20,7 +20,7 @@ export default function ProductNotFound() {
         <h1 className="H2 mt-8 text-center xl:mt-16">Categoria non trovata.</h1>
 
         <p className="text_R mt-3 text-center">
-          La categoria che stai cercando potrebbe essere stata rimossa, rinominata o non ГЁ piГ№
+          La categoria che stai cercando potrebbe essere stata rimossa, rinominata o non è più
           disponibile nel nostro catalogo.
         </p>
 

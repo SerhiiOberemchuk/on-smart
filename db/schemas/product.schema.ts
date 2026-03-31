@@ -34,6 +34,7 @@ export const productsSchema = mysqlTable(
     weightKg: decimal("weight_kg", { precision: 8, scale: 3 }).notNull().default("0"),
     inStock: int("in_stock").notNull(),
     isOnOrder: boolean("is_on_order").default(false).notNull(),
+    isHidden: boolean("is_hidden").default(false).notNull(),
     imgSrc: json("imgSrc").$type<string>().notNull(),
     productType: mysqlEnum("product_type", ["product", "bundle"]).notNull().default("product"),
     hasVariants: boolean("has_variants").default(false).notNull(),

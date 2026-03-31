@@ -4,7 +4,7 @@ import { db } from "@/db/db";
 import { brandProductsSchema } from "@/db/schemas/brand-products.schema";
 import { categoryProductsSchema } from "@/db/schemas/caregory-products.schema";
 import { productsSchema } from "@/db/schemas/product.schema";
-import { and, gt, like, or, sql } from "drizzle-orm";
+import { and, eq, gt, like, or, sql } from "drizzle-orm";
 
 export type GlobalSearchProductResult = {
   id: string;
@@ -201,6 +201,7 @@ export async function getHeaderGlobalSearchResults(
         .where(
           and(
             gt(productsSchema.inStock, 0),
+            eq(productsSchema.isHidden, false),
             or(
               sql`LOWER(${productsSchema.name}) LIKE ${searchTermLower}`,
               sql`LOWER(${productsSchema.nameFull}) LIKE ${searchTermLower}`,

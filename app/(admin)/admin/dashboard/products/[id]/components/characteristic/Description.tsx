@@ -1,18 +1,32 @@
-"use client";
+﻿"use client";
 
 import { getProductDescriptionById } from "@/app/actions/product-details.ts/get-product-description";
 import { updateProductDescriptionById } from "@/app/actions/product-details.ts/update-product-description copy";
 import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
-import ButtonYellow from "@/components/BattonYellow";
 import Spiner from "@/components/Spiner";
 import { ProductDescriptionType } from "@/db/schemas/product-details.schema";
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "react-toastify";
 import ButtonXDellete from "../../../../ButtonXDellete";
 import InputAdminStyle from "../../../../InputComponent";
 import TextAreaAdminComponent from "../../../../TextAreaAdminComponent";
+import {
+  PRODUCT_SAVE_ALL_EVENT,
+  reportProductSaveAllActivity,
+  reportProductSaveAllResult,
+} from "../save-all.helpers";
 
 const updateDescription = async (
   props: Pick<ProductDescriptionType, "product_id"> & Partial<Omit<ProductDescriptionType, "product_id">>,
@@ -20,15 +34,60 @@ const updateDescription = async (
 ) => {
   functionIsLoading(true);
   try {
-    await updateProductDescriptionById(props);
-    toast.success("Опис оновлено");
+    const response = await updateProductDescriptionById(props);
+    if (!response?.success) {
+      return { success: false as const, message: "Не вдалося оновити опис товару" };
+    }
+    return { success: true as const, message: "" };
   } catch (error) {
-    toast.error("Не вдалося оновити опис");
     console.error(error);
+    return { success: false as const, message: "Не вдалося оновити опис товару" };
   } finally {
     functionIsLoading(false);
   }
 };
+
+function SortableDescriptionImage({
+  url,
+  onDelete,
+}: {
+  url: string;
+  onDelete: (url: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: url,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={isDragging ? "opacity-70" : undefined}
+    >
+      <div className="relative mx-auto w-fit rounded-lg border border-slate-600/55">
+        <ButtonXDellete className="absolute top-2 right-2 h-8 w-8" onClick={() => onDelete(url)} />
+        <button
+          type="button"
+          className="absolute top-2 left-2 z-10 cursor-grab rounded bg-slate-900/80 px-1.5 py-0.5 text-[10px] text-slate-100 active:cursor-grabbing"
+          title="Перемістити фото"
+          aria-label="Перемістити фото"
+          {...attributes}
+          {...listeners}
+        >
+          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current" aria-hidden="true">
+            <circle cx="8" cy="6" r="1.7" />
+            <circle cx="8" cy="12" r="1.7" />
+            <circle cx="8" cy="18" r="1.7" />
+            <circle cx="16" cy="6" r="1.7" />
+            <circle cx="16" cy="12" r="1.7" />
+            <circle cx="16" cy="18" r="1.7" />
+          </svg>
+        </button>
+        <Image width={326} height={326} alt={url} src={url} className="h-32 w-full rounded-lg object-cover object-center" />
+      </div>
+    </div>
+  );
+}
 
 export default function Description({ id }: { id: string }) {
   const [images, setImages] = useState<string[]>([]);
@@ -36,14 +95,16 @@ export default function Description({ id }: { id: string }) {
   const [description, setDescription] = useState<string>("");
   const [isUploading, setUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   useEffect(() => {
     const getFoto = async () => {
       const response = await getProductDescriptionById({ id });
-      if (response.data && response.data.images.length > 0) {
-        setImages(response.data.images);
-        setTitle(response.data.title);
-        setDescription(response.data.description);
+      if (response.data) {
+        setImages(response.data.images ?? []);
+        setTitle(response.data.title ?? "");
+        setDescription(response.data.description ?? "");
       }
     };
 
@@ -56,29 +117,22 @@ export default function Description({ id }: { id: string }) {
 
     for (const file of acceptedFiles) {
       try {
-        const response = await uploadFile({
-          file,
-          sub_bucket: "products",
-          imagePreset: "content",
-        });
-
-        if (response?.fileUrl) {
-          uploadedUrls.push(response.fileUrl);
-        }
+        const response = await uploadFile({ file, sub_bucket: "products", imagePreset: "content" });
+        if (response?.fileUrl) uploadedUrls.push(response.fileUrl);
       } catch (error) {
         console.error("Помилка завантаження:", error);
       }
     }
 
     setImages([...uploadedUrls]);
-    updateDescription({ product_id: id, images: uploadedUrls }, setIsLoading);
+    const response = await updateDescription({ product_id: id, images: uploadedUrls }, setIsLoading);
+    if (!response.success) {
+      toast.error(response.message);
+    }
     setUploading(false);
   };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { "image/*": [] },
-  });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { "image/*": [] } });
 
   const handleDeleteFoto = async (url: string) => {
     const newUrl = images.filter((i) => i !== url);
@@ -93,39 +147,84 @@ export default function Description({ id }: { id: string }) {
     toast.success("Зображення видалено");
   };
 
+  const handleImageDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = images.findIndex((item) => item === active.id);
+    const newIndex = images.findIndex((item) => item === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+
+    const prev = images;
+    const next = arrayMove(images, oldIndex, newIndex);
+    setImages(next);
+
+    try {
+      setIsReordering(true);
+      const response = await updateProductDescriptionById({ product_id: id, images: next });
+      if (!response.success) {
+        setImages(prev);
+        toast.error("Не вдалося оновити порядок фото");
+        return;
+      }
+      toast.success("Порядок фото оновлено");
+    } catch (error) {
+      console.error(error);
+      setImages(prev);
+      toast.error("Не вдалося оновити порядок фото");
+    } finally {
+      setIsReordering(false);
+    }
+  };
+
+  const saveAll = useCallback(() => {
+    reportProductSaveAllActivity({
+      emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+      delta: 1,
+    });
+    void updateDescription({ product_id: id, title, description }, setIsLoading)
+      .then((response) => {
+        reportProductSaveAllResult({
+          emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+          status: response.success ? "success" : "error",
+          message: response.success ? undefined : response.message,
+        });
+      })
+      .finally(() => {
+        reportProductSaveAllActivity({
+          emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+          delta: -1,
+        });
+      });
+  }, [description, id, title]);
+
+  useEffect(() => {
+    const listener = () => saveAll();
+    document.addEventListener(PRODUCT_SAVE_ALL_EVENT, listener);
+    return () => document.removeEventListener(PRODUCT_SAVE_ALL_EVENT, listener);
+  }, [saveAll]);
+
   return (
     <div className="admin-card admin-card-content flex flex-col gap-4">
       <h2 className="text-base font-semibold">Опис товару</h2>
 
       <div {...getRootProps()} className="admin-dropzone cursor-pointer">
         <input {...getInputProps()} />
-
-        {isDragActive ? (
-          <p>Відпустіть файли тут...</p>
-        ) : (
-          <p>Перетягніть фото або натисніть, щоб обрати</p>
-        )}
-
+        {isDragActive ? <p>Відпустіть файли тут...</p> : <p>Перетягніть фото або натисніть, щоб обрати</p>}
         {isUploading ? <p className="mt-2 text-yellow-300">Завантаження...</p> : null}
+        {isReordering ? <p className="mt-2 text-yellow-300">Оновлення порядку...</p> : null}
       </div>
 
       {images.length > 0 ? (
-        <div className="admin-media-grid mt-2">
-          {images.map((url) => (
-            <div key={url}>
-              <div className="relative mx-auto w-fit rounded-lg border border-slate-600/55">
-                <ButtonXDellete className="absolute top-2 right-2 h-8 w-8" onClick={() => handleDeleteFoto(url)} />
-                <Image
-                  width={326}
-                  height={326}
-                  alt={url}
-                  src={url}
-                  className="h-32 w-full rounded-lg object-cover object-center"
-                />
-              </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleImageDragEnd}>
+          <SortableContext items={images} strategy={rectSortingStrategy}>
+            <div className="admin-media-grid mt-2">
+              {images.map((url) => (
+                <SortableDescriptionImage key={url} url={url} onDelete={handleDeleteFoto} />
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
       ) : null}
 
       <div className="space-y-2">
@@ -136,12 +235,6 @@ export default function Description({ id }: { id: string }) {
           onChange={(e) => setTitle(e.currentTarget.value)}
           placeholder="Заголовок опису"
         />
-        <ButtonYellow
-          className="admin-btn-secondary !px-4 !py-2 !text-sm"
-          onClick={() => updateDescription({ product_id: id, title }, setIsLoading)}
-        >
-          Зберегти заголовок
-        </ButtonYellow>
       </div>
 
       <div className="space-y-2">
@@ -151,12 +244,6 @@ export default function Description({ id }: { id: string }) {
           placeholder="Опис"
           onChange={(e) => setDescription(e.currentTarget.value)}
         />
-        <ButtonYellow
-          className="admin-btn-secondary !px-4 !py-2 !text-sm"
-          onClick={() => updateDescription({ product_id: id, description }, setIsLoading)}
-        >
-          Зберегти опис
-        </ButtonYellow>
       </div>
 
       {isLoading ? (
@@ -167,3 +254,4 @@ export default function Description({ id }: { id: string }) {
     </div>
   );
 }
+

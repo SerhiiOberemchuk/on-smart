@@ -3,8 +3,7 @@ import { Product_Details } from "@/types/product.types";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { twMerge } from "tailwind-merge";
 import { Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
+import "@/app/styles/swiper.css";
 import "./style-swiper-product.css";
 import FormFeedback from "@/components/FormFeedback/FormFeedback";
 import { ProductType } from "@/db/schemas/product.schema";
@@ -83,3 +82,4 @@ function RecensioneCard({
     </div>
   );
 }
+

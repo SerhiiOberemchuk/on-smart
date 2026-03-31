@@ -103,7 +103,7 @@ export default function CheckouteStep2ConsegnaDati() {
             />
             Consegna a domicilio tramite corriere
           </label>
-          <span className="helper_text text-grey">
+            <span className="helper_text text-grey">
             {getDeliveryPrice(totalPrice)
               ? `${getDeliveryPrice(totalPrice).toFixed(2)} €`
               : "Gratis"}
@@ -162,7 +162,7 @@ export default function CheckouteStep2ConsegnaDati() {
                   <div className="flex flex-wrap gap-3">
                     <InputBlock
                       {...register("deliveryAdress.citta")}
-                      title="CittГ *"
+                      title="Città*"
                       required
                       className="helper_text min-w-60 flex-1"
                       type="text"

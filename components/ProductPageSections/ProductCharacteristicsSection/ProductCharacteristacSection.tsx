@@ -17,7 +17,7 @@ import { ProductType } from "@/db/schemas/product.schema";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
-import "swiper/css";
+import "@/app/styles/swiper.css";
 
 const calcCurrentIndex = (tab: TabTypeCaracteristics) =>
   TABS_CHARACTERISTICS.findIndex((t) => t.searchParam === tab);
@@ -145,3 +145,4 @@ export default function ProductCharacteristicsSection({
     </section>
   );
 }
+

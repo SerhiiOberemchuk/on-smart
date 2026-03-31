@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import ClientPageAllProducts from "./PageAllProducts";
 
 export default function ProductsPage() {
-  const res: Promise<ProductFetchResult> = getAllProducts();
+  const res: Promise<ProductFetchResult> = getAllProducts({ includeHidden: true });
 
   return (
     <Suspense fallback={<Spiner />}>

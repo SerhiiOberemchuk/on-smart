@@ -1,12 +1,16 @@
-﻿"use client";
+"use client";
 
+import { copyBundleById } from "@/app/actions/bundles/copy-bundle";
+import { deleteBundleById } from "@/app/actions/bundles/delete-bundle";
 import type { BundleListItem } from "@/app/actions/bundles/get-all-bundles";
 import { ProductType } from "@/db/schemas/product.schema";
 import type { BrandTypes } from "@/types/brands.types";
 import { CategoryTypes } from "@/types/category.types";
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useMemo, useState, useTransition } from "react";
+import { toast } from "react-toastify";
 
 export default function ListBundlesAdmin({
   bundles,
@@ -19,6 +23,9 @@ export default function ListBundlesAdmin({
   categories: CategoryTypes[];
   brands: BrandTypes[];
 }) {
+  const router = useRouter();
+  const [isCopyPending, startCopyTransition] = useTransition();
+  const [copyingId, setCopyingId] = useState<string | null>(null);
   const productById = useMemo(() => new Map(products.map((item) => [item.id, item])), [products]);
   const categoryById = useMemo(() => new Map(categories.map((item) => [item.id, item])), [categories]);
   const brandBySlug = useMemo(
@@ -30,6 +37,47 @@ export default function ListBundlesAdmin({
       ),
     [brands],
   );
+
+  const handleCopyBundle = (id: string) => {
+    setCopyingId(id);
+    startCopyTransition(async () => {
+      try {
+        const response = await copyBundleById(id);
+        if (!response.success || !response.id) {
+          toast.error(response.error || "Не вдалося скопіювати комплект");
+          return;
+        }
+
+        toast.success("Копію комплекту створено");
+        router.push(`/admin/dashboard/bundles/${response.id}`);
+        router.refresh();
+      } catch (error) {
+        console.error(error);
+        toast.error("Не вдалося скопіювати комплект");
+      } finally {
+        setCopyingId(null);
+      }
+    });
+  };
+
+  const handleDeleteBundle = async (id: string) => {
+    const confirmed = confirm("Видалити комплект?");
+    if (!confirmed) return;
+
+    try {
+      const response = await deleteBundleById(id);
+      if (!response.success) {
+        toast.error(response.error || "Не вдалося видалити комплект");
+        return;
+      }
+
+      toast.success("Комплект видалено");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      toast.error("Не вдалося видалити комплект");
+    }
+  };
 
   return (
     <ul className="flex flex-col gap-2">
@@ -115,6 +163,21 @@ export default function ListBundlesAdmin({
                 >
                   Редагувати
                 </Link>
+                <button
+                  type="button"
+                  className="admin-btn-secondary mt-1 !px-3 !py-1.5 !text-xs"
+                  onClick={() => handleCopyBundle(bundle.id)}
+                  disabled={isCopyPending && copyingId === bundle.id}
+                >
+                  {isCopyPending && copyingId === bundle.id ? "Копіювання..." : "Копіювати"}
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn-secondary mt-1 !px-3 !py-1.5 !text-xs"
+                  onClick={() => handleDeleteBundle(bundle.id)}
+                >
+                  Видалити
+                </button>
               </div>
             </div>
           </li>

@@ -1,14 +1,18 @@
-"use client";
+﻿"use client";
 
 import { getProductDocumentsById } from "@/app/actions/product-documents/get-product-documents";
 import { updateProductDocumentsById } from "@/app/actions/product-documents/update-product-documents";
 import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
-import ButtonYellow from "@/components/BattonYellow";
 import { ProductDocumentsType } from "@/db/schemas/product-documents.schema";
 import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { FILE_MAX_SIZE } from "../../../../categories/ModalCategoryForm";
 import InputAdminStyle from "../../../../InputComponent";
+import {
+  PRODUCT_SAVE_ALL_EVENT,
+  reportProductSaveAllActivity,
+  reportProductSaveAllResult,
+} from "../save-all.helpers";
 
 export default function DocumentsProduct({ id }: { id: string }) {
   const [file, setFile] = useState<File | null>(null);
@@ -37,6 +41,16 @@ export default function DocumentsProduct({ id }: { id: string }) {
 
     fetch();
   }, [id]);
+
+  useEffect(() => {
+    const listener = () => {
+      if (file && title.trim()) {
+        void handleSubmit();
+      }
+    };
+    document.addEventListener(PRODUCT_SAVE_ALL_EVENT, listener);
+    return () => document.removeEventListener(PRODUCT_SAVE_ALL_EVENT, listener);
+  }, [file, title]);
 
   const handleSelectFile = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
@@ -85,6 +99,10 @@ export default function DocumentsProduct({ id }: { id: string }) {
       return;
     }
 
+    reportProductSaveAllActivity({
+      emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+      delta: 1,
+    });
     try {
       setIsLoading(true);
 
@@ -111,14 +129,25 @@ export default function DocumentsProduct({ id }: { id: string }) {
         documents: updatedDocuments,
       });
 
-      toast.success("Документ збережено");
+      reportProductSaveAllResult({
+        emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+        status: "success",
+      });
       setFile(null);
       setTitle("");
     } catch (error) {
       console.error(error);
-      toast.error("Помилка збереження документа");
+      reportProductSaveAllResult({
+        emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+        status: "error",
+        message: "Помилка збереження документа",
+      });
     } finally {
       setIsLoading(false);
+      reportProductSaveAllActivity({
+        emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+        delta: -1,
+      });
     }
   };
 
@@ -168,15 +197,13 @@ export default function DocumentsProduct({ id }: { id: string }) {
           onChange={(e) => setTitle(e.currentTarget.value)}
         />
 
-        <ButtonYellow
-          type="button"
-          onClick={handleSubmit}
-          className="admin-btn-secondary !px-4 !py-2 !text-sm"
-          disabled={isLoading}
-        >
-          {isLoading ? "Збереження..." : "Зберегти документ"}
-        </ButtonYellow>
+        {file && title.trim() ? (
+          <p className="text-xs text-amber-300">Документ буде збережено кнопкою "Зберегти все".</p>
+        ) : null}
       </form>
     </div>
   );
 }
+
+
+

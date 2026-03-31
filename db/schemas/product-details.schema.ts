@@ -2,7 +2,7 @@ import { int, json, mysqlTable, text, varchar } from "drizzle-orm/mysql-core";
 import { ulid } from "ulid";
 
 export const productDescriptionSchema = mysqlTable("product_descrizione", {
-  product_id: varchar("product_id", { length: 36 }).notNull(),
+  product_id: varchar("product_id", { length: 36 }).notNull().primaryKey(),
   images: json("images").$type<string[]>().notNull().default([]),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description").notNull(),

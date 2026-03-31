@@ -1,0 +1,1 @@
+ALTER TABLE `products` ADD `is_hidden` boolean DEFAULT false NOT NULL;

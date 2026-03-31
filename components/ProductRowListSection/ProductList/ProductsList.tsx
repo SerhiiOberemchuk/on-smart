@@ -2,9 +2,7 @@
 
 import CardProduct from "@/components/ProductCard/CardProduct";
 import { SwiperSlide, Swiper } from "swiper/react";
-
-import "swiper/css";
-import "swiper/css/free-mode";
+import "@/app/styles/swiper.css";
 
 import "./styles.css";
 import { FreeMode, Navigation } from "swiper/modules";
@@ -39,3 +37,4 @@ export default function ProductsList({
     </Swiper>
   );
 }
+

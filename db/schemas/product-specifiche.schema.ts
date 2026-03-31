@@ -1,7 +1,7 @@
 import { mysqlTable, varchar, json } from "drizzle-orm/mysql-core";
 
 export const productSpecificheSchema = mysqlTable("product_specifiche", {
-  product_id: varchar("product_id", { length: 36 }).notNull(),
+  product_id: varchar("product_id", { length: 36 }).notNull().primaryKey(),
 
   title: varchar("title", { length: 255 }).notNull(),
   images: json("images").$type<string[]>().notNull().default([]),

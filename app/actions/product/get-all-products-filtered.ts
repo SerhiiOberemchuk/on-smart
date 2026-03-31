@@ -3,7 +3,7 @@
 import { db } from "@/db/db";
 import { productsSchema } from "@/db/schemas/product.schema";
 import { productCharacteristicProductSchema } from "@/db/schemas/product_characteristic_product.schema";
-import { and, asc, desc, gte, inArray, isNull, lte, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNull, lte, sql, type SQL } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
@@ -44,6 +44,7 @@ export async function getAllProductsFiltered(payload: CatalogQueryPayload) {
   `;
 
   const where: SQL<unknown>[] = [];
+  where.push(eq(productsSchema.isHidden, false));
   if (mode === "parentsOnly") where.push(isNull(productsSchema.parent_product_id));
   if (categorySlugs?.length) where.push(inArray(productsSchema.category_slug, categorySlugs));
   if (brandSlugs?.length) where.push(inArray(productsSchema.brand_slug, brandSlugs));
