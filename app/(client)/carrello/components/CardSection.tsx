@@ -32,10 +32,12 @@ export default function CartSection() {
     const load = async () => {
       const ids = basket.map((item) => item.productId).filter((i) => i !== null);
 
-      const { data, error } = await getProductsByIds(ids);
+      const { data, success, errorMessage } = await getProductsByIds(ids);
 
-      if (error) {
-        console.error(error);
+      if (!success) {
+        if (errorMessage) {
+          console.error(`[CartSection] ${errorMessage}`);
+        }
         toast.error("Errore nel caricamento dei prodotti");
         return;
       }

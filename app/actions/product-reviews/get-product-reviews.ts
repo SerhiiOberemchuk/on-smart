@@ -7,36 +7,83 @@ import { eq, desc, and } from "drizzle-orm";
 import { cacheTag } from "next/cache";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
-export async function getProductReviews(productId: ProductType["id"]) {
+type ProductReviewsResult = {
+  reviews?: typeof productReviewsSchema.$inferSelect[];
+  success: boolean;
+  errorCode: "INVALID_INPUT" | "DB_ERROR" | null;
+  errorMessage: string | null;
+};
+
+async function getProductReviewsCachedCore(productId: ProductType["id"]): Promise<ProductReviewsResult> {
   "use cache";
   cacheTag(CACHE_TAGS.product.reviewsById(productId));
+
+  const reviews = await db
+    .select()
+    .from(productReviewsSchema)
+    .where(
+      and(eq(productReviewsSchema.product_id, productId), eq(productReviewsSchema.is_approved, true)),
+    )
+    .orderBy(desc(productReviewsSchema.created_at));
+
+  return { reviews, success: true, errorCode: null, errorMessage: null };
+}
+
+async function getProductReviewsAdminCachedCore(
+  productId: ProductType["id"],
+): Promise<ProductReviewsResult> {
+  "use cache";
+  cacheTag(CACHE_TAGS.product.reviewsById(productId));
+
+  const reviews = await db
+    .select()
+    .from(productReviewsSchema)
+    .where(and(eq(productReviewsSchema.product_id, productId)))
+    .orderBy(desc(productReviewsSchema.created_at));
+
+  return { reviews, success: true, errorCode: null, errorMessage: null };
+}
+
+export async function getProductReviews(productId: ProductType["id"]): Promise<ProductReviewsResult> {
+  if (!productId) {
+    return {
+      success: false,
+      errorCode: "INVALID_INPUT",
+      errorMessage: "Product id is required",
+    };
+  }
+
   try {
-    const reviews = await db
-      .select()
-      .from(productReviewsSchema)
-      .where(
-        and(
-          eq(productReviewsSchema.product_id, productId),
-          eq(productReviewsSchema.is_approved, true),
-        ),
-      )
-      .orderBy(desc(productReviewsSchema.created_at));
-    return { reviews, success: true };
+    return await getProductReviewsCachedCore(productId);
   } catch (error) {
-    return { success: false, error };
+    console.error("[getProductReviews]", error);
+    return {
+      success: false,
+      errorCode: "DB_ERROR",
+      errorMessage: "Failed to load product reviews",
+    };
   }
 }
-export async function getProductReviewsAdmin(productId: ProductType["id"]) {
-  "use cache";
-  cacheTag(CACHE_TAGS.product.reviewsById(productId));
+
+export async function getProductReviewsAdmin(
+  productId: ProductType["id"],
+): Promise<ProductReviewsResult> {
+  if (!productId) {
+    return {
+      success: false,
+      errorCode: "INVALID_INPUT",
+      errorMessage: "Product id is required",
+    };
+  }
+
   try {
-    const reviews = await db
-      .select()
-      .from(productReviewsSchema)
-      .where(and(eq(productReviewsSchema.product_id, productId)))
-      .orderBy(desc(productReviewsSchema.created_at));
-    return { reviews, success: true };
+    return await getProductReviewsAdminCachedCore(productId);
   } catch (error) {
-    return { success: false, error };
+    console.error("[getProductReviewsAdmin]", error);
+    return {
+      success: false,
+      errorCode: "DB_ERROR",
+      errorMessage: "Failed to load admin product reviews",
+    };
   }
 }

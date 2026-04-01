@@ -20,9 +20,8 @@ import Script from "next/script";
 import { Metadata } from "next/types";
 import { Suspense } from "react";
 
-type CatalogProductsData = {
+type CatalogFilterState = {
   isAnyFilterApplied: boolean;
-  productsResponse: Awaited<ReturnType<typeof getAllProductsFiltered>>;
 };
 
 export const metadata: Metadata = {
@@ -80,53 +79,64 @@ function buildProductHref(product: ProductType): string {
   return `/catalogo/${product.category_slug}/${product.brand_slug}/${product.slug}`;
 }
 
-async function getCatalogProductsData({
+async function getCatalogFilterState({
   filtersAction,
   searchParamsAction,
 }: {
   filtersAction: ReturnType<typeof getCatalogFilters>;
   searchParamsAction: PageProps<"/catalogo">["searchParams"];
-}): Promise<CatalogProductsData> {
+}): Promise<CatalogFilterState> {
   const [filters, searchParams] = await Promise.all([filtersAction, searchParamsAction]);
-  const isAnyFilterApplied = hasCatalogFiltersApplied({
-    allFilters: filters,
-    searchParams,
-  });
-  const productsResponse = await getAllProductsFiltered(
+
+  return {
+    isAnyFilterApplied: hasCatalogFiltersApplied({
+      allFilters: filters,
+      searchParams,
+    }),
+  };
+}
+
+async function getCatalogProductsResponse({
+  filtersAction,
+  searchParamsAction,
+}: {
+  filtersAction: ReturnType<typeof getCatalogFilters>;
+  searchParamsAction: PageProps<"/catalogo">["searchParams"];
+}) {
+  const [filters, searchParams] = await Promise.all([filtersAction, searchParamsAction]);
+
+  return getAllProductsFiltered(
     buildCatalogPayloadFromSearchParams({
       allFilters: filters,
       searchParams,
     }),
   );
-
-  return {
-    isAnyFilterApplied,
-    productsResponse,
-  };
 }
 
 async function CatalogHeaderContent({
-  catalogProductsDataAction,
+  productsResponseAction,
 }: {
-  catalogProductsDataAction: Promise<CatalogProductsData>;
+  productsResponseAction: ReturnType<typeof getCatalogProductsResponse>;
 }) {
-  const { productsResponse } = await catalogProductsDataAction;
+  const productsResponse = await productsResponseAction;
   return <HeaderCatalogo totalProducts={productsResponse.meta.total} />;
 }
 
 async function CatalogProductsContent({
-  catalogProductsDataAction,
+  productsResponseAction,
+  filterStateAction,
 }: {
-  catalogProductsDataAction: Promise<CatalogProductsData>;
+  productsResponseAction: ReturnType<typeof getCatalogProductsResponse>;
+  filterStateAction: Promise<CatalogFilterState>;
 }) {
-  const { productsResponse, isAnyFilterApplied } = await catalogProductsDataAction;
+  const [productsResponse, filterState] = await Promise.all([productsResponseAction, filterStateAction]);
 
   return (
     <CatalogProductSection
       page={productsResponse.meta.page}
       totalPages={productsResponse.meta.totalPages}
       products={productsResponse.data}
-      showResetButtonOnEmpty={isAnyFilterApplied}
+      showResetButtonOnEmpty={filterState.isAnyFilterApplied}
     />
   );
 }
@@ -150,11 +160,11 @@ async function CatalogDesktopFiltersContent({
 }
 
 async function CatalogJsonLdContent({
-  catalogProductsDataAction,
+  productsResponseAction,
 }: {
-  catalogProductsDataAction: Promise<CatalogProductsData>;
+  productsResponseAction: ReturnType<typeof getCatalogProductsResponse>;
 }) {
-  const { productsResponse } = await catalogProductsDataAction;
+  const productsResponse = await productsResponseAction;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -194,7 +204,11 @@ function CatalogoContent({
   filtersAction: ReturnType<typeof getCatalogFilters>;
   searchParamsAction: PageProps<"/catalogo">["searchParams"];
 }) {
-  const catalogProductsDataAction = getCatalogProductsData({
+  const filterStateAction = getCatalogFilterState({
+    filtersAction,
+    searchParamsAction,
+  });
+  const productsResponseAction = getCatalogProductsResponse({
     filtersAction,
     searchParamsAction,
   });
@@ -202,7 +216,7 @@ function CatalogoContent({
   return (
     <>
       <Suspense fallback={<CatalogHeaderFallback />}>
-        <CatalogHeaderContent catalogProductsDataAction={catalogProductsDataAction} />
+        <CatalogHeaderContent productsResponseAction={productsResponseAction} />
       </Suspense>
 
       <div id="filters" className="xl:bg-background">
@@ -216,13 +230,16 @@ function CatalogoContent({
           </Suspense>
 
           <Suspense fallback={<CatalogProductsFallback />}>
-            <CatalogProductsContent catalogProductsDataAction={catalogProductsDataAction} />
+            <CatalogProductsContent
+              productsResponseAction={productsResponseAction}
+              filterStateAction={filterStateAction}
+            />
           </Suspense>
         </div>
       </div>
 
       <Suspense fallback={null}>
-        <CatalogJsonLdContent catalogProductsDataAction={catalogProductsDataAction} />
+        <CatalogJsonLdContent productsResponseAction={productsResponseAction} />
       </Suspense>
     </>
   );

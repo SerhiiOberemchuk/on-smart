@@ -40,6 +40,9 @@ Rules:
 - Use `"use cache"` only in functions that actually perform cached reads.
 - Never use `"use cache"` in mutation actions.
 - Never cache errors: only successful, valid data may be returned from cached code paths.
+- Never place `try/catch` that returns fallback/error objects inside the same function that contains `"use cache"`.
+- Validation that does not depend on DB state (`missing id`, `empty array`, invalid params) must run in the outer wrapper before entering the cached core.
+- If a DB/schema error happens, the wrapper may log and return a safe fallback, but that fallback must be produced outside the cached function so it is not persisted in cache.
 
 Recommended template:
 
@@ -57,9 +60,14 @@ async function getSomethingCachedCore(id: string) {
 }
 
 export async function getSomething(id: string) {
+  if (!id) {
+    return fallback;
+  }
+
   try {
     return await getSomethingCachedCore(id);
   } catch (error) {
+    console.error("[getSomething]", error);
     return fallback;
   }
 }
@@ -118,9 +126,32 @@ export async function updateEntity(input: Input) {
 ## 9. Error Handling and Logging
 
 - Do not cache error states or failed responses.
+- If the function returns `{ success: false }`, `null`, `[]`, or any other fallback after a DB failure, that return path must stay outside `"use cache"`.
 - In cached wrappers, return a safe fallback (`[]`/`null`) where appropriate.
 - Log technical errors with context (`[featureName] ...`).
 - Do not pass raw errors to UI without normalization.
+- Do not expose `error: unknown` in stable UI-facing contracts when a typed error shape is practical.
+- Prefer explicit error fields such as `errorCode` and `errorMessage` over raw error objects in returned results.
+- Recommended read error codes: `"INVALID_INPUT" | "NOT_FOUND" | "DB_ERROR"`; extend only when the caller needs a materially different branch.
+- Keep raw thrown errors in logs only (`console.error` with context); map them to stable user-safe values before returning.
+
+Recommended typed result shape:
+
+```ts
+type ReadResult<T> =
+  | {
+      success: true;
+      data: T;
+      errorCode: null;
+      errorMessage: null;
+    }
+  | {
+      success: false;
+      data: null;
+      errorCode: "INVALID_INPUT" | "NOT_FOUND" | "DB_ERROR";
+      errorMessage: string;
+    };
+```
 
 ## 10. Naming Conventions
 
@@ -165,3 +196,16 @@ export async function updateEntity(input: Input) {
 - In client components, read these promises with `use()` under `Suspense`.
 - This is the default pattern for reducing repeated DB calls, avoiding connection spikes, and keeping data flow predictable.
 - Public/product-catalog reads must default to `includeHidden: false`; admin pages must pass `includeHidden: true` explicitly when hidden items are required.
+
+## 16. Route Error Boundaries
+
+- Public route segments with multiple independent async data sources should provide `error.tsx` at the segment level.
+- `error.tsx` is the last-resort protection for unexpected render-time failures; it does not replace typed read wrappers.
+- Use typed wrappers for expected data failures (`NOT_FOUND`, `DB_ERROR`, empty-state fallback) and `error.tsx` for everything that still escapes.
+- Prefer smaller route segments when the page has independently recoverable areas.
+- When a page area can fail independently and is driven by `searchParams`, prefer splitting it into a separate route segment or slot so it can own its own `loading.tsx` and `error.tsx`.
+
+Catalog guidance:
+
+- The catalog page is a good candidate for segmented rendering because filters, header/meta counters, and product list are independent read surfaces.
+- If the page is split further, each segment must keep search-param-driven behavior deterministic and must not duplicate expensive DB reads unnecessarily.

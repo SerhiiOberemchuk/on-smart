@@ -1,42 +1,87 @@
 "use server";
 
-import { Product_Details } from "@/types/product.types";
-import { getProductDescriptionById } from "../product-details.ts/get-product-description";
-import { getProductSpecificheById } from "../product-specifiche/get-product-specifiche";
-import { getProductDocumentsById } from "../product-documents/get-product-documents";
-import { getProductReviews } from "../product-reviews/get-product-reviews";
 import { cacheTag } from "next/cache";
-import { CACHE_TAGS } from "@/types/cache-trigers.constant";
+import { and, desc, eq } from "drizzle-orm";
 
-export async function getProductDetailsById(id: string): Promise<Product_Details> {
+import { db } from "@/db/db";
+import { productDescriptionSchema } from "@/db/schemas/product-details.schema";
+import { productDocumentsSchema } from "@/db/schemas/product-documents.schema";
+import { productReviewsSchema } from "@/db/schemas/product-reviews.schema";
+import { productSpecificheSchema } from "@/db/schemas/product-specifiche.schema";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
+import { Product_Details } from "@/types/product.types";
+
+function buildEmptyProductDetails(id: string): Product_Details {
+  return {
+    product_id: id,
+    characteristics_descrizione: {
+      title: "No title",
+      description: "",
+      images: ["/logo.png"],
+    },
+    characteristics_specifiche: {
+      title: "Specifiche",
+      images: ["/logo.png"],
+      groups: [],
+    },
+    characteristics_documenti: {
+      documents: [],
+    },
+    characteristics_valutazione: [],
+  };
+}
+
+async function getProductDetailsByIdCachedCore(id: string): Promise<Product_Details> {
   "use cache";
   cacheTag(CACHE_TAGS.product.details.all);
   cacheTag(CACHE_TAGS.product.details.byId(id));
-  const [description, specifiche, documents, reviews] = await Promise.all([
-    getProductDescriptionById({ id }),
-    getProductSpecificheById(id),
-    getProductDocumentsById({ product_id: id }),
-    getProductReviews(id),
+
+  const [descriptionRows, specificheRows, documentsRows, reviews] = await Promise.all([
+    db.select().from(productDescriptionSchema).where(eq(productDescriptionSchema.product_id, id)),
+    db.select().from(productSpecificheSchema).where(eq(productSpecificheSchema.product_id, id)),
+    db.select().from(productDocumentsSchema).where(eq(productDocumentsSchema.product_id, id)),
+    db
+      .select()
+      .from(productReviewsSchema)
+      .where(
+        and(eq(productReviewsSchema.product_id, id), eq(productReviewsSchema.is_approved, true)),
+      )
+      .orderBy(desc(productReviewsSchema.created_at)),
   ]);
+
+  const description = descriptionRows[0] ?? null;
+  const specifiche = specificheRows[0] ?? null;
+  const documents = documentsRows[0] ?? null;
+
   return {
     product_id: id,
-
     characteristics_descrizione: {
-      title: description?.data?.title ?? "No title",
-      description: description?.data?.description ?? "",
-      images: description?.data?.images?.length ? description.data.images : ["/logo.png"],
+      title: description?.title ?? "No title",
+      description: description?.description ?? "",
+      images: description?.images?.length ? description.images : ["/logo.png"],
     },
-
     characteristics_specifiche: {
-      title: specifiche?.data?.title ?? "Specifiche",
-      images: specifiche?.data?.images?.length ? specifiche.data.images : ["/logo.png"],
-      groups: specifiche?.data?.groups?.length ? specifiche.data.groups : [],
+      title: specifiche?.title ?? "Specifiche",
+      images: specifiche?.images?.length ? specifiche.images : ["/logo.png"],
+      groups: specifiche?.groups?.length ? specifiche.groups : [],
     },
-
     characteristics_documenti: {
-      documents: documents?.data?.documents?.length ? documents.data.documents : [],
+      documents: documents?.documents?.length ? documents.documents : [],
     },
-
-    characteristics_valutazione: reviews.reviews ? reviews.reviews : [],
+    characteristics_valutazione: reviews,
   };
+}
+
+export async function getProductDetailsById(id: string): Promise<Product_Details> {
+  if (!id) {
+    console.error("[getProductDetailsById] Product id is required");
+    return buildEmptyProductDetails(id);
+  }
+
+  try {
+    return await getProductDetailsByIdCachedCore(id);
+  } catch (error) {
+    console.error("[getProductDetailsById]", error);
+    return buildEmptyProductDetails(id);
+  }
 }

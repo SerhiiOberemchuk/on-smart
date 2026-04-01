@@ -19,7 +19,24 @@ export type CatalogQueryPayload = {
   mode?: "parentsOnly" | "all";
 };
 
-export async function getAllProductsFiltered(payload: CatalogQueryPayload) {
+type CatalogProductsFilteredResult = {
+  success: boolean;
+  data: typeof productsSchema.$inferSelect[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    mode: "parentsOnly" | "all";
+    sort: CatalogSort;
+  };
+  errorCode: "DB_ERROR" | null;
+  errorMessage: string | null;
+};
+
+async function getAllProductsFilteredCachedCore(
+  payload: CatalogQueryPayload,
+): Promise<CatalogProductsFilteredResult> {
   "use cache";
   cacheTag(CACHE_TAGS.product.all);
   cacheLife("minutes");
@@ -100,6 +117,7 @@ export async function getAllProductsFiltered(payload: CatalogQueryPayload) {
     .offset(safeOffset);
 
   return {
+    success: true,
     data,
     meta: {
       page: safePage,
@@ -109,5 +127,44 @@ export async function getAllProductsFiltered(payload: CatalogQueryPayload) {
       mode,
       sort: safeSort,
     },
+    errorCode: null,
+    errorMessage: null,
   };
+}
+
+export async function getAllProductsFiltered(
+  payload: CatalogQueryPayload,
+): Promise<CatalogProductsFilteredResult> {
+  try {
+    return await getAllProductsFilteredCachedCore(payload);
+  } catch (error) {
+    console.error("[getAllProductsFiltered]", error);
+
+    const limit =
+      Number.isFinite(payload.limit) && (payload.limit ?? 0) > 0
+        ? Math.min(Math.trunc(payload.limit as number), 100)
+        : 20;
+    const page =
+      Number.isFinite(payload.page) && (payload.page ?? 0) > 0
+        ? Math.trunc(payload.page as number)
+        : 1;
+
+    return {
+      success: false,
+      data: [],
+      meta: {
+        page,
+        limit,
+        total: 0,
+        totalPages: 1,
+        mode: payload.mode === "parentsOnly" ? "parentsOnly" : "all",
+        sort:
+          payload.sort === "price-asc" || payload.sort === "price-desc" || payload.sort === "new"
+            ? payload.sort
+            : "new",
+      },
+      errorCode: "DB_ERROR",
+      errorMessage: "Failed to load catalog products",
+    };
+  }
 }

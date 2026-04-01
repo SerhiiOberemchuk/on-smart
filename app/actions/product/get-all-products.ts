@@ -3,34 +3,54 @@
 import { db } from "@/db/db";
 import { ProductType, productsSchema } from "@/db/schemas/product.schema";
 import { eq } from "drizzle-orm";
-import { cacheLife } from "next/cache";
-import { cacheTag } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
-export type ProductFetchResult = {
-  success: boolean;
-  data: ProductType[] | null;
-  error: string | null;
-};
+export type ProductFetchResult =
+  | {
+      success: true;
+      data: ProductType[];
+      errorCode: null;
+      errorMessage: null;
+    }
+  | {
+      success: false;
+      data: null;
+      errorCode: "DB_ERROR";
+      errorMessage: string;
+    };
 
-export async function getAllProducts(options?: { includeHidden?: boolean }) {
+async function getAllProductsCachedCore(includeHidden: boolean): Promise<ProductFetchResult> {
   "use cache";
   cacheLife("seconds");
   cacheTag(CACHE_TAGS.product.all);
 
-  try {
-    const includeHidden = options?.includeHidden ?? false;
-    const response = includeHidden
-      ? await db.select().from(productsSchema)
-      : await db.select().from(productsSchema).where(eq(productsSchema.isHidden, false));
+  const response = includeHidden
+    ? await db.select().from(productsSchema)
+    : await db.select().from(productsSchema).where(eq(productsSchema.isHidden, false));
 
-    return { success: true, data: response, error: null };
+  return {
+    success: true,
+    data: response,
+    errorCode: null,
+    errorMessage: null,
+  };
+}
+
+export async function getAllProducts(
+  options?: { includeHidden?: boolean },
+): Promise<ProductFetchResult> {
+  const includeHidden = options?.includeHidden ?? false;
+
+  try {
+    return await getAllProductsCachedCore(includeHidden);
   } catch (error) {
-    console.error("DB error:", error);
+    console.error("[getAllProducts]", error);
     return {
       success: false,
       data: null,
-      error: error instanceof Error ? error.message : String(error),
+      errorCode: "DB_ERROR",
+      errorMessage: "Failed to load products",
     };
   }
 }
