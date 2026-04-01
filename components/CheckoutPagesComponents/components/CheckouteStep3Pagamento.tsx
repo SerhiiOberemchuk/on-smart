@@ -1,4 +1,6 @@
-﻿import SmartImage from "@/components/SmartImage";
+﻿"use client";
+
+import SmartImage from "@/components/SmartImage";
 
 import icon_card from "@/assets/icons/icon_card.svg";
 import { InputBlock } from "@/components/InputBloc";
@@ -6,24 +8,27 @@ import { useState } from "react";
 import ButtonYellow from "@/components/BattonYellow";
 import { MetodsPayment, PAYMENT_METHODS } from "@/types/bonifico.data";
 import { useCheckoutStore } from "@/store/checkout-store";
-import { redirect } from "next/navigation";
+import { PAGES } from "@/types/pages.types";
+import { useRouter } from "next/navigation";
 import BonificoDati from "./BonificoDati";
 import RiepilogoDatiCliente from "./RiepilogoDatiCliente";
 import RiepilogoDatiConsegna from "./RepilogoDatiConsegna";
 
 export default function CheckouteStep3Pagamento() {
   const { setDataCheckoutStepPagamento, setStep, dataCheckoutStepPagamento } = useCheckoutStore();
-  // const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const router = useRouter();
 
   const [paymentMethod, setPaymentMethod] = useState<MetodsPayment["paymentMethod"] | undefined>(
     dataCheckoutStepPagamento?.paymentMethod,
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = () => {
-    if (!paymentMethod) return;
-    // setIsButtonDisabled(true);
+    if (!paymentMethod || isSubmitting) return;
+    setIsSubmitting(true);
     setDataCheckoutStepPagamento(PAYMENT_METHODS.find((m) => m.paymentMethod === paymentMethod)!);
     setStep(4);
-    redirect("/checkout/riepilogo");
+    router.push(PAGES.CHECKOUT_PAGES.SUMMARY);
   };
 
   return (
@@ -45,6 +50,7 @@ export default function CheckouteStep3Pagamento() {
                 value={method.paymentMethod}
                 required
                 checked={method.paymentMethod === paymentMethod}
+                disabled={isSubmitting}
                 className="flex flex-row-reverse justify-end gap-3 py-2"
                 onChange={() => setPaymentMethod(method.paymentMethod)}
               />
@@ -55,15 +61,12 @@ export default function CheckouteStep3Pagamento() {
       </div>
       <ButtonYellow
         className="ml-auto"
-        disabled={!paymentMethod
-          //  || isButtonDisabled
-          }
+        disabled={!paymentMethod || isSubmitting}
         type="button"
         onClick={handleSubmit}
       >
-        Vai avanti
+        {isSubmitting ? "Apertura riepilogo..." : "Vai avanti"}
       </ButtonYellow>
     </div>
   );
 }
-

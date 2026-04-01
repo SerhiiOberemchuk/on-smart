@@ -20,6 +20,11 @@ type CreatedOrderRef = {
   orderNumber: string;
 };
 
+const PERSISTENT_PAYMENT_TOAST_OPTIONS = {
+  autoClose: false,
+  closeOnClick: true,
+} as const;
+
 export default function SumUpModalButton() {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -72,6 +77,7 @@ export default function SumUpModalButton() {
     (reason: string) => {
       toast.error(
         "Pagamento non riuscito. Prova piu tardi oppure scegli un altro metodo di pagamento.",
+        PERSISTENT_PAYMENT_TOAST_OPTIONS,
       );
       router.push(`${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=${encodeURIComponent(reason)}`);
     },
@@ -82,7 +88,7 @@ export default function SumUpModalButton() {
     if (!open || !checkoutId) return;
 
     if (!window.SumUpCard) {
-      toast.error("SumUp non disponibile, riprova.");
+      toast.error("SumUp non disponibile, riprova.", PERSISTENT_PAYMENT_TOAST_OPTIONS);
       void close();
       return;
     }
@@ -191,7 +197,10 @@ export default function SumUpModalButton() {
         });
 
         if (!created?.success || !created.orderId || !created.orderNumber) {
-          toast.error(`Errore: ${String(created?.error ?? "")}`);
+          toast.error(
+            `Errore: ${String(created?.error ?? "")}`,
+            PERSISTENT_PAYMENT_TOAST_OPTIONS,
+          );
           return;
         }
 
@@ -218,7 +227,7 @@ export default function SumUpModalButton() {
         });
 
         if (!checkout.success) {
-          toast.error("Prova piu tardi");
+          toast.error("Prova piu tardi", PERSISTENT_PAYMENT_TOAST_OPTIONS);
           await close();
           redirectToSumUpErrorState("sumup_checkout_creation_failed");
           return;
@@ -249,7 +258,13 @@ export default function SumUpModalButton() {
         disabled={pending || startingRef.current || open || isProcessingResponse}
         className="w-full rounded-xl bg-[#F2C94C] px-6 py-3 font-semibold text-black disabled:opacity-60"
       >
-        {pending ? "Apro..." : "Paga e procedi avanti"}
+        {isProcessingResponse
+          ? "Verifica del pagamento in corso..."
+          : open
+            ? "Finestra di pagamento aperta..."
+            : pending || startingRef.current
+              ? "Preparazione del pagamento..."
+              : "Paga e procedi avanti"}
       </button>
 
       {open && (
@@ -258,6 +273,7 @@ export default function SumUpModalButton() {
           role="dialog"
           aria-modal="true"
           onMouseDown={(e) => {
+            if (isProcessingResponse) return;
             if (e.target === e.currentTarget) void close();
           }}
         >
@@ -265,12 +281,18 @@ export default function SumUpModalButton() {
             <button
               type="button"
               onClick={() => void close()}
-              className="absolute top-3 right-3 rounded-lg px-3 py-1 text-sm text-black/70 hover:bg-black/5"
+              disabled={isProcessingResponse}
+              className="absolute top-3 right-3 rounded-lg px-3 py-1 text-sm text-black/70 hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Chiudi"
             >
               x
             </button>
 
+            {isProcessingResponse ? (
+              <div className="px-4 pt-4 text-sm text-white">
+                Conferma del pagamento in corso. Non chiudere questa finestra.
+              </div>
+            ) : null}
             <div id="sumUpIdContainer" ref={containerRef} className="pb-4" />
           </div>
         </div>

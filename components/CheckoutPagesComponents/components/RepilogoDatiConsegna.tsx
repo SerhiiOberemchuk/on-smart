@@ -9,6 +9,7 @@ import {
   CheckoutTypesDataStepConsegna,
   useCheckoutStore,
 } from "@/store/checkout-store";
+import { PAGES } from "@/types/pages.types";
 
 export default function RiepilogoDatiConsegna({
   isModifica = true,
@@ -48,7 +49,7 @@ export default function RiepilogoDatiConsegna({
         <h3 className="H5">Metodo di consegna</h3>
         {isModifica && (
           <Link
-            href="/checkout/consegna"
+            href={PAGES.CHECKOUT_PAGES.DELIVERY}
             className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
           >
             <SmartImage src={icon_pencil} alt="icon pencil" aria-label="icon pencil" /> Modifica

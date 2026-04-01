@@ -18,6 +18,7 @@ import { getProductsByIds } from "@/app/actions/product/get-products-by-array-id
 import type { ProductType } from "@/db/schemas/product.schema";
 export default function CartSection() {
   const [fetchedProducts, setFetchedProducts] = useState<ProductType[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
 
   const { basket, removeFromBasketById, updateBasket, setProductsInBasket } = useBasketStore();
   useEffect(() => {
@@ -26,17 +27,22 @@ export default function CartSection() {
   useEffect(() => {
     if (basket.length === 0) {
       setFetchedProducts([]);
+      setIsLoadingProducts(false);
       return;
     }
 
     const load = async () => {
+      setIsLoadingProducts(true);
       const ids = basket.map((item) => item.productId).filter((i) => i !== null);
 
-      const { data, error } = await getProductsByIds(ids);
+      const { data, success, errorMessage } = await getProductsByIds(ids);
 
-      if (error) {
-        console.error(error);
+      if (!success) {
+        if (errorMessage) {
+          console.error(`[CartSection] ${errorMessage}`);
+        }
         toast.error("Errore nel caricamento dei prodotti");
+        setIsLoadingProducts(false);
         return;
       }
 
@@ -67,6 +73,7 @@ export default function CartSection() {
       });
 
       setFetchedProducts(products);
+      setIsLoadingProducts(false);
     };
 
     load();
@@ -120,86 +127,117 @@ export default function CartSection() {
 
       <div className="container bg-background xl:bg-transparent">
         <div className="relative flex flex-col gap-4 xl:mt-5 xl:flex-row xl:gap-5">
-          <ul className="mx-auto flex w-full max-w-[916px] flex-col gap-6 rounded-sm bg-background p-3 xl:mx-0">
-            {fetchedProducts.map((prod, index) => {
-              const item = basket.find((b) => b.productId === prod.id);
-              const price = calcProductPrice(prod.id);
-              const canIncrement = item && prod && item.quantity < prod.inStock;
-              const canDecrement = item && item.quantity > 1;
-              return (
+          <ul className="mx-auto flex min-h-[320px] w-full max-w-[916px] flex-col gap-6 rounded-sm bg-background p-3 xl:mx-0">
+            {isLoadingProducts &&
+              basket.length > 0 &&
+              Array.from({ length: Math.min(Math.max(basket.length, 1), 3) }).map((_, index) => (
                 <li
-                  key={prod.id}
+                  key={`cart-skeleton-${index}`}
                   className={clsx(
                     "relative flex flex-col gap-3 xl:flex-row xl:gap-5",
-                    index !== fetchedProducts.length - 1 &&
+                    index !== Math.min(Math.max(basket.length, 1), 3) - 1 &&
                       "border-b border-grey-hover-stroke pb-3 xl:pb-6",
                   )}
                 >
-                  <button
-                    onClick={() => removeFromBasketById(prod.id)}
-                    className="absolute top-0 right-0"
-                  >
-                    <SmartImage src={icon_dell} alt="delete" />
-                  </button>
-
-                  <SmartImage
-                    src={prod.imgSrc}
-                    alt="product"
-                    width={230}
-                    height={230}
-                    className="card_gradient h-auto w-16 rounded-sm object-contain object-left xl:w-60"
-                  />
-
-                  <div className="flex w-full flex-col justify-between">
-                    <div>
-                      <h2 className="input_R_18 mt-2 line-clamp-3 max-w-[412px]">
-                        {prod.nameFull}
-                      </h2>
+                  <div className="card_gradient h-16 w-16 animate-pulse rounded-sm xl:h-[230px] xl:w-60" />
+                  <div className="flex w-full flex-col justify-between gap-4">
+                    <div className="mt-2 space-y-3">
+                      <div className="h-5 w-2/3 animate-pulse rounded bg-grey-hover-stroke" />
+                      <div className="h-5 w-5/6 animate-pulse rounded bg-grey-hover-stroke" />
+                      <div className="h-5 w-1/2 animate-pulse rounded bg-grey-hover-stroke" />
                     </div>
 
                     <div className="mt-2 flex items-center justify-between">
-                      <div className="flex h-11 w-[132px] items-center rounded-sm border border-stroke-grey text-[20px]">
-                        <button
-                          type="button"
-                          disabled={!canDecrement}
-                          className={clsx(
-                            "flex-1 text-white transition hover:scale-110",
-                            !canDecrement && "cursor-not-allowed opacity-50",
-                          )}
-                          onClick={() => canDecrement && decrementQnt(prod.id)}
-                        >
-                          -
-                        </button>
-
-                        <div className="input_M_18 flex h-11 w-11 items-center justify-center text-white">
-                          {item?.quantity ?? 0}
-                        </div>
-
-                        <button
-                          type="button"
-                          disabled={!canIncrement}
-                          className={clsx(
-                            "flex-1 text-white transition hover:scale-110",
-                            !canIncrement && "cursor-not-allowed opacity-50",
-                          )}
-                          onClick={() => canIncrement && incrementQnt(prod.id)}
-                        >
-                          +
-                        </button>
+                      <div className="h-11 w-[132px] animate-pulse rounded-sm bg-grey-hover-stroke" />
+                      <div className="space-y-2">
+                        <div className="ml-auto h-5 w-24 animate-pulse rounded bg-grey-hover-stroke" />
+                        <div className="ml-auto h-7 w-28 animate-pulse rounded bg-grey-hover-stroke" />
                       </div>
-
-                      <PricesBox
-                        price={price.price}
-                        oldPrice={price.oldPrice}
-                        place="main-card-product"
-                      />
                     </div>
                   </div>
                 </li>
-              );
-            })}
+              ))}
 
-            {basket.length === 0 && (
+            {!isLoadingProducts &&
+              fetchedProducts.map((prod, index) => {
+                const item = basket.find((b) => b.productId === prod.id);
+                const price = calcProductPrice(prod.id);
+                const canIncrement = item && prod && item.quantity < prod.inStock;
+                const canDecrement = item && item.quantity > 1;
+                return (
+                  <li
+                    key={prod.id}
+                    className={clsx(
+                      "relative flex flex-col gap-3 xl:flex-row xl:gap-5",
+                      index !== fetchedProducts.length - 1 &&
+                        "border-b border-grey-hover-stroke pb-3 xl:pb-6",
+                    )}
+                  >
+                    <button
+                      onClick={() => removeFromBasketById(prod.id)}
+                      className="absolute top-0 right-0"
+                    >
+                      <SmartImage src={icon_dell} alt="delete" />
+                    </button>
+
+                    <SmartImage
+                      src={prod.imgSrc}
+                      alt="product"
+                      width={230}
+                      height={230}
+                      className="card_gradient h-auto w-16 rounded-sm object-contain object-left xl:w-60"
+                    />
+
+                    <div className="flex w-full flex-col justify-between">
+                      <div>
+                        <h2 className="input_R_18 mt-2 line-clamp-3 max-w-[412px]">
+                          {prod.nameFull}
+                        </h2>
+                      </div>
+
+                      <div className="mt-2 flex items-center justify-between">
+                        <div className="flex h-11 w-[132px] items-center rounded-sm border border-stroke-grey text-[20px]">
+                          <button
+                            type="button"
+                            disabled={!canDecrement}
+                            className={clsx(
+                              "flex-1 text-white transition hover:scale-110",
+                              !canDecrement && "cursor-not-allowed opacity-50",
+                            )}
+                            onClick={() => canDecrement && decrementQnt(prod.id)}
+                          >
+                            -
+                          </button>
+
+                          <div className="input_M_18 flex h-11 w-11 items-center justify-center text-white">
+                            {item?.quantity ?? 0}
+                          </div>
+
+                          <button
+                            type="button"
+                            disabled={!canIncrement}
+                            className={clsx(
+                              "flex-1 text-white transition hover:scale-110",
+                              !canIncrement && "cursor-not-allowed opacity-50",
+                            )}
+                            onClick={() => canIncrement && incrementQnt(prod.id)}
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        <PricesBox
+                          price={price.price}
+                          oldPrice={price.oldPrice}
+                          place="main-card-product"
+                        />
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+
+            {!isLoadingProducts && basket.length === 0 && (
               <li className="text-center">
                 Il carrello è vuoto{" "}
                 <Link href="/catalogo" className="underline">
@@ -209,7 +247,28 @@ export default function CartSection() {
             )}
           </ul>
 
-          <RepilogoComponent totalPrice={calcTotal()} basket={basket} />
+          {isLoadingProducts && basket.length > 0 ? (
+            <div className="sticky top-5 w-full xl:max-w-[426px]">
+              <div className="sticky top-5 flex min-h-[260px] w-full flex-col gap-6 rounded-sm bg-background p-3">
+                <div className="h-8 w-2/3 animate-pulse rounded bg-grey-hover-stroke" />
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div key={`summary-skeleton-${index}`} className="flex items-center justify-between">
+                      <div className="h-5 w-28 animate-pulse rounded bg-grey-hover-stroke" />
+                      <div className="h-5 w-20 animate-pulse rounded bg-grey-hover-stroke" />
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center justify-between pt-2">
+                  <div className="h-7 w-24 animate-pulse rounded bg-grey-hover-stroke" />
+                  <div className="h-7 w-24 animate-pulse rounded bg-grey-hover-stroke" />
+                </div>
+                <div className="h-11 w-full animate-pulse rounded-sm bg-yellow-500/40" />
+              </div>
+            </div>
+          ) : (
+            <RepilogoComponent totalPrice={calcTotal()} basket={basket} />
+          )}
         </div>
       </div>
     </section>

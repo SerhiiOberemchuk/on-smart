@@ -10,6 +10,11 @@ import { useBasketStore } from "@/store/basket-store";
 import { toast } from "react-toastify";
 import { notifyOrderById } from "@/app/actions/notify-order-by-id/notify-order-by-id";
 
+const PERSISTENT_PAYMENT_TOAST_OPTIONS = {
+  autoClose: false,
+  closeOnClick: true,
+} as const;
+
 export default function BonificoPaymentWidget() {
   const router = useRouter();
   const {
@@ -83,6 +88,7 @@ export default function BonificoPaymentWidget() {
     console.error(stateOrder.error);
     toast.error(
       "Pagamento non riuscito. Prova piu tardi oppure scegli un altro metodo di pagamento.",
+      PERSISTENT_PAYMENT_TOAST_OPTIONS,
     );
     router.push(`${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=bonifico_order_create_failed`);
   }, [router, stateOrder.error]);
@@ -90,7 +96,7 @@ export default function BonificoPaymentWidget() {
   return (
     <>
       <ButtonYellow
-        className="ml-auto"
+        className="ml-auto flex"
         disabled={pendingOrder}
         onClick={() => {
           startTransition(actionOrder);
@@ -98,8 +104,6 @@ export default function BonificoPaymentWidget() {
       >
         {pendingOrder ? "Creazione..." : "Conferma Ordine"}
       </ButtonYellow>
-
-      {/* {!pending && stateOrder.error ? <p className="mt-2 text-sm text-red-600">{state.error}</p> : null} */}
     </>
   );
 }

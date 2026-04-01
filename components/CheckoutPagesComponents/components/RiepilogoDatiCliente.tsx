@@ -5,6 +5,7 @@ import icon_pencil from "@/assets/icons/icon_add_review.svg";
 import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
 import { CheckoutTypesDataFirstStep, useCheckoutStore } from "@/store/checkout-store";
+import { PAGES } from "@/types/pages.types";
 
 export default function RiepilogoDatiCliente({
   isModifica = true,
@@ -47,7 +48,7 @@ export default function RiepilogoDatiCliente({
         <h3 className="H5">I tuoi dati</h3>
         {isModifica && (
           <Link
-            href="/checkout/informazioni"
+            href={PAGES.CHECKOUT_PAGES.INFORMATION}
             className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
           >
             <SmartImage src={icon_pencil} alt="icon pencil" /> Modifica

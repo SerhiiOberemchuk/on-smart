@@ -4,12 +4,13 @@ import { useCheckoutStore } from "@/store/checkout-store";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { twMerge } from "tailwind-merge";
+import { PAGES } from "@/types/pages.types";
 
 export const checkoutSteps = [
-  { label: "I tuoi dati", href: "/checkout/informazioni", checkoutStep: 1 },
-  { label: "Consegna", href: "/checkout/consegna", checkoutStep: 2 },
-  { label: "Pagamento", href: "/checkout/pagamento", checkoutStep: 3 },
-  { label: "Riepilogo", href: "/checkout/riepilogo", checkoutStep: 4 },
+  { label: "I tuoi dati", href: PAGES.CHECKOUT_PAGES.INFORMATION, checkoutStep: 1 },
+  { label: "Consegna", href: PAGES.CHECKOUT_PAGES.DELIVERY, checkoutStep: 2 },
+  { label: "Pagamento", href: PAGES.CHECKOUT_PAGES.PAYMENT, checkoutStep: 3 },
+  { label: "Riepilogo", href: PAGES.CHECKOUT_PAGES.SUMMARY, checkoutStep: 4 },
 ];
 
 export default function CheckoutStepsLinks() {

@@ -9,12 +9,19 @@ import { isBuildPhase } from "@/utils/guard-build";
 import { and, desc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 
-async function getTopSalesProductsCachedCore(limit: number): Promise<ProductType[]> {
+function normalizeTopSalesLimit(limit: number): number {
+  if (!Number.isFinite(limit)) {
+    return 12;
+  }
+
+  return Math.max(1, Math.min(Math.trunc(limit), 30));
+}
+
+async function getTopSalesProductsCachedCore(safeLimit: number): Promise<ProductType[]> {
   "use cache";
   cacheTag(CACHE_TAGS.product.topSales);
   cacheTag(CACHE_TAGS.product.all);
   cacheLife("minutes");
-  const safeLimit = Math.max(1, Math.min(limit, 30));
   const effectiveProductId = sql<string>`COALESCE(${productsSchema.parent_product_id}, ${productsSchema.id})`;
   const soldQty = sql<number>`SUM(${orderItemsSchema.quantity})`;
 
@@ -76,10 +83,12 @@ export async function getTopSalesProducts(limit = 12): Promise<ProductType[]> {
     return [];
   }
 
+  const safeLimit = normalizeTopSalesLimit(limit);
+
   try {
-    return await getTopSalesProductsCachedCore(limit);
+    return await getTopSalesProductsCachedCore(safeLimit);
   } catch (error) {
-    console.error("getTopSalesProducts error:", error);
+    console.error("[getTopSalesProducts]", error);
     return [];
   }
 }

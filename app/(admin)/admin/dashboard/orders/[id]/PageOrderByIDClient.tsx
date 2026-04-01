@@ -92,8 +92,8 @@ export default function PageOrderByID({
         },
       });
 
-      if (!response.succes) {
-        const message = String(response.error ?? "Помилка збереження");
+      if (!response.success) {
+        const message = response.errorMessage || "Помилка збереження";
         setSaveError(message);
         toast.error(message);
         return;

@@ -8,7 +8,8 @@ import { BrandTypes } from "@/types/brands.types";
 type BrandListResult = {
   success: boolean;
   data: BrandTypes[];
-  error?: unknown;
+  errorCode?: string | null;
+  errorMessage?: string | null;
 };
 
 function toAbsoluteImageUrl(src: string) {

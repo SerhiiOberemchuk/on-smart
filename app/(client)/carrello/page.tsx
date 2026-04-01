@@ -3,16 +3,19 @@ import CardSection from "./components/CardSection";
 import ProductSuspensedListCarello from "./ProductSuspensedListCarello";
 import { Suspense } from "react";
 
-export default function CarrelloPage() {
-  const products = getAllProducts({ includeHidden: false });
+async function CartRecommendations() {
+  const products = await getAllProducts({ includeHidden: false });
+  return <ProductSuspensedListCarello productsAction={Promise.resolve(products)} />;
+}
 
+export default function CarrelloPage() {
   return (
     <>
-      <Suspense>
+      <Suspense fallback={null}>
         <CardSection />
       </Suspense>
-      <Suspense>
-        <ProductSuspensedListCarello productsAction={products} />
+      <Suspense fallback={null}>
+        <CartRecommendations />
       </Suspense>
     </>
   );

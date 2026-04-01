@@ -107,6 +107,12 @@
   text-decoration: underline;
 }
 
+.admin-logout-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  text-decoration: none;
+}
+
 .admin-main {
   position: relative;
   display: flex;
@@ -352,6 +358,70 @@
 
 .admin-card-content {
   padding: 1rem;
+}
+
+.admin-auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-block: 2rem;
+}
+
+.admin-auth-wrap {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.admin-auth-header {
+  margin-bottom: 1rem;
+}
+
+.admin-auth-chip {
+  width: fit-content;
+  margin-inline: auto;
+}
+
+.admin-auth-card {
+  background:
+    linear-gradient(180deg, rgba(247, 190, 58, 0.05), rgba(247, 190, 58, 0) 28%),
+    var(--admin-bg-card);
+}
+
+.admin-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-auth-alert {
+  border-radius: 0.75rem;
+  border: 1px solid var(--admin-border);
+  padding: 0.75rem 0.85rem;
+  font-size: 0.88rem;
+}
+
+.admin-auth-alert-error {
+  border-color: rgba(255, 45, 45, 0.45);
+  background: rgba(255, 45, 45, 0.08);
+  color: #ffc1c1;
+}
+
+.admin-auth-alert-pending {
+  border-color: rgba(247, 190, 58, 0.35);
+  background: rgba(247, 190, 58, 0.1);
+  color: #ffe4a6;
+}
+
+.admin-auth-submit {
+  width: 100%;
+  justify-content: center;
+}
+
+.admin-auth-footnote {
+  margin-top: 0.875rem;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--admin-text-muted);
 }
 
 .admin-grid-2 {

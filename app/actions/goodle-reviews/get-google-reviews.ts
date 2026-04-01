@@ -16,6 +16,20 @@ const client = new ApifyClient({
   token: APIFY_TOKEN,
 });
 
+type GoogleReviewsActionResult =
+  | {
+      success: true;
+      reviews: GoogleReview[];
+      errorCode: null;
+      errorMessage: null;
+    }
+  | {
+      success: false;
+      reviews: [];
+      errorCode: "BUILD_PHASE" | "MISSING_CONFIG" | "EXTERNAL_ERROR";
+      errorMessage: string;
+    };
+
 type ApifyReviewItem = {
   name?: string;
   reviewId?: string;
@@ -56,6 +70,7 @@ function normalizeReview(item: ApifyReviewItem, index: number): GoogleReview | n
 async function getGoogleReviewsCachedCore(taskId: string): Promise<GoogleReview[]> {
   "use cache";
   cacheLife("hours");
+
   const run = await client.task(taskId).call();
   const { items } = await client.dataset(run.defaultDatasetId).listItems({
     limit: MAX_REVIEWS,
@@ -67,13 +82,23 @@ async function getGoogleReviewsCachedCore(taskId: string): Promise<GoogleReview[
     .filter((item): item is GoogleReview => Boolean(item));
 }
 
-export async function getGoogleReviewsAction() {
+export async function getGoogleReviewsAction(): Promise<GoogleReviewsActionResult> {
   if (isBuildPhase()) {
-    return { success: false, error: BUILD_PHASE_SKIP_ERROR, reviews: [] };
+    return {
+      success: false,
+      errorCode: "BUILD_PHASE",
+      errorMessage: BUILD_PHASE_SKIP_ERROR,
+      reviews: [],
+    };
   }
 
   if (!APIFY_TOKEN || !APIFY_TASK_ID) {
-    return { success: false, error: "APIFY_TOKEN or APIFY_TASK_ID is not defined", reviews: [] };
+    return {
+      success: false,
+      errorCode: "MISSING_CONFIG",
+      errorMessage: "APIFY_TOKEN or APIFY_TASK_ID is not defined",
+      reviews: [],
+    };
   }
 
   try {
@@ -81,8 +106,16 @@ export async function getGoogleReviewsAction() {
     return {
       success: true,
       reviews,
+      errorCode: null,
+      errorMessage: null,
     };
   } catch (error) {
-    return { success: false, error, reviews: [] };
+    console.error("[getGoogleReviewsAction]", error);
+    return {
+      success: false,
+      errorCode: "EXTERNAL_ERROR",
+      errorMessage: "Failed to load Google reviews",
+      reviews: [],
+    };
   }
 }

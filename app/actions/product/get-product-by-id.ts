@@ -6,43 +6,65 @@ import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 
-export async function getProductById(id: ProductType["id"]) {
+type GetProductByIdResult =
+  | {
+      success: true;
+      data: ProductType;
+      errorCode: null;
+      errorMessage: null;
+    }
+  | {
+      success: false;
+      data: null;
+      errorCode: "INVALID_INPUT" | "NOT_FOUND" | "DB_ERROR";
+      errorMessage: string;
+    };
+
+async function getProductByIdCachedCore(id: ProductType["id"]): Promise<GetProductByIdResult> {
   "use cache";
   cacheLife("seconds");
   cacheTag(CACHE_TAGS.product.byId(id));
   cacheTag(CACHE_TAGS.product.all);
 
+  const rows = await db.select().from(productsSchema).where(eq(productsSchema.id, id));
+  const product = rows[0] ?? null;
+
+  if (!product) {
+    return {
+      success: false,
+      data: null,
+      errorCode: "NOT_FOUND",
+      errorMessage: "Product not found",
+    };
+  }
+
+  return {
+    success: true,
+    data: product,
+    errorCode: null,
+    errorMessage: null,
+  };
+}
+
+export async function getProductById(id: ProductType["id"]): Promise<GetProductByIdResult> {
   if (!id) {
     return {
       success: false,
       data: null,
-      error: "Product id is required",
+      errorCode: "INVALID_INPUT",
+      errorMessage: "Product id is required",
     };
   }
 
   try {
-    const rows = await db.select().from(productsSchema).where(eq(productsSchema.id, id));
-
-    const product = rows[0] ?? null;
-
-    if (!product) {
-      return {
-        success: false,
-        data: null,
-        error: "Товар не знайдено",
-      };
-    }
-
-    return {
-      success: true,
-      data: product,
-      error: null,
-    };
+    return await getProductByIdCachedCore(id);
   } catch (error) {
+    console.error("[getProductById]", error);
     return {
       success: false,
       data: null,
-      error,
+      errorCode: "DB_ERROR",
+      errorMessage: "Failed to load product by id",
     };
   }
 }

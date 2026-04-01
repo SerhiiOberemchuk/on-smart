@@ -33,6 +33,10 @@ import Script from "next/script";
 
 const containerId = "klarna_container";
 const currency = "EUR";
+const PERSISTENT_PAYMENT_TOAST_OPTIONS = {
+  autoClose: false,
+  closeOnClick: true,
+} as const;
 
 type CreatedOrderRef = {
   orderId: string;
@@ -76,8 +80,15 @@ export default function KlarnaPaymentWidget() {
   const redirectToKlarnaErrorState = (reason: string) => {
     toast.error(
       "Pagamento Klarna non riuscito. Riprova piu tardi o scegli un altro metodo di pagamento.",
+      PERSISTENT_PAYMENT_TOAST_OPTIONS,
     );
     router.push(`${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=${encodeURIComponent(reason)}`);
+  };
+
+  const redirectToKlarnaPendingReviewState = () => {
+    router.push(
+      `${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=${encodeURIComponent("klarna_paid_persist_failed")}`,
+    );
   };
 
   const canPay = useMemo<boolean>(() => {
@@ -181,7 +192,7 @@ export default function KlarnaPaymentWidget() {
     });
 
     if (!created?.success || !created.orderId) {
-      toast.error("Errore creazione ordine");
+      toast.error("Errore creazione ordine", PERSISTENT_PAYMENT_TOAST_OPTIONS);
       isCreatingRef.current = false;
       setIsPaying(false);
       return;
@@ -195,14 +206,20 @@ export default function KlarnaPaymentWidget() {
       async (res: KlarnaAuthorizeResponse) => {
         try {
           if (!res.approved || !res.authorization_token) {
-            await updateOrderPaymentAction({
+            const cancelUpdate = await updateOrderPaymentAction({
               orderNumber,
               data: {
                 status: "CANCELED",
                 notes: "Klarna authorization was not approved",
               },
             });
-            await deleteOrderByOrderId({ id: created.orderId });
+            if (!cancelUpdate.success) {
+              console.error("Klarna cancel update failed:", cancelUpdate);
+            }
+            const rollback = await deleteOrderByOrderId({ id: created.orderId });
+            if (!rollback.success) {
+              console.error("Klarna rollback after authorization failure failed:", rollback);
+            }
             redirectToKlarnaErrorState("klarna_authorization_not_approved");
             return;
           }
@@ -218,29 +235,49 @@ export default function KlarnaPaymentWidget() {
           });
 
           if (!placedOrder.success) {
-            await updateOrderPaymentAction({
+            const failedUpdate = await updateOrderPaymentAction({
               orderNumber,
               data: {
                 status: "FAILED",
                 notes: `Klarna place order failed: ${placedOrder.error}`,
               },
             });
-            await deleteOrderByOrderId({ id: created.orderId });
+            if (!failedUpdate.success) {
+              console.error("Klarna failed update after place-order failed:", failedUpdate);
+            }
+            const rollback = await deleteOrderByOrderId({ id: created.orderId });
+            if (!rollback.success) {
+              console.error("Klarna rollback after place-order failed:", rollback);
+            }
             redirectToKlarnaErrorState("klarna_place_order_failed");
             return;
           }
 
-          await updateOrderPaymentAction({
+          const paymentPersist = await updateOrderPaymentAction({
             orderNumber,
             data: {
               status: "PAYED",
               providerOrderId: placedOrder.orderId,
             },
           });
-          await updateOrderInfoByOrderIDAction({
+
+          if (!paymentPersist.success) {
+            console.error("Klarna payment persist failed after provider success:", paymentPersist);
+            redirectToKlarnaPendingReviewState();
+            return;
+          }
+
+          const orderPersist = await updateOrderInfoByOrderIDAction({
             orderId: created.orderId,
             dataToUpdate: { orderStatus: "PAID" },
           });
+
+          if (!orderPersist.success) {
+            console.error("Klarna order persist failed after provider success:", orderPersist);
+            redirectToKlarnaPendingReviewState();
+            return;
+          }
+
           if (!didNotifyRef.current) {
             didNotifyRef.current = true;
 
@@ -259,14 +296,20 @@ export default function KlarnaPaymentWidget() {
           router.push(`${PAGES.CHECKOUT_PAGES.COMPLETED}/${orderNumber}`);
         } catch (e) {
           console.error(e);
-          await updateOrderPaymentAction({
+          const runtimeFailedUpdate = await updateOrderPaymentAction({
             orderNumber,
             data: {
               status: "FAILED",
               notes: e instanceof Error ? e.message : "Unexpected Klarna payment error",
             },
           });
-          await deleteOrderByOrderId({ id: created.orderId });
+          if (!runtimeFailedUpdate.success) {
+            console.error("Klarna runtime failed update failed:", runtimeFailedUpdate);
+          }
+          const rollback = await deleteOrderByOrderId({ id: created.orderId });
+          if (!rollback.success) {
+            console.error("Klarna rollback after runtime error failed:", rollback);
+          }
           redirectToKlarnaErrorState("klarna_runtime_error");
         } finally {
           isCreatingRef.current = false;
@@ -281,6 +324,11 @@ export default function KlarnaPaymentWidget() {
       <Script src="https://x.klarnacdn.net/kp/lib/v1/api.js" strategy="afterInteractive" />
       <h2 className="text-xl font-semibold">Pagamento con Klarna</h2>
       {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      {loadingSession ? (
+        <div className="rounded-md border border-stroke-grey bg-background px-4 py-3 text-sm text-text-grey">
+          Preparazione del pagamento Klarna in corso...
+        </div>
+      ) : null}
       <div id={containerId} className="min-h-[180px] rounded-md border bg-amber-50 p-3" />
       <ButtonYellow
         className={twMerge(
@@ -290,7 +338,11 @@ export default function KlarnaPaymentWidget() {
         disabled={!canPay || isPaying || loadingSession}
         onClick={handleAuthorize}
       >
-        {isPaying ? "Pagamento in corso..." : "Conferma e paga con Klarna"}
+        {loadingSession
+          ? "Preparazione Klarna..."
+          : isPaying
+            ? "Pagamento in corso..."
+            : "Conferma e paga con Klarna"}
       </ButtonYellow>
     </div>
   );

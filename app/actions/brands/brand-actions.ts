@@ -9,6 +9,7 @@ import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
+import { unstable_rethrow } from "next/navigation";
 
 const BRAND_READ_RETRY_OPTIONS = { tries: 10, delayMs: 800, linearBackoffMs: 250 } as const;
 const BUILD_PHASE_SKIP_ERROR = "skipped: build phase";
@@ -99,6 +100,7 @@ export async function getAllBrands(): GetAllBrandsResponse {
       error: null,
     };
   } catch (error) {
+    unstable_rethrow(error);
     return { success: false, error, data: [] };
   }
 }
@@ -179,6 +181,7 @@ export async function getBrandBySlug(
 
     return { success: true, error: null, data: fetchBrand };
   } catch (error) {
+    unstable_rethrow(error);
     return { success: false, error, data: null };
   }
 }

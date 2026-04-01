@@ -1,4 +1,6 @@
 ﻿export const URL_DASHBOARD = {
+  ROOT: "/admin",
+  AUTH: "/admin/auth",
   DASHBOARD: "/admin/dashboard",
   SUB_DASHBOARD: {
     PRODUCTS: "/products",
@@ -85,5 +87,3 @@ export const dashboardLinks = [
   icon: DashboardLinkIcon;
   active: boolean;
 }>;
-
-

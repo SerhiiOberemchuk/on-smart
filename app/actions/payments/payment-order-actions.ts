@@ -16,6 +16,18 @@ export type GetOrderPayInfoResponseType = Promise<{
   error?: undefined | unknown;
 }>;
 
+export type PaymentMutationResult =
+  | {
+      success: true;
+      errorCode: null;
+      errorMessage: null;
+    }
+  | {
+      success: false;
+      errorCode: "INVALID_INPUT" | "DB_ERROR";
+      errorMessage: string;
+    };
+
 export async function getOrderPaymentByOrderNumberAction({
   orderNumber,
 }: {
@@ -42,14 +54,28 @@ export async function updateOrderPaymentAction({
 }: {
   orderNumber: OrderPaymentTypes["orderId"];
   data: Partial<Omit<OrderPaymentTypes, "id" | "createdAt" | "updatedAt">>;
-}) {
+}): Promise<PaymentMutationResult> {
+  if (!orderNumber) {
+    return {
+      success: false,
+      errorCode: "INVALID_INPUT",
+      errorMessage: "Order number is required",
+    };
+  }
+
   try {
     await db.update(paymentsSchema).set(data).where(eq(paymentsSchema.orderNumber, orderNumber));
     return {
       success: true,
+      errorCode: null,
+      errorMessage: null,
     };
   } catch (error) {
-    return { error };
+    return {
+      success: false,
+      errorCode: "DB_ERROR",
+      errorMessage: error instanceof Error ? error.message : "Failed to update order payment",
+    };
   }
 }
 

@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+﻿import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { Suspense } from "react";
 import Spiner from "@/components/Spiner";
@@ -19,7 +19,7 @@ async function DashboardDataComponent() {
       <div className="admin-page-header">
         <div>
           <h1 className="admin-title">Дашборд</h1>
-          <p className="admin-subtitle">Швидкий огляд адмін-панелі</p>
+          <p className="admin-subtitle">Швидкий огляд адмінпанелі</p>
         </div>
       </div>
 

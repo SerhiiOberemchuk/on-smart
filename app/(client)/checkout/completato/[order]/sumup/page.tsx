@@ -6,11 +6,22 @@ import { SUM_UP_CONSTANTS } from "@/app/actions/sumup/sumup-constans";
 import { PAGES } from "@/types/pages.types";
 import { getOrderFullInfoById } from "@/app/actions/orders/get-order";
 import { notifyOrderById } from "@/app/actions/notify-order-by-id/notify-order-by-id";
+import { connection } from "next/server";
+import { Suspense } from "react";
 
-export default async function SumUpCallbackPage({
+export default function SumUpCallbackPage(props: PageProps<"/checkout/completato/[order]/sumup">) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SumUpCallbackContent params={props.params} searchParams={props.searchParams} />
+    </Suspense>
+  );
+}
+
+async function SumUpCallbackContent({
   params,
   searchParams,
 }: PageProps<"/checkout/completato/[order]/sumup">) {
+  await connection();
   const { order: orderNumber } = await params;
   const searchParamsState = await searchParams;
   const summaryWithError = (reason: string) =>
@@ -29,28 +40,87 @@ export default async function SumUpCallbackPage({
   if (!order) {
     redirect(summaryWithError("sumup_order_not_found"));
   }
+
+  const currentOrder = order;
+
+  async function persistPaymentState({
+    paymentData,
+    orderStatus,
+  }: {
+    paymentData: Partial<{
+      status: "CREATED" | "PENDING" | "PAYED" | "FAILED" | "CANCELED";
+      providerOrderId: string | null;
+      notes: string | null;
+    }>;
+    orderStatus?: "PAID";
+  }) {
+    const paymentUpdate = await updateOrderPaymentAction({
+      orderNumber,
+      data: paymentData,
+    });
+
+    if (!paymentUpdate.success) {
+      console.error("[SumUpCallbackPage] payment update failed", {
+        orderNumber,
+        checkoutId,
+        errorCode: paymentUpdate.errorCode,
+        errorMessage: paymentUpdate.errorMessage,
+      });
+
+      return {
+        success: false as const,
+        stage: "payment_update" as const,
+      };
+    }
+
+    if (!orderStatus) {
+      return { success: true as const };
+    }
+
+    const orderUpdate = await updateOrderInfoByOrderIDAction({
+      orderId: currentOrder.id,
+      dataToUpdate: { orderStatus },
+    });
+
+    if (!orderUpdate.success) {
+      console.error("[SumUpCallbackPage] order update failed", {
+        orderId: currentOrder.id,
+        orderNumber,
+        checkoutId,
+        errorCode: orderUpdate.errorCode,
+        errorMessage: orderUpdate.errorMessage,
+      });
+
+      return {
+        success: false as const,
+        stage: "order_update" as const,
+      };
+    }
+
+    return { success: true as const };
+  }
+
   try {
     const resp = await getSumUpCheckoutStatus(checkoutId as string);
     const status = resp.status;
 
     if (status === "PAID") {
-      await updateOrderPaymentAction({
-        orderNumber,
-        data: {
+      const persistResult = await persistPaymentState({
+        paymentData: {
           status: "PAYED",
           providerOrderId: checkoutId as string,
           notes: `SumUp status: ${status}`,
         },
+        orderStatus: "PAID",
       });
 
-      await updateOrderInfoByOrderIDAction({
-        orderId: order.id,
-        dataToUpdate: { orderStatus: "PAID" },
-      });
+      if (!persistResult.success) {
+        redirect(summaryWithError("sumup_paid_persist_failed"));
+      }
 
       if (true) {
         try {
-          await notifyOrderById({ orderId: order.id });
+          await notifyOrderById({ orderId: currentOrder.id });
           console.log(" Messaggio notificato con successo");
         } catch (e) {
           console.error("Notify error:", e);
@@ -61,9 +131,8 @@ export default async function SumUpCallbackPage({
     }
 
     if (status === "FAILED" || status === "EXPIRED") {
-      await updateOrderPaymentAction({
-        orderNumber,
-        data: {
+      await persistPaymentState({
+        paymentData: {
           status: "FAILED",
           providerOrderId: checkoutId as string,
           notes: `SumUp status: ${status}`,
@@ -73,9 +142,8 @@ export default async function SumUpCallbackPage({
       redirect(summaryWithError(`sumup_${status.toLowerCase()}`));
     }
 
-    await updateOrderPaymentAction({
-      orderNumber,
-      data: {
+    await persistPaymentState({
+      paymentData: {
         status: "PENDING",
         providerOrderId: checkoutId as string,
         notes: `SumUp status: ${status}`,
@@ -85,9 +153,8 @@ export default async function SumUpCallbackPage({
     redirect(summaryWithError("sumup_pending_verification"));
   } catch (error) {
     console.error("SumUp callback error:", error);
-    await updateOrderPaymentAction({
-      orderNumber,
-      data: {
+    await persistPaymentState({
+      paymentData: {
         status: "FAILED",
         providerOrderId: (checkoutId as string) ?? null,
         notes: error instanceof Error ? error.message : "SumUp callback runtime error",
@@ -95,4 +162,6 @@ export default async function SumUpCallbackPage({
     });
     redirect(summaryWithError("sumup_runtime_error"));
   }
+
+  return null;
 }
