@@ -4,14 +4,16 @@ import LayoutRepilogoComponent from "@/components/CheckoutPagesComponents/compon
 
 export default function CheckoutLayout({ children }: { children: ReactNode }) {
   return (
-    <Suspense fallback={<p>Caricamento...</p>}>
-      <section>
+    <section>
+      <Suspense fallback={null}>
         <HeaderCart />
-        <div className="container flex flex-col gap-5 pt-3 pb-6 lg:flex-row">
-          <div className="flex-1">{children}</div>
+      </Suspense>
+      <div className="container flex flex-col gap-5 pt-3 pb-6 lg:flex-row">
+        <div className="flex-1">{children}</div>
+        <Suspense fallback={null}>
           <LayoutRepilogoComponent className="-mx-4 md:mx-0" />
-        </div>
-      </section>
-    </Suspense>
+        </Suspense>
+      </div>
+    </section>
   );
 }

@@ -8,6 +8,7 @@ import { CategoryTypes } from "@/types/category.types";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
+import { unstable_rethrow } from "next/navigation";
 
 const CATEGORY_READ_RETRY_OPTIONS = { tries: 10, delayMs: 800, linearBackoffMs: 250 } as const;
 const BUILD_PHASE_SKIP_ERROR = "skipped: build phase";
@@ -105,6 +106,7 @@ export async function getAllCategoryProducts(): GetAllCategoriesResponse {
       error: null,
     };
   } catch (error) {
+    unstable_rethrow(error);
     return { success: false, error, data: [] };
   }
 }
@@ -187,6 +189,7 @@ export async function getCategoryBySlug(
 
     return { success: true, error: null, data: fetchCategory };
   } catch (error) {
+    unstable_rethrow(error);
     return { success: false, error, data: null };
   }
 }

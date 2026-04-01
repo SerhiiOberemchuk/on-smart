@@ -19,24 +19,28 @@ export default function CheckouteStep4Riepilogo() {
       <RiepilogoDatiPagamento />
 
       {dataCheckoutStepPagamento.paymentMethod === "klarna" && (
-        <div className="mt-4">
+        <div className="mt-4 min-h-[320px]">
           <p className="mb-2 font-medium">Procedi con il pagamento Klarna qui sotto:</p>
           <KlarnaPaymentWidget />
         </div>
       )}
       {dataCheckoutStepPagamento.paymentMethod === "paypal" && (
-        <div className="mt-4">
+        <div className="mt-4 min-h-[320px]">
           <p className="mb-2 font-medium">Procedi con il pagamento PayPal qui sotto:</p>
           <PayPalPaymentWidget />
         </div>
       )}
       {dataCheckoutStepPagamento.paymentMethod === "sumup" && (
-        <div className="mt-4">
+        <div className="mt-4 min-h-[320px]">
           <p className="mb-2 font-medium">Procedi con il pagamento con carta qui sotto:</p>
           <SumUpWidget />
         </div>
       )}
-      {dataCheckoutStepPagamento.paymentMethod === "bonifico" && <BonificoPaymentWidget />}
+      {dataCheckoutStepPagamento.paymentMethod === "bonifico" && (
+        <div className="min-h-[220px]">
+          <BonificoPaymentWidget />
+        </div>
+      )}
     </div>
   );
 }

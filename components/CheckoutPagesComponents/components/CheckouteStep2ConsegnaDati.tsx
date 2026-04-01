@@ -9,8 +9,9 @@ import { CheckoutTypesDataStepConsegna, useCheckoutStore } from "@/store/checkou
 import { useRouter } from "next/navigation";
 import RiepilogoDatiCliente from "./RiepilogoDatiCliente";
 import { DELIVERY_METHOD_CONSTANT } from "@/types/orders.types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getDeliveryPrice } from "@/utils/get-prices";
+import { PAGES } from "@/types/pages.types";
 
 const NAME_RADIO_BUTTON_METOD = "deliveryMethod";
 
@@ -33,8 +34,11 @@ export default function CheckouteStep2ConsegnaDati() {
   });
 
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit: SubmitHandler<CheckoutTypesDataStepConsegna> = (data) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     let cleaned: CheckoutTypesDataStepConsegna["deliveryAdress"];
     if (dataFirstStep.deliveryMethod === "RITIRO_NEGOZIO") {
       setDataCheckoutStepConsegna({
@@ -42,7 +46,7 @@ export default function CheckouteStep2ConsegnaDati() {
         deliveryAdress: null,
       });
       setStep(3);
-      router.push("/checkout/pagamento");
+      router.push(PAGES.CHECKOUT_PAGES.PAYMENT);
       return;
     }
 
@@ -66,7 +70,7 @@ export default function CheckouteStep2ConsegnaDati() {
       sameAsBilling,
     });
     setStep(3);
-    router.push("/checkout/pagamento");
+    router.push(PAGES.CHECKOUT_PAGES.PAYMENT);
   };
   useEffect(() => {
     (() => {
@@ -96,8 +100,10 @@ export default function CheckouteStep2ConsegnaDati() {
               value={DELIVERY_METHOD_CONSTANT.CONSEGNA_CORRIERE}
               required
               id="deliveryMethodCorriere"
+              disabled={isSubmitting}
               checked={dataFirstStep.deliveryMethod === DELIVERY_METHOD_CONSTANT.CONSEGNA_CORRIERE}
               onChange={() => {
+                if (isSubmitting) return;
                 setDeliveryMethod(DELIVERY_METHOD_CONSTANT.CONSEGNA_CORRIERE);
               }}
             />
@@ -119,8 +125,12 @@ export default function CheckouteStep2ConsegnaDati() {
                 <input
                   {...register("sameAsBilling")}
                   type="checkbox"
+                  disabled={isSubmitting}
                   checked={dataCheckoutStepConsegna.sameAsBilling}
-                  onChange={() => setSameAsBilling(!dataCheckoutStepConsegna.sameAsBilling)}
+                  onChange={() => {
+                    if (isSubmitting) return;
+                    setSameAsBilling(!dataCheckoutStepConsegna.sameAsBilling);
+                  }}
                   id="sameAsBilling"
                 />
                 L'indirizzo di spedizione coincide con l'indirizzo di fatturazione
@@ -132,6 +142,7 @@ export default function CheckouteStep2ConsegnaDati() {
                     required
                     {...register("deliveryAdress.referente_contatto")}
                     type="text"
+                    disabled={isSubmitting}
                     className="helper_text"
                   />
                   <div className="flex flex-wrap gap-3">
@@ -141,6 +152,7 @@ export default function CheckouteStep2ConsegnaDati() {
                       required
                       className="helper_text min-w-60 flex-1"
                       type="text"
+                      disabled={isSubmitting}
                     />
                     <InputBlock
                       {...register("deliveryAdress.partita_iva")}
@@ -149,6 +161,7 @@ export default function CheckouteStep2ConsegnaDati() {
                       minLength={11}
                       maxLength={11}
                       type="text"
+                      disabled={isSubmitting}
                       className="helper_text min-w-60 flex-1"
                     />
                   </div>
@@ -157,6 +170,7 @@ export default function CheckouteStep2ConsegnaDati() {
                     title="Indirizzo / Sede legale*"
                     required
                     type="text"
+                    disabled={isSubmitting}
                     className="helper_text min-w-60 flex-1"
                   />
                   <div className="flex flex-wrap gap-3">
@@ -166,12 +180,14 @@ export default function CheckouteStep2ConsegnaDati() {
                       required
                       className="helper_text min-w-60 flex-1"
                       type="text"
+                      disabled={isSubmitting}
                     />
                     <InputBlock
                       {...register("deliveryAdress.cap")}
                       title="CAP*"
                       required
                       type="text"
+                      disabled={isSubmitting}
                       className="helper_text min-w-60 flex-1"
                     />
                   </div>
@@ -182,12 +198,14 @@ export default function CheckouteStep2ConsegnaDati() {
                       required
                       className="helper_text min-w-60 flex-1"
                       type="text"
+                      disabled={isSubmitting}
                     />
                     <InputBlock
                       {...register("deliveryAdress.provincia_regione")}
                       title="Provincia / Regione*"
                       required
                       type="text"
+                      disabled={isSubmitting}
                       className="helper_text min-w-60 flex-1"
                     />
                   </div>
@@ -206,8 +224,10 @@ export default function CheckouteStep2ConsegnaDati() {
               required
               value={DELIVERY_METHOD_CONSTANT.RITIRO_NEGOZIO}
               id="deliveryMethodNegozio"
+              disabled={isSubmitting}
               checked={dataFirstStep.deliveryMethod === DELIVERY_METHOD_CONSTANT.RITIRO_NEGOZIO}
               onChange={() => {
+                if (isSubmitting) return;
                 setDeliveryMethod(DELIVERY_METHOD_CONSTANT.RITIRO_NEGOZIO);
               }}
             />
@@ -215,8 +235,8 @@ export default function CheckouteStep2ConsegnaDati() {
           </label>{" "}
           <span className="helper_text text-grey">Gratis</span>
         </div>
-        <ButtonYellow className="ml-auto" type="submit">
-          Vai avanti
+        <ButtonYellow className="ml-auto" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Apertura pagamento..." : "Vai avanti"}
         </ButtonYellow>
       </form>
     </div>

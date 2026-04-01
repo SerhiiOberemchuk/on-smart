@@ -9,6 +9,7 @@ import Link from "next/link";
 import { CheckoutTypesDataFirstStep, useCheckoutStore } from "@/store/checkout-store";
 import { useRouter } from "next/navigation";
 import { InputBlock } from "@/components/InputBloc";
+import { PAGES } from "@/types/pages.types";
 
 export default function CheckouteStep1FormClientData() {
   const {
@@ -26,6 +27,7 @@ export default function CheckouteStep1FormClientData() {
   const [clientType, setClientType] = useState<CheckoutTypesDataFirstStep["clientType"]>(
     dataFirstStep?.clientType || "privato",
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (clientType === "privato") {
@@ -43,9 +45,11 @@ export default function CheckouteStep1FormClientData() {
   }, [clientType, resetField]);
 
   const onSubmit: SubmitHandler<CheckoutTypesDataFirstStep> = (data) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     setDataFirstStepCheckout(data);
     setStep(2);
-    router.push("/checkout/consegna");
+    router.push(PAGES.CHECKOUT_PAGES.DELIVERY);
   };
   const pec = watch("pecAzzienda");
   const codice = watch("codiceUnico");
@@ -64,9 +68,11 @@ export default function CheckouteStep1FormClientData() {
                 type="radio"
                 {...register("clientType")}
                 onChange={() => {
+                  if (isSubmitting) return;
                   setClientType("privato");
                 }}
                 required
+                disabled={isSubmitting}
                 checked={clientType === "privato"}
                 value="privato"
               />
@@ -77,9 +83,11 @@ export default function CheckouteStep1FormClientData() {
                 type="radio"
                 {...register("clientType")}
                 onChange={() => {
+                  if (isSubmitting) return;
                   setClientType("azienda");
                 }}
                 required
+                disabled={isSubmitting}
                 checked={clientType === "azienda"}
                 value="azienda"
               />
@@ -93,6 +101,7 @@ export default function CheckouteStep1FormClientData() {
             type="email"
             {...register("email")}
             required
+            disabled={isSubmitting}
             className="min-w-[200px] flex-1"
           />
           <InputBlock
@@ -100,6 +109,7 @@ export default function CheckouteStep1FormClientData() {
             {...register("numeroTelefono")}
             required
             type="tel"
+            disabled={isSubmitting}
             className="min-w-[200px] flex-1"
           />
         </div>
@@ -110,6 +120,7 @@ export default function CheckouteStep1FormClientData() {
               {...register("nome")}
               required
               type="text"
+              disabled={isSubmitting}
               className="min-w-[200px] flex-1"
             />
             <InputBlock
@@ -117,6 +128,7 @@ export default function CheckouteStep1FormClientData() {
               {...register("cognome")}
               required
               type="text"
+              disabled={isSubmitting}
               className="min-w-[200px] flex-1"
             />
           </div>
@@ -128,6 +140,7 @@ export default function CheckouteStep1FormClientData() {
             {...register("referenteContatto")}
             required
             type="text"
+            disabled={isSubmitting}
             className="min-w-[200px] flex-1"
           />
         )}
@@ -140,6 +153,7 @@ export default function CheckouteStep1FormClientData() {
                 {...register("ragioneSociale")}
                 required
                 type="text"
+                disabled={isSubmitting}
                 className="min-w-[200px] flex-1"
               />
               <InputBlock
@@ -149,6 +163,7 @@ export default function CheckouteStep1FormClientData() {
                 minLength={11}
                 maxLength={11}
                 type="text"
+                disabled={isSubmitting}
                 className="min-w-[200px] flex-1"
               />
             </div>
@@ -158,6 +173,7 @@ export default function CheckouteStep1FormClientData() {
                 {...register("pecAzzienda")}
                 required={!codice}
                 type="text"
+                disabled={isSubmitting}
                 className="min-w-[200px] flex-1"
               />
               <InputBlock
@@ -167,6 +183,7 @@ export default function CheckouteStep1FormClientData() {
                 minLength={7}
                 maxLength={7}
                 type="text"
+                disabled={isSubmitting}
                 className="min-w-[200px] flex-1"
               />
             </div>
@@ -178,6 +195,7 @@ export default function CheckouteStep1FormClientData() {
             {...register("indirizzo")}
             required
             type="text"
+            disabled={isSubmitting}
             className="min-w-[200px] flex-1"
           />
           <InputBlock
@@ -185,6 +203,7 @@ export default function CheckouteStep1FormClientData() {
             {...register("numeroCivico")}
             required
             type="text"
+            disabled={isSubmitting}
             className="min-w-[200px] flex-1"
           />
         </div>
@@ -195,6 +214,7 @@ export default function CheckouteStep1FormClientData() {
             {...register("citta")}
             required
             type="text"
+            disabled={isSubmitting}
             className="min-w-[200px] flex-1"
           />
           <InputBlock
@@ -202,6 +222,7 @@ export default function CheckouteStep1FormClientData() {
             {...register("cap")}
             required
             type="text"
+            disabled={isSubmitting}
             className="min-w-[200px] flex-1"
           />{" "}
         </div>
@@ -211,6 +232,7 @@ export default function CheckouteStep1FormClientData() {
             {...register("nazione")}
             required
             type="text"
+            disabled={isSubmitting}
             className="min-w-[200px] flex-1"
           />
           <InputBlock
@@ -218,6 +240,7 @@ export default function CheckouteStep1FormClientData() {
             {...register("provinciaRegione")}
             required
             type="text"
+            disabled={isSubmitting}
             className="min-w-[200px] flex-1"
           />
         </div>
@@ -243,8 +266,10 @@ export default function CheckouteStep1FormClientData() {
                 type="checkbox"
                 {...register("requestInvoice")}
                 id="request_invoice"
+                disabled={isSubmitting}
                 checked={dataFirstStep.requestInvoice}
                 onChange={() => {
+                  if (isSubmitting) return;
                   switchRequestInvoce();
                   if (dataFirstStep.requestInvoice === true) {
                     resetField("codiceFiscale");
@@ -268,6 +293,7 @@ export default function CheckouteStep1FormClientData() {
                   minLength={16}
                   maxLength={16}
                   {...register("codiceFiscale")}
+                  disabled={isSubmitting}
                   type="text"
                   className=""
                 />
@@ -275,8 +301,8 @@ export default function CheckouteStep1FormClientData() {
             </div>
           </>
         )}
-        <ButtonYellow type="submit" className="ml-auto">
-          Vai avanti
+        <ButtonYellow type="submit" className="ml-auto" disabled={isSubmitting}>
+          {isSubmitting ? "Apertura consegna..." : "Vai avanti"}
         </ButtonYellow>
       </form>
     </>

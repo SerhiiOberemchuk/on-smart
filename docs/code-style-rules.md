@@ -43,6 +43,8 @@ Rules:
 - Never place `try/catch` that returns fallback/error objects inside the same function that contains `"use cache"`.
 - Validation that does not depend on DB state (`missing id`, `empty array`, invalid params) must run in the outer wrapper before entering the cached core.
 - If a DB/schema error happens, the wrapper may log and return a safe fallback, but that fallback must be produced outside the cached function so it is not persisted in cache.
+- In wrappers around `"use cache"` reads that run in route render/prerender flow, call `unstable_rethrow(error)` before custom error handling.
+- Reason: some Next.js control-flow errors (`redirect`, `notFound`, prerender/PPR cache interruptions such as `HANGING_PROMISE_REJECTION`) are framework-managed and must not be treated as normal application errors.
 
 Recommended template:
 
@@ -50,6 +52,7 @@ Recommended template:
 "use server";
 
 import { cacheLife, cacheTag } from "next/cache";
+import { unstable_rethrow } from "next/navigation";
 
 async function getSomethingCachedCore(id: string) {
   "use cache";
@@ -67,11 +70,19 @@ export async function getSomething(id: string) {
   try {
     return await getSomethingCachedCore(id);
   } catch (error) {
+    unstable_rethrow(error);
     console.error("[getSomething]", error);
     return fallback;
   }
 }
 ```
+
+When to use `unstable_rethrow`:
+
+- Use it in outer wrappers for cached server reads that are called during page/layout/metadata rendering.
+- Do not add it blindly to every `try/catch`; mutations and plain utility functions usually do not need it.
+- Treat build-time `HANGING_PROMISE_REJECTION` logs as a strong signal that a cached read wrapper is swallowing a Next.js control-flow error.
+- Build logs are a useful alarm, but not a full guarantee. The real rule is based on execution context: `use cache` + wrapper `catch` + render/prerender path.
 
 ## 5. `cacheLife` TTL Policy
 

@@ -4,6 +4,7 @@ import { db } from "@/db/db";
 import { ProductType, productsSchema } from "@/db/schemas/product.schema";
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
+import { unstable_rethrow } from "next/navigation";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 export type ProductFetchResult =
@@ -45,6 +46,7 @@ export async function getAllProducts(
   try {
     return await getAllProductsCachedCore(includeHidden);
   } catch (error) {
+    unstable_rethrow(error);
     console.error("[getAllProducts]", error);
     return {
       success: false,

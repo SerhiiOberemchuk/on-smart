@@ -2,6 +2,7 @@
 
 import { cacheLife, cacheTag } from "next/cache";
 import { eq } from "drizzle-orm";
+import { unstable_rethrow } from "next/navigation";
 
 import { db } from "@/db/db";
 import { type BundleMetaType, bundleMetaSchema } from "@/db/schemas/bundle-meta.schema";
@@ -46,6 +47,7 @@ export async function getAllBundles(): Promise<BundleFetchResult> {
   try {
     return await getAllBundlesCachedCore();
   } catch (error) {
+    unstable_rethrow(error);
     console.error("[getAllBundles]", error);
     return {
       success: false,

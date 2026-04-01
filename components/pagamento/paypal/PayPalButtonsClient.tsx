@@ -65,6 +65,12 @@ export default function PayPalButtonsClient(props: Props) {
     [router],
   );
 
+  const redirectToPayPalPendingReviewState = useCallback(() => {
+    router.push(
+      `${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=${encodeURIComponent("paypal_paid_persist_failed")}`,
+    );
+  }, [router]);
+
   useEffect(() => {
     if (!totalPrice) return;
 
@@ -156,29 +162,27 @@ export default function PayPalButtonsClient(props: Props) {
           });
 
           if (!pp.ok || !pp.orderId) {
-            try {
-              await deleteOrderByOrderId({ id: created.orderId });
-            } catch (e) {
-              console.error("Rollback deleteOrderByOrderId failed:", e);
-            } finally {
-              resetDraftOrderIdentity();
+            const rollback = await deleteOrderByOrderId({ id: created.orderId });
+            if (!rollback.success) {
+              console.error("Rollback deleteOrderByOrderId failed:", rollback);
             }
+            resetDraftOrderIdentity();
 
             throw new Error(`Create PayPal order failed: ${String(pp.error ?? "")}`);
           }
 
           createdDbRef.current.providerOrderId = pp.orderId;
 
-          try {
-            await updateOrderPaymentAction({
-              orderNumber: referenceId,
-              data: { status: "CREATED", providerOrderId: pp.orderId },
-            });
-          } catch (e) {
-            console.error("updateOrderPaymentAction after PayPal create failed:", e);
-          } finally {
-            isCreatingRef.current = false;
+          const paymentCreateUpdate = await updateOrderPaymentAction({
+            orderNumber: referenceId,
+            data: { status: "CREATED", providerOrderId: pp.orderId },
+          });
+
+          if (!paymentCreateUpdate.success) {
+            console.error("updateOrderPaymentAction after PayPal create failed:", paymentCreateUpdate);
           }
+
+          isCreatingRef.current = false;
 
           return pp.orderId;
         }}
@@ -200,34 +204,44 @@ export default function PayPalButtonsClient(props: Props) {
           });
 
           if (!cap.ok) {
-            try {
-              await updateOrderPaymentAction({
-                orderNumber: referenceId,
-                data: {
-                  status: "FAILED",
-                  providerOrderId: ppOrderId,
-                  notes: String(cap.error ?? ""),
-                },
-              });
-            } catch (e) {
-              console.error("updateOrderPaymentAction FAILED after capture fail:", e);
+            const failedUpdate = await updateOrderPaymentAction({
+              orderNumber: referenceId,
+              data: {
+                status: "FAILED",
+                providerOrderId: ppOrderId,
+                notes: String(cap.error ?? ""),
+              },
+            });
+            if (!failedUpdate.success) {
+              console.error("updateOrderPaymentAction FAILED after capture fail:", failedUpdate);
             }
             resetDraftOrderIdentity();
             redirectToPayPalErrorState("paypal_capture_failed");
             return;
           }
 
-          try {
-            await updateOrderPaymentAction({
-              orderNumber: referenceId,
-              data: { status: "PAYED", providerOrderId: ppOrderId, notes: null },
-            });
-            await updateOrderInfoByOrderIDAction({
-              orderId: created.orderId,
-              dataToUpdate: { orderStatus: "PAID" },
-            });
-          } catch (e) {
-            console.error("updateOrderPaymentAction SUCCESS after capture ok:", e);
+          const paymentPersist = await updateOrderPaymentAction({
+            orderNumber: referenceId,
+            data: { status: "PAYED", providerOrderId: ppOrderId, notes: null },
+          });
+
+          if (!paymentPersist.success) {
+            console.error("updateOrderPaymentAction SUCCESS after capture ok:", paymentPersist);
+            resetDraftOrderIdentity();
+            redirectToPayPalPendingReviewState();
+            return;
+          }
+
+          const orderPersist = await updateOrderInfoByOrderIDAction({
+            orderId: created.orderId,
+            dataToUpdate: { orderStatus: "PAID" },
+          });
+
+          if (!orderPersist.success) {
+            console.error("updateOrderInfoByOrderIDAction after PayPal capture ok:", orderPersist);
+            resetDraftOrderIdentity();
+            redirectToPayPalPendingReviewState();
+            return;
           }
 
           if (!didNotifyRef.current) {
@@ -248,10 +262,9 @@ export default function PayPalButtonsClient(props: Props) {
         onCancel={async () => {
           const created = createdDbRef.current;
           if (created?.orderId) {
-            try {
-              await deleteOrderByOrderId({ id: created.orderId });
-            } catch (e) {
-              console.error("deleteOrderByOrderId onCancel failed:", e);
+            const rollback = await deleteOrderByOrderId({ id: created.orderId });
+            if (!rollback.success) {
+              console.error("deleteOrderByOrderId onCancel failed:", rollback);
             }
           }
 
@@ -261,10 +274,9 @@ export default function PayPalButtonsClient(props: Props) {
         onError={async (err) => {
           const created = createdDbRef.current;
           if (created?.orderId) {
-            try {
-              await deleteOrderByOrderId({ id: created.orderId });
-            } catch (e) {
-              console.error("deleteOrderByOrderId onError failed:", e);
+            const rollback = await deleteOrderByOrderId({ id: created.orderId });
+            if (!rollback.success) {
+              console.error("deleteOrderByOrderId onError failed:", rollback);
             }
           }
 

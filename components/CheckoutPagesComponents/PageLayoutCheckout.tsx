@@ -9,8 +9,11 @@ export default function PageLayoutCheckout({
 }: {
   page: "informazioni" | "consegna" | "pagamento" | "riepilogo";
 }) {
+  const minHeightClass =
+    page === "pagamento" || page === "riepilogo" ? "min-h-[720px]" : "min-h-[640px]";
+
   return (
-    <div className="-mx-4 flex flex-col gap-6 bg-background p-3 md:mx-0">
+    <div className={`-mx-4 flex flex-col gap-6 bg-background p-3 md:mx-0 ${minHeightClass}`}>
       <CheckoutStepsLinks />
       {page === "informazioni" && <CheckouteStep1FormClientData />}
       {page === "consegna" && <CheckouteStep2ConsegnaDati />}

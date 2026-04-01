@@ -1,5 +1,9 @@
 "use server";
 
+import { cacheLife, cacheTag } from "next/cache";
+import { unstable_rethrow } from "next/navigation";
+import { eq } from "drizzle-orm";
+
 import { db } from "@/db/db";
 import {
   orderItemsSchema,
@@ -9,12 +13,11 @@ import {
   OrderTypes,
   paymentsSchema,
 } from "@/db/schemas/orders.schema";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { isBuildPhase } from "@/utils/guard-build";
 import { withRetrySelective } from "@/utils/with-retry-selective";
-import { eq } from "drizzle-orm";
-import { cacheLife, cacheTag } from "next/cache";
+
 import { CACHE_TAG_GET_ORDER_INFO } from "./cache-tags";
-import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 const ORDERS_READ_RETRY_OPTIONS = { tries: 10, delayMs: 800, linearBackoffMs: 250 } as const;
 const BUILD_PHASE_SKIP_ERROR = "skipped: build phase";
@@ -25,23 +28,37 @@ export type GetOrderResponseType = Promise<{
   error?: undefined | unknown;
 }>;
 
-export async function getOrderByNumberAction(
+async function getOrderByNumberCachedCore(
   orderNumber: OrderTypes["orderNumber"],
-): GetOrderResponseType {
+): Promise<{
+  success: boolean;
+  order: OrderTypes | null;
+  error: null;
+}> {
   "use cache";
   cacheLife("minutes");
   cacheTag(CACHE_TAG_GET_ORDER_INFO);
+
+  const order = await db.select().from(ordersSchema).where(eq(ordersSchema.orderNumber, orderNumber));
+
+  return {
+    success: true,
+    order: order[0] ?? null,
+    error: null,
+  };
+}
+
+export async function getOrderByNumberAction(
+  orderNumber: OrderTypes["orderNumber"],
+): GetOrderResponseType {
+  if (!orderNumber) {
+    return { success: false, order: null, error: "Order number is required" };
+  }
+
   try {
-    const order = await db
-      .select()
-      .from(ordersSchema)
-      .where(eq(ordersSchema.orderNumber, orderNumber));
-    return {
-      success: true,
-      order: order[0],
-      error: null,
-    };
+    return await getOrderByNumberCachedCore(orderNumber);
   } catch (error) {
+    unstable_rethrow(error);
     return { error, success: false, order: null };
   }
 }
@@ -53,21 +70,36 @@ export type GetOrderFullInfoByIdResponseType = Promise<{
   error: unknown;
 }>;
 
-export async function getOrderFullInfoById({
+async function getOrderFullInfoByIdCachedCore({
   id,
-}: Pick<OrderTypes, "id">): GetOrderFullInfoByIdResponseType {
+}: Pick<OrderTypes, "id">): Promise<{
+  order: OrderTypes | null;
+  orderItems: OrderItemsTypes[];
+  payments: OrderPaymentTypes | null;
+  error: null;
+}> {
   "use cache";
   cacheLife("minutes");
   cacheTag(CACHE_TAGS.orders.byId(id));
+
+  const [order] = await db.select().from(ordersSchema).where(eq(ordersSchema.id, id));
+  const orderItems = await db.select().from(orderItemsSchema).where(eq(orderItemsSchema.orderId, id));
+  const [payments] = await db.select().from(paymentsSchema).where(eq(paymentsSchema.orderId, id));
+
+  return { order: order ?? null, orderItems, error: null, payments: payments ?? null };
+}
+
+export async function getOrderFullInfoById({
+  id,
+}: Pick<OrderTypes, "id">): GetOrderFullInfoByIdResponseType {
+  if (!id) {
+    return { error: "Order id is required", order: null, orderItems: null, payments: null };
+  }
+
   try {
-    const [order] = await db.select().from(ordersSchema).where(eq(ordersSchema.id, id));
-    const orderItems = await db
-      .select()
-      .from(orderItemsSchema)
-      .where(eq(orderItemsSchema.orderId, id));
-    const [payments] = await db.select().from(paymentsSchema).where(eq(paymentsSchema.orderId, id));
-    return { order, orderItems, error: null, payments };
+    return await getOrderFullInfoByIdCachedCore({ id });
   } catch (error) {
+    unstable_rethrow(error);
     return { error, order: null, orderItems: null, payments: null };
   }
 }
@@ -135,6 +167,7 @@ export async function getOrdersAllAction(): GetOrdersAllActionResponseType {
       error: null,
     };
   } catch (error) {
+    unstable_rethrow(error);
     return { error, orders: null };
   }
 }

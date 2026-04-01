@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-import localFont from "next/font/local";
+﻿import localFont from "next/font/local";
 import clsx from "clsx";
 
 import "../../styles/globals.css";
@@ -17,16 +16,6 @@ const fixelFont = localFont({
   adjustFontFallback: "Arial",
   weight: "100 900",
 });
-
-export const metadata: Metadata = {
-  title: "OnSmart Адмінка",
-  description: "Адміністративна панель OnSmart",
-
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
 
 export default function RootLayout({
   children,
