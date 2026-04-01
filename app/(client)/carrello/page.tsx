@@ -3,9 +3,9 @@ import CardSection from "./components/CardSection";
 import ProductSuspensedListCarello from "./ProductSuspensedListCarello";
 import { Suspense } from "react";
 
-async function CartRecommendations() {
-  const products = await getAllProducts({ includeHidden: false });
-  return <ProductSuspensedListCarello productsAction={Promise.resolve(products)} />;
+function CartRecommendations() {
+  const productsAction = getAllProducts({ includeHidden: false });
+  return <ProductSuspensedListCarello productsAction={productsAction} />;
 }
 
 export default function CarrelloPage() {

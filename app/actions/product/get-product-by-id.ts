@@ -20,33 +20,9 @@ type GetProductByIdResult =
       errorMessage: string;
     };
 
-async function getProductByIdCachedCore(id: ProductType["id"]): Promise<GetProductByIdResult> {
-  "use cache";
-  cacheLife("seconds");
-  cacheTag(CACHE_TAGS.product.byId(id));
-  cacheTag(CACHE_TAGS.product.all);
-
-  const rows = await db.select().from(productsSchema).where(eq(productsSchema.id, id));
-  const product = rows[0] ?? null;
-
-  if (!product) {
-    return {
-      success: false,
-      data: null,
-      errorCode: "NOT_FOUND",
-      errorMessage: "Product not found",
-    };
-  }
-
-  return {
-    success: true,
-    data: product,
-    errorCode: null,
-    errorMessage: null,
-  };
-}
-
 export async function getProductById(id: ProductType["id"]): Promise<GetProductByIdResult> {
+  "use cache";
+
   if (!id) {
     return {
       success: false,
@@ -55,9 +31,29 @@ export async function getProductById(id: ProductType["id"]): Promise<GetProductB
       errorMessage: "Product id is required",
     };
   }
+  cacheLife("seconds");
+  cacheTag(CACHE_TAGS.product.byId(id));
+  cacheTag(CACHE_TAGS.product.all);
 
   try {
-    return await getProductByIdCachedCore(id);
+    const rows = await db.select().from(productsSchema).where(eq(productsSchema.id, id));
+    const product = rows[0] ?? null;
+
+    if (!product) {
+      return {
+        success: false,
+        data: null,
+        errorCode: "NOT_FOUND",
+        errorMessage: "Product not found",
+      };
+    }
+
+    return {
+      success: true,
+      data: product,
+      errorCode: null,
+      errorMessage: null,
+    };
   } catch (error) {
     console.error("[getProductById]", error);
     return {

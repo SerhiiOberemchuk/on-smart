@@ -27,32 +27,11 @@ class GalleryNotFoundError extends Error {
   }
 }
 
-async function getFotoFromGalleryCachedCore(
-  params: { parent_product_id: string },
-): Promise<GetFotoFromGalleryResult> {
-  "use cache";
-  cacheTag(CACHE_TAGS.gallery.byParentProductId(params.parent_product_id));
-
-  const response = await db
-    .select()
-    .from(productFotoGallery)
-    .where(eq(productFotoGallery.parent_product_id, params.parent_product_id));
-
-  if (!response.length) {
-    throw new GalleryNotFoundError();
-  }
-
-  return {
-    success: true,
-    data: response[0],
-    errorCode: null,
-    errorMessage: null,
-  };
-}
-
 export async function getFotoFromGallery(
   params: { parent_product_id: string },
 ): Promise<GetFotoFromGalleryResult> {
+  "use cache";
+
   if (!params.parent_product_id) {
     return {
       success: false,
@@ -62,8 +41,24 @@ export async function getFotoFromGallery(
     };
   }
 
+  cacheTag(CACHE_TAGS.gallery.byParentProductId(params.parent_product_id));
+
   try {
-    return await getFotoFromGalleryCachedCore(params);
+    const response = await db
+      .select()
+      .from(productFotoGallery)
+      .where(eq(productFotoGallery.parent_product_id, params.parent_product_id));
+
+    if (!response.length) {
+      throw new GalleryNotFoundError();
+    }
+
+    return {
+      success: true,
+      data: response[0],
+      errorCode: null,
+      errorMessage: null,
+    };
   } catch (error) {
     if (error instanceof GalleryNotFoundError) {
       return {

@@ -22,35 +22,32 @@ function mapSupportProducts(
   return sortedByOrder.filter((item) => item.inStock > 0);
 }
 
-async function getSupportProductByIdCachedCore(productId: ProductType["id"]): Promise<ProductType[]> {
-  "use cache";
-  cacheLife("seconds");
-  cacheTag(CACHE_TAGS.product.supportById(productId));
-  cacheTag(CACHE_TAGS.product.all);
-
-  const [product] = await db
-    .select({ relatedProductIds: productsSchema.relatedProductIds })
-    .from(productsSchema)
-    .where(eq(productsSchema.id, productId)) as RelatedProductIdsRow[];
-
-  const relatedIds = product?.relatedProductIds ?? [];
-  if (relatedIds.length === 0) return [];
-
-  const relatedProducts = await db
-    .select()
-    .from(productsSchema)
-    .where(inArray(productsSchema.id, relatedIds));
-
-  return mapSupportProducts(relatedIds, relatedProducts);
-}
-
 export async function getSupportProductById(productId: ProductType["id"]): Promise<ProductType[]> {
+  "use cache";
+
   if (!productId) {
     return [];
   }
 
+  cacheLife("seconds");
+  cacheTag(CACHE_TAGS.product.supportById(productId));
+  cacheTag(CACHE_TAGS.product.all);
+
   try {
-    return await getSupportProductByIdCachedCore(productId);
+    const [product] = await db
+      .select({ relatedProductIds: productsSchema.relatedProductIds })
+      .from(productsSchema)
+      .where(eq(productsSchema.id, productId)) as RelatedProductIdsRow[];
+
+    const relatedIds = product?.relatedProductIds ?? [];
+    if (relatedIds.length === 0) return [];
+
+    const relatedProducts = await db
+      .select()
+      .from(productsSchema)
+      .where(inArray(productsSchema.id, relatedIds));
+
+    return mapSupportProducts(relatedIds, relatedProducts);
   } catch (error) {
     console.error("[getSupportProductById]", error);
     return [];
