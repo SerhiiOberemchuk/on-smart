@@ -1,7 +1,6 @@
 "use server";
 
 import { cacheLife, cacheTag } from "next/cache";
-import { unstable_rethrow } from "next/navigation";
 import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db/db";
@@ -31,64 +30,58 @@ class BundleBySlugNotFoundError extends Error {
   }
 }
 
-async function getBundleBySlugCachedCore(slug: ProductType["slug"]): Promise<BundleBySlugResult> {
+export async function getBundleBySlug(slug: ProductType["slug"]): Promise<BundleBySlugResult> {
   "use cache";
+
+  if (!slug) {
+    return { success: false, data: null, error: "Bundle slug is required" };
+  }
   cacheLife("minutes");
   cacheTag(CACHE_TAGS.bundle.all);
   cacheTag(CACHE_TAGS.bundle.bySlug(slug));
 
-  const rows = await db
-    .select({
-      bundle: productsSchema,
-      bundleMeta: bundleMetaSchema,
-      category_name: categoryProductsSchema.name,
-      brand_name: brandProductsSchema.name,
-      brand_image: brandProductsSchema.image,
-    })
-    .from(productsSchema)
-    .innerJoin(categoryProductsSchema, eq(productsSchema.category_id, categoryProductsSchema.id))
-    .innerJoin(brandProductsSchema, eq(productsSchema.brand_slug, brandProductsSchema.brand_slug))
-    .leftJoin(bundleMetaSchema, eq(bundleMetaSchema.bundle_id, productsSchema.id))
-    .where(
-      and(
-        eq(productsSchema.slug, slug),
-        eq(productsSchema.productType, "bundle"),
-        eq(productsSchema.isHidden, false),
-      ),
-    )
-    .limit(1);
-
-  const row = rows[0] ?? null;
-
-  if (!row) {
-    throw new BundleBySlugNotFoundError();
-  }
-
-  cacheTag(CACHE_TAGS.bundleMeta.byBundleId(row.bundle.id));
-
-  return {
-    success: true,
-    data: {
-      ...row.bundle,
-      bundleMeta: row.bundleMeta,
-      category_name: row.category_name,
-      brand_name: row.brand_name,
-      brand_image: row.brand_image,
-    },
-    error: null,
-  };
-}
-
-export async function getBundleBySlug(slug: ProductType["slug"]): Promise<BundleBySlugResult> {
-  if (!slug) {
-    return { success: false, data: null, error: "Bundle slug is required" };
-  }
-
   try {
-    return await getBundleBySlugCachedCore(slug);
-  } catch (error) {
-    unstable_rethrow(error);
+    const rows = await db
+      .select({
+        bundle: productsSchema,
+        bundleMeta: bundleMetaSchema,
+        category_name: categoryProductsSchema.name,
+        brand_name: brandProductsSchema.name,
+        brand_image: brandProductsSchema.image,
+      })
+      .from(productsSchema)
+      .innerJoin(categoryProductsSchema, eq(productsSchema.category_id, categoryProductsSchema.id))
+      .innerJoin(brandProductsSchema, eq(productsSchema.brand_slug, brandProductsSchema.brand_slug))
+      .leftJoin(bundleMetaSchema, eq(bundleMetaSchema.bundle_id, productsSchema.id))
+      .where(
+        and(
+          eq(productsSchema.slug, slug),
+          eq(productsSchema.productType, "bundle"),
+          eq(productsSchema.isHidden, false),
+        ),
+      )
+      .limit(1);
 
+    const row = rows[0] ?? null;
+
+    if (!row) {
+      throw new BundleBySlugNotFoundError();
+    }
+
+    cacheTag(CACHE_TAGS.bundleMeta.byBundleId(row.bundle.id));
+
+    return {
+      success: true,
+      data: {
+        ...row.bundle,
+        bundleMeta: row.bundleMeta,
+        category_name: row.category_name,
+        brand_name: row.brand_name,
+        brand_image: row.brand_image,
+      },
+      error: null,
+    };
+  } catch (error) {
     if (error instanceof BundleBySlugNotFoundError) {
       return { success: false, data: null, error: error.message };
     }

@@ -34,7 +34,7 @@ type CatalogProductsFilteredResult = {
   errorMessage: string | null;
 };
 
-async function getAllProductsFilteredCachedCore(
+export async function getAllProductsFiltered(
   payload: CatalogQueryPayload,
 ): Promise<CatalogProductsFilteredResult> {
   "use cache";
@@ -98,45 +98,39 @@ async function getAllProductsFilteredCachedCore(
       ? desc(productsSchema.price)
       : desc(productsSchema.id);
 
-  const [{ total }] = await db
-    .select({ total: sql<number>`COUNT(*)` })
-    .from(productsSchema)
-    .where(whereClause);
-
-  const normalizedPage = Number.isFinite(page) && page > 0 ? Math.trunc(page) : 1;
-  const totalPages = Math.max(1, Math.ceil(total / safeLimit));
-  const safePage = Math.min(normalizedPage, totalPages);
-  const safeOffset = (safePage - 1) * safeLimit;
-
-  const data = await db
-    .select()
-    .from(productsSchema)
-    .where(whereClause)
-    .orderBy(orderBy)
-    .limit(safeLimit)
-    .offset(safeOffset);
-
-  return {
-    success: true,
-    data,
-    meta: {
-      page: safePage,
-      limit: safeLimit,
-      total,
-      totalPages,
-      mode,
-      sort: safeSort,
-    },
-    errorCode: null,
-    errorMessage: null,
-  };
-}
-
-export async function getAllProductsFiltered(
-  payload: CatalogQueryPayload,
-): Promise<CatalogProductsFilteredResult> {
   try {
-    return await getAllProductsFilteredCachedCore(payload);
+    const [{ total }] = await db
+      .select({ total: sql<number>`COUNT(*)` })
+      .from(productsSchema)
+      .where(whereClause);
+
+    const normalizedPage = Number.isFinite(page) && page > 0 ? Math.trunc(page) : 1;
+    const totalPages = Math.max(1, Math.ceil(total / safeLimit));
+    const safePage = Math.min(normalizedPage, totalPages);
+    const safeOffset = (safePage - 1) * safeLimit;
+
+    const data = await db
+      .select()
+      .from(productsSchema)
+      .where(whereClause)
+      .orderBy(orderBy)
+      .limit(safeLimit)
+      .offset(safeOffset);
+
+    return {
+      success: true,
+      data,
+      meta: {
+        page: safePage,
+        limit: safeLimit,
+        total,
+        totalPages,
+        mode,
+        sort: safeSort,
+      },
+      errorCode: null,
+      errorMessage: null,
+    };
   } catch (error) {
     console.error("[getAllProductsFiltered]", error);
 

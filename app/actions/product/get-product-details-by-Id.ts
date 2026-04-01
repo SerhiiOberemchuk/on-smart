@@ -31,55 +31,52 @@ function buildEmptyProductDetails(id: string): Product_Details {
   };
 }
 
-async function getProductDetailsByIdCachedCore(id: string): Promise<Product_Details> {
-  "use cache";
-  cacheTag(CACHE_TAGS.product.details.all);
-  cacheTag(CACHE_TAGS.product.details.byId(id));
-
-  const [descriptionRows, specificheRows, documentsRows, reviews] = await Promise.all([
-    db.select().from(productDescriptionSchema).where(eq(productDescriptionSchema.product_id, id)),
-    db.select().from(productSpecificheSchema).where(eq(productSpecificheSchema.product_id, id)),
-    db.select().from(productDocumentsSchema).where(eq(productDocumentsSchema.product_id, id)),
-    db
-      .select()
-      .from(productReviewsSchema)
-      .where(
-        and(eq(productReviewsSchema.product_id, id), eq(productReviewsSchema.is_approved, true)),
-      )
-      .orderBy(desc(productReviewsSchema.created_at)),
-  ]);
-
-  const description = descriptionRows[0] ?? null;
-  const specifiche = specificheRows[0] ?? null;
-  const documents = documentsRows[0] ?? null;
-
-  return {
-    product_id: id,
-    characteristics_descrizione: {
-      title: description?.title ?? "No title",
-      description: description?.description ?? "",
-      images: description?.images?.length ? description.images : ["/logo.png"],
-    },
-    characteristics_specifiche: {
-      title: specifiche?.title ?? "Specifiche",
-      images: specifiche?.images?.length ? specifiche.images : ["/logo.png"],
-      groups: specifiche?.groups?.length ? specifiche.groups : [],
-    },
-    characteristics_documenti: {
-      documents: documents?.documents?.length ? documents.documents : [],
-    },
-    characteristics_valutazione: reviews,
-  };
-}
-
 export async function getProductDetailsById(id: string): Promise<Product_Details> {
+  "use cache";
+
   if (!id) {
     console.error("[getProductDetailsById] Product id is required");
     return buildEmptyProductDetails(id);
   }
 
+  cacheTag(CACHE_TAGS.product.details.all);
+  cacheTag(CACHE_TAGS.product.details.byId(id));
+
   try {
-    return await getProductDetailsByIdCachedCore(id);
+    const [descriptionRows, specificheRows, documentsRows, reviews] = await Promise.all([
+      db.select().from(productDescriptionSchema).where(eq(productDescriptionSchema.product_id, id)),
+      db.select().from(productSpecificheSchema).where(eq(productSpecificheSchema.product_id, id)),
+      db.select().from(productDocumentsSchema).where(eq(productDocumentsSchema.product_id, id)),
+      db
+        .select()
+        .from(productReviewsSchema)
+        .where(
+          and(eq(productReviewsSchema.product_id, id), eq(productReviewsSchema.is_approved, true)),
+        )
+        .orderBy(desc(productReviewsSchema.created_at)),
+    ]);
+
+    const description = descriptionRows[0] ?? null;
+    const specifiche = specificheRows[0] ?? null;
+    const documents = documentsRows[0] ?? null;
+
+    return {
+      product_id: id,
+      characteristics_descrizione: {
+        title: description?.title ?? "No title",
+        description: description?.description ?? "",
+        images: description?.images?.length ? description.images : ["/logo.png"],
+      },
+      characteristics_specifiche: {
+        title: specifiche?.title ?? "Specifiche",
+        images: specifiche?.images?.length ? specifiche.images : ["/logo.png"],
+        groups: specifiche?.groups?.length ? specifiche.groups : [],
+      },
+      characteristics_documenti: {
+        documents: documents?.documents?.length ? documents.documents : [],
+      },
+      characteristics_valutazione: reviews,
+    };
   } catch (error) {
     console.error("[getProductDetailsById]", error);
     return buildEmptyProductDetails(id);

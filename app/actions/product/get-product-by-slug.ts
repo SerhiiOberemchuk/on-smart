@@ -20,28 +20,9 @@ type GetProductBySlugResult =
       errorMessage: string;
     };
 
-async function getProductBySlugCachedCore(
-  slug: ProductType["slug"],
-): Promise<GetProductBySlugResult> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.product.bySlug(slug));
-  cacheTag(CACHE_TAGS.product.all);
-
-  const [product] = await db
-    .select()
-    .from(productsSchema)
-    .where(and(eq(productsSchema.slug, slug), eq(productsSchema.isHidden, false)));
-
-  return {
-    success: true,
-    data: product ?? null,
-    errorCode: null,
-    errorMessage: null,
-  };
-}
-
 export async function getProductBySlug(slug: ProductType["slug"]): Promise<GetProductBySlugResult> {
+  "use cache";
+
   if (!slug) {
     return {
       success: false,
@@ -50,9 +31,22 @@ export async function getProductBySlug(slug: ProductType["slug"]): Promise<GetPr
       errorMessage: "Product slug is required",
     };
   }
+  cacheLife("minutes");
+  cacheTag(CACHE_TAGS.product.bySlug(slug));
+  cacheTag(CACHE_TAGS.product.all);
 
   try {
-    return await getProductBySlugCachedCore(slug);
+    const [product] = await db
+      .select()
+      .from(productsSchema)
+      .where(and(eq(productsSchema.slug, slug), eq(productsSchema.isHidden, false)));
+
+    return {
+      success: true,
+      data: product ?? null,
+      errorCode: null,
+      errorMessage: null,
+    };
   } catch (error) {
     console.error("[getProductBySlug]", error);
     return {

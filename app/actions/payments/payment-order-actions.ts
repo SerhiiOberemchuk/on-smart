@@ -2,13 +2,11 @@
 
 import { db } from "@/db/db";
 import { OrderPaymentTypes, paymentsSchema } from "@/db/schemas/orders.schema";
-import { isBuildPhase } from "@/utils/guard-build";
 import { withRetrySelective } from "@/utils/with-retry-selective";
 import { eq } from "drizzle-orm";
 import { cacheLife } from "next/cache";
 
 const PAYMENTS_READ_RETRY_OPTIONS = { tries: 10, delayMs: 800, linearBackoffMs: 250 } as const;
-const BUILD_PHASE_SKIP_ERROR = "skipped: build phase";
 
 export type GetOrderPayInfoResponseType = Promise<{
   success: boolean;
@@ -84,20 +82,15 @@ export type GetAllOrdersPaymentActionResponseTypes = Promise<{
   payments: OrderPaymentTypes[] | null;
 }>;
 
-async function getAllOrdersPaymentCachedCore(): Promise<OrderPaymentTypes[]> {
+export async function getAllOrdersPaymentAction(): GetAllOrdersPaymentActionResponseTypes {
   "use cache";
   cacheLife("seconds");
 
-  return withRetrySelective(() => db.select().from(paymentsSchema), PAYMENTS_READ_RETRY_OPTIONS);
-}
-
-export async function getAllOrdersPaymentAction(): GetAllOrdersPaymentActionResponseTypes {
-  if (isBuildPhase()) {
-    return { error: BUILD_PHASE_SKIP_ERROR, payments: null };
-  }
-
   try {
-    const payments = await getAllOrdersPaymentCachedCore();
+    const payments = await withRetrySelective(
+      () => db.select().from(paymentsSchema),
+      PAYMENTS_READ_RETRY_OPTIONS,
+    );
     return { payments, error: null };
   } catch (error) {
     return { error, payments: null };

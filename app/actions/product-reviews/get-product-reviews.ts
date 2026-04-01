@@ -14,37 +14,9 @@ type ProductReviewsResult = {
   errorMessage: string | null;
 };
 
-async function getProductReviewsCachedCore(productId: ProductType["id"]): Promise<ProductReviewsResult> {
-  "use cache";
-  cacheTag(CACHE_TAGS.product.reviewsById(productId));
-
-  const reviews = await db
-    .select()
-    .from(productReviewsSchema)
-    .where(
-      and(eq(productReviewsSchema.product_id, productId), eq(productReviewsSchema.is_approved, true)),
-    )
-    .orderBy(desc(productReviewsSchema.created_at));
-
-  return { reviews, success: true, errorCode: null, errorMessage: null };
-}
-
-async function getProductReviewsAdminCachedCore(
-  productId: ProductType["id"],
-): Promise<ProductReviewsResult> {
-  "use cache";
-  cacheTag(CACHE_TAGS.product.reviewsById(productId));
-
-  const reviews = await db
-    .select()
-    .from(productReviewsSchema)
-    .where(and(eq(productReviewsSchema.product_id, productId)))
-    .orderBy(desc(productReviewsSchema.created_at));
-
-  return { reviews, success: true, errorCode: null, errorMessage: null };
-}
-
 export async function getProductReviews(productId: ProductType["id"]): Promise<ProductReviewsResult> {
+  "use cache";
+
   if (!productId) {
     return {
       success: false,
@@ -53,8 +25,18 @@ export async function getProductReviews(productId: ProductType["id"]): Promise<P
     };
   }
 
+  cacheTag(CACHE_TAGS.product.reviewsById(productId));
+
   try {
-    return await getProductReviewsCachedCore(productId);
+    const reviews = await db
+      .select()
+      .from(productReviewsSchema)
+      .where(
+        and(eq(productReviewsSchema.product_id, productId), eq(productReviewsSchema.is_approved, true)),
+      )
+      .orderBy(desc(productReviewsSchema.created_at));
+
+    return { reviews, success: true, errorCode: null, errorMessage: null };
   } catch (error) {
     console.error("[getProductReviews]", error);
     return {
@@ -68,6 +50,8 @@ export async function getProductReviews(productId: ProductType["id"]): Promise<P
 export async function getProductReviewsAdmin(
   productId: ProductType["id"],
 ): Promise<ProductReviewsResult> {
+  "use cache";
+
   if (!productId) {
     return {
       success: false,
@@ -76,8 +60,16 @@ export async function getProductReviewsAdmin(
     };
   }
 
+  cacheTag(CACHE_TAGS.product.reviewsById(productId));
+
   try {
-    return await getProductReviewsAdminCachedCore(productId);
+    const reviews = await db
+      .select()
+      .from(productReviewsSchema)
+      .where(and(eq(productReviewsSchema.product_id, productId)))
+      .orderBy(desc(productReviewsSchema.created_at));
+
+    return { reviews, success: true, errorCode: null, errorMessage: null };
   } catch (error) {
     console.error("[getProductReviewsAdmin]", error);
     return {

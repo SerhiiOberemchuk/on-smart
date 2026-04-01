@@ -4,7 +4,6 @@ import { db } from "@/db/db";
 import { ProductType, productsSchema } from "@/db/schemas/product.schema";
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
-import { unstable_rethrow } from "next/navigation";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 export type ProductFetchResult =
@@ -21,32 +20,26 @@ export type ProductFetchResult =
       errorMessage: string;
     };
 
-async function getAllProductsCachedCore(includeHidden: boolean): Promise<ProductFetchResult> {
-  "use cache";
-  cacheLife("seconds");
-  cacheTag(CACHE_TAGS.product.all);
-
-  const response = includeHidden
-    ? await db.select().from(productsSchema)
-    : await db.select().from(productsSchema).where(eq(productsSchema.isHidden, false));
-
-  return {
-    success: true,
-    data: response,
-    errorCode: null,
-    errorMessage: null,
-  };
-}
-
 export async function getAllProducts(
   options?: { includeHidden?: boolean },
 ): Promise<ProductFetchResult> {
+  "use cache";
+  cacheLife("seconds");
+  cacheTag(CACHE_TAGS.product.all);
   const includeHidden = options?.includeHidden ?? false;
 
   try {
-    return await getAllProductsCachedCore(includeHidden);
+    const response = includeHidden
+      ? await db.select().from(productsSchema)
+      : await db.select().from(productsSchema).where(eq(productsSchema.isHidden, false));
+
+    return {
+      success: true,
+      data: response,
+      errorCode: null,
+      errorMessage: null,
+    };
   } catch (error) {
-    unstable_rethrow(error);
     console.error("[getAllProducts]", error);
     return {
       success: false,

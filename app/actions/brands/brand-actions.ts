@@ -2,17 +2,14 @@
 
 import { db } from "@/db/db";
 import { brandProductsSchema } from "@/db/schemas/brand-products.schema";
-import { isBuildPhase } from "@/utils/guard-build";
 import { withRetrySelective } from "@/utils/with-retry-selective";
 import { BrandTypes } from "@/types/brands.types";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
-import { unstable_rethrow } from "next/navigation";
 
 const BRAND_READ_RETRY_OPTIONS = { tries: 10, delayMs: 800, linearBackoffMs: 250 } as const;
-const BUILD_PHASE_SKIP_ERROR = "skipped: build phase";
 
 type BrandRow = typeof brandProductsSchema.$inferSelect;
 
@@ -51,25 +48,25 @@ function refreshBrandCacheTags(brandSlug?: string) {
   }
 }
 
-async function getAllBrandsCachedCore(): Promise<BrandRow[]> {
+export async function getAllBrands(): GetAllBrandsResponse {
   "use cache";
   cacheTag(CACHE_TAGS.brand.all);
   cacheLife("minutes");
 
-  return withRetrySelective(() => db.select().from(brandProductsSchema), BRAND_READ_RETRY_OPTIONS);
-}
+  try {
+    const result = await withRetrySelective(
+      () => db.select().from(brandProductsSchema),
+      BRAND_READ_RETRY_OPTIONS,
+    );
 
-async function getBrandBySlugCachedCore(brandSlug: string): Promise<BrandRow | null> {
-  "use cache";
-  cacheTag(CACHE_TAGS.brand.bySlug(brandSlug));
-  cacheLife("minutes");
-
-  const rows = await withRetrySelective(
-    () => db.select().from(brandProductsSchema).where(eq(brandProductsSchema.brand_slug, brandSlug)),
-    BRAND_READ_RETRY_OPTIONS,
-  );
-
-  return rows[0] ?? null;
+    return {
+      success: true,
+      data: result,
+      error: null,
+    };
+  } catch (error) {
+    return { success: false, error, data: [] };
+  }
 }
 
 export async function createBrand(brand: BrandTypes) {
@@ -83,25 +80,6 @@ export async function createBrand(brand: BrandTypes) {
     };
   } catch (error) {
     return { success: false, error };
-  }
-}
-
-export async function getAllBrands(): GetAllBrandsResponse {
-  if (isBuildPhase()) {
-    return { success: false, error: BUILD_PHASE_SKIP_ERROR, data: [] };
-  }
-
-  try {
-    const result = await getAllBrandsCachedCore();
-
-    return {
-      success: true,
-      data: result,
-      error: null,
-    };
-  } catch (error) {
-    unstable_rethrow(error);
-    return { success: false, error, data: [] };
   }
 }
 
@@ -168,20 +146,22 @@ export async function updateBrandById(
 export async function getBrandBySlug(
   brand_slug: BrandTypes["brand_slug"],
 ): GetBrandBySlugResponse {
-  if (isBuildPhase()) {
-    return { success: false, error: BUILD_PHASE_SKIP_ERROR, data: null };
-  }
+  "use cache";
+  cacheTag(CACHE_TAGS.brand.bySlug(brand_slug));
+  cacheLife("minutes");
 
   try {
-    const fetchBrand = await getBrandBySlugCachedCore(brand_slug);
-
+    const rows = await withRetrySelective(
+      () => db.select().from(brandProductsSchema).where(eq(brandProductsSchema.brand_slug, brand_slug)),
+      BRAND_READ_RETRY_OPTIONS,
+    );
+    const fetchBrand = rows[0] ?? null;
     if (!fetchBrand) {
       return { success: false, error: "Brand not found", data: null };
     }
 
     return { success: true, error: null, data: fetchBrand };
   } catch (error) {
-    unstable_rethrow(error);
     return { success: false, error, data: null };
   }
 }

@@ -13,37 +13,13 @@ type GetProductsByIdsResult = {
   errorMessage: string | null;
 };
 
-async function getProductsByIdsCachedCore(
-  normalizedIds: string[],
-  includeOutOfStock: boolean,
-): Promise<GetProductsByIdsResult> {
-  "use cache";
-
-  cacheLife("seconds");
-  cacheTag(CACHE_TAGS.product.byIds(normalizedIds));
-  cacheTag(CACHE_TAGS.product.all);
-
-  const res = await db
-    .select()
-    .from(productsSchema)
-    .where(and(inArray(productsSchema.id, normalizedIds), eq(productsSchema.isHidden, false)));
-
-  const availableProducts = includeOutOfStock ? res : res.filter((p) => p.inStock > 0);
-
-  return {
-    success: true,
-    data: availableProducts,
-    errorCode: null,
-    errorMessage: null,
-  };
-}
-
 export async function getProductsByIds(
   ids: string[],
   options?: {
     includeOutOfStock?: boolean;
   },
 ): Promise<GetProductsByIdsResult> {
+  "use cache";
   const normalizedIds = Array.from(new Set(ids)).sort();
 
   if (!normalizedIds.length) {
@@ -55,8 +31,26 @@ export async function getProductsByIds(
     };
   }
 
+  const includeOutOfStock = options?.includeOutOfStock ?? false;
+
+  cacheLife("seconds");
+  cacheTag(CACHE_TAGS.product.byIds(normalizedIds));
+  cacheTag(CACHE_TAGS.product.all);
+
   try {
-    return await getProductsByIdsCachedCore(normalizedIds, options?.includeOutOfStock ?? false);
+    const res = await db
+      .select()
+      .from(productsSchema)
+      .where(and(inArray(productsSchema.id, normalizedIds), eq(productsSchema.isHidden, false)));
+
+    const availableProducts = includeOutOfStock ? res : res.filter((p) => p.inStock > 0);
+
+    return {
+      success: true,
+      data: availableProducts,
+      errorCode: null,
+      errorMessage: null,
+    };
   } catch (error) {
     console.error("[getProductsByIds]", error);
     return {

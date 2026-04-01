@@ -2,7 +2,6 @@
 
 import { cacheLife, cacheTag } from "next/cache";
 import { eq } from "drizzle-orm";
-import { unstable_rethrow } from "next/navigation";
 
 import { db } from "@/db/db";
 import { type BundleMetaType, bundleMetaSchema } from "@/db/schemas/bundle-meta.schema";
@@ -19,35 +18,30 @@ export type BundleFetchResult = {
   error: string | null;
 };
 
-async function getAllBundlesCachedCore(): Promise<BundleFetchResult> {
+export async function getAllBundles(): Promise<BundleFetchResult> {
   "use cache";
   cacheLife("seconds");
   cacheTag(CACHE_TAGS.bundle.all);
 
-  const response = await db
-    .select({
-      bundle: productsSchema,
-      bundleMeta: bundleMetaSchema,
-    })
-    .from(productsSchema)
-    .leftJoin(bundleMetaSchema, eq(bundleMetaSchema.bundle_id, productsSchema.id))
-    .where(eq(productsSchema.productType, "bundle"));
-
-  return {
-    success: true,
-    data: response.map((row) => ({
-      ...row.bundle,
-      bundleMeta: row.bundleMeta,
-    })),
-    error: null,
-  };
-}
-
-export async function getAllBundles(): Promise<BundleFetchResult> {
   try {
-    return await getAllBundlesCachedCore();
+    const response = await db
+      .select({
+        bundle: productsSchema,
+        bundleMeta: bundleMetaSchema,
+      })
+      .from(productsSchema)
+      .leftJoin(bundleMetaSchema, eq(bundleMetaSchema.bundle_id, productsSchema.id))
+      .where(eq(productsSchema.productType, "bundle"));
+
+    return {
+      success: true,
+      data: response.map((row) => ({
+        ...row.bundle,
+        bundleMeta: row.bundleMeta,
+      })),
+      error: null,
+    };
   } catch (error) {
-    unstable_rethrow(error);
     console.error("[getAllBundles]", error);
     return {
       success: false,

@@ -26,39 +26,9 @@ class BundleByIdNotFoundError extends Error {
   }
 }
 
-async function getBundleByIdCachedCore(id: ProductType["id"]): Promise<BundleByIdResult> {
-  "use cache";
-  cacheLife("seconds");
-  cacheTag(CACHE_TAGS.bundle.all);
-  cacheTag(CACHE_TAGS.bundle.byId(id));
-  cacheTag(CACHE_TAGS.bundleMeta.byBundleId(id));
-
-  const rows = await db
-    .select({
-      bundle: productsSchema,
-      bundleMeta: bundleMetaSchema,
-    })
-    .from(productsSchema)
-    .leftJoin(bundleMetaSchema, eq(bundleMetaSchema.bundle_id, productsSchema.id))
-    .where(and(eq(productsSchema.id, id), eq(productsSchema.productType, "bundle")));
-
-  const row = rows[0] ?? null;
-
-  if (!row?.bundle) {
-    throw new BundleByIdNotFoundError();
-  }
-
-  return {
-    success: true,
-    data: {
-      bundle: row.bundle,
-      bundleMeta: row.bundleMeta,
-    },
-    error: null,
-  };
-}
-
 export async function getBundleById(id: ProductType["id"]): Promise<BundleByIdResult> {
+  "use cache";
+
   if (!id) {
     return {
       success: false,
@@ -66,9 +36,35 @@ export async function getBundleById(id: ProductType["id"]): Promise<BundleByIdRe
       error: "Bundle id is required",
     };
   }
+  cacheLife("seconds");
+  cacheTag(CACHE_TAGS.bundle.all);
+  cacheTag(CACHE_TAGS.bundle.byId(id));
+  cacheTag(CACHE_TAGS.bundleMeta.byBundleId(id));
 
   try {
-    return await getBundleByIdCachedCore(id);
+    const rows = await db
+      .select({
+        bundle: productsSchema,
+        bundleMeta: bundleMetaSchema,
+      })
+      .from(productsSchema)
+      .leftJoin(bundleMetaSchema, eq(bundleMetaSchema.bundle_id, productsSchema.id))
+      .where(and(eq(productsSchema.id, id), eq(productsSchema.productType, "bundle")));
+
+    const row = rows[0] ?? null;
+
+    if (!row?.bundle) {
+      throw new BundleByIdNotFoundError();
+    }
+
+    return {
+      success: true,
+      data: {
+        bundle: row.bundle,
+        bundleMeta: row.bundleMeta,
+      },
+      error: null,
+    };
   } catch (error) {
     if (error instanceof BundleByIdNotFoundError) {
       return {
