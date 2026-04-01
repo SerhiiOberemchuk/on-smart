@@ -19,7 +19,6 @@ export default function CompletatoPage({
   order,
   paymentInfo,
 }: {
-  searchParams: Record<string, string | string[] | undefined>;
   order: OrderResponse;
   paymentInfo: PaymentResponse;
 }) {

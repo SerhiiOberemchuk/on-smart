@@ -6,11 +6,22 @@ import { SUM_UP_CONSTANTS } from "@/app/actions/sumup/sumup-constans";
 import { PAGES } from "@/types/pages.types";
 import { getOrderFullInfoById } from "@/app/actions/orders/get-order";
 import { notifyOrderById } from "@/app/actions/notify-order-by-id/notify-order-by-id";
+import { connection } from "next/server";
+import { Suspense } from "react";
 
-export default async function SumUpCallbackPage({
+export default function SumUpCallbackPage(props: PageProps<"/checkout/completato/[order]/sumup">) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SumUpCallbackContent params={props.params} searchParams={props.searchParams} />
+    </Suspense>
+  );
+}
+
+async function SumUpCallbackContent({
   params,
   searchParams,
 }: PageProps<"/checkout/completato/[order]/sumup">) {
+  await connection();
   const { order: orderNumber } = await params;
   const searchParamsState = await searchParams;
   const summaryWithError = (reason: string) =>
@@ -151,4 +162,6 @@ export default async function SumUpCallbackPage({
     });
     redirect(summaryWithError("sumup_runtime_error"));
   }
+
+  return null;
 }

@@ -4,7 +4,7 @@ import PageLayoutCheckout from "@/components/CheckoutPagesComponents/PageLayoutC
 import { useCheckoutStore } from "@/store/checkout-store";
 import { PAGES } from "@/types/pages.types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { toast } from "react-toastify";
 
 const PERSISTENT_PAYMENT_TOAST_OPTIONS = {
@@ -13,6 +13,14 @@ const PERSISTENT_PAYMENT_TOAST_OPTIONS = {
 } as const;
 
 export default function RepilogoDatiConsegna() {
+  return (
+    <Suspense fallback={null}>
+      <RiepilogoContent />
+    </Suspense>
+  );
+}
+
+function RiepilogoContent() {
   const { step } = useCheckoutStore();
   const router = useRouter();
   const searchParams = useSearchParams();
