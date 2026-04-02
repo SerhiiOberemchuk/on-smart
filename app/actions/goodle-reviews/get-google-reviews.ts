@@ -1,6 +1,5 @@
 "use server";
 
-import { ApifyClient } from "apify-client";
 import { cacheLife } from "next/cache";
 
 import { GoogleReview } from "@/types/google-reviews.types";
@@ -8,13 +7,10 @@ import { isBuildPhase } from "@/utils/guard-build";
 
 const APIFY_TOKEN = process.env.APIFY_API_TOKEN;
 const APIFY_TASK_ID = process.env.APIFY_TASK_ID;
+const APIFY_BASE_URL = "https://api.apify.com/v2";
 const DEFAULT_GOOGLE_REVIEW_URL = "https://g.page/r/CRhuErfSy0siEAE/review";
 const MAX_REVIEWS = 20;
 const BUILD_PHASE_SKIP_ERROR = "skipped: build phase";
-
-const client = new ApifyClient({
-  token: APIFY_TOKEN,
-});
 
 type GoogleReviewsActionResult =
   | {
@@ -71,13 +67,27 @@ async function getGoogleReviewsCachedCore(taskId: string): Promise<GoogleReview[
   "use cache";
   cacheLife("hours");
 
-  const run = await client.task(taskId).call();
-  const { items } = await client.dataset(run.defaultDatasetId).listItems({
-    limit: MAX_REVIEWS,
-    fields: ["name", "reviewId", "reviewUrl", "stars", "text", "publishedAtDate"],
+  const url = new URL(`${APIFY_BASE_URL}/actor-tasks/${taskId}/run-sync-get-dataset-items`);
+  url.searchParams.set("token", APIFY_TOKEN!);
+  url.searchParams.set("clean", "true");
+  url.searchParams.set("format", "json");
+  url.searchParams.set("limit", String(MAX_REVIEWS));
+  url.searchParams.set("fields", "name,reviewId,reviewUrl,stars,text,publishedAtDate");
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
   });
 
-  return (items as ApifyReviewItem[])
+  if (!response.ok) {
+    throw new Error(`Apify request failed with status ${response.status}`);
+  }
+
+  const items = (await response.json()) as ApifyReviewItem[];
+
+  return items
     .map((item, index) => normalizeReview(item, index))
     .filter((item): item is GoogleReview => Boolean(item));
 }
