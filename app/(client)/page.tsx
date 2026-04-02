@@ -8,7 +8,6 @@ import TopSalesSection from "@/components/home-sections/top-sales-section/TopSal
 import Script from "next/script";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import { Suspense } from "react";
-import { headers } from "next/headers";
 import FallbackHeroSection from "@/components/home-sections/hero-section/FallbackHeroSection";
 import {
   BrandSectionFallback,
@@ -90,8 +89,6 @@ function HomePageFallback() {
 }
 
 async function HomeContent() {
-  await headers();
-
   return (
     <>
       <h1 className="sr-only">
