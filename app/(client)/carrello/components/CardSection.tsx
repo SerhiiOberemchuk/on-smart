@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import Link from "next/link";
 import { toast } from "react-toastify";
@@ -21,15 +21,21 @@ export default function CartSection() {
   const [fetchedProducts, setFetchedProducts] = useState<ProductType[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const hasValidatedOnceRef = useRef(false);
+  const previousFetchedProductsRef = useRef<ProductType[]>([]);
 
-  const { basket, productsInBasket, removeFromBasketById, updateBasket, setProductsInBasket } =
+  const { basket, hasHydrated, removeFromBasketById, updateBasket, setProductsInBasket } =
     useBasketStore();
 
   useEffect(() => {
     setProductsInBasket(fetchedProducts);
+    previousFetchedProductsRef.current = fetchedProducts;
   }, [fetchedProducts, setProductsInBasket]);
 
   useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
+
     if (basket.length === 0) {
       setFetchedProducts([]);
       setIsLoadingProducts(false);
@@ -61,7 +67,9 @@ export default function CartSection() {
 
       const products = data ?? [];
       const productsById = new Map(products.map((product) => [product.id, product]));
-      const previousProductsById = new Map(productsInBasket.map((product) => [product.id, product]));
+      const previousProductsById = new Map(
+        previousFetchedProductsRef.current.map((product) => [product.id, product]),
+      );
 
       const missingIds: string[] = [];
       const hiddenIds: string[] = [];
@@ -123,7 +131,9 @@ export default function CartSection() {
 
       if (hasValidatedOnceRef.current) {
         if (missingIds.length > 0) {
-          toast.warning("Alcuni prodotti non sono più disponibili e sono stati rimossi dal carrello.");
+          toast.warning(
+            "Alcuni prodotti non sono più disponibili e sono stati rimossi dal carrello.",
+          );
         }
 
         if (hiddenIds.length > 0) {
@@ -143,7 +153,9 @@ export default function CartSection() {
         }
 
         if (quantityAdjustedIds.length > 0) {
-          toast.info("Le quantità di alcuni prodotti sono state aggiornate in base alla disponibilità.");
+          toast.info(
+            "Le quantità di alcuni prodotti sono state aggiornate in base alla disponibilità.",
+          );
         }
 
         if (priceChangedIds.length > 0) {
@@ -161,11 +173,20 @@ export default function CartSection() {
     };
 
     load();
-  }, [basket, productsInBasket, removeFromBasketById, updateBasket]);
+  }, [basket, hasHydrated, removeFromBasketById, updateBasket]);
+
+  const basketById = useMemo(
+    () => new Map(basket.map((basketItem) => [basketItem.productId, basketItem])),
+    [basket],
+  );
+  const fetchedProductsById = useMemo(
+    () => new Map(fetchedProducts.map((product) => [product.id, product])),
+    [fetchedProducts],
+  );
 
   const calcProductPrice = (productId: string) => {
-    const item = basket.find((basketItem) => basketItem.productId === productId);
-    const product = fetchedProducts.find((fetchedProduct) => fetchedProduct.id === productId);
+    const item = basketById.get(productId);
+    const product = fetchedProductsById.get(productId);
 
     if (!item || !product) {
       return { price: "0", oldPrice: null };
@@ -178,8 +199,8 @@ export default function CartSection() {
   };
 
   const incrementQnt = (productId: string) => {
-    const item = basket.find((basketItem) => basketItem.productId === productId);
-    const product = fetchedProducts.find((fetchedProduct) => fetchedProduct.id === productId);
+    const item = basketById.get(productId);
+    const product = fetchedProductsById.get(productId);
 
     if (!item || !product) return;
 
@@ -192,7 +213,7 @@ export default function CartSection() {
   };
 
   const decrementQnt = (productId: string) => {
-    const item = basket.find((basketItem) => basketItem.productId === productId);
+    const item = basketById.get(productId);
 
     if (item && item.quantity > 1) {
       updateBasket([{ productId, quantity: item.quantity - 1 }]);
@@ -201,7 +222,7 @@ export default function CartSection() {
 
   const calcTotal = () => {
     return fetchedProducts.reduce((acc, product) => {
-      const item = basket.find((basketItem) => basketItem.productId === product.id);
+      const item = basketById.get(product.id);
       if (!item) return acc;
       return acc + item.quantity * Number(product.price);
     }, 0);
@@ -215,7 +236,7 @@ export default function CartSection() {
       <div className="container bg-background xl:bg-transparent">
         <div className="relative flex flex-col gap-4 xl:mt-5 xl:flex-row xl:gap-5">
           <ul className="mx-auto flex min-h-[320px] w-full max-w-[916px] flex-col gap-6 rounded-sm bg-background p-3 xl:mx-0">
-            {isLoadingProducts &&
+            {(!hasHydrated || isLoadingProducts) &&
               basket.length > 0 &&
               Array.from({ length: Math.min(Math.max(basket.length, 1), 3) }).map((_, index) => (
                 <li
@@ -245,9 +266,10 @@ export default function CartSection() {
                 </li>
               ))}
 
-            {!isLoadingProducts &&
+            {hasHydrated &&
+              !isLoadingProducts &&
               fetchedProducts.map((product, index) => {
-                const item = basket.find((basketItem) => basketItem.productId === product.id);
+                const item = basketById.get(product.id);
                 const price = calcProductPrice(product.id);
                 const canIncrement = item && item.quantity < product.inStock;
                 const canDecrement = item && item.quantity > 1;
@@ -325,7 +347,7 @@ export default function CartSection() {
                 );
               })}
 
-            {!isLoadingProducts && basket.length === 0 && (
+            {hasHydrated && !isLoadingProducts && basket.length === 0 && (
               <li className="text-center">
                 Il carrello è vuoto{" "}
                 <Link href="/catalogo" className="underline">
@@ -335,7 +357,7 @@ export default function CartSection() {
             )}
           </ul>
 
-          {isLoadingProducts && basket.length > 0 ? (
+          {!hasHydrated || (isLoadingProducts && basket.length > 0) ? (
             <div className="sticky top-5 w-full xl:max-w-[426px]">
               <div className="sticky top-5 flex min-h-[260px] w-full flex-col gap-6 rounded-sm bg-background p-3">
                 <div className="h-8 w-2/3 animate-pulse rounded bg-grey-hover-stroke" />

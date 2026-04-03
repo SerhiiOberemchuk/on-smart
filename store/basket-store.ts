@@ -8,6 +8,7 @@ export type BasceketStoreStateType = {
   qntToShow: number;
   basket: BasketTypeUseCheckoutStore;
   productsInBasket: ProductType[];
+  hasHydrated: boolean;
 };
 
 type BasketStateFunctions = {
@@ -19,6 +20,7 @@ type BasketStateFunctions = {
   setProductsInBasket: (products: ProductType[]) => void;
   removeProdutsFromBasket: () => void;
   clearBasketStore: () => void;
+  setHasHydrated: (hasHydrated: boolean) => void;
 };
 
 type BasketState = BasceketStoreStateType & BasketStateFunctions;
@@ -29,6 +31,7 @@ export const useBasketStore = create<BasketState, [["zustand/persist", BasketSta
       qntToShow: 0,
       isPopupOpen: false,
       productsInBasket: [],
+      hasHydrated: false,
       clearBasketStore: () =>
         set({ basket: [], productsInBasket: [], qntToShow: 0, isPopupOpen: false }),
       removeAllBasket: () => set({ basket: [] }),
@@ -46,11 +49,15 @@ export const useBasketStore = create<BasketState, [["zustand/persist", BasketSta
       hidePopup: () => set({ isPopupOpen: false, qntToShow: 0 }),
       setProductsInBasket: (products) => set({ productsInBasket: products }),
       removeProdutsFromBasket: () => set({ productsInBasket: [] }),
+      setHasHydrated: (hasHydrated) => set({ hasHydrated }),
     }),
     {
       name: "carello",
       version: 1,
       storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     },
   ),
 );
