@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import StarsRating from "../../StarsRating";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import styles from "./style.module.css";
 import SmartImage from "@/components/SmartImage";
@@ -50,6 +50,13 @@ export default function SelectProductSection({
   const variantGroupName = `product-page-variant-${variantGroupSourceId}`;
 
   const shouldShowVariants = (variantsProduct?.length ?? 0) > 1;
+
+  useEffect(() => {
+    const fallback =
+      variantsProduct?.find((item) => item.id === product.id) ?? variantsProduct?.[0] ?? product;
+    setSelectedProduct({ ...fallback, qnt: 1 });
+    setVariantsToShow(NUMBER_OF_VARIANTS_TO_SHOW);
+  }, [product.id, product.parent_product_id, variantsProduct]);
 
   return (
     <section className="w-full rounded-sm bg-background p-3 xl:flex-1">
