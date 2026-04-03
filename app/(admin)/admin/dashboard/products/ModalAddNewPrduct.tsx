@@ -144,7 +144,12 @@ export default function ModalAddNewPrduct() {
       <div className="admin-modal">
         <div className="admin-modal-header">
           <h2 className="text-base font-semibold">Створити новий товар</h2>
-          <ButtonXDellete type="button" onClick={() => closeModal()} className="h-8 w-8" />
+          <ButtonXDellete
+            icon="close"
+            type="button"
+            onClick={() => closeModal()}
+            className="h-8 w-8"
+          />
         </div>
 
         <div className="admin-modal-content">

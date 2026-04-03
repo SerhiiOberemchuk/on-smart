@@ -373,7 +373,12 @@ export default function ModalCreateBundle({
       <div className="admin-modal max-w-6xl">
         <div className="admin-modal-header">
           <h2 className="text-base font-semibold">Створити новий комплект</h2>
-          <ButtonXDellete type="button" onClick={() => void closeModal()} className="h-8 w-8" />
+          <ButtonXDellete
+            icon="close"
+            type="button"
+            onClick={() => void closeModal()}
+            className="h-8 w-8"
+          />
         </div>
 
         <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="admin-modal-content">

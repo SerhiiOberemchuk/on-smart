@@ -1,7 +1,9 @@
 "use client";
 
 import { deleteCharacteristic } from "@/app/actions/admin/characteristics/mutations";
+import { confirmActionToast } from "@/app/(admin)/admin/dashboard/confirm-action-toast";
 import ButtonYellow from "@/components/BattonYellow";
+import { useState } from "react";
 import ButtonXDellete from "../../ButtonXDellete";
 import { useCharacteristicStore } from "../store/useCharacteristicStore";
 
@@ -65,11 +67,17 @@ export default function ListCharacteristics({
   data: CharacteristicsResponse;
 }) {
   const { openEdit } = useCharacteristicStore();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
-    const confirmDelete = window.confirm("Видалити характеристику?");
-    if (!confirmDelete) return;
-    await deleteCharacteristic(id);
+    if (deletingId === id) return;
+    if (!(await confirmActionToast("Видалити характеристику?"))) return;
+    try {
+      setDeletingId(id);
+      await deleteCharacteristic(id);
+    } finally {
+      setDeletingId((current) => (current === id ? null : current));
+    }
   };
 
   if (data.error || !data.data) {
@@ -131,7 +139,11 @@ export default function ListCharacteristics({
                   >
                     Редагувати
                   </ButtonYellow>
-                  <ButtonXDellete className="h-8 w-8" onClick={() => handleDelete(item.id)} />
+                  <ButtonXDellete
+                    className="h-8 w-8"
+                    disabled={deletingId === item.id}
+                    onClick={() => void handleDelete(item.id)}
+                  />
                 </div>
               </li>
             ))}
