@@ -46,6 +46,8 @@ export default function SelectProductSection({
   ]);
 
   const uiProduct = selectedProduct ?? product;
+  const variantGroupSourceId = product.parent_product_id ?? product.id;
+  const variantGroupName = `product-page-variant-${variantGroupSourceId}`;
 
   const shouldShowVariants = (variantsProduct?.length ?? 0) > 1;
 
@@ -61,7 +63,10 @@ export default function SelectProductSection({
         <>
           {variantsProduct ? (
             <>
-              <fieldset className="mt-6 flex flex-col gap-3">
+              <fieldset
+                key={variantGroupName}
+                className="mt-6 flex flex-col gap-3"
+              >
                 <legend className="input_M_18 mb-3 text-white">Scegli una versione</legend>
 
                 {variantsProduct.slice(0, variantsToShow).map((variant) => {
@@ -74,7 +79,7 @@ export default function SelectProductSection({
                     >
                       <input
                         type="radio"
-                        name="ProductVariant"
+                        name={variantGroupName}
                         value={variant.id}
                         checked={checked}
                         onChange={() => setSelectedProduct({ ...variant, qnt: 1 })}
