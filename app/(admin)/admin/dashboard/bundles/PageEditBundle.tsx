@@ -1,8 +1,7 @@
 ﻿"use client";
 
-import { updateBundle } from "@/app/actions/bundles/update-bundle";
-import { deleteBundleReview } from "@/app/actions/bundles/delete-bundle-review";
-import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
+import { updateBundle, deleteBundleReview } from "@/app/actions/admin/bundles/mutations";
+import { deleteFileFromS3, uploadFile } from "@/app/actions/admin/files/mutations";
 import ButtonYellow from "@/components/BattonYellow";
 import {
   type BundleMetaDocument,

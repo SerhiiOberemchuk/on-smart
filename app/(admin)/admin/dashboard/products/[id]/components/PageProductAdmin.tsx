@@ -1,7 +1,7 @@
 ﻿"use client";
 
-import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
-import { updateProductById } from "@/app/actions/product/update-product";
+import { deleteFileFromS3, uploadFile } from "@/app/actions/admin/files/mutations";
+import { updateProductById } from "@/app/actions/admin/products/mutations";
 import ButtonYellow from "@/components/BattonYellow";
 import { ProductType } from "@/db/schemas/product.schema";
 import { BrandTypes } from "@/types/brands.types";
@@ -16,6 +16,7 @@ import SelectComponentAdmin from "../../../SelectComponent";
 import { objectFromPickedKeys } from "../../helpers/objectFromPickedKeys";
 import CharacteristicProductSection from "./characteristic/CharacteristicProductSection";
 import FotoGaleryProduct from "./FotoGaleryProduct";
+import RelatedProductsPicker from "./RelatedProductsPicker";
 import {
   PRODUCT_SAVE_ALL_ACTIVITY_EVENT,
   PRODUCT_SAVE_ALL_RESULT_EVENT,
@@ -30,6 +31,28 @@ type PageProductAdminProps = {
   allProductsAction: Promise<ProductType[]>;
 };
 
+type ProductAdminFormValues = Pick<
+  ProductType,
+  | "name"
+  | "nameFull"
+  | "slug"
+  | "brand_slug"
+  | "category_slug"
+  | "price"
+  | "oldPrice"
+  | "ean"
+  | "lengthCm"
+  | "widthCm"
+  | "heightCm"
+  | "weightKg"
+  | "inStock"
+  | "isOnOrder"
+  | "isHidden"
+  | "category_id"
+> & {
+  searchKeywordsInput: string;
+};
+
 export default function PageProductAdmin({
   dataAction,
   categoriesAction,
@@ -40,7 +63,7 @@ export default function PageProductAdmin({
   const categories = use(categoriesAction);
   const brands = use(brandsAction);
   const allProducts = use(allProductsAction);
-  const mainPartDataProduct = objectFromPickedKeys(product, [
+  const pickedMainPartDataProduct = objectFromPickedKeys(product, [
     "name",
     "nameFull",
     "slug",
@@ -58,16 +81,19 @@ export default function PageProductAdmin({
     "isHidden",
     "category_id",
   ]);
+  const mainPartDataProduct: ProductAdminFormValues = {
+    ...pickedMainPartDataProduct,
+    searchKeywordsInput: (product.searchKeywords ?? []).join(", "),
+  };
 
   const [fotoToUpload, setFotoToUpload] = useState<File | null>(null);
-  const { register, handleSubmit, watch } = useForm<typeof mainPartDataProduct>({
+  const { register, handleSubmit } = useForm<typeof mainPartDataProduct>({
     defaultValues: mainPartDataProduct,
   });
 
   const [isPendingUpdateProduct, startTransitionUpdateProduct] = useTransition();
   const formRef = useRef<HTMLFormElement | null>(null);
 
-  const [relatedProductsQuery, setRelatedProductsQuery] = useState("");
   const [relatedProductIds, setRelatedProductIds] = useState<string[]>(
     product.relatedProductIds ?? [],
   );
@@ -75,33 +101,6 @@ export default function PageProductAdmin({
   const [isSaveAllRequested, setIsSaveAllRequested] = useState(false);
   const [pendingChildSaves, setPendingChildSaves] = useState(0);
   const [saveAllErrors, setSaveAllErrors] = useState<string[]>([]);
-
-  const relatedProductCandidates = useMemo(() => {
-    const normalizedQuery = relatedProductsQuery.trim().toLowerCase();
-    if (!normalizedQuery) return [];
-
-    return allProducts
-      .filter((item) => item.id !== product.id)
-      .filter((item) => !relatedProductIds.includes(item.id))
-      .filter((item) => {
-        const searchableText = `${item.name} ${item.nameFull} ${item.slug} ${item.id}`.toLowerCase();
-        return searchableText.includes(normalizedQuery);
-      })
-      .slice(0, 8);
-  }, [allProducts, product.id, relatedProductIds, relatedProductsQuery]);
-
-  const selectedRelatedProducts = useMemo(
-    () =>
-      relatedProductIds
-        .map((id) => allProducts.find((item) => item.id === id))
-        .filter(Boolean) as ProductType[],
-    [allProducts, relatedProductIds],
-  );
-
-  const selectedRelatedProductsMap = useMemo(
-    () => new Map(selectedRelatedProducts.map((item) => [item.id, item])),
-    [selectedRelatedProducts],
-  );
 
   const onSubmit: SubmitHandler<typeof mainPartDataProduct> = (data) => {
     if (!isSaveConfirmedRef.current) {
@@ -126,17 +125,33 @@ export default function PageProductAdmin({
       return;
     }
 
-    const slug = watch("category_slug");
-    const [category] = categories.filter((i) => i.category_slug === slug);
+    const [category] = categories.filter((i) => i.category_slug === data.category_slug);
     const normalizedEan = data.ean.trim();
+    const normalizedSearchKeywords = Array.from(
+      new Set(
+        data.searchKeywordsInput
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean),
+      ),
+    );
+    const normalizedRelatedProductIds = Array.from(
+      new Set(
+        relatedProductIds.filter(
+          (id): id is string => typeof id === "string" && id.trim().length > 0 && id !== product.id,
+        ),
+      ),
+    );
 
     const preparedData: Partial<Omit<ProductType, "id">> = {
       ...data,
       oldPrice: Number(data.oldPrice) ? data.oldPrice : null,
       ean: normalizedEan,
       category_id: category?.id ?? product.category_id,
-      relatedProductIds,
+      searchKeywords: normalizedSearchKeywords,
+      relatedProductIds: normalizedRelatedProductIds,
     };
+    delete (preparedData as Partial<ProductAdminFormValues>).searchKeywordsInput;
 
     startTransitionUpdateProduct(async () => {
       try {
@@ -188,18 +203,6 @@ export default function PageProductAdmin({
         });
       }
     });
-  };
-
-  const addRelatedProduct = (id: ProductType["id"]) => {
-    setRelatedProductIds((prev) => {
-      if (prev.includes(id)) return prev;
-      return [...prev, id];
-    });
-    setRelatedProductsQuery("");
-  };
-
-  const removeRelatedProduct = (id: ProductType["id"]) => {
-    setRelatedProductIds((prev) => prev.filter((itemId) => itemId !== id));
   };
 
   const prepareFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -310,7 +313,14 @@ export default function PageProductAdmin({
 
       <div className="admin-page-header">
         <div>
-          <h1 className="admin-title">Товар: {product.nameFull}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="admin-title">Товар: {product.nameFull}</h1>
+            {product.isHidden ? (
+              <span className="admin-chip border-amber-500/40 bg-amber-500/15 text-amber-200">
+                Приховано
+              </span>
+            ) : null}
+          </div>
           <p className="admin-subtitle">Редагування даних, медіа та характеристик</p>
         </div>
       </div>
@@ -370,6 +380,13 @@ export default function PageProductAdmin({
                 {...register("ean", { required: true })}
                 defaultValue={product.ean ?? ""}
               />
+              <InputAdminStyle
+                input_title="Ключові слова для пошуку"
+                type="text"
+                placeholder="Напр. dahua, відеореєстратор, 4 канали"
+                {...register("searchKeywordsInput")}
+                defaultValue={(product.searchKeywords ?? []).join(", ")}
+              />
             </div>
 
             <div className="admin-grid-3">
@@ -397,47 +414,14 @@ export default function PageProductAdmin({
           </div>
         </div>
 
-        <div className="admin-card admin-card-content">
-          <p className="mb-2 text-sm font-semibold text-slate-100">Супутні рекомендовані товари</p>
-          <p className="mb-3 text-xs text-slate-400">Пошук за назвою, слагом або ID. Обрані товари показуються клієнту в блоці "Купують разом".</p>
-
-          <InputAdminStyle input_title="Пошук товару" value={relatedProductsQuery} onChange={(e) => setRelatedProductsQuery(e.target.value)} placeholder="Введіть кілька символів..." />
-
-          {relatedProductsQuery.trim() ? (
-            <div className="mt-2 max-h-64 overflow-auto rounded-lg border border-slate-600/55 bg-slate-900/35">
-              {relatedProductCandidates.length ? (
-                relatedProductCandidates.map((candidate) => (
-                  <button key={candidate.id} type="button" className="block w-full border-b border-slate-600/45 px-3 py-2 text-left text-sm text-slate-100 last:border-b-0 hover:bg-slate-800/60" onClick={() => addRelatedProduct(candidate.id)}>
-                    <span className="font-medium">{candidate.name}</span>
-                    <span className="ml-2 text-xs text-slate-400">{candidate.slug}</span>
-                  </button>
-                ))
-              ) : (
-                <p className="px-3 py-2 text-xs text-slate-400">Товари не знайдено</p>
-              )}
-            </div>
-          ) : null}
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            {relatedProductIds.length === 0 ? (
-              <p className="text-xs text-slate-400">Супутні товари ще не обрані.</p>
-            ) : (
-              relatedProductIds.map((id) => {
-                const selectedProduct = selectedRelatedProductsMap.get(id);
-                const title = selectedProduct ? `${selectedProduct.name} (${selectedProduct.slug})` : `ID: ${id}`;
-
-                return (
-                  <span key={id} className="admin-chip gap-2!">
-                    <span>{title}</span>
-                    <button type="button" className="rounded bg-slate-700 px-1.5 py-0.5 text-[10px] hover:bg-slate-600" onClick={() => removeRelatedProduct(id)}>
-                      Видалити
-                    </button>
-                  </span>
-                );
-              })
-            )}
-          </div>
-        </div>
+        <RelatedProductsPicker
+          allProducts={allProducts}
+          brands={brands}
+          categories={categories}
+          currentProductId={product.id}
+          selectedIds={relatedProductIds}
+          onChange={setRelatedProductIds}
+        />
       </form>
 
       <div className="fixed right-4 bottom-4 z-50">

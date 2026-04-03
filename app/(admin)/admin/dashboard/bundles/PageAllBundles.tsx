@@ -1,13 +1,46 @@
-﻿"use client";
+"use client";
 
-import { BundleFetchResult } from "@/app/actions/bundles/get-all-bundles";
-import { type GetAllCategoriesResponse } from "@/app/actions/category/category-actions";
-import { ProductFetchResult } from "@/app/actions/product/get-all-products";
 import ButtonYellow from "@/components/BattonYellow";
+import type { ProductType } from "@/db/schemas/product.schema";
 import type { BrandTypes } from "@/types/brands.types";
+import type { CategoryTypes } from "@/types/category.types";
 import { use, useState } from "react";
 import ListBundlesAdmin from "./ListBundlesAdmin";
+import type { BundleListItem } from "./_bundle-list.types";
 import ModalCreateBundle from "./ModalCreateBundle";
+
+type BundleFetchResult = {
+  success: boolean;
+  data: BundleListItem[] | null;
+  error: string | null;
+};
+
+type ProductFetchResult =
+  | {
+      success: true;
+      data: ProductType[];
+      errorCode: null;
+      errorMessage: null;
+    }
+  | {
+      success: false;
+      data: null;
+      errorCode: "DB_ERROR";
+      errorMessage: string;
+    };
+
+type GetAllCategoriesResponse = Promise<
+  | {
+      success: true;
+      data: CategoryTypes[];
+      error: null;
+    }
+  | {
+      success: false;
+      error: unknown;
+      data: [];
+    }
+>;
 
 export default function ClientPageAllBundles({
   bundlesAction,

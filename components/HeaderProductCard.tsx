@@ -9,6 +9,9 @@ export default function HeaderProductCard({
   // id,
   className,
 }: Pick<ProductType, "id" | "oldPrice" | "inStock" | "isOnOrder"> & { className?: string }) {
+  const availabilityBadge =
+    inStock <= 0 ? "in arrivo" : isOnOrder ? "su ordinazione" : null;
+
   return (
     <header
       className={twMerge(
@@ -17,10 +20,9 @@ export default function HeaderProductCard({
       )}
     >
       {oldPrice && <span className="helper_XXS mr-2 bg-offerta-color px-2 py-1">offerta</span>}
-      { isOnOrder && (
-        <span className="helper_XXS bg-blue px-2 py-1">su ordinazione</span>
-      )}
-      {!inStock  && <span className="helper_XXS bg-blue px-2 py-1">in arrivo</span>}
+      {availabilityBadge ? (
+        <span className="helper_XXS bg-blue px-2 py-1">{availabilityBadge}</span>
+      ) : null}
       {/* <ButtonComparison id={id} /> */}
     </header>
   );

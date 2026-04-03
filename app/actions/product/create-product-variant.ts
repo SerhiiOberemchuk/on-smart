@@ -13,13 +13,14 @@ export async function createProductVariant({
   newData,
 }: {
   parentId: ProductType["id"];
-  newData: {
-    name: string;
-    nameFull: string;
-    ean: string;
-    lengthCm: string;
-    widthCm: string;
-    heightCm: string;
+    newData: {
+      name: string;
+      nameFull: string;
+      ean: string;
+      searchKeywords?: string[];
+      lengthCm: string;
+      widthCm: string;
+      heightCm: string;
     weightKg: string;
     price: string;
     oldPrice: string | null;
@@ -94,6 +95,9 @@ export async function createProductVariant({
       parent_product_id: parentId,
       variants: [],
       hasVariants: false,
+      searchKeywords: Array.from(
+        new Set((newData.searchKeywords ?? []).map((item) => item.trim()).filter(Boolean)),
+      ),
 
       rating: "5.0",
     };

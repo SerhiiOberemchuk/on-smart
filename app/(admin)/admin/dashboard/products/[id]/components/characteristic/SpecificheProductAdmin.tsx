@@ -11,20 +11,20 @@ import ButtonXDellete from "../../../../ButtonXDellete";
 
 import {
   getCharacteristicsByCategoryId,
-  GetCharacteristicsByCategoryIdType,
-} from "@/app/actions/product-characteristic/get-characteristics-by-category-id";
+  getProductCharacteristics,
+} from "@/app/actions/admin/characteristics/queries";
 
 import {
-  getProductCharacteristics,
   upsertProductCharacteristic,
   deleteProductCharacteristic,
-} from "@/app/actions/product-characteristic/product-characteristic";
+} from "@/app/actions/admin/characteristics/mutations";
 
-import { uploadFile, deleteFileFromS3 } from "@/app/actions/files/uploadFile";
+import { uploadFile, deleteFileFromS3 } from "@/app/actions/admin/files/mutations";
 import { ProductSpecificheType } from "@/db/schemas/product-specifiche.schema";
+import { ProductCharacteristicType } from "@/db/schemas/product_characteristic.schema";
 import { CategoryTypes } from "@/types/category.types";
-import { getProductSpecificheById } from "@/app/actions/product-specifiche/get-product-specifiche";
-import { updateOrCreateSpecifiche } from "@/app/actions/product-specifiche/update-or-create-specifiche";
+import { getProductSpecificheById } from "@/app/actions/admin/product-details/queries";
+import { updateOrCreateSpecifiche } from "@/app/actions/admin/characteristics/mutations";
 import {
   PRODUCT_SAVE_ALL_EVENT,
   reportProductSaveAllActivity,
@@ -40,6 +40,11 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+
+type GetCharacteristicsByCategoryIdType = ProductCharacteristicType & {
+  category_name: string | null;
+  values: { value: string; id: string }[];
+};
 
 type OrderedSelectItem = {
   kind: "select";
@@ -60,7 +65,7 @@ type OrderedItem = OrderedSelectItem | OrderedTextItem;
 type CustomGroup = { name: string; value: string };
 
 type FormValues = {
-  title: string;
+  title?: string;
   ordered: OrderedItem[];
   groups: CustomGroup[];
 };
@@ -537,9 +542,8 @@ export default function SpecificheProductAdmin({
       )}
 
       <InputAdminStyle
-        input_title="Назва секції *"
-        required
-        {...register("title", { required: true })}
+        input_title="Назва секції"
+        {...register("title")}
       />
 
       {orderedFields.map((f, index) => {

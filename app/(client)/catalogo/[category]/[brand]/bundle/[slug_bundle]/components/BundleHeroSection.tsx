@@ -61,7 +61,9 @@ export default function BundleHeroSection({
                 Risparmi {discountValue.toFixed(2)} EUR ({discountPercent}%)
               </p>
             ) : null}
-            <p className={`helper_text mt-3 ${availability.className}`}>{availability.label}</p>
+            {availability.label ? (
+              <p className={`helper_text mt-3 ${availability.className}`}>{availability.label}</p>
+            ) : null}
             <BundleAddToCartButton
               bundleId={bundle.id}
               inStock={bundle.inStock}

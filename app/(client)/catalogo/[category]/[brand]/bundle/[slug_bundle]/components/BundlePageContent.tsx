@@ -39,7 +39,7 @@ export default async function BundlePageContent({
 
   const [productsResponse, galleryResponse, specificheResponses] = await Promise.all([
     productIds.length > 0
-      ? getProductsByIds(productIds, { includeOutOfStock: true })
+      ? getProductsByIds(productIds, { includeOutOfStock: true, includeHidden: true })
       : { data: [] },
     getFotoFromGallery({ parent_product_id: bundle.id }),
     Promise.all(productIds.map((productId) => getProductSpecificheById(productId))),

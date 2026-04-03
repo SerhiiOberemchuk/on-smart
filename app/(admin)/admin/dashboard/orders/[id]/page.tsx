@@ -1,4 +1,4 @@
-import { getOrderFullInfoById } from "@/app/actions/orders/get-order";
+import { getOrderFullInfoById } from "@/app/actions/admin/orders/queries";
 import { Suspense } from "react";
 import PageOrderByID from "./PageOrderByIDClient";
 import Spiner from "@/components/Spiner";

@@ -32,6 +32,7 @@ export function mapBundleToProduct(bundle: BundlePageData): ProductType {
     productType: "bundle",
     hasVariants: false,
     variants: [],
+    searchKeywords: [],
     relatedProductIds: [],
     parent_product_id: null,
     bundleIds: [],
@@ -57,7 +58,7 @@ export function normalizeIncludedProducts(bundle: BundlePageData): IncludedProdu
 export function getBundleAvailability(bundle: BundlePageData): BundleAvailability {
   if (bundle.inStock > 0) {
     return {
-      label: `Disponibile per l'acquisto (${bundle.inStock} pz.)`,
+      label: bundle.inStock > 15 ? "" : `Disponibile per l'acquisto (${bundle.inStock} pz.)`,
       className: "text-green-500",
       schema: "https://schema.org/InStock",
     };

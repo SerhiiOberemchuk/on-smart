@@ -1,4 +1,4 @@
-import { getAllCharacteristicsWithMeta } from "@/app/actions/product-characteristic/create-product-characteristic";
+import { getAllCharacteristicsWithMeta } from "@/app/actions/admin/characteristics/queries";
 import Spiner from "@/components/Spiner";
 import { headers } from "next/headers";
 import { Suspense } from "react";

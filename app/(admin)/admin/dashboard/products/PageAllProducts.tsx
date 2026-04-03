@@ -1,16 +1,30 @@
 "use client";
 
 import ButtonYellow from "@/components/BattonYellow";
-import { ProductFetchResult } from "@/app/actions/product/get-all-products";
+import type { ProductType } from "@/db/schemas/product.schema";
 import { use } from "react";
 import { useModalStore } from "../../store/modal-store";
 import ListProductsAdmin from "./ListProductsAdmin";
 import ModalAddNewPrduct from "./ModalAddNewPrduct";
 
+type ProductListResponse =
+  | {
+      success: true;
+      data: ProductType[];
+      errorCode: null;
+      errorMessage: null;
+    }
+  | {
+      success: false;
+      data: null;
+      errorCode: "DB_ERROR";
+      errorMessage: string;
+    };
+
 export default function ClientPageAllProducts({
   productAction,
 }: {
-  productAction: Promise<ProductFetchResult>;
+  productAction: Promise<ProductListResponse>;
 }) {
   const products = use(productAction);
   const { setType, openModal, isOpen } = useModalStore();

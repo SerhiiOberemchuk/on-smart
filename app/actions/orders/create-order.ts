@@ -104,6 +104,10 @@ export async function createOrderAction({
   const delivery =
     dataFirstStep.deliveryMethod === "CONSEGNA_CORRIERE" ? Number(dataFirstStep.deliveryPrice) : 0;
   const amount = (itemsSubtotal + delivery).toFixed(2);
+  const customerDisplayName = [dataFirstStep.nome, dataFirstStep.cognome]
+    .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    .join(" ")
+    .trim();
 
   try {
     await db.transaction(async (tx) => {
@@ -137,8 +141,8 @@ export async function createOrderAction({
         const telegramResult = await sendTelegramMessage({
           orderNumber,
           orderId,
-          customerDisplayName: dataFirstStep.nome || "" + dataFirstStep.cognome,
-          total: paymentData.amount,
+          customerDisplayName,
+          total: amount,
           paymentMethod: paymentData.provider,
           deliveryMethod: dataFirstStep.deliveryMethod,
           email: dataFirstStep.email,

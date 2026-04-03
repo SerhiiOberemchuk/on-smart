@@ -1,8 +1,8 @@
 ﻿"use client";
 
-import { getProductDocumentsById } from "@/app/actions/product-documents/get-product-documents";
-import { updateProductDocumentsById } from "@/app/actions/product-documents/update-product-documents";
-import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
+import { getProductDocumentsById } from "@/app/actions/admin/product-details/queries";
+import { updateProductDocumentsById } from "@/app/actions/admin/characteristics/mutations";
+import { deleteFileFromS3, uploadFile } from "@/app/actions/admin/files/mutations";
 import { ProductDocumentsType } from "@/db/schemas/product-documents.schema";
 import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -20,6 +20,7 @@ export default function DocumentsProduct({ id }: { id: string }) {
   const [documents, setDocuments] = useState<ProductDocumentsType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [isDirtyTitles, setIsDirtyTitles] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -44,13 +45,13 @@ export default function DocumentsProduct({ id }: { id: string }) {
 
   useEffect(() => {
     const listener = () => {
-      if (file && title.trim()) {
+      if ((file && title.trim()) || isDirtyTitles) {
         void handleSubmit();
       }
     };
     document.addEventListener(PRODUCT_SAVE_ALL_EVENT, listener);
     return () => document.removeEventListener(PRODUCT_SAVE_ALL_EVENT, listener);
-  }, [file, title]);
+  }, [file, title, isDirtyTitles, documents]);
 
   const handleSelectFile = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
@@ -79,6 +80,7 @@ export default function DocumentsProduct({ id }: { id: string }) {
       });
 
       setDocuments({ product_id: id, documents: updatedList });
+      setIsDirtyTitles(false);
       toast.success("Документ видалено");
     } catch (error) {
       console.error(error);
@@ -89,13 +91,27 @@ export default function DocumentsProduct({ id }: { id: string }) {
   };
 
   const handleSubmit = async () => {
-    if (!file || !title.trim()) {
+    if (!documents) {
+      toast.error("Документи ще не завантажені");
+      return;
+    }
+
+    const hasPendingUpload = Boolean(file && title.trim());
+    const hasEditableTitles = documents.documents.some(
+      (doc) => doc.title.trim().length > 0 && doc.link.trim().length > 0,
+    );
+
+    if (!hasPendingUpload && !isDirtyTitles) {
+      return;
+    }
+
+    if (file && !title.trim()) {
       toast.warning("Заповніть усі поля");
       return;
     }
 
-    if (!documents) {
-      toast.error("Документи ще не завантажені");
+    if (!hasPendingUpload && !hasEditableTitles) {
+      toast.warning("Документи ще не додані");
       return;
     }
 
@@ -106,18 +122,25 @@ export default function DocumentsProduct({ id }: { id: string }) {
     try {
       setIsLoading(true);
 
-      const upload = await uploadFile({ file, sub_bucket: "files" });
-      if (!upload.fileUrl) {
-        toast.error("Помилка завантаження");
-        return;
+      let updatedDocuments = documents.documents.map((doc) => ({
+        title: doc.title.trim(),
+        link: doc.link.trim(),
+      }));
+
+      if (hasPendingUpload && file) {
+        const upload = await uploadFile({ file, sub_bucket: "files" });
+        if (!upload.fileUrl) {
+          toast.error("Помилка завантаження");
+          return;
+        }
+
+        const newDoc = {
+          title: title.trim(),
+          link: upload.fileUrl,
+        };
+
+        updatedDocuments = [...updatedDocuments, newDoc];
       }
-
-      const newDoc = {
-        title,
-        link: upload.fileUrl,
-      };
-
-      const updatedDocuments = [...(documents.documents ?? []), newDoc];
 
       await updateProductDocumentsById({
         product_id: id,
@@ -135,6 +158,7 @@ export default function DocumentsProduct({ id }: { id: string }) {
       });
       setFile(null);
       setTitle("");
+      setIsDirtyTitles(false);
     } catch (error) {
       console.error(error);
       reportProductSaveAllResult({
@@ -151,6 +175,18 @@ export default function DocumentsProduct({ id }: { id: string }) {
     }
   };
 
+  const handleChangeExistingTitle = (link: string, value: string) => {
+    setDocuments((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        documents: prev.documents.map((doc) => (doc.link === link ? { ...doc, title: value } : doc)),
+      };
+    });
+    setIsDirtyTitles(true);
+  };
+
   return (
     <div className="admin-card admin-card-content flex flex-col gap-3">
       <h2 className="text-base font-semibold">Документи товару</h2>
@@ -163,22 +199,28 @@ export default function DocumentsProduct({ id }: { id: string }) {
             documents.documents.map((doc) => (
               <li
                 key={doc.link}
-                className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-600/45 pb-2"
+                className="flex flex-col gap-2 border-b border-slate-600/45 pb-2"
               >
                 <div className="min-w-0 flex-1">
-                  <span className="text-sm font-medium">{doc.title}</span>
+                  <InputAdminStyle
+                    input_title="Назва документа"
+                    value={doc.title}
+                    onChange={(event) => handleChangeExistingTitle(doc.link, event.currentTarget.value)}
+                  />
                   <a href={doc.link} target="_blank" className="block break-all text-xs text-amber-300 hover:underline">
                     {doc.link}
                   </a>
                 </div>
 
-                <button
-                  onClick={() => handleDelete(doc.link)}
-                  disabled={isDeleting === doc.link}
-                  className="admin-btn-danger !px-3 !py-1.5 !text-xs"
-                >
-                  {isDeleting === doc.link ? "..." : "Видалити"}
-                </button>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => handleDelete(doc.link)}
+                    disabled={isDeleting === doc.link}
+                    className="admin-btn-danger !px-3 !py-1.5 !text-xs"
+                  >
+                    {isDeleting === doc.link ? "..." : "Видалити"}
+                  </button>
+                </div>
               </li>
             ))
           )}
@@ -199,6 +241,10 @@ export default function DocumentsProduct({ id }: { id: string }) {
 
         {file && title.trim() ? (
           <p className="text-xs text-amber-300">Документ буде збережено кнопкою "Зберегти все".</p>
+        ) : null}
+
+        {isDirtyTitles ? (
+          <p className="text-xs text-amber-300">Оновлені назви документів будуть збережені кнопкою "Зберегти все".</p>
         ) : null}
       </form>
     </div>

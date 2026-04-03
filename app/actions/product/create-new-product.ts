@@ -22,6 +22,9 @@ export async function createNewProduct(formData: ProductType) {
     ...formData,
     ean: formData.ean.trim(),
     oldPrice: formData.oldPrice ? formData.oldPrice : null,
+    searchKeywords: Array.from(
+      new Set((formData.searchKeywords ?? []).map((item) => item.trim()).filter(Boolean)),
+    ),
     isHidden: formData.isHidden ?? false,
     productType: formData.productType ?? "product",
   };

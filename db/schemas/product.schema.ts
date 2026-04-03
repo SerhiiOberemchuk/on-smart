@@ -39,6 +39,7 @@ export const productsSchema = mysqlTable(
     productType: mysqlEnum("product_type", ["product", "bundle"]).notNull().default("product"),
     hasVariants: boolean("has_variants").default(false).notNull(),
     variants: json("variants").$type<string[]>(),
+    searchKeywords: json("search_keywords").$type<string[]>(),
     relatedProductIds: json("related_product_ids").$type<string[]>(),
     parent_product_id: varchar("parent_product_id", { length: 36 }),
     bundleIds: json("bundle_ids").$type<string[]>(),

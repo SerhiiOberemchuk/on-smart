@@ -1,6 +1,5 @@
 "use client";
 
-import type { GetOrdersAllActionResponseType, OrderListItem } from "@/app/actions/orders/get-order";
 import { OrderTypes } from "@/db/schemas/orders.schema";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -18,6 +17,16 @@ type DateFilterOption =
   | "THIS_YEAR";
 
 type SortOption = "NEWEST" | "OLDEST" | "TOTAL_DESC" | "TOTAL_ASC";
+
+type OrderListItem = OrderTypes & {
+  itemsSubtotal: number;
+  orderTotal: number;
+};
+
+type OrdersResponse = {
+  orders: OrderListItem[] | null;
+  error: unknown | null;
+};
 
 const DATE_FILTER_OPTIONS: { value: DateFilterOption; label: string }[] = [
   { value: "ALL", label: "Усі дати" },
@@ -144,7 +153,7 @@ function getDeliveryPrice(order: OrderTypes) {
 export default function PageOrdersClient({
   serverActionOrders,
 }: {
-  serverActionOrders: Awaited<GetOrdersAllActionResponseType>;
+  serverActionOrders: OrdersResponse;
 }) {
   const { orders, error } = serverActionOrders;
 

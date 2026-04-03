@@ -19,7 +19,7 @@ function mapSupportProducts(
     .map((id) => productsById.get(id))
     .filter((item): item is ProductType => Boolean(item));
 
-  return sortedByOrder.filter((item) => item.inStock > 0);
+  return sortedByOrder.filter((item) => item.inStock > 0 && !item.isHidden);
 }
 
 export async function getSupportProductById(productId: ProductType["id"]): Promise<ProductType[]> {

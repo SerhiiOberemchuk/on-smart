@@ -1,8 +1,10 @@
 "use client";
 
-import { copyProductById } from "@/app/actions/product/copy-product";
-import { deleteProductById } from "@/app/actions/product/delete-product";
-import { deleteProductVariant } from "@/app/actions/product/delete-product-variant";
+import {
+  copyProductById,
+  deleteProductById,
+  deleteProductVariant,
+} from "@/app/actions/admin/products/mutations";
 import LinkYellow from "@/components/YellowLink";
 import { ProductType } from "@/db/schemas/product.schema";
 import Image from "next/image";
@@ -381,6 +383,11 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
                         <span className="admin-chip">Залишок: {item.inStock}</span>
                         <span className="admin-chip">Варіантів: {variants.length}</span>
                         {item.isOnOrder ? <span className="admin-chip">Під замовлення</span> : null}
+                        {item.isHidden ? (
+                          <span className="admin-chip border-amber-500/40 bg-amber-500/15 text-amber-200">
+                            Приховано
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -461,6 +468,11 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
                                   <span className="admin-chip capitalize">{variant.brand_slug}</span>
                                   <span className="admin-chip">Залишок: {variant.inStock}</span>
                                   {variant.isOnOrder ? <span className="admin-chip">Під замовлення</span> : null}
+                                  {variant.isHidden ? (
+                                    <span className="admin-chip border-amber-500/40 bg-amber-500/15 text-amber-200">
+                                      Приховано
+                                    </span>
+                                  ) : null}
                                 </div>
                               </div>
                             </div>

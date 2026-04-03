@@ -13,6 +13,9 @@ import { useEffect, useState } from "react";
 import { getFotoFromGallery } from "@/app/actions/foto-galery/get-foto-from-gallery";
 import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
 
+const dialogGalleryCache = new Map<string, string[]>();
+const dialogBrandLogoCache = new Map<string, string>();
+
 export const DialogProductCard = ({
   inStock,
   isOnOrder,
@@ -45,13 +48,20 @@ export const DialogProductCard = ({
   useEffect(() => {
     const fetchImages = async () => {
       const idToFetchFoto = parent_product_id ? parent_product_id : id;
+      const cachedImages = dialogGalleryCache.get(idToFetchFoto);
+      if (cachedImages) {
+        setImages(cachedImages);
+        return;
+      }
+
       try {
         const resp = await getFotoFromGallery({ parent_product_id: idToFetchFoto });
-        if (resp.data && resp.data.images.length > 0) {
-          setImages([...resp.data.images, imgSrc]);
-        } else {
-          setImages([imgSrc]);
-        }
+        const nextImages =
+          resp.data && resp.data.images.length > 0
+            ? Array.from(new Set([...resp.data.images, imgSrc]))
+            : [imgSrc];
+        dialogGalleryCache.set(idToFetchFoto, nextImages);
+        setImages(nextImages);
       } catch (error) {
         console.error(error);
       }
@@ -61,9 +71,16 @@ export const DialogProductCard = ({
 
   useEffect(() => {
     const fetchLogoBrand = async () => {
+      const cachedBrandLogo = dialogBrandLogoCache.get(brand_slug);
+      if (cachedBrandLogo) {
+        setBrandLogo(cachedBrandLogo);
+        return;
+      }
+
       try {
         const resp = await getBrandBySlug(brand_slug);
         if (resp.success && resp.data) {
+          dialogBrandLogoCache.set(brand_slug, resp.data.image);
           setBrandLogo(resp.data?.image);
         }
       } catch (error) {
