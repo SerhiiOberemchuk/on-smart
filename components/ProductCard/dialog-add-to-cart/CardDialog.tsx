@@ -22,6 +22,8 @@ import { ProductType } from "@/db/schemas/product.schema";
 import { BasketTypeUseCheckoutStore } from "@/store/checkout-store";
 
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
+const dialogVariantsCache = new Map<string, ProductType[] | null>();
+const dialogSupportProductsCache = new Map<string, ProductType[] | null>();
 
 export default function CardDialog() {
   const { isOpenDialog, product, closeDialog } = useCardDialogStore();
@@ -38,6 +40,11 @@ export default function CardDialog() {
   const [variantsOfProduct, setVariantsOfProduct] = useState<ProductType[] | null>(null);
 
   const [variantsToShow, setVariantsToShow] = useState(NUMBER_OF_VARIANTS_TO_SHOW);
+  const dialogSourceId =
+    product?.parent_product_id && product.parent_product_id !== "NULL"
+      ? product.parent_product_id
+      : product?.id;
+  const variantGroupName = `product-variant-${dialogSourceId ?? "default"}`;
 
   const handleAddToCart = () => {
     setIsDisabled(true);
@@ -99,65 +106,105 @@ export default function CardDialog() {
 
   useEffect(() => {
     const setPreselectedProduct = () => {
-      if (product?.inStock)
-        setSelectedProduct({ ...product, qnt: 1 } as ProductType & { qnt: number });
+      if (!product) {
+        setSelectedProduct(null);
+        return;
+      }
+
+      setSelectedProduct({ ...product, qnt: 1 } as ProductType & { qnt: number });
     };
     setPreselectedProduct();
 
-    const fetchVariants = async () => {
+    if (!product?.id) {
+      setVariantsOfProduct(null);
+      setSupportProducts(null);
+      return;
+    }
+
+    let isCancelled = false;
+    const supportSourceId =
+      product.parent_product_id && product.parent_product_id !== "NULL"
+        ? product.parent_product_id
+        : product.id;
+    const variantsCacheKey = supportSourceId;
+    const cachedVariants = dialogVariantsCache.get(variantsCacheKey);
+    const cachedSupportProducts = dialogSupportProductsCache.get(supportSourceId);
+
+    if (cachedVariants !== undefined) {
+      setVariantsOfProduct(cachedVariants);
+    } else {
+      setVariantsOfProduct(null);
+    }
+
+    if (cachedSupportProducts !== undefined) {
+      setSupportProducts(cachedSupportProducts);
+    } else {
+      setSupportProducts(null);
+    }
+
+    const fetchDialogData = async () => {
       try {
-        if (!product?.id) return;
+        const tasks: Promise<void>[] = [];
 
-        let idsToFetch: string[] = [];
+        if (cachedVariants === undefined) {
+          tasks.push(
+            (async () => {
+              let idsToFetch: string[] = [];
 
-        if (product.parent_product_id && product.parent_product_id !== "NULL") {
-          const parentResponse = await getProductById(product.parent_product_id);
-          const parentProduct = parentResponse.data;
-          if (parentProduct) {
-            idsToFetch = [parentProduct.id, ...(parentProduct.variants ?? [])];
-          }
-        } else {
-          idsToFetch = [product.id, ...(product.variants ?? [])];
+              if (product.parent_product_id && product.parent_product_id !== "NULL") {
+                const parentResponse = await getProductById(product.parent_product_id);
+                const parentProduct = parentResponse.data;
+                if (parentProduct) {
+                  idsToFetch = [parentProduct.id, ...(parentProduct.variants ?? [])];
+                }
+              } else {
+                idsToFetch = [product.id, ...(product.variants ?? [])];
+              }
+
+              const uniqueIds = Array.from(new Set(idsToFetch.filter(Boolean)));
+              let nextVariants: ProductType[] | null = null;
+
+              if (uniqueIds.length > 0) {
+                const variantsData = await getProductsByIds(uniqueIds, { includeOutOfStock: true });
+                if (variantsData.data && variantsData.data.length > 0) {
+                  nextVariants = variantsData.data;
+                }
+              }
+
+              dialogVariantsCache.set(variantsCacheKey, nextVariants);
+              if (!isCancelled) {
+                setVariantsOfProduct(nextVariants);
+              }
+            })(),
+          );
         }
 
-        const uniqueIds = Array.from(new Set(idsToFetch.filter(Boolean)));
-        if (uniqueIds.length === 0) {
-          setVariantsOfProduct(null);
-          return;
+        if (cachedSupportProducts === undefined) {
+          tasks.push(
+            (async () => {
+              const supportProductsData = await getSupportProductById(supportSourceId);
+              const nextSupportProducts =
+                supportProductsData && supportProductsData.length > 0 ? supportProductsData : null;
+
+              dialogSupportProductsCache.set(supportSourceId, nextSupportProducts);
+              if (!isCancelled) {
+                setSupportProducts(nextSupportProducts);
+              }
+            })(),
+          );
         }
 
-        const variantsData = await getProductsByIds(uniqueIds, { includeOutOfStock: true });
-        if (variantsData.data && variantsData.data.length > 0) {
-          setVariantsOfProduct(variantsData.data);
-          return;
-        }
-
-        setVariantsOfProduct(null);
+        await Promise.all(tasks);
       } catch (error) {
         console.error({ error });
       }
     };
-    fetchVariants();
-  }, [product]);
 
-  useEffect(() => {
-    queueMicrotask(() => setSupportProducts(null));
-    const fetchSupportProducts = async () => {
-      try {
-        if (!product?.id) return;
-        const supportSourceId =
-          product.parent_product_id && product.parent_product_id !== "NULL"
-            ? product.parent_product_id
-            : product.id;
-        const supportProductsData = await getSupportProductById(supportSourceId);
-        if (supportProductsData && supportProductsData.length > 0) {
-          setSupportProducts(supportProductsData);
-        }
-      } catch (error) {
-        console.error({ error });
-      }
+    void fetchDialogData();
+
+    return () => {
+      isCancelled = true;
     };
-    fetchSupportProducts();
   }, [product]);
 
   useEffect(() => {
@@ -217,7 +264,11 @@ export default function CardDialog() {
 
               <div className="min-h-fit flex-1 rounded-sm bg-background px-4 py-3 xl:px-3">
                 <h2 className="H3 text-white">{selectedProduct?.name}</h2>
-                <div id="product`s variants" className="mt-4 flex flex-col gap-3 xl:mt-6">
+                <div
+                  key={variantGroupName}
+                  id="product`s variants"
+                  className="mt-4 flex flex-col gap-3 xl:mt-6"
+                >
                   {(variantsOfProduct?.length ?? 0) > 1 && (
                     <>
                       {variantsOfProduct && variantsOfProduct.length > 0 ? (
@@ -238,7 +289,7 @@ export default function CardDialog() {
                                   <input
                                     disabled={variant.inStock === 0}
                                     type="radio"
-                                    name="Product variant"
+                                    name={variantGroupName}
                                     value={variant.id}
                                     checked={selectedProduct?.id === variant.id}
                                     onChange={() => {

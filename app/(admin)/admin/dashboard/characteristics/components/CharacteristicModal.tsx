@@ -1,12 +1,12 @@
 "use client";
 
-import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
+import { getAllCategoryProducts } from "@/app/actions/admin/categories/queries";
+import { getCharacteristicById } from "@/app/actions/admin/characteristics/queries";
 import {
   createCharacteristic,
-  getCharacteristicById,
   updateCharacteristic,
-} from "@/app/actions/product-characteristic/create-product-characteristic";
-import { createProductCharacteristicValues } from "@/app/actions/product-characteristic/create-product-characteristic-values";
+} from "@/app/actions/admin/characteristics/mutations";
+import { createProductCharacteristicValues } from "@/app/actions/admin/characteristics/mutations";
 import ButtonYellow from "@/components/BattonYellow";
 import { ProductCharacteristicType } from "@/db/schemas/product_characteristic.schema";
 import { ProductCharacteristicValuesType } from "@/db/schemas/product_characteristic_values.schema";

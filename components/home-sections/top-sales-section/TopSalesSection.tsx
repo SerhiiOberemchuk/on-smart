@@ -66,8 +66,6 @@ export default async function TopSalesSection() {
             availability:
               product.inStock > 0
                 ? "https://schema.org/InStock"
-                : product.isOnOrder
-                ? "https://schema.org/PreOrder"
                 : "https://schema.org/OutOfStock",
           },
         },

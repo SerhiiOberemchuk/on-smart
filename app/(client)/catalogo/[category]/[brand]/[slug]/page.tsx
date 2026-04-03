@@ -47,6 +47,7 @@ export async function generateMetadata({
     brandLabel,
     categoryLabel,
     slugLabel,
+    ...(data.searchKeywords ?? []),
     eanValue ? `EAN ${eanValue}` : undefined,
     eanValue,
   ].filter(Boolean) as string[];

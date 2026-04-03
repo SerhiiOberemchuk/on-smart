@@ -1,7 +1,7 @@
 "use client";
 
-import { removeBrandById } from "@/app/actions/brands/brand-actions";
-import { deleteFileFromS3 } from "@/app/actions/files/uploadFile";
+import { removeBrandById } from "@/app/actions/admin/brands/mutations";
+import { deleteFileFromS3 } from "@/app/actions/admin/files/mutations";
 import { BrandTypes } from "@/types/brands.types";
 import Image from "next/image";
 import Link from "next/link";

@@ -1,4 +1,4 @@
-import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
+import { getAllCategoryProducts } from "@/app/actions/admin/categories/queries";
 import Spiner from "@/components/Spiner";
 import { headers } from "next/headers";
 import { Suspense } from "react";

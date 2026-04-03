@@ -1,4 +1,4 @@
-import { uploadFile } from "@/app/actions/files/uploadFile";
+import { uploadFile } from "@/app/actions/admin/files/mutations";
 import { toast } from "react-toastify";
 
 export async function uploadCategoryImage(file: File) {

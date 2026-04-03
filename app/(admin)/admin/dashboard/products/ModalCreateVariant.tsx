@@ -1,7 +1,7 @@
 "use client";
 
-import { createProductVariant } from "@/app/actions/product/create-product-variant";
-import { uploadFile } from "@/app/actions/files/uploadFile";
+import { createProductVariant } from "@/app/actions/admin/products/mutations";
+import { uploadFile } from "@/app/actions/admin/files/mutations";
 import ButtonYellow from "@/components/BattonYellow";
 import { ProductType } from "@/db/schemas/product.schema";
 import Image from "next/image";

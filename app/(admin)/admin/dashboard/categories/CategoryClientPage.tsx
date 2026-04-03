@@ -1,12 +1,11 @@
 "use client";
 
-import {
+import type {
   GetAllCategoriesFailure,
-  
   GetAllCategoriesSuccess,
-  removeCategoryProductsById,
-} from "@/app/actions/category/category-actions";
-import { deleteFileFromS3 } from "@/app/actions/files/uploadFile";
+} from "@/app/actions/admin/categories/mutations";
+import { removeCategoryProductsById } from "@/app/actions/admin/categories/mutations";
+import { deleteFileFromS3 } from "@/app/actions/admin/files/mutations";
 import { CategoryTypes } from "@/types/category.types";
 import Image from "next/image";
 import Link from "next/link";

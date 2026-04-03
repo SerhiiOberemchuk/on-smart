@@ -1,122 +1,209 @@
-﻿"use client";
+"use client";
 
-import { useEffect, useState } from "react";
-import SmartImage from "@/components/SmartImage";
-import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
+import Link from "next/link";
 import { toast } from "react-toastify";
+
+import icon_dell from "@/assets/icons/icon_delete.svg";
+import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
+import type { ProductType } from "@/db/schemas/product.schema";
+import { useBasketStore } from "@/store/basket-store";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PricesBox from "@/components/PricesBox";
+import SmartImage from "@/components/SmartImage";
+
 import HeaderCart from "./HeaderCart";
 import RepilogoComponent from "./RepilogoComponent";
 
-import icon_dell from "@/assets/icons/icon_delete.svg";
-
-import { useBasketStore } from "@/store/basket-store";
-import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
-import type { ProductType } from "@/db/schemas/product.schema";
 export default function CartSection() {
   const [fetchedProducts, setFetchedProducts] = useState<ProductType[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const hasValidatedOnceRef = useRef(false);
 
-  const { basket, removeFromBasketById, updateBasket, setProductsInBasket } = useBasketStore();
+  const { basket, productsInBasket, removeFromBasketById, updateBasket, setProductsInBasket } =
+    useBasketStore();
+
   useEffect(() => {
     setProductsInBasket(fetchedProducts);
   }, [fetchedProducts, setProductsInBasket]);
+
   useEffect(() => {
     if (basket.length === 0) {
       setFetchedProducts([]);
       setIsLoadingProducts(false);
+      hasValidatedOnceRef.current = false;
       return;
     }
 
     const load = async () => {
       setIsLoadingProducts(true);
-      const ids = basket.map((item) => item.productId).filter((i) => i !== null);
 
-      const { data, success, errorMessage } = await getProductsByIds(ids);
+      const ids = basket
+        .map((item) => item.productId)
+        .filter((item): item is string => typeof item === "string");
+
+      const { data, success, errorMessage } = await getProductsByIds(ids, {
+        includeOutOfStock: true,
+        includeHidden: true,
+      });
 
       if (!success) {
         if (errorMessage) {
           console.error(`[CartSection] ${errorMessage}`);
         }
+
         toast.error("Errore nel caricamento dei prodotti");
         setIsLoadingProducts(false);
         return;
       }
 
       const products = data ?? [];
+      const productsById = new Map(products.map((product) => [product.id, product]));
+      const previousProductsById = new Map(productsInBasket.map((product) => [product.id, product]));
 
-      if (products.length < ids.length) {
-        toast.warning("Alcuni prodotti non sono più disponibili.");
+      const missingIds: string[] = [];
+      const hiddenIds: string[] = [];
+      const unavailableIds: string[] = [];
+      const invalidQuantityIds: string[] = [];
+      const quantityAdjustedIds: string[] = [];
+      const priceChangedIds: string[] = [];
+      const idsToRemove = new Set<string>();
+      const nextBasketUpdates: { productId: string; quantity: number }[] = [];
 
-        const validIds = new Set(products.map((p) => p.id));
-        const staleBasketItems = basket.filter(
-          (b) => typeof b.productId === "string" && !validIds.has(b.productId),
-        );
+      basket.forEach((basketItem) => {
+        if (typeof basketItem.productId !== "string") return;
 
-        staleBasketItems.forEach((b) => {
-          if (typeof b.productId === "string") {
-            removeFromBasketById(b.productId);
-          }
-        });
-      }
+        const product = productsById.get(basketItem.productId);
+        if (!product) {
+          missingIds.push(basketItem.productId);
+          idsToRemove.add(basketItem.productId);
+          return;
+        }
 
-      products.forEach((prod) => {
-        const item = basket.find((i) => i.productId === prod.id);
-        if (!item) return;
+        if (product.isHidden) {
+          hiddenIds.push(product.id);
+          idsToRemove.add(product.id);
+          return;
+        }
 
-        if (item.quantity > prod.inStock) {
-          updateBasket([{ productId: prod.id, quantity: prod.inStock }]);
+        if (!Number.isFinite(basketItem.quantity) || basketItem.quantity <= 0) {
+          invalidQuantityIds.push(product.id);
+          nextBasketUpdates.push({ productId: product.id, quantity: 1 });
+          return;
+        }
+
+        if (product.inStock <= 0) {
+          unavailableIds.push(product.id);
+          idsToRemove.add(product.id);
+          return;
+        }
+
+        if (basketItem.quantity > product.inStock) {
+          quantityAdjustedIds.push(product.id);
+          nextBasketUpdates.push({ productId: product.id, quantity: product.inStock });
+        }
+
+        const previousProduct = previousProductsById.get(product.id);
+        if (
+          previousProduct &&
+          (Number(previousProduct.price) !== Number(product.price) ||
+            Number(previousProduct.oldPrice ?? 0) !== Number(product.oldPrice ?? 0))
+        ) {
+          priceChangedIds.push(product.id);
         }
       });
 
-      setFetchedProducts(products);
+      idsToRemove.forEach((id) => removeFromBasketById(id));
+
+      if (nextBasketUpdates.length > 0) {
+        updateBasket(nextBasketUpdates);
+      }
+
+      if (hasValidatedOnceRef.current) {
+        if (missingIds.length > 0) {
+          toast.warning("Alcuni prodotti non sono più disponibili e sono stati rimossi dal carrello.");
+        }
+
+        if (hiddenIds.length > 0) {
+          toast.warning(
+            "Alcuni prodotti non sono più presenti nel nostro catalogo e sono stati rimossi dal carrello.",
+          );
+        }
+
+        if (unavailableIds.length > 0) {
+          toast.warning(
+            "Alcuni prodotti non sono disponibili per l'ordine e sono stati rimossi dal carrello.",
+          );
+        }
+
+        if (invalidQuantityIds.length > 0) {
+          toast.info("Le quantità non valide sono state corrette.");
+        }
+
+        if (quantityAdjustedIds.length > 0) {
+          toast.info("Le quantità di alcuni prodotti sono state aggiornate in base alla disponibilità.");
+        }
+
+        if (priceChangedIds.length > 0) {
+          toast.info("I prezzi di alcuni prodotti sono stati aggiornati.");
+        }
+      }
+
+      hasValidatedOnceRef.current = true;
+      setFetchedProducts(
+        products.filter(
+          (product) => !idsToRemove.has(product.id) && !product.isHidden && product.inStock > 0,
+        ),
+      );
       setIsLoadingProducts(false);
     };
 
     load();
-  }, [basket, removeFromBasketById, updateBasket]);
+  }, [basket, productsInBasket, removeFromBasketById, updateBasket]);
 
   const calcProductPrice = (productId: string) => {
-    const item = basket.find((b) => b.productId === productId);
-    const prod = fetchedProducts.find((p) => p.id === productId);
+    const item = basket.find((basketItem) => basketItem.productId === productId);
+    const product = fetchedProducts.find((fetchedProduct) => fetchedProduct.id === productId);
 
-    if (!item || !prod) return { price: "0", oldPrice: null };
+    if (!item || !product) {
+      return { price: "0", oldPrice: null };
+    }
 
     return {
-      price: (item.quantity * Number(prod.price)).toString(),
-      oldPrice: prod.oldPrice ? (item.quantity * Number(prod.oldPrice)).toString() : null,
+      price: (item.quantity * Number(product.price)).toString(),
+      oldPrice: product.oldPrice ? (item.quantity * Number(product.oldPrice)).toString() : null,
     };
   };
 
   const incrementQnt = (productId: string) => {
-    const item = basket.find((b) => b.productId === productId);
-    const prod = fetchedProducts.find((p) => p.id === productId);
+    const item = basket.find((basketItem) => basketItem.productId === productId);
+    const product = fetchedProducts.find((fetchedProduct) => fetchedProduct.id === productId);
 
-    if (!item || !prod) return;
+    if (!item || !product) return;
 
-    if (item.quantity < prod.inStock) {
+    if (item.quantity < product.inStock) {
       updateBasket([{ productId, quantity: item.quantity + 1 }]);
-    } else {
-      toast.info("Quantità massima disponibile.");
+      return;
     }
+
+    toast.info("Quantità massima disponibile.");
   };
 
-  const decrementQnt = (id: string) => {
-    const item = basket.find((b) => b.productId === id);
+  const decrementQnt = (productId: string) => {
+    const item = basket.find((basketItem) => basketItem.productId === productId);
 
     if (item && item.quantity > 1) {
-      updateBasket([{ productId: id, quantity: item.quantity - 1 }]);
+      updateBasket([{ productId, quantity: item.quantity - 1 }]);
     }
   };
 
   const calcTotal = () => {
-    return fetchedProducts.reduce((acc, prod) => {
-      const item = basket.find((b) => b.productId === prod.id);
+    return fetchedProducts.reduce((acc, product) => {
+      const item = basket.find((basketItem) => basketItem.productId === product.id);
       if (!item) return acc;
-      return acc + item.quantity * Number(prod.price);
+      return acc + item.quantity * Number(product.price);
     }, 0);
   };
 
@@ -159,14 +246,15 @@ export default function CartSection() {
               ))}
 
             {!isLoadingProducts &&
-              fetchedProducts.map((prod, index) => {
-                const item = basket.find((b) => b.productId === prod.id);
-                const price = calcProductPrice(prod.id);
-                const canIncrement = item && prod && item.quantity < prod.inStock;
+              fetchedProducts.map((product, index) => {
+                const item = basket.find((basketItem) => basketItem.productId === product.id);
+                const price = calcProductPrice(product.id);
+                const canIncrement = item && item.quantity < product.inStock;
                 const canDecrement = item && item.quantity > 1;
+
                 return (
                   <li
-                    key={prod.id}
+                    key={product.id}
                     className={clsx(
                       "relative flex flex-col gap-3 xl:flex-row xl:gap-5",
                       index !== fetchedProducts.length - 1 &&
@@ -174,14 +262,14 @@ export default function CartSection() {
                     )}
                   >
                     <button
-                      onClick={() => removeFromBasketById(prod.id)}
+                      onClick={() => removeFromBasketById(product.id)}
                       className="absolute top-0 right-0"
                     >
                       <SmartImage src={icon_dell} alt="delete" />
                     </button>
 
                     <SmartImage
-                      src={prod.imgSrc}
+                      src={product.imgSrc}
                       alt="product"
                       width={230}
                       height={230}
@@ -191,7 +279,7 @@ export default function CartSection() {
                     <div className="flex w-full flex-col justify-between">
                       <div>
                         <h2 className="input_R_18 mt-2 line-clamp-3 max-w-[412px]">
-                          {prod.nameFull}
+                          {product.nameFull}
                         </h2>
                       </div>
 
@@ -204,7 +292,7 @@ export default function CartSection() {
                               "flex-1 text-white transition hover:scale-110",
                               !canDecrement && "cursor-not-allowed opacity-50",
                             )}
-                            onClick={() => canDecrement && decrementQnt(prod.id)}
+                            onClick={() => canDecrement && decrementQnt(product.id)}
                           >
                             -
                           </button>
@@ -220,7 +308,7 @@ export default function CartSection() {
                               "flex-1 text-white transition hover:scale-110",
                               !canIncrement && "cursor-not-allowed opacity-50",
                             )}
-                            onClick={() => canIncrement && incrementQnt(prod.id)}
+                            onClick={() => canIncrement && incrementQnt(product.id)}
                           >
                             +
                           </button>
@@ -253,7 +341,10 @@ export default function CartSection() {
                 <div className="h-8 w-2/3 animate-pulse rounded bg-grey-hover-stroke" />
                 <div className="space-y-3">
                   {Array.from({ length: 3 }).map((_, index) => (
-                    <div key={`summary-skeleton-${index}`} className="flex items-center justify-between">
+                    <div
+                      key={`summary-skeleton-${index}`}
+                      className="flex items-center justify-between"
+                    >
                       <div className="h-5 w-28 animate-pulse rounded bg-grey-hover-stroke" />
                       <div className="h-5 w-20 animate-pulse rounded bg-grey-hover-stroke" />
                     </div>
@@ -274,4 +365,3 @@ export default function CartSection() {
     </section>
   );
 }
-

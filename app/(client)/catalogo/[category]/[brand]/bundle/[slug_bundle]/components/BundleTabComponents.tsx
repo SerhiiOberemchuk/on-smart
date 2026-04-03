@@ -27,6 +27,7 @@ export default function BundleTabComponents({
     <div className={twMerge("flex flex-col gap-3 md:gap-4", className)}>
       {includedProducts.map(
         ({ product, shortDescription, characteristicTitle, characteristics }) => {
+          const productHref = `/catalogo/${product.category_slug}/${product.brand_slug}/${product.slug}`;
           const descriptionParagraphs = (shortDescription ?? "")
             .split(/\r?\n/)
             .map((paragraph) => paragraph.trim())
@@ -35,26 +36,43 @@ export default function BundleTabComponents({
           return (
             <article key={product.id} className="rounded-sm bg-background p-3 md:p-4">
               <div className="flex flex-col gap-4 md:flex-row">
-                <Link
-                  href={`/catalogo/${product.category_slug}/${product.brand_slug}/${product.slug}`}
-                  className="block shrink-0"
-                >
-                  <SmartImage
-                    src={product.imgSrc}
-                    alt={product.nameFull}
-                    width={148}
-                    height={148}
-                    className="aspect-square rounded-sm border border-stroke-grey object-contain p-2"
-                  />
-                </Link>
+                {product.isHidden ? (
+                  <div className="block shrink-0">
+                    <SmartImage
+                      src={product.imgSrc}
+                      alt={product.nameFull}
+                      width={148}
+                      height={148}
+                      className="aspect-square rounded-sm border border-stroke-grey object-contain p-2"
+                    />
+                  </div>
+                ) : (
+                  <Link href={productHref} className="block shrink-0">
+                    <SmartImage
+                      src={product.imgSrc}
+                      alt={product.nameFull}
+                      width={148}
+                      height={148}
+                      className="aspect-square rounded-sm border border-stroke-grey object-contain p-2"
+                    />
+                  </Link>
+                )}
 
                 <div className="min-w-0 flex-1">
-                  <Link
-                    href={`/catalogo/${product.category_slug}/${product.brand_slug}/${product.slug}`}
-                    className="H4M line-clamp-2 hover:text-yellow-500"
-                  >
-                    {product.nameFull}
-                  </Link>
+                  <div className="flex flex-wrap items-start gap-2">
+                    {product.isHidden ? (
+                      <h3 className="H4M line-clamp-2">{product.nameFull}</h3>
+                    ) : (
+                      <Link href={productHref} className="H4M line-clamp-2 hover:text-yellow-500">
+                        {product.nameFull}
+                      </Link>
+                    )}
+                    {product.isHidden ? (
+                      <span className="helper_text inline-flex rounded-sm border border-yellow-500/50 bg-yellow-500/10 px-2 py-1 text-yellow-400">
+                        Non presente nel nostro catalogo
+                      </span>
+                    ) : null}
+                  </div>
 
                   <div className="mt-3 rounded-sm border border-stroke-grey p-3">
                     <h3 className="input_R_18">Descrizione</h3>

@@ -1,7 +1,7 @@
 "use client";
 
-import type { GetOrderFullInfoByIdResponseType } from "@/app/actions/orders/get-order";
-import { updateOrderInfoByOrderIDAction } from "@/app/actions/orders/udate-order-info";
+import { updateOrderInfoByOrderIDAction } from "@/app/actions/admin/orders/mutations";
+import type { OrderItemsTypes, OrderPaymentTypes, OrderTypes } from "@/db/schemas/orders.schema";
 import type { OrderStatusTypes } from "@/types/orders.types";
 import { use, useState, useTransition } from "react";
 import { toast } from "react-toastify";
@@ -25,6 +25,13 @@ import {
   getInvoiceAvailabilityReason,
   toDateTimeLocalValue,
 } from "./_order-details";
+
+type GetOrderFullInfoByIdResponseType = Promise<{
+  order: OrderTypes | null;
+  orderItems: OrderItemsTypes[] | null;
+  payments: OrderPaymentTypes | null;
+  error: unknown;
+}>;
 
 export default function PageOrderByID({
   orderInfoAction,

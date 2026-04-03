@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  deleteCharacteristic,
-  type GetAllCharacteristicsWithMetaResponse,
-} from "@/app/actions/product-characteristic/create-product-characteristic";
+import { deleteCharacteristic } from "@/app/actions/admin/characteristics/mutations";
 import ButtonYellow from "@/components/BattonYellow";
 import ButtonXDellete from "../../ButtonXDellete";
 import { useCharacteristicStore } from "../store/useCharacteristicStore";
@@ -18,6 +15,18 @@ type CharacteristicListItem = {
   is_multiple: boolean;
   values: string[];
 };
+
+type CharacteristicsResponse =
+  | {
+      success: true;
+      data: CharacteristicListItem[];
+      error: null;
+    }
+  | {
+      success: false;
+      error: unknown;
+      data: [];
+    };
 
 const DEFAULT_CATEGORY_NAME = "Універсальні характеристики";
 
@@ -53,7 +62,7 @@ function getFlags(item: CharacteristicListItem) {
 export default function ListCharacteristics({
   data,
 }: {
-  data: Awaited<GetAllCharacteristicsWithMetaResponse>;
+  data: CharacteristicsResponse;
 }) {
   const { openEdit } = useCharacteristicStore();
 

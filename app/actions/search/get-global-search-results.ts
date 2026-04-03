@@ -208,6 +208,7 @@ export async function getHeaderGlobalSearchResults(
               sql`LOWER(${productsSchema.slug}) LIKE ${searchTermLower}`,
               sql`LOWER(${productsSchema.brand_slug}) LIKE ${searchTermLower}`,
               sql`LOWER(${productsSchema.category_slug}) LIKE ${searchTermLower}`,
+              sql`LOWER(COALESCE(JSON_UNQUOTE(${productsSchema.searchKeywords}), '')) LIKE ${searchTermLower}`,
               sql`LOWER(${productsSchema.id}) LIKE ${searchTermLower}`,
               ...(eanSearchTerm ? [like(productsSchema.ean, eanSearchTerm)] : []),
               ...(eanSearchTerm

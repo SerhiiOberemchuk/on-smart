@@ -1,7 +1,7 @@
-import { getAllBrands } from "@/app/actions/brands/brand-actions";
-import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
-import { uploadFile } from "@/app/actions/files/uploadFile";
-import { createNewProduct } from "@/app/actions/product/create-new-product";
+import { getAllBrands } from "@/app/actions/admin/brands/queries";
+import { getAllCategoryProducts } from "@/app/actions/admin/categories/queries";
+import { uploadFile } from "@/app/actions/admin/files/mutations";
+import { createNewProduct } from "@/app/actions/admin/products/mutations";
 import ButtonYellow from "@/components/BattonYellow";
 import { ProductType } from "@/db/schemas/product.schema";
 import { BrandTypes } from "@/types/brands.types";
@@ -10,28 +10,32 @@ import slugify from "@sindresorhus/slugify";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import { useModalStore } from "../../store/modal-store";
 import ButtonXDellete from "../ButtonXDellete";
 import { FILE_MAX_SIZE } from "../categories/ModalCategoryForm";
 import InputAdminStyle from "../InputComponent";
 import SelectComponentAdmin from "../SelectComponent";
-import { useModalStore } from "../../store/modal-store";
+
+type CreateProductFormValues = ProductType & {
+  searchKeywordsInput?: string;
+};
 
 export default function ModalAddNewPrduct() {
   const { type, isOpen, closeModal } = useModalStore();
-  const { register, handleSubmit, setValue, watch } = useForm<ProductType>();
+  const { register, handleSubmit, setValue } = useForm<CreateProductFormValues>();
   const [isPendingCreate, startTransitionCreateProduct] = useTransition();
   const [fileToUpload, setFileToUpload] = useState<File | null>(null);
   const router = useRouter();
 
   const [categories, setCategories] = useState<CategoryTypes[]>([]);
-  const [bradns, setBrands] = useState<BrandTypes[]>([]);
-  const [isPendengCategories, startTransitionCategory] = useTransition();
-  const [isPendengBrands, startTransitionBrands] = useTransition();
+  const [brands, setBrands] = useState<BrandTypes[]>([]);
+  const [isPendingCategories, startTransitionCategory] = useTransition();
+  const [isPendingBrands, startTransitionBrands] = useTransition();
   const [image, setImage] = useState<string | null>(null);
 
-  const onSubmit: SubmitHandler<ProductType> = (data) => {
+  const onSubmit: SubmitHandler<CreateProductFormValues> = (data) => {
     if (!image || !fileToUpload) {
       toast.warning("Спочатку завантажте головне фото товару");
       return;
@@ -39,6 +43,7 @@ export default function ModalAddNewPrduct() {
 
     const hasValue = (value: unknown) =>
       value !== null && value !== undefined && `${value}`.trim() !== "";
+
     if (
       !hasValue(data.ean) ||
       !hasValue(data.lengthCm) ||
@@ -50,32 +55,39 @@ export default function ModalAddNewPrduct() {
       return;
     }
 
-    const slug = watch("category_slug");
-    const [category_id] = categories.filter((i) => i.category_slug === slug);
+    const [category] = categories.filter((item) => item.category_slug === data.category_slug);
 
     startTransitionCreateProduct(async () => {
       try {
-        const resp = await uploadFile({ file: fileToUpload, sub_bucket: "products" });
-        if (!resp.fileUrl) {
+        const response = await uploadFile({ file: fileToUpload, sub_bucket: "products" });
+        if (!response.fileUrl) {
           toast.error("Не вдалося завантажити зображення");
           return;
         }
 
-        const res = await createNewProduct({
+        const result = await createNewProduct({
           ...data,
           ean: data.ean.trim(),
-          imgSrc: resp.fileUrl,
-          category_id: category_id?.id ?? "",
+          searchKeywords: Array.from(
+            new Set(
+              (data.searchKeywordsInput ?? "")
+                .split(",")
+                .map((item) => item.trim())
+                .filter(Boolean),
+            ),
+          ),
+          imgSrc: response.fileUrl,
+          category_id: category?.id ?? "",
         });
 
-        if (res.error) {
-          toast.error(res.error.toString());
+        if (result.error) {
+          toast.error(result.error.toString());
           return;
         }
 
-        if (res.success) {
-          toast.success(`Товар створено: ${res.id}`);
-          router.push(`/admin/dashboard/products/${res.id}`);
+        if (result.success) {
+          toast.success(`Товар створено: ${result.id}`);
+          router.push(`/admin/dashboard/products/${result.id}`);
           closeModal();
         }
       } catch (error) {
@@ -90,29 +102,29 @@ export default function ModalAddNewPrduct() {
 
   useEffect(() => {
     startTransitionCategory(async () => {
-      const res = await getAllCategoryProducts();
-      if (!res.success) {
+      const response = await getAllCategoryProducts();
+      if (!response.success) {
         toast.error("Помилка завантаження категорій");
         return;
       }
-      setCategories(res.data);
+      setCategories(response.data);
     });
   }, []);
 
   useEffect(() => {
     startTransitionBrands(async () => {
-      const res = await getAllBrands();
-      if (!res.success) {
+      const response = await getAllBrands();
+      if (!response.success) {
         toast.error("Помилка завантаження брендів");
         return;
       }
-      setBrands(res.data);
+      setBrands(response.data);
     });
   }, []);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length) return;
-    const file = e.target.files[0];
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files?.length) return;
+    const file = event.target.files[0];
 
     if (file.size > FILE_MAX_SIZE) {
       toast.error("Файл перевищує 2 МБ");
@@ -177,9 +189,9 @@ export default function ModalAddNewPrduct() {
                   {...register("name")}
                   required
                   input_title="Назва товару"
-                  onChange={(e) => {
-                    setValue("nameFull", e.currentTarget.value);
-                    generateSlug(e.currentTarget.value);
+                  onChange={(event) => {
+                    setValue("nameFull", event.currentTarget.value);
+                    generateSlug(event.currentTarget.value);
                   }}
                 />
 
@@ -187,20 +199,20 @@ export default function ModalAddNewPrduct() {
                   required
                   {...register("nameFull", { required: true })}
                   input_title="Повна назва товару"
-                  onChange={(v) => generateSlug(v.currentTarget.value)}
+                  onChange={(event) => generateSlug(event.currentTarget.value)}
                 />
               </div>
 
               <InputAdminStyle {...register("slug")} required input_title="Слаг товару" />
 
               <div className="admin-grid-2">
-                {isPendengBrands ? (
+                {isPendingBrands ? (
                   <p className="text-sm text-slate-400">Завантаження брендів...</p>
                 ) : (
                   <SelectComponentAdmin
                     selectTitle="Бренд"
                     optionsTitle="-- Виберіть бренд --"
-                    options={bradns.map((item) => ({
+                    options={brands.map((item) => ({
                       value: item.brand_slug as string,
                       name: item.name,
                     }))}
@@ -210,7 +222,7 @@ export default function ModalAddNewPrduct() {
                   />
                 )}
 
-                {isPendengCategories ? (
+                {isPendingCategories ? (
                   <p className="text-sm text-slate-400">Завантаження категорій...</p>
                 ) : (
                   <SelectComponentAdmin
@@ -235,6 +247,12 @@ export default function ModalAddNewPrduct() {
                   {...register("ean", { required: true })}
                   input_title="EAN (штрихкод)"
                   placeholder="Напр. 4820000000000"
+                />
+                <InputAdminStyle
+                  type="text"
+                  {...register("searchKeywordsInput")}
+                  input_title="Ключові слова для пошуку"
+                  placeholder="dahua, 4 canali, відеореєстратор"
                 />
               </div>
 

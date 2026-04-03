@@ -1,8 +1,8 @@
 ﻿"use client";
 
-import { getProductDescriptionById } from "@/app/actions/product-details.ts/get-product-description";
-import { updateProductDescriptionById } from "@/app/actions/product-details.ts/update-product-description copy";
-import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
+import { getProductDescriptionById } from "@/app/actions/admin/product-details/queries";
+import { updateProductDescriptionById } from "@/app/actions/admin/characteristics/mutations";
+import { deleteFileFromS3, uploadFile } from "@/app/actions/admin/files/mutations";
 import Spiner from "@/components/Spiner";
 import { ProductDescriptionType } from "@/db/schemas/product-details.schema";
 import {

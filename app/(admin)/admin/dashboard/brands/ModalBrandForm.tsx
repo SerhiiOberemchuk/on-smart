@@ -1,7 +1,7 @@
 "use client";
 
-import { createBrand, updateBrandById } from "@/app/actions/brands/brand-actions";
-import { deleteFileFromS3 } from "@/app/actions/files/uploadFile";
+import { createBrand, updateBrandById } from "@/app/actions/admin/brands/mutations";
+import { deleteFileFromS3 } from "@/app/actions/admin/files/mutations";
 import ButtonYellow from "@/components/BattonYellow";
 import { BrandTypes } from "@/types/brands.types";
 import slugify from "@sindresorhus/slugify";

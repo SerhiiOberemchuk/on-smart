@@ -3,8 +3,8 @@
 import {
   createCategoryProducts,
   updateCategoryProductsById,
-} from "@/app/actions/category/category-actions";
-import { deleteFileFromS3 } from "@/app/actions/files/uploadFile";
+} from "@/app/actions/admin/categories/mutations";
+import { deleteFileFromS3 } from "@/app/actions/admin/files/mutations";
 import ButtonYellow from "@/components/BattonYellow";
 import { CategoryTypes } from "@/types/category.types";
 import slugify from "@sindresorhus/slugify";

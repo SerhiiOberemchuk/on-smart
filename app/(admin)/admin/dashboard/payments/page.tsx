@@ -1,4 +1,4 @@
-import { getAllOrdersPaymentAction } from "@/app/actions/payments/payment-order-actions";
+import { getAllOrdersPaymentAction } from "@/app/actions/admin/payments/queries";
 import Spiner from "@/components/Spiner";
 import { headers } from "next/headers";
 import { Suspense } from "react";

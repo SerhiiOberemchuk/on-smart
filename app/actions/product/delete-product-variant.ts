@@ -13,41 +13,54 @@ export async function deleteProductVariant({
   product_variant_id: ProductType["id"];
 }) {
   try {
-    const variantProduct = await db
-      .select()
-      .from(productsSchema)
-      .where(eq(productsSchema.id, product_variant_id));
+    const variant = await db.transaction(async (tx) => {
+      const variantProduct = await tx
+        .select()
+        .from(productsSchema)
+        .where(eq(productsSchema.id, product_variant_id));
 
-    if (!variantProduct.length) {
+      if (!variantProduct.length) {
+        return null;
+      }
+
+      const currentVariant = variantProduct[0];
+
+      if (currentVariant.parent_product_id) {
+        const parentRows = await tx
+          .select()
+          .from(productsSchema)
+          .where(eq(productsSchema.id, currentVariant.parent_product_id));
+
+        const parent = parentRows[0];
+        if (parent?.variants?.length) {
+          const newVariants = parent.variants.filter((id) => id !== product_variant_id);
+          await tx
+            .update(productsSchema)
+            .set({
+              variants: newVariants,
+              hasVariants: newVariants.length > 0,
+            })
+            .where(eq(productsSchema.id, currentVariant.parent_product_id));
+        }
+      }
+
+      await tx.delete(productsSchema).where(eq(productsSchema.id, currentVariant.id));
+
+      return currentVariant;
+    });
+
+    if (!variant) {
       return {
         success: false,
         error: "Variant not found",
       };
     }
 
-    const variant = variantProduct[0];
-
-    await db.delete(productsSchema).where(eq(productsSchema.id, variant.id));
-
     if (variant.imgSrc) {
-      await deleteFileFromS3(variant.imgSrc);
-    }
-
-    if (variant.parent_product_id) {
-      const siblings = await db
-        .select()
-        .from(productsSchema)
-        .where(eq(productsSchema.id, variant.parent_product_id));
-
-      if (siblings[0].variants?.length) {
-        const newVariants = siblings[0].variants.filter((i) => i !== product_variant_id);
-        await db
-          .update(productsSchema)
-          .set({
-            variants: newVariants,
-            hasVariants: newVariants.length > 0,
-          })
-          .where(eq(productsSchema.id, variant.parent_product_id));
+      try {
+        await deleteFileFromS3(variant.imgSrc);
+      } catch (error) {
+        console.error("[deleteProductVariant] S3 cleanup failed:", error);
       }
     }
 

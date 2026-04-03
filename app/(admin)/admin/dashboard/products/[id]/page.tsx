@@ -1,7 +1,6 @@
-import { getAllBrands } from "@/app/actions/brands/brand-actions";
-import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
-import { getAllProducts } from "@/app/actions/product/get-all-products";
-import { getProductById } from "@/app/actions/product/get-product-by-id";
+import { getAllBrands } from "@/app/actions/admin/brands/queries";
+import { getAllCategoryProducts } from "@/app/actions/admin/categories/queries";
+import { getAllProductsAdmin, getProductByIdAdmin } from "@/app/actions/admin/products/queries";
 import { BrandTypes } from "@/types/brands.types";
 import { CategoryTypes } from "@/types/category.types";
 import Spiner from "@/components/Spiner";
@@ -23,11 +22,11 @@ export default async function AdminProductPage({ params }: Props) {
   const brandsPromise: Promise<BrandTypes[]> = getAllBrands().then((res) =>
     res.success ? res.data : [],
   );
-  const allProductsPromise: Promise<ProductType[]> = getAllProducts({ includeHidden: true }).then((res) =>
+  const allProductsPromise: Promise<ProductType[]> = getAllProductsAdmin({ includeHidden: true }).then((res) =>
     res.success && res.data ? res.data : [],
   );
 
-  const productPromise = getProductById(id).then((res) => {
+  const productPromise = getProductByIdAdmin(id).then((res) => {
     if (!res.success || !res.data) {
       notFound();
     }

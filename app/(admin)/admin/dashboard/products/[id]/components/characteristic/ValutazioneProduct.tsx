@@ -1,8 +1,10 @@
 "use client";
 
-import { deleteProductReviewById } from "@/app/actions/product-reviews/delete-review";
-import { getProductReviewsAdmin } from "@/app/actions/product-reviews/get-product-reviews";
-import { updateProductReviewById } from "@/app/actions/product-reviews/update-review";
+import {
+  deleteProductReviewById,
+  updateProductReviewById,
+} from "@/app/actions/admin/characteristics/mutations";
+import { getProductReviewsAdmin } from "@/app/actions/admin/product-details/queries";
 import ButtonYellow from "@/components/BattonYellow";
 import { ProductReviewType } from "@/db/schemas/product-reviews.schema";
 import { useEffect, useState } from "react";

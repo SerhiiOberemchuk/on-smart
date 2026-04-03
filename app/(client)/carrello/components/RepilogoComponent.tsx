@@ -25,15 +25,23 @@ export default function RepilogoComponent({
   const { setCheckoutData, setStep, step, dataFirstStep, setDelyveryPrice } = useCheckoutStore();
   const path = usePathname();
   const router = useRouter();
+  const isCartPage = path === "/carrello";
+
+  useEffect(() => {
+    if (!isCartPage) return;
+    setCheckoutData({ totalPrice, basket });
+  }, [basket, isCartPage, setCheckoutData, totalPrice]);
 
   const handleProceedToOrder = () => {
     if (basket.length === 0) {
       toast.warn("Il carrello è vuoto");
       return;
     }
+
     if (!step) {
       setStep(1);
     }
+
     setCheckoutData({ totalPrice, basket });
     router.push(PAGES.CHECKOUT_PAGES.INFORMATION);
   };
@@ -58,23 +66,22 @@ export default function RepilogoComponent({
                   ? 0
                   : dataFirstStep.deliveryPrice,
             },
-          ].map((i, index) => (
+          ].map((item, index) => (
             <li key={index} className="flex items-center justify-between">
               <span className="text_R">
                 <span className={clsx(index !== 0 && "hidden")}>
                   {" "}
-                  {basket.reduce((acc, item) => {
-                    return acc + item.quantity;
-                  }, 0)}
+                  {basket.reduce((acc, basketItem) => acc + basketItem.quantity, 0)}
                 </span>{" "}
-                {i.title}
+                {item.title}
               </span>
-              <span className="input_R_18">{i.price.toFixed(2)} €</span>
+              <span className="input_R_18">{item.price.toFixed(2)} €</span>
             </li>
           ))}
         </ul>
+
         <div className="flex items-center justify-between">
-          <h4 className="H3 mr-1">Totale</h4>{" "}
+          <h4 className="H3 mr-1">Totale</h4>
           <span className="H4M">
             {getTotalPriceToPay({
               totalPrice,
@@ -83,7 +90,8 @@ export default function RepilogoComponent({
             €
           </span>
         </div>
-        {path === "/carrello" && (
+
+        {isCartPage && (
           <ButtonYellow type="button" disabled={basket.length === 0} onClick={handleProceedToOrder}>
             Procedi all'ordine
           </ButtonYellow>

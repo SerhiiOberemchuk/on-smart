@@ -1,4 +1,4 @@
-import { getAllBrands } from "@/app/actions/brands/brand-actions";
+import { getAllBrands } from "@/app/actions/admin/brands/queries";
 import Spiner from "@/components/Spiner";
 import { headers } from "next/headers";
 import { Suspense } from "react";

@@ -1,8 +1,6 @@
 "use client";
 
-import { copyBundleById } from "@/app/actions/bundles/copy-bundle";
-import { deleteBundleById } from "@/app/actions/bundles/delete-bundle";
-import type { BundleListItem } from "@/app/actions/bundles/get-all-bundles";
+import { copyBundleById, deleteBundleById } from "@/app/actions/admin/bundles/mutations";
 import { ProductType } from "@/db/schemas/product.schema";
 import type { BrandTypes } from "@/types/brands.types";
 import { CategoryTypes } from "@/types/category.types";
@@ -11,6 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "react-toastify";
+import type { BundleListItem } from "./_bundle-list.types";
 
 export default function ListBundlesAdmin({
   bundles,

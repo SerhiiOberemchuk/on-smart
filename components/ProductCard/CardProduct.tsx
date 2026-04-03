@@ -28,6 +28,7 @@ export default function CardProduct({
     nameFull,
     productType,
   } = product;
+  const titleTooltipId = `card-title-tooltip-${id}`;
   const isBundle = productType === "bundle";
   const productHref = isBundle
     ? `/catalogo/${category_slug}/${brand_slug}/bundle/${slug}`
@@ -54,12 +55,12 @@ export default function CardProduct({
           )}
           <h2
             className="body_R_20 line-clamp-3 min-h-[72px]"
-            data-tooltip-id="card-title-tooltip"
+            data-tooltip-id={titleTooltipId}
             data-tooltip-content={nameFull}
           >
             {name}
           </h2>
-          <TitleTooltip id="card-title-tooltip" />
+          <TitleTooltip id={titleTooltipId} />
           <h3 className="helper_text my-2 text-text-grey capitalize">{category_slug}</h3>
 
           <StarsRating rating={rating} />

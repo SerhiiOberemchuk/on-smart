@@ -1,18 +1,17 @@
-import { getAllBrands } from "@/app/actions/brands/brand-actions";
-import { BundleFetchResult, getAllBundles } from "@/app/actions/bundles/get-all-bundles";
+import { getAllBrands } from "@/app/actions/admin/brands/queries";
+import { getAllBundlesAdmin } from "@/app/actions/admin/bundles/queries";
 import {
   getAllCategoryProducts,
-  type GetAllCategoriesResponse,
-} from "@/app/actions/category/category-actions";
-import { getAllProducts, ProductFetchResult } from "@/app/actions/product/get-all-products";
+} from "@/app/actions/admin/categories/queries";
+import { getAllProductsAdmin } from "@/app/actions/admin/products/queries";
 import Spiner from "@/components/Spiner";
 import { Suspense } from "react";
 import ClientPageAllBundles from "./PageAllBundles";
 
 export default function BundlesPage() {
-  const bundlesAction: Promise<BundleFetchResult> = getAllBundles();
-  const productsAction: Promise<ProductFetchResult> = getAllProducts({ includeHidden: true });
-  const categoriesAction: GetAllCategoriesResponse = getAllCategoryProducts();
+  const bundlesAction = getAllBundlesAdmin();
+  const productsAction = getAllProductsAdmin({ includeHidden: true });
+  const categoriesAction = getAllCategoryProducts();
   const brandsAction = getAllBrands();
 
   return (

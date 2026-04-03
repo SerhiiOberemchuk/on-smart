@@ -17,6 +17,7 @@ export async function getProductsByIds(
   ids: string[],
   options?: {
     includeOutOfStock?: boolean;
+    includeHidden?: boolean;
   },
 ): Promise<GetProductsByIdsResult> {
   "use cache";
@@ -32,16 +33,23 @@ export async function getProductsByIds(
   }
 
   const includeOutOfStock = options?.includeOutOfStock ?? false;
+  const includeHidden = options?.includeHidden ?? false;
 
   cacheLife("seconds");
   cacheTag(CACHE_TAGS.product.byIds(normalizedIds));
   cacheTag(CACHE_TAGS.product.all);
 
   try {
+    const conditions = [inArray(productsSchema.id, normalizedIds)];
+
+    if (!includeHidden) {
+      conditions.push(eq(productsSchema.isHidden, false));
+    }
+
     const res = await db
       .select()
       .from(productsSchema)
-      .where(and(inArray(productsSchema.id, normalizedIds), eq(productsSchema.isHidden, false)));
+      .where(and(...conditions));
 
     const availableProducts = includeOutOfStock ? res : res.filter((p) => p.inStock > 0);
 

@@ -1,10 +1,13 @@
 "use client";
 
-import { GetAllOrdersPaymentActionResponseTypes } from "@/app/actions/payments/payment-order-actions";
+import type { OrderPaymentTypes } from "@/db/schemas/orders.schema";
 import Link from "next/link";
 import { URL_DASHBOARD } from "../dashboard-admin.types";
 
-type PaymentsPageData = Awaited<GetAllOrdersPaymentActionResponseTypes>;
+type PaymentsPageData = {
+  error: null | unknown;
+  payments: OrderPaymentTypes[] | null;
+};
 
 function formatCurrency(amount: string, currency: string) {
   return new Intl.NumberFormat("uk-UA", {

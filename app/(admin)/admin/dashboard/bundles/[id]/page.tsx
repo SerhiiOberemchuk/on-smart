@@ -1,8 +1,8 @@
-import { getAllBrands } from "@/app/actions/brands/brand-actions";
-import { getBundleById } from "@/app/actions/bundles/get-bundle-by-id";
-import { getAllCategoryProducts } from "@/app/actions/category/category-actions";
-import { getFotoFromGallery } from "@/app/actions/foto-galery/get-foto-from-gallery";
-import { getAllProducts } from "@/app/actions/product/get-all-products";
+import { getAllBrands } from "@/app/actions/admin/brands/queries";
+import { getBundleByIdAdmin } from "@/app/actions/admin/bundles/queries";
+import { getAllCategoryProducts } from "@/app/actions/admin/categories/queries";
+import { getFotoFromGallery } from "@/app/actions/admin/product-details/queries";
+import { getAllProductsAdmin } from "@/app/actions/admin/products/queries";
 import Spiner from "@/components/Spiner";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -24,8 +24,8 @@ async function GetDataComponent({ params }: Props) {
   const { id } = await params;
 
   const [bundleResponse, productsResponse, categoriesResponse, brandsResponse, galleryResponse] = await Promise.all([
-    getBundleById(id),
-    getAllProducts({ includeHidden: true }),
+    getBundleByIdAdmin(id),
+    getAllProductsAdmin({ includeHidden: true }),
     getAllCategoryProducts(),
     getAllBrands(),
     getFotoFromGallery({ parent_product_id: id }),

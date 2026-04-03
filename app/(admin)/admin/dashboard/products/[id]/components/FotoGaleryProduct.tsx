@@ -1,8 +1,8 @@
 ﻿"use client";
 
-import { getFotoFromGallery } from "@/app/actions/foto-galery/get-foto-from-gallery";
-import { updateFotoGallery } from "@/app/actions/foto-galery/update-foto-gallery";
-import { deleteFileFromS3, uploadFile } from "@/app/actions/files/uploadFile";
+import { getFotoFromGallery } from "@/app/actions/admin/product-details/queries";
+import { updateFotoGallery } from "@/app/actions/admin/characteristics/mutations";
+import { deleteFileFromS3, uploadFile } from "@/app/actions/admin/files/mutations";
 import { ProductType } from "@/db/schemas/product.schema";
 import {
   DndContext,
