@@ -7,6 +7,7 @@ import "../styles/globals.css";
 import Header from "@/layout-components/Header/Header";
 import Footer from "@/layout-components/Footer";
 import CardDialog from "@/components/ProductCard/dialog-add-to-cart/CardDialog";
+import ClientErrorBoundary from "@/components/ClientErrorBoundary";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ToastContainer } from "react-toastify";
 import { ReactNode } from "react";
@@ -46,7 +47,9 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
-          <CardDialog />
+          <ClientErrorBoundary>
+            <CardDialog />
+          </ClientErrorBoundary>
           <CookieBanner />
         </NuqsAdapter>
         <ToastContainer />

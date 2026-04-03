@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "react-toastify";
+import { confirmActionToast } from "../confirm-action-toast";
 import ButtonXDellete from "../ButtonXDellete";
 import ModalAddVariant from "./ModalCreateVariant";
 
@@ -25,7 +26,9 @@ function PriceBlock({
   return (
     <div className="flex items-center gap-2 whitespace-nowrap">
       <span className="text-[1.1rem] leading-none font-semibold text-emerald-500">{price}</span>
-      {oldPrice ? <span className="text-[1.1rem] leading-none text-red-500 line-through">{oldPrice}</span> : null}
+      {oldPrice ? (
+        <span className="text-[1.1rem] leading-none text-red-500 line-through">{oldPrice}</span>
+      ) : null}
     </div>
   );
 }
@@ -44,6 +47,8 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
   const router = useRouter();
   const [isCopyPending, startCopyTransition] = useTransition();
   const [copyingId, setCopyingId] = useState<string | null>(null);
+  const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
+  const [deletingVariantId, setDeletingVariantId] = useState<string | null>(null);
   const [openedProductIds, setOpenedProductIds] = useState<Set<string>>(new Set());
   const [variantModalOpen, setVariantModalOpen] = useState(false);
   const [parentProduct, setParentProduct] = useState<ProductType | null>(null);
@@ -139,7 +144,9 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
   const visibleProductsWithVariants = useMemo(
     () =>
       sortedParentProducts
-        .filter((product) => (variantsByParentId.get(product.id)?.length ?? 0) > 0 || product.hasVariants)
+        .filter(
+          (product) => (variantsByParentId.get(product.id)?.length ?? 0) > 0 || product.hasVariants,
+        )
         .map((product) => product.id),
     [sortedParentProducts, variantsByParentId],
   );
@@ -202,25 +209,39 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
   };
 
   const handleDeleteProduct = async (id: string) => {
-    const res = await deleteProductById(id);
-    if (res.error) {
-      console.error(res.error);
-      toast.error("Не вдалося видалити товар");
-      return;
-    }
+    if (deletingProductId === id) return;
 
-    toast.success("Товар видалено");
+    try {
+      setDeletingProductId(id);
+      const res = await deleteProductById(id);
+      if (res.error) {
+        console.error(res.error);
+        toast.error("Не вдалося видалити товар");
+        return;
+      }
+
+      toast.success("Товар видалено");
+    } finally {
+      setDeletingProductId((current) => (current === id ? null : current));
+    }
   };
 
   const handleDeleteVariant = async (productVariantId: string) => {
-    const res = await deleteProductVariant({ product_variant_id: productVariantId });
-    if (res.error) {
-      console.error(res.error);
-      toast.error("Не вдалося видалити варіант");
-      return;
-    }
+    if (deletingVariantId === productVariantId) return;
 
-    toast.success("Варіант видалено");
+    try {
+      setDeletingVariantId(productVariantId);
+      const res = await deleteProductVariant({ product_variant_id: productVariantId });
+      if (res.error) {
+        console.error(res.error);
+        toast.error("Не вдалося видалити варіант");
+        return;
+      }
+
+      toast.success("Варіант видалено");
+    } finally {
+      setDeletingVariantId((current) => (current === productVariantId ? null : current));
+    }
   };
 
   const handleCopyProduct = (id: string) => {
@@ -304,7 +325,9 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
               type="button"
               className="admin-btn-secondary w-full text-sm! md:w-auto"
               onClick={resetFilters}
-              disabled={selectedBrand === "ALL" && selectedCategory === "ALL" && sortType === "default"}
+              disabled={
+                selectedBrand === "ALL" && selectedCategory === "ALL" && sortType === "default"
+              }
             >
               Скинути фільтри
             </button>
@@ -338,7 +361,10 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
           const isOpened = visibleOpenedProductIds.has(item.id);
 
           return (
-            <li key={item.id} className="admin-card admin-card-content admin-card-hover p-3! sm:p-4!">
+            <li
+              key={item.id}
+              className="admin-card admin-card-content admin-card-hover p-3! sm:p-4!"
+            >
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-center">
                 <div className="min-w-0">
                   <div className="flex items-start gap-3">
@@ -363,12 +389,16 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
                             type="button"
                             onClick={() => toggleVariants(item.id, hasVariants)}
                             className="inline-flex items-center gap-1.5 rounded-md border border-yellow-500/70 bg-yellow-500/10 px-2 py-1 text-[11px] font-semibold text-yellow-300 transition hover:bg-yellow-500/20 hover:text-yellow-200"
-                            aria-label={isOpened ? "Сховати варіанти товару" : "Показати варіанти товару"}
-                            title={isOpened ? "Сховати варіанти товару" : "Показати варіанти товару"}
+                            aria-label={
+                              isOpened ? "Сховати варіанти товару" : "Показати варіанти товару"
+                            }
+                            title={
+                              isOpened ? "Сховати варіанти товару" : "Показати варіанти товару"
+                            }
                             aria-expanded={isOpened}
                             aria-controls={`variants-${item.id}`}
                           >
-                            <span aria-hidden>{isOpened ? "?" : "?"}</span>
+                            {/* <span aria-hidden>{isOpened ? "?" : "?"}</span> */}
                             <span>{isOpened ? "Сховати варіанти" : "Показати варіанти"}</span>
                             <span className="rounded bg-yellow-500/20 px-1.5 py-0.5 text-[10px] leading-none">
                               {variants.length}
@@ -432,8 +462,11 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
                     <ButtonXDellete
                       type="button"
                       className="h-10 w-10"
-                      onClick={() => {
-                        if (confirm("Видалити цей товар?")) handleDeleteProduct(item.id);
+                      disabled={deletingProductId === item.id}
+                      onClick={async () => {
+                        if (deletingProductId === item.id) return;
+                        if (!(await confirmActionToast("Видалити цей товар?"))) return;
+                        void handleDeleteProduct(item.id);
                       }}
                     />
                   )}
@@ -462,12 +495,20 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
                               />
 
                               <div className="min-w-0">
-                                <p className="line-clamp-2 text-sm font-medium text-slate-100">{variant.nameFull}</p>
+                                <p className="line-clamp-2 text-sm font-medium text-slate-100">
+                                  {variant.nameFull}
+                                </p>
                                 <div className="mt-1 flex flex-wrap gap-1.5">
-                                  <span className="admin-chip capitalize">{variant.category_slug}</span>
-                                  <span className="admin-chip capitalize">{variant.brand_slug}</span>
+                                  <span className="admin-chip capitalize">
+                                    {variant.category_slug}
+                                  </span>
+                                  <span className="admin-chip capitalize">
+                                    {variant.brand_slug}
+                                  </span>
                                   <span className="admin-chip">Залишок: {variant.inStock}</span>
-                                  {variant.isOnOrder ? <span className="admin-chip">Під замовлення</span> : null}
+                                  {variant.isOnOrder ? (
+                                    <span className="admin-chip">Під замовлення</span>
+                                  ) : null}
                                   {variant.isHidden ? (
                                     <span className="admin-chip border-amber-500/40 bg-amber-500/15 text-amber-200">
                                       Приховано
@@ -488,12 +529,14 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
                                 className="admin-btn-primary px-3! py-2! text-xs!"
                               />
 
-
                               <ButtonXDellete
                                 type="button"
                                 className="h-10 w-10"
-                                onClick={() => {
-                                  if (confirm("Видалити цей варіант?")) handleDeleteVariant(variant.id);
+                                disabled={deletingVariantId === variant.id}
+                                onClick={async () => {
+                                  if (deletingVariantId === variant.id) return;
+                                  if (!(await confirmActionToast("Видалити цей варіант?"))) return;
+                                  void handleDeleteVariant(variant.id);
                                 }}
                               />
                             </div>
@@ -510,7 +553,11 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
       </ul>
 
       {variantModalOpen && parentProduct ? (
-        <ModalAddVariant parent={parentProduct} isOpen={variantModalOpen} onClose={closeVariantModal} />
+        <ModalAddVariant
+          parent={parentProduct}
+          isOpen={variantModalOpen}
+          onClose={closeVariantModal}
+        />
       ) : null}
     </>
   );

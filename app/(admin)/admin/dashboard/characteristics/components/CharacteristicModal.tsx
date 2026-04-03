@@ -154,7 +154,7 @@ export function CharacteristicModal() {
           <h2 className="text-base font-semibold">
             {mode === "create" ? "Нова характеристика" : "Редагувати характеристику"}
           </h2>
-          <ButtonXDellete className="h-8 w-8" onClick={closeModal} />
+          <ButtonXDellete icon="close" className="h-8 w-8" onClick={closeModal} />
         </div>
 
         <div className="admin-modal-content">

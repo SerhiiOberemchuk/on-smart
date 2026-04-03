@@ -6,10 +6,12 @@ import type {
 } from "@/app/actions/admin/categories/mutations";
 import { removeCategoryProductsById } from "@/app/actions/admin/categories/mutations";
 import { deleteFileFromS3 } from "@/app/actions/admin/files/mutations";
+import ButtonXDellete from "@/app/(admin)/admin/dashboard/ButtonXDellete";
+import { confirmActionToast } from "@/app/(admin)/admin/dashboard/confirm-action-toast";
 import { CategoryTypes } from "@/types/category.types";
 import Image from "next/image";
 import Link from "next/link";
-import { use, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "react-toastify";
 import ModalCategoryForm from "./ModalCategoryForm";
 
@@ -34,14 +36,12 @@ function CategoryRowActions({
         Редагувати
       </button>
 
-      <button
+      <ButtonXDellete
         type="button"
         onClick={() => onDelete({ id: category.id, image: category.image })}
-        className="admin-btn-danger px-3! py-1.5! text-xs!"
+        className="h-8 w-8 rounded-md"
         disabled={isDeleting}
-      >
-        {isDeleting ? "Видалення..." : "Видалити"}
-      </button>
+      />
     </div>
   );
 }
@@ -62,8 +62,8 @@ export default function CategoriesClientPage({
     setModalOpen(true);
   };
 
-  const handleDelete = ({ id, image }: Pick<CategoryTypes, "id" | "image">) => {
-    if (!confirm("Видалити цю категорію?")) return;
+  const handleDelete = async ({ id, image }: Pick<CategoryTypes, "id" | "image">) => {
+    if (!(await confirmActionToast("Видалити цю категорію?"))) return;
 
     if (!id) {
       toast.error("Некоректний ID категорії");

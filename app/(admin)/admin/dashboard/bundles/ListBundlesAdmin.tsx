@@ -1,6 +1,8 @@
 "use client";
 
 import { copyBundleById, deleteBundleById } from "@/app/actions/admin/bundles/mutations";
+import ButtonXDellete from "@/app/(admin)/admin/dashboard/ButtonXDellete";
+import { confirmActionToast } from "@/app/(admin)/admin/dashboard/confirm-action-toast";
 import { ProductType } from "@/db/schemas/product.schema";
 import type { BrandTypes } from "@/types/brands.types";
 import { CategoryTypes } from "@/types/category.types";
@@ -25,8 +27,12 @@ export default function ListBundlesAdmin({
   const router = useRouter();
   const [isCopyPending, startCopyTransition] = useTransition();
   const [copyingId, setCopyingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const productById = useMemo(() => new Map(products.map((item) => [item.id, item])), [products]);
-  const categoryById = useMemo(() => new Map(categories.map((item) => [item.id, item])), [categories]);
+  const categoryById = useMemo(
+    () => new Map(categories.map((item) => [item.id, item])),
+    [categories],
+  );
   const brandBySlug = useMemo(
     () =>
       new Map(
@@ -60,10 +66,11 @@ export default function ListBundlesAdmin({
   };
 
   const handleDeleteBundle = async (id: string) => {
-    const confirmed = confirm("Видалити комплект?");
-    if (!confirmed) return;
+    if (deletingId === id) return;
+    if (!(await confirmActionToast("Видалити комплект?"))) return;
 
     try {
+      setDeletingId(id);
       const response = await deleteBundleById(id);
       if (!response.success) {
         toast.error(response.error || "Не вдалося видалити комплект");
@@ -75,6 +82,8 @@ export default function ListBundlesAdmin({
     } catch (error) {
       console.error(error);
       toast.error("Не вдалося видалити комплект");
+    } finally {
+      setDeletingId((current) => (current === id ? null : current));
     }
   };
 
@@ -95,7 +104,10 @@ export default function ListBundlesAdmin({
           .filter(Boolean) as ProductType[];
 
         return (
-          <li key={bundle.id} className="admin-card admin-card-content admin-card-hover p-3! sm:p-4!">
+          <li
+            key={bundle.id}
+            className="admin-card admin-card-content admin-card-hover p-3! sm:p-4!"
+          >
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-[72px_minmax(0,1fr)_auto] lg:items-center">
               <div className="shrink-0">
                 {photos[0] ? (
@@ -120,7 +132,9 @@ export default function ListBundlesAdmin({
 
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   <span className="admin-chip">Слаг: {bundle.slug}</span>
-                  <span className="admin-chip">Категорія: {category?.name ?? bundle.category_id}</span>
+                  <span className="admin-chip">
+                    Категорія: {category?.name ?? bundle.category_id}
+                  </span>
                   <span className="admin-chip">Бренд: {brand?.name ?? bundle.brand_slug}</span>
                   <span className="admin-chip">EAN: {bundle.ean}</span>
                   <span className="admin-chip">Залишок: {bundle.inStock}</span>
@@ -133,9 +147,13 @@ export default function ListBundlesAdmin({
                 </div>
 
                 {items.length > 0 ? (
-                  <p className="mt-2 text-xs text-slate-400">Містить: {items.map((item) => item.nameFull).join(", ")}</p>
+                  <p className="mt-2 text-xs text-slate-400">
+                    Містить: {items.map((item) => item.nameFull).join(", ")}
+                  </p>
                 ) : (
-                  <p className="mt-2 text-xs text-slate-400">Список товарів недоступний.</p>
+                  <p className="mt-2 text-xs text-slate-400">
+                    Список товарів недоступний.
+                  </p>
                 )}
 
                 {reviewsPreview.length > 0 ? (
@@ -152,9 +170,13 @@ export default function ListBundlesAdmin({
               </div>
 
               <div className="flex flex-col items-start gap-1 lg:items-end">
-                <span className="text-[1.1rem] leading-none font-semibold text-emerald-500">{bundle.price}</span>
+                <span className="text-[1.1rem] leading-none font-semibold text-emerald-500">
+                  {bundle.price}
+                </span>
                 {bundle.oldPrice ? (
-                  <span className="text-sm leading-none text-red-500 line-through">{bundle.oldPrice}</span>
+                  <span className="text-sm leading-none text-red-500 line-through">
+                    {bundle.oldPrice}
+                  </span>
                 ) : null}
                 <Link
                   href={`/admin/dashboard/bundles/${bundle.id}`}
@@ -170,13 +192,12 @@ export default function ListBundlesAdmin({
                 >
                   {isCopyPending && copyingId === bundle.id ? "Копіювання..." : "Копіювати"}
                 </button>
-                <button
+                <ButtonXDellete
                   type="button"
-                  className="admin-btn-secondary mt-1 !px-3 !py-1.5 !text-xs"
+                  className="mt-1 h-8 w-8 rounded-md"
                   onClick={() => handleDeleteBundle(bundle.id)}
-                >
-                  Видалити
-                </button>
+                  disabled={deletingId === bundle.id}
+                />
               </div>
             </div>
           </li>

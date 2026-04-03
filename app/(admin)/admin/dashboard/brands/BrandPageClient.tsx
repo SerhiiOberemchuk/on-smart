@@ -2,6 +2,8 @@
 
 import { removeBrandById } from "@/app/actions/admin/brands/mutations";
 import { deleteFileFromS3 } from "@/app/actions/admin/files/mutations";
+import ButtonXDellete from "@/app/(admin)/admin/dashboard/ButtonXDellete";
+import { confirmActionToast } from "@/app/(admin)/admin/dashboard/confirm-action-toast";
 import { BrandTypes } from "@/types/brands.types";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,14 +32,12 @@ function BrandRowActions({
         Редагувати
       </button>
 
-      <button
+      <ButtonXDellete
         type="button"
         onClick={() => onDelete({ id: brand.id, image: brand.image })}
-        className="admin-btn-danger px-3! py-1.5! text-xs!"
+        className="h-8 w-8 rounded-md"
         disabled={isDeleting}
-      >
-        {isDeleting ? "Видалення..." : "Видалити"}
-      </button>
+      />
     </div>
   );
 }
@@ -55,7 +55,7 @@ export default function BrandsPageClient({ brandsData }: { brandsData: BrandType
   };
 
   const handleDelete = async ({ id, image }: Pick<BrandTypes, "id" | "image">) => {
-    if (!confirm("Видалити цей бренд?")) return;
+    if (!(await confirmActionToast("Видалити цей бренд?"))) return;
 
     if (!id) {
       toast.error("Некоректний ID бренду");

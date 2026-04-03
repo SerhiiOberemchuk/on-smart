@@ -6,6 +6,7 @@ import type { ProductType } from "@/db/schemas/product.schema";
 import type { BrandTypes } from "@/types/brands.types";
 import type { CategoryTypes } from "@/types/category.types";
 
+import ButtonXDellete from "../../../ButtonXDellete";
 import InputAdminStyle from "../../../InputComponent";
 import SelectComponentAdmin from "../../../SelectComponent";
 
@@ -221,13 +222,11 @@ export default function RelatedProductsPicker({
                           Приховано
                         </span>
                       ) : null}
-                      <button
+                      <ButtonXDellete
                         type="button"
-                        className="rounded bg-slate-700 px-1.5 py-0.5 text-[10px] hover:bg-slate-600"
+                        className="h-6 w-6 rounded-md border-red-500/60 bg-red-500/10"
                         onClick={() => toggleProduct(id)}
-                      >
-                        Видалити
-                      </button>
+                      />
                     </span>
                   );
                 })}

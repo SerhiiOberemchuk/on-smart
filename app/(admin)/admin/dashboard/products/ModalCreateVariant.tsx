@@ -124,7 +124,7 @@ export default function ModalAddVariant({
       <div className="admin-modal max-w-4xl">
         <div className="admin-modal-header">
           <h2 className="text-base font-semibold">Додати варіант до {parent.nameFull}</h2>
-          <ButtonXDellete className="h-8 w-8" onClick={onClose} />
+          <ButtonXDellete icon="close" className="h-8 w-8" onClick={onClose} />
         </div>
 
         <div className="admin-modal-content space-y-4">

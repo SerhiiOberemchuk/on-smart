@@ -7,6 +7,7 @@ import { ProductDocumentsType } from "@/db/schemas/product-documents.schema";
 import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { FILE_MAX_SIZE } from "../../../../categories/ModalCategoryForm";
+import ButtonXDellete from "../../../../ButtonXDellete";
 import InputAdminStyle from "../../../../InputComponent";
 import {
   PRODUCT_SAVE_ALL_EVENT,
@@ -213,13 +214,11 @@ export default function DocumentsProduct({ id }: { id: string }) {
                 </div>
 
                 <div className="flex justify-end">
-                  <button
+                  <ButtonXDellete
                     onClick={() => handleDelete(doc.link)}
                     disabled={isDeleting === doc.link}
-                    className="admin-btn-danger !px-3 !py-1.5 !text-xs"
-                  >
-                    {isDeleting === doc.link ? "..." : "Видалити"}
-                  </button>
+                    className="h-8 w-8 rounded-md"
+                  />
                 </div>
               </li>
             ))
