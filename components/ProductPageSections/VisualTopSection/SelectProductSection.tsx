@@ -47,7 +47,7 @@ export default function SelectProductSection({
 
   const uiProduct = selectedProduct ?? product;
   const variantGroupSourceId = product.parent_product_id ?? product.id;
-  const variantGroupName = `product-page-variant-${variantGroupSourceId}`;
+  const variantGroupName = `product-page-variant-${variantGroupSourceId}-${product.id}`;
 
   const shouldShowVariants = (variantsProduct?.length ?? 0) > 1;
 
@@ -71,7 +71,7 @@ export default function SelectProductSection({
           {variantsProduct ? (
             <>
               <fieldset
-                key={variantGroupName}
+                key={`${variantGroupName}-${selectedProduct?.id ?? "none"}`}
                 className="mt-6 flex flex-col gap-3"
               >
                 <legend className="input_M_18 mb-3 text-white">Scegli una versione</legend>
