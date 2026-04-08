@@ -1,16 +1,17 @@
 "use server";
 
-import { db } from "@/db/db";
-import { productDescriptionSchema } from "@/db/schemas/product-details.schema";
-import { productDocumentsSchema } from "@/db/schemas/product-documents.schema";
-import { productFotoGallery } from "@/db/schemas/product-foto-gallery.schema";
-import { productSpecificheSchema } from "@/db/schemas/product-specifiche.schema";
+import { copyFilesInS3, deleteFileFromS3 } from "../files/uploadFile";
+import { db } from "../../../db/db";
+import { productDescriptionSchema } from "../../../db/schemas/product-details.schema";
+import { productDocumentsSchema } from "../../../db/schemas/product-documents.schema";
+import { productFotoGallery } from "../../../db/schemas/product-foto-gallery.schema";
+import { productSpecificheSchema } from "../../../db/schemas/product-specifiche.schema";
 import {
   productCharacteristicProductSchema,
   type ProductCharacteristicProductType,
-} from "@/db/schemas/product_characteristic_product.schema";
-import { productsSchema, type ProductInsertType } from "@/db/schemas/product.schema";
-import { CACHE_TAGS } from "@/types/cache-trigers.constant";
+} from "../../../db/schemas/product_characteristic_product.schema";
+import { productsSchema, type ProductInsertType } from "../../../db/schemas/product.schema";
+import { CACHE_TAGS } from "../../../types/cache-trigers.constant";
 import { and, eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import {
@@ -19,9 +20,7 @@ import {
   canCopyProduct,
 } from "./copy-product.helpers";
 
-function normalizeNullableDecimal(
-  value: string | number | null | undefined,
-): string | null {
+function normalizeNullableDecimal(value: string | number | null | undefined): string | null {
   if (value === null || value === undefined) return null;
   const normalized = String(value).trim();
   return normalized.length > 0 ? normalized : null;
@@ -42,6 +41,20 @@ function normalizeJsonStringValue(value: unknown): string {
   }
 
   return trimmed;
+}
+
+function collectNonEmptyStrings(values: Array<string | null | undefined>) {
+  return values.map((value) => (typeof value === "string" ? value.trim() : "")).filter(Boolean);
+}
+
+async function cleanupCopiedFiles(urls: string[]) {
+  if (urls.length === 0) return;
+
+  const results = await Promise.allSettled(urls.map((url) => deleteFileFromS3(url)));
+  const rejected = results.filter((item) => item.status === "rejected");
+  if (rejected.length > 0) {
+    console.error("[copyProductById] Failed to cleanup copied files:", rejected);
+  }
 }
 
 async function buildUniqueCopySlug(baseSlug: string): Promise<string> {
@@ -103,33 +116,38 @@ export async function copyProductById(sourceProductId: string) {
       };
     }
 
-    const [sourceGalleryRows, sourceDescriptionRows, sourceSpecificheRows, sourceDocumentsRows, sourceCharacteristics] =
-      await Promise.all([
-        db
-          .select()
-          .from(productFotoGallery)
-          .where(eq(productFotoGallery.parent_product_id, sourceProductId))
-          .limit(1),
-        db
-          .select()
-          .from(productDescriptionSchema)
-          .where(eq(productDescriptionSchema.product_id, sourceProductId))
-          .limit(1),
-        db
-          .select()
-          .from(productSpecificheSchema)
-          .where(eq(productSpecificheSchema.product_id, sourceProductId))
-          .limit(1),
-        db
-          .select()
-          .from(productDocumentsSchema)
-          .where(eq(productDocumentsSchema.product_id, sourceProductId))
-          .limit(1),
-        db
-          .select()
-          .from(productCharacteristicProductSchema)
-          .where(eq(productCharacteristicProductSchema.product_id, sourceProductId)),
-      ]);
+    const [
+      sourceGalleryRows,
+      sourceDescriptionRows,
+      sourceSpecificheRows,
+      sourceDocumentsRows,
+      sourceCharacteristics,
+    ] = await Promise.all([
+      db
+        .select()
+        .from(productFotoGallery)
+        .where(eq(productFotoGallery.parent_product_id, sourceProductId))
+        .limit(1),
+      db
+        .select()
+        .from(productDescriptionSchema)
+        .where(eq(productDescriptionSchema.product_id, sourceProductId))
+        .limit(1),
+      db
+        .select()
+        .from(productSpecificheSchema)
+        .where(eq(productSpecificheSchema.product_id, sourceProductId))
+        .limit(1),
+      db
+        .select()
+        .from(productDocumentsSchema)
+        .where(eq(productDocumentsSchema.product_id, sourceProductId))
+        .limit(1),
+      db
+        .select()
+        .from(productCharacteristicProductSchema)
+        .where(eq(productCharacteristicProductSchema.product_id, sourceProductId)),
+    ]);
     const sourceGallery = sourceGalleryRows[0];
     const sourceDescription = sourceDescriptionRows[0];
     const sourceSpecifiche = sourceSpecificheRows[0];
@@ -138,87 +156,117 @@ export async function copyProductById(sourceProductId: string) {
     const nextSlug = await buildUniqueCopySlug(sourceProduct.slug);
     const nextNames = await buildUniqueCopyNames(sourceProduct.name, sourceProduct.nameFull);
 
-    const { id: _sourceId, ...sourceProductWithoutId } = sourceProduct;
+    const originalMainImage = normalizeJsonStringValue(sourceProduct.imgSrc);
+    const galleryImages = collectNonEmptyStrings(sourceGallery?.images ?? []);
+    const descriptionImages = collectNonEmptyStrings(sourceDescription?.images ?? []);
+    const specificheImages = collectNonEmptyStrings(sourceSpecifiche?.images ?? []);
+    const documentLinks = (sourceDocuments?.documents ?? [])
+      .map((document) => (typeof document?.link === "string" ? document.link.trim() : ""))
+      .filter(Boolean);
 
-    const payload: ProductInsertType = {
-      ...sourceProductWithoutId,
-      slug: nextSlug,
-      name: nextNames.name,
-      nameFull: nextNames.nameFull,
-      imgSrc: normalizeJsonStringValue(sourceProduct.imgSrc),
-      oldPrice: normalizeNullableDecimal(sourceProduct.oldPrice),
-      rating: normalizeNullableDecimal(sourceProduct.rating) ?? "5.0",
-      hasVariants: false,
-      variants: [],
-      relatedProductIds: sourceProduct.relatedProductIds ?? [],
-      parent_product_id: null,
-      bundleIds: [],
-    };
+    const filesToCopy = [
+      originalMainImage,
+      ...galleryImages,
+      ...descriptionImages,
+      ...specificheImages,
+      ...documentLinks,
+    ].filter(Boolean);
 
-    const copiedProductId = await db.transaction(async (tx) => {
-      const [inserted] = await tx.insert(productsSchema).values(payload).$returningId();
-      const newProductId = inserted?.id;
+    const copiedFiles = await copyFilesInS3(filesToCopy);
+    const copiedFileUrls = copiedFiles.copiedEntries.map((entry) => entry.fileUrl);
 
-      if (!newProductId) {
-        throw new Error("Failed to copy product");
-      }
+    try {
+      const { id: _sourceId, ...sourceProductWithoutId } = sourceProduct;
 
-      if (sourceGallery) {
-        await tx.insert(productFotoGallery).values({
-          parent_product_id: newProductId,
-          images: sourceGallery.images,
-        });
-      }
+      const payload: ProductInsertType = {
+        ...sourceProductWithoutId,
+        slug: nextSlug,
+        name: nextNames.name,
+        nameFull: nextNames.nameFull,
+        imgSrc: copiedFiles.urlMap.get(originalMainImage) ?? originalMainImage,
+        oldPrice: normalizeNullableDecimal(sourceProduct.oldPrice),
+        rating: normalizeNullableDecimal(sourceProduct.rating) ?? "5.0",
+        hasVariants: false,
+        variants: [],
+        relatedProductIds: sourceProduct.relatedProductIds ?? [],
+        parent_product_id: null,
+        bundleIds: [],
+      };
 
-      if (sourceDescription) {
-        await tx.insert(productDescriptionSchema).values({
-          product_id: newProductId,
-          title: sourceDescription.title,
-          description: sourceDescription.description,
-          images: sourceDescription.images,
-        });
-      }
+      const copiedProductId = await db.transaction(async (tx) => {
+        const [inserted] = await tx.insert(productsSchema).values(payload).$returningId();
+        const newProductId = inserted?.id;
 
-      if (sourceSpecifiche) {
-        await tx.insert(productSpecificheSchema).values({
-          product_id: newProductId,
-          title: sourceSpecifiche.title,
-          images: sourceSpecifiche.images,
-          groups: sourceSpecifiche.groups,
-        });
-      }
+        if (!newProductId) {
+          throw new Error("Failed to copy product");
+        }
 
-      if (sourceDocuments) {
-        await tx.insert(productDocumentsSchema).values({
-          product_id: newProductId,
-          documents: sourceDocuments.documents,
-        });
-      }
+        if (sourceGallery) {
+          await tx.insert(productFotoGallery).values({
+            parent_product_id: newProductId,
+            images: galleryImages.map((url) => copiedFiles.urlMap.get(url) ?? url),
+          });
+        }
 
-      if (sourceCharacteristics.length > 0) {
-        const rowsToInsert: Array<Omit<ProductCharacteristicProductType, "id">> =
-          sourceCharacteristics.map((row) => ({
+        if (sourceDescription) {
+          await tx.insert(productDescriptionSchema).values({
             product_id: newProductId,
-            characteristic_id: row.characteristic_id,
-            characteristic_name: row.characteristic_name,
-            value_ids: row.value_ids,
-          }));
+            title: sourceDescription.title,
+            description: sourceDescription.description,
+            images: descriptionImages.map((url) => copiedFiles.urlMap.get(url) ?? url),
+          });
+        }
 
-        await tx.insert(productCharacteristicProductSchema).values(rowsToInsert);
-      }
+        if (sourceSpecifiche) {
+          await tx.insert(productSpecificheSchema).values({
+            product_id: newProductId,
+            title: sourceSpecifiche.title,
+            images: specificheImages.map((url) => copiedFiles.urlMap.get(url) ?? url),
+            groups: sourceSpecifiche.groups,
+          });
+        }
 
-      return newProductId;
-    });
+        if (sourceDocuments) {
+          await tx.insert(productDocumentsSchema).values({
+            product_id: newProductId,
+            documents: sourceDocuments.documents.map((document) => ({
+              ...document,
+              link:
+                typeof document.link === "string"
+                  ? (copiedFiles.urlMap.get(document.link.trim()) ?? document.link)
+                  : document.link,
+            })),
+          });
+        }
 
-    updateTag(CACHE_TAGS.product.all);
-    updateTag(CACHE_TAGS.product.byId(copiedProductId));
-    updateTag(CACHE_TAGS.product.bySlug(nextSlug));
-    updateTag(CACHE_TAGS.product.supportById(copiedProductId));
-    updateTag(CACHE_TAGS.product.details.byId(copiedProductId));
-    updateTag(CACHE_TAGS.product.details.all);
-    updateTag(CACHE_TAGS.gallery.byParentProductId(copiedProductId));
+        if (sourceCharacteristics.length > 0) {
+          const rowsToInsert: Array<Omit<ProductCharacteristicProductType, "id">> =
+            sourceCharacteristics.map((row) => ({
+              product_id: newProductId,
+              characteristic_id: row.characteristic_id,
+              characteristic_name: row.characteristic_name,
+              value_ids: row.value_ids,
+            }));
 
-    return { success: true, id: copiedProductId, error: null };
+          await tx.insert(productCharacteristicProductSchema).values(rowsToInsert);
+        }
+
+        return newProductId;
+      });
+
+      updateTag(CACHE_TAGS.product.all);
+      updateTag(CACHE_TAGS.product.byId(copiedProductId));
+      updateTag(CACHE_TAGS.product.bySlug(nextSlug));
+      updateTag(CACHE_TAGS.product.supportById(copiedProductId));
+      updateTag(CACHE_TAGS.product.details.byId(copiedProductId));
+      updateTag(CACHE_TAGS.product.details.all);
+      updateTag(CACHE_TAGS.gallery.byParentProductId(copiedProductId));
+
+      return { success: true, id: copiedProductId, error: null };
+    } catch (error) {
+      await cleanupCopiedFiles(copiedFileUrls);
+      throw error;
+    }
   } catch (error) {
     return {
       success: false,

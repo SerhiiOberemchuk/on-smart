@@ -15,6 +15,20 @@ import {
   reportProductSaveAllResult,
 } from "../save-all.helpers";
 
+function getDocumentDisplayName(link: string, title?: string) {
+  const normalizedTitle = title?.trim();
+  if (normalizedTitle) return normalizedTitle;
+
+  try {
+    const pathname = new URL(link).pathname;
+    const fileName = pathname.split("/").pop()?.trim();
+    return fileName || "Файл документа";
+  } catch {
+    const fileName = link.split("/").pop()?.trim();
+    return fileName || "Файл документа";
+  }
+}
+
 export default function DocumentsProduct({ id }: { id: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
@@ -120,6 +134,7 @@ export default function DocumentsProduct({ id }: { id: string }) {
       emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
       delta: 1,
     });
+    let uploadedDocumentUrl: string | null = null;
     try {
       setIsLoading(true);
 
@@ -134,10 +149,11 @@ export default function DocumentsProduct({ id }: { id: string }) {
           toast.error("Помилка завантаження");
           return;
         }
+        uploadedDocumentUrl = upload.fileUrl;
 
         const newDoc = {
           title: title.trim(),
-          link: upload.fileUrl,
+          link: uploadedDocumentUrl,
         };
 
         updatedDocuments = [...updatedDocuments, newDoc];
@@ -167,6 +183,9 @@ export default function DocumentsProduct({ id }: { id: string }) {
         status: "error",
         message: "Помилка збереження документа",
       });
+      if (typeof uploadedDocumentUrl === "string") {
+        await deleteFileFromS3(uploadedDocumentUrl);
+      }
     } finally {
       setIsLoading(false);
       reportProductSaveAllActivity({
@@ -209,7 +228,7 @@ export default function DocumentsProduct({ id }: { id: string }) {
                     onChange={(event) => handleChangeExistingTitle(doc.link, event.currentTarget.value)}
                   />
                   <a href={doc.link} target="_blank" className="block break-all text-xs text-amber-300 hover:underline">
-                    {doc.link}
+                    {getDocumentDisplayName(doc.link, doc.title)}
                   </a>
                 </div>
 

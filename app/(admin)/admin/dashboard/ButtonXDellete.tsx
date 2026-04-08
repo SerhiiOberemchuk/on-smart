@@ -18,7 +18,7 @@ export default function ButtonXDellete({
       className={twMerge(
         isCloseButton
           ? "inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-600 bg-transparent text-slate-100 transition hover:bg-slate-700/40 hover:text-white"
-          : "inline-flex h-10 w-10 items-center justify-center rounded-full border border-red-600 bg-transparent text-red-500 transition hover:bg-red-600/15 hover:text-red-400",
+          : "admin-icon-action admin-icon-action-delete",
         rest.className,
         rest.disabled && "cursor-not-allowed opacity-50",
       )}

@@ -114,11 +114,15 @@ export default function Description({ id }: { id: string }) {
   const onDrop = async (acceptedFiles: File[]) => {
     setUploading(true);
     const uploadedUrls: string[] = [...images];
+    const newlyUploadedUrls: string[] = [];
 
     for (const file of acceptedFiles) {
       try {
         const response = await uploadFile({ file, sub_bucket: "products", imagePreset: "content" });
-        if (response?.fileUrl) uploadedUrls.push(response.fileUrl);
+        if (response?.fileUrl) {
+          uploadedUrls.push(response.fileUrl);
+          newlyUploadedUrls.push(response.fileUrl);
+        }
       } catch (error) {
         console.error("Помилка завантаження:", error);
       }
@@ -127,6 +131,8 @@ export default function Description({ id }: { id: string }) {
     setImages([...uploadedUrls]);
     const response = await updateDescription({ product_id: id, images: uploadedUrls }, setIsLoading);
     if (!response.success) {
+      setImages((prev) => prev.filter((url) => !newlyUploadedUrls.includes(url)));
+      await Promise.allSettled(newlyUploadedUrls.map((url) => deleteFileFromS3(url)));
       toast.error(response.message);
     }
     setUploading(false);
