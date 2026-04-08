@@ -1,13 +1,19 @@
 "use client";
 
 import { copyBundleById, deleteBundleById } from "@/app/actions/admin/bundles/mutations";
+import {
+  AdminIconActionButton,
+  AdminIconActionLink,
+} from "@/app/(admin)/admin/dashboard/AdminIconAction";
 import ButtonXDellete from "@/app/(admin)/admin/dashboard/ButtonXDellete";
 import { confirmActionToast } from "@/app/(admin)/admin/dashboard/confirm-action-toast";
+import IconCopyActive from "@/assets/icons/copy-active.svg";
+import IconCopy from "@/assets/icons/copy.svg";
+import IconEdit from "@/assets/icons/edit.svg";
 import { ProductType } from "@/db/schemas/product.schema";
 import type { BrandTypes } from "@/types/brands.types";
 import { CategoryTypes } from "@/types/category.types";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "react-toastify";
@@ -132,9 +138,7 @@ export default function ListBundlesAdmin({
 
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   <span className="admin-chip">Слаг: {bundle.slug}</span>
-                  <span className="admin-chip">
-                    Категорія: {category?.name ?? bundle.category_id}
-                  </span>
+                  <span className="admin-chip">Категорія: {category?.name ?? bundle.category_id}</span>
                   <span className="admin-chip">Бренд: {brand?.name ?? bundle.brand_slug}</span>
                   <span className="admin-chip">EAN: {bundle.ean}</span>
                   <span className="admin-chip">Залишок: {bundle.inStock}</span>
@@ -151,9 +155,7 @@ export default function ListBundlesAdmin({
                     Містить: {items.map((item) => item.nameFull).join(", ")}
                   </p>
                 ) : (
-                  <p className="mt-2 text-xs text-slate-400">
-                    Список товарів недоступний.
-                  </p>
+                  <p className="mt-2 text-xs text-slate-400">Список товарів недоступний.</p>
                 )}
 
                 {reviewsPreview.length > 0 ? (
@@ -178,26 +180,32 @@ export default function ListBundlesAdmin({
                     {bundle.oldPrice}
                   </span>
                 ) : null}
-                <Link
-                  href={`/admin/dashboard/bundles/${bundle.id}`}
-                  className="admin-btn-secondary mt-2 !px-3 !py-1.5 !text-xs"
-                >
-                  Редагувати
-                </Link>
-                <button
-                  type="button"
-                  className="admin-btn-secondary mt-1 !px-3 !py-1.5 !text-xs"
-                  onClick={() => handleCopyBundle(bundle.id)}
-                  disabled={isCopyPending && copyingId === bundle.id}
-                >
-                  {isCopyPending && copyingId === bundle.id ? "Копіювання..." : "Копіювати"}
-                </button>
-                <ButtonXDellete
-                  type="button"
-                  className="mt-1 h-8 w-8 rounded-md"
-                  onClick={() => handleDeleteBundle(bundle.id)}
-                  disabled={deletingId === bundle.id}
-                />
+
+                <div className="admin-actions mt-2 lg:justify-end">
+                  <AdminIconActionLink
+                    href={`/admin/dashboard/bundles/${bundle.id}`}
+                    icon={IconEdit}
+                    alt="Редагувати"
+                    className="admin-icon-action-edit"
+                    iconClassName="admin-icon-action-icon"
+                  />
+                  <AdminIconActionButton
+                    icon={IconCopy}
+                    activeIcon={IconCopyActive}
+                    isActive={isCopyPending && copyingId === bundle.id}
+                    alt="Копіювати"
+                    className="admin-icon-action-copy"
+                    iconClassName="admin-icon-action-icon"
+                    onClick={() => handleCopyBundle(bundle.id)}
+                    disabled={isCopyPending && copyingId === bundle.id}
+                  />
+                  <ButtonXDellete
+                    type="button"
+                    className="h-10 w-10"
+                    onClick={() => handleDeleteBundle(bundle.id)}
+                    disabled={deletingId === bundle.id}
+                  />
+                </div>
               </div>
             </div>
           </li>

@@ -154,18 +154,9 @@ export default function PageProductAdmin({
     delete (preparedData as Partial<ProductAdminFormValues>).searchKeywordsInput;
 
     startTransitionUpdateProduct(async () => {
+      let uploadedMainImageUrl: string | null = null;
       try {
         if (fotoToUpload) {
-          const removeResponse = await deleteFileFromS3(product.imgSrc);
-          if (!removeResponse.success) {
-            reportProductSaveAllResult({
-              emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
-              status: "error",
-              message: "Не вдалося видалити попереднє зображення",
-            });
-            return;
-          }
-
           const uploadResponse = await uploadFile({ file: fotoToUpload, sub_bucket: "products" });
           if (uploadResponse.$metadata.httpStatusCode !== 200 || !uploadResponse.fileUrl) {
             reportProductSaveAllResult({
@@ -176,11 +167,15 @@ export default function PageProductAdmin({
             return;
           }
 
-          preparedData.imgSrc = uploadResponse.fileUrl;
+          uploadedMainImageUrl = uploadResponse.fileUrl;
+          preparedData.imgSrc = uploadedMainImageUrl;
         }
 
         const updateResponse = await updateProductById({ id: product.id, data: preparedData });
         if (!updateResponse.success) {
+          if (uploadedMainImageUrl) {
+            await deleteFileFromS3(uploadedMainImageUrl);
+          }
           console.error(updateResponse.error);
           reportProductSaveAllResult({
             emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
@@ -189,6 +184,15 @@ export default function PageProductAdmin({
           });
           return;
         }
+
+        if (uploadedMainImageUrl && uploadedMainImageUrl !== product.imgSrc) {
+          const removeResponse = await deleteFileFromS3(product.imgSrc);
+          if (!removeResponse.success) {
+            console.error("Не вдалося видалити попереднє головне фото", removeResponse.error);
+            toast.warning("Товар оновлено, але старе головне фото не вдалося видалити");
+          }
+        }
+
         reportProductSaveAllResult({
           emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
           status: "success",
@@ -201,6 +205,9 @@ export default function PageProductAdmin({
           status: "error",
           message: "Помилка під час оновлення товару",
         });
+        if (uploadedMainImageUrl) {
+          await deleteFileFromS3(uploadedMainImageUrl);
+        }
       }
     });
   };

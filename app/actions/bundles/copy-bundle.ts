@@ -1,20 +1,16 @@
 "use server";
 
-import { db } from "@/db/db";
-import { bundleMetaSchema } from "@/db/schemas/bundle-meta.schema";
-import { productFotoGallery } from "@/db/schemas/product-foto-gallery.schema";
-import { productsSchema, type ProductInsertType } from "@/db/schemas/product.schema";
-import { CACHE_TAGS } from "@/types/cache-trigers.constant";
+import { copyFilesInS3, deleteFileFromS3 } from "../files/uploadFile";
+import { db } from "../../../db/db";
+import { bundleMetaSchema } from "../../../db/schemas/bundle-meta.schema";
+import { productFotoGallery } from "../../../db/schemas/product-foto-gallery.schema";
+import { productsSchema, type ProductInsertType } from "../../../db/schemas/product.schema";
+import { CACHE_TAGS } from "../../../types/cache-trigers.constant";
 import { and, eq, inArray } from "drizzle-orm";
 import { updateTag } from "next/cache";
-import {
-  buildCopyName,
-  buildUniqueCopySlugWithResolver,
-} from "./copy-bundle.helpers";
+import { buildCopyName, buildUniqueCopySlugWithResolver } from "./copy-bundle.helpers";
 
-function normalizeNullableDecimal(
-  value: string | number | null | undefined,
-): string | null {
+function normalizeNullableDecimal(value: string | number | null | undefined): string | null {
   if (value === null || value === undefined) return null;
   const normalized = String(value).trim();
   return normalized.length > 0 ? normalized : null;
@@ -35,6 +31,20 @@ function normalizeJsonStringValue(value: unknown): string {
   }
 
   return trimmed;
+}
+
+function collectNonEmptyStrings(values: Array<string | null | undefined>) {
+  return values.map((value) => (typeof value === "string" ? value.trim() : "")).filter(Boolean);
+}
+
+async function cleanupCopiedFiles(urls: string[]) {
+  if (urls.length === 0) return;
+
+  const results = await Promise.allSettled(urls.map((url) => deleteFileFromS3(url)));
+  const rejected = results.filter((item) => item.status === "rejected");
+  if (rejected.length > 0) {
+    console.error("[copyBundleById] Failed to cleanup copied files:", rejected);
+  }
 }
 
 async function buildUniqueCopySlug(baseSlug: string): Promise<string> {
@@ -126,65 +136,86 @@ export async function copyBundleById(sourceBundleId: string) {
       return { success: false, id: "", error: "Some bundled products were not found" };
     }
 
-    const { id: _sourceId, ...sourceBundleWithoutId } = sourceBundle;
+    const originalMainImage = normalizeJsonStringValue(sourceBundle.imgSrc);
+    const galleryImages = collectNonEmptyStrings(sourceGallery?.images ?? []);
+    const documentLinks = (sourceBundleMeta?.documents ?? [])
+      .map((document) => (typeof document?.link === "string" ? document.link.trim() : ""))
+      .filter(Boolean);
 
-    const payload: ProductInsertType = {
-      ...sourceBundleWithoutId,
-      slug: nextSlug,
-      name: nextNames.name,
-      nameFull: nextNames.nameFull,
-      imgSrc: normalizeJsonStringValue(sourceBundle.imgSrc),
-      oldPrice: normalizeNullableDecimal(sourceBundle.oldPrice),
-      rating: normalizeNullableDecimal(sourceBundle.rating) ?? "5.0",
-      relatedProductIds: [],
-      bundleIds: [],
-    };
+    const filesToCopy = [originalMainImage, ...galleryImages, ...documentLinks].filter(Boolean);
+    const copiedFiles = await copyFilesInS3(filesToCopy);
+    const copiedFileUrls = copiedFiles.copiedEntries.map((entry) => entry.fileUrl);
 
-    const copiedBundleId = await db.transaction(async (tx) => {
-      const [inserted] = await tx.insert(productsSchema).values(payload).$returningId();
-      const newBundleId = inserted?.id;
+    try {
+      const { id: _sourceId, ...sourceBundleWithoutId } = sourceBundle;
 
-      if (!newBundleId) {
-        throw new Error("Failed to copy bundle");
-      }
+      const payload: ProductInsertType = {
+        ...sourceBundleWithoutId,
+        slug: nextSlug,
+        name: nextNames.name,
+        nameFull: nextNames.nameFull,
+        imgSrc: copiedFiles.urlMap.get(originalMainImage) ?? originalMainImage,
+        oldPrice: normalizeNullableDecimal(sourceBundle.oldPrice),
+        rating: normalizeNullableDecimal(sourceBundle.rating) ?? "5.0",
+        relatedProductIds: [],
+        bundleIds: [],
+      };
 
-      for (const product of includedProducts) {
-        const nextBundleIds = Array.from(new Set([...(product.bundleIds ?? []), newBundleId]));
-        await tx
-          .update(productsSchema)
-          .set({ bundleIds: nextBundleIds })
-          .where(eq(productsSchema.id, product.id));
-      }
+      const copiedBundleId = await db.transaction(async (tx) => {
+        const [inserted] = await tx.insert(productsSchema).values(payload).$returningId();
+        const newBundleId = inserted?.id;
 
-      if (sourceBundleMeta) {
-        await tx.insert(bundleMetaSchema).values({
-          bundle_id: newBundleId,
-          includedProducts: sourceBundleMeta.includedProducts,
-          advantages: sourceBundleMeta.advantages,
-          description: sourceBundleMeta.description,
-          documents: sourceBundleMeta.documents,
-          reviews: [],
-        });
-      }
+        if (!newBundleId) {
+          throw new Error("Failed to copy bundle");
+        }
 
-      if (sourceGallery) {
-        await tx.insert(productFotoGallery).values({
-          parent_product_id: newBundleId,
-          images: sourceGallery.images,
-        });
-      }
+        for (const product of includedProducts) {
+          const nextBundleIds = Array.from(new Set([...(product.bundleIds ?? []), newBundleId]));
+          await tx
+            .update(productsSchema)
+            .set({ bundleIds: nextBundleIds })
+            .where(eq(productsSchema.id, product.id));
+        }
 
-      return newBundleId;
-    });
+        if (sourceBundleMeta) {
+          await tx.insert(bundleMetaSchema).values({
+            bundle_id: newBundleId,
+            includedProducts: sourceBundleMeta.includedProducts,
+            advantages: sourceBundleMeta.advantages,
+            description: sourceBundleMeta.description,
+            documents: sourceBundleMeta.documents.map((document) => ({
+              ...document,
+              link:
+                typeof document.link === "string"
+                  ? (copiedFiles.urlMap.get(document.link.trim()) ?? document.link)
+                  : document.link,
+            })),
+            reviews: [],
+          });
+        }
 
-    updateTag(CACHE_TAGS.bundle.all);
-    updateTag(CACHE_TAGS.bundle.byId(copiedBundleId));
-    updateTag(CACHE_TAGS.bundle.bySlug(nextSlug));
-    updateTag(CACHE_TAGS.bundleMeta.byBundleId(copiedBundleId));
-    updateTag(CACHE_TAGS.gallery.byParentProductId(copiedBundleId));
-    updateTag(CACHE_TAGS.product.all);
+        if (sourceGallery) {
+          await tx.insert(productFotoGallery).values({
+            parent_product_id: newBundleId,
+            images: galleryImages.map((url) => copiedFiles.urlMap.get(url) ?? url),
+          });
+        }
 
-    return { success: true, id: copiedBundleId, error: null };
+        return newBundleId;
+      });
+
+      updateTag(CACHE_TAGS.bundle.all);
+      updateTag(CACHE_TAGS.bundle.byId(copiedBundleId));
+      updateTag(CACHE_TAGS.bundle.bySlug(nextSlug));
+      updateTag(CACHE_TAGS.bundleMeta.byBundleId(copiedBundleId));
+      updateTag(CACHE_TAGS.gallery.byParentProductId(copiedBundleId));
+      updateTag(CACHE_TAGS.product.all);
+
+      return { success: true, id: copiedBundleId, error: null };
+    } catch (error) {
+      await cleanupCopiedFiles(copiedFileUrls);
+      throw error;
+    }
   } catch (error) {
     return {
       success: false,

@@ -29,11 +29,18 @@ export async function deleteBundleById(bundleId: string) {
       return { success: false, error: "Bundle not found" };
     }
 
-    const gallery = await db
-      .select({ images: productFotoGallery.images })
-      .from(productFotoGallery)
-      .where(eq(productFotoGallery.parent_product_id, bundleId))
-      .limit(1);
+    const [gallery, bundleMeta] = await Promise.all([
+      db
+        .select({ images: productFotoGallery.images })
+        .from(productFotoGallery)
+        .where(eq(productFotoGallery.parent_product_id, bundleId))
+        .limit(1),
+      db
+        .select({ documents: bundleMetaSchema.documents })
+        .from(bundleMetaSchema)
+        .where(eq(bundleMetaSchema.bundle_id, bundleId))
+        .limit(1),
+    ]);
 
     const productsWithBundle = await db
       .select({
@@ -60,7 +67,11 @@ export async function deleteBundleById(bundleId: string) {
       await tx.delete(productsSchema).where(eq(productsSchema.id, bundleId));
     });
 
-    const fileUrls = [bundle[0].imgSrc, ...(gallery[0]?.images ?? [])].filter(
+    const documentUrls = (bundleMeta[0]?.documents ?? [])
+      .map((document) => (typeof document?.link === "string" ? document.link.trim() : ""))
+      .filter(Boolean);
+
+    const fileUrls = [bundle[0].imgSrc, ...(gallery[0]?.images ?? []), ...documentUrls].filter(
       (url): url is string => typeof url === "string" && url.length > 0,
     );
 

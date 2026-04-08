@@ -52,6 +52,17 @@ type IncludedProductMetaDraft = {
   shortDescription: string;
 };
 
+function getDocumentDisplayName(link: string) {
+  if (!link.trim()) return "Файл ще не завантажено";
+
+  try {
+    const pathname = new URL(link).pathname;
+    return pathname.split("/").pop()?.trim() || "Файл документа";
+  } catch {
+    return link.split("/").pop()?.trim() || "Файл документа";
+  }
+}
+
 export default function ModalCreateBundle({
   products,
   categories,
@@ -552,6 +563,63 @@ export default function ModalCreateBundle({
                   {...register("isOnOrder")}
                 />
               </div>
+
+              <div className="rounded-lg border border-slate-600/55 bg-slate-900/35 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-slate-100">Документи комплекту</p>
+                  <ButtonYellow
+                    type="button"
+                    className="admin-btn-secondary px-3! py-1.5! text-xs!"
+                    onClick={handleAddDocument}
+                  >
+                    Додати документ
+                  </ButtonYellow>
+                </div>
+
+                {documents.length > 0 ? (
+                  <div className="mt-3 space-y-3">
+                    {documents.map((document, index) => (
+                      <div
+                        key={`bundle-document-${index}`}
+                        className="rounded border border-slate-600/55 p-3"
+                      >
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
+                          <InputAdminStyle
+                            input_title="Назва документа"
+                            value={document.title}
+                            onChange={(event) =>
+                              handleChangeDocument(index, "title", event.target.value)
+                            }
+                          />
+                          <InputAdminStyle
+                            input_title="Файл"
+                            type="file"
+                            onChange={(event) =>
+                              handleUploadDocumentFile(index, event.target.files?.[0])
+                            }
+                          />
+                        </div>
+                        <div className="mt-2 flex justify-between gap-2">
+                          <p className="text-xs text-slate-400">
+                            {uploadingDocumentCount > 0 ? "Завантаження..." : " "}
+                          </p>
+                          <div className="flex justify-end">
+                            <ButtonYellow
+                              type="button"
+                              className="admin-btn-secondary px-3! py-1.5! text-xs!"
+                              onClick={() => void handleRemoveDocument(index)}
+                            >
+                              Видалити
+                            </ButtonYellow>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-xs text-slate-400">Документи ще не додані.</p>
+                )}
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -714,71 +782,6 @@ export default function ModalCreateBundle({
                     onChange={(event) => setDescriptionText(event.target.value)}
                     placeholder="Детально опишіть призначення комплекту, ключові переваги та сценарії використання."
                   />
-                </div>
-
-                <div className="mt-4 rounded-lg border border-slate-600/55 bg-slate-950/35 p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-slate-100">Документи комплекту</p>
-                    <ButtonYellow
-                      type="button"
-                      className="admin-btn-secondary px-3! py-1.5! text-xs!"
-                      onClick={handleAddDocument}
-                    >
-                      Додати документ
-                    </ButtonYellow>
-                  </div>
-
-                  {documents.length > 0 ? (
-                    <div className="mt-3 space-y-3">
-                      {documents.map((document, index) => (
-                        <div
-                          key={`bundle-document-${index}`}
-                          className="rounded border border-slate-600/55 p-3"
-                        >
-                          <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
-                        <InputAdminStyle
-                          input_title="Назва документа"
-                          value={document.title}
-                          onChange={(event) =>
-                            handleChangeDocument(index, "title", event.target.value)
-                          }
-                        />
-                        <InputAdminStyle
-                          input_title="Посилання на документ"
-                          value={document.link}
-                          onChange={(event) =>
-                            handleChangeDocument(index, "link", event.target.value)
-                          }
-                          placeholder="https://..."
-                        />
-                        <InputAdminStyle
-                          input_title="Файл"
-                          type="file"
-                          onChange={(event) =>
-                            handleUploadDocumentFile(index, event.target.files?.[0])
-                          }
-                        />
-                      </div>
-                          <div className="mt-2 flex justify-between gap-2">
-                            <p className="text-xs text-slate-400">
-                              {uploadingDocumentCount > 0 ? "Завантаження..." : " "}
-                            </p>
-                            <div className="flex justify-end">
-                            <ButtonYellow
-                              type="button"
-                              className="admin-btn-secondary px-3! py-1.5! text-xs!"
-                              onClick={() => void handleRemoveDocument(index)}
-                            >
-                              Видалити
-                            </ButtonYellow>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="mt-3 text-xs text-slate-400">Документи ще не додані.</p>
-                  )}
                 </div>
 
               </div>

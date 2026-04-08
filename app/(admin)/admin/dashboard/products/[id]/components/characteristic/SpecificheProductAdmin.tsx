@@ -392,15 +392,26 @@ export default function SpecificheProductAdmin({
   const onDrop = async (files: File[]) => {
     setUploading(true);
     const next = [...images];
+    const newlyUploadedUrls: string[] = [];
 
     for (const file of files) {
       const res = await uploadFile({ file, sub_bucket: "products" });
-      if (res?.fileUrl) next.push(res.fileUrl);
+      if (res?.fileUrl) {
+        next.push(res.fileUrl);
+        newlyUploadedUrls.push(res.fileUrl);
+      }
     }
 
     setImages(next);
-    await updateOrCreateSpecifiche({ product_id, images: next });
-    setUploading(false);
+    try {
+      await updateOrCreateSpecifiche({ product_id, images: next });
+    } catch (error) {
+      console.error(error);
+      setImages((prev) => prev.filter((url) => !newlyUploadedUrls.includes(url)));
+      await Promise.allSettled(newlyUploadedUrls.map((url) => deleteFileFromS3(url)));
+    } finally {
+      setUploading(false);
+    }
   };
 
   const { getRootProps, getInputProps } = useDropzone({

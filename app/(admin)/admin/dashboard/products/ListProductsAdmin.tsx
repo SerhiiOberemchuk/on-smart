@@ -5,16 +5,19 @@ import {
   deleteProductById,
   deleteProductVariant,
 } from "@/app/actions/admin/products/mutations";
-import LinkYellow from "@/components/YellowLink";
 import { ProductType } from "@/db/schemas/product.schema";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "react-toastify";
+import { AdminIconActionButton, AdminIconActionLink } from "../AdminIconAction";
 import { confirmActionToast } from "../confirm-action-toast";
 import ButtonXDellete from "../ButtonXDellete";
 import ModalAddVariant from "./ModalCreateVariant";
+import IconCopy from "@/assets/icons/copy.svg";
+import IconCopyActive from "@/assets/icons/copy-active.svg";
+import IconEdit from "@/assets/icons/edit.svg";
 
 function PriceBlock({
   price,
@@ -428,10 +431,12 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
                 </div>
 
                 <div className="admin-actions lg:justify-end">
-                  <LinkYellow
-                    className="admin-btn-primary text-sm!"
+                  <AdminIconActionLink
                     href={`/admin/dashboard/products/${item.id}`}
-                    title="Редагувати"
+                    icon={IconEdit}
+                    alt="Редагувати"
+                    className="admin-icon-action-edit"
+                    iconClassName="admin-icon-action-icon"
                   />
 
                   <button
@@ -442,14 +447,16 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
                     Додати варіант
                   </button>
 
-                  <button
-                    type="button"
-                    className="admin-btn-secondary text-sm!"
+                  <AdminIconActionButton
+                    icon={IconCopy}
+                    activeIcon={IconCopyActive}
+                    isActive={isCopyPending && copyingId === item.id}
+                    alt="Копіювати"
+                    className="admin-icon-action-copy"
+                    iconClassName="admin-icon-action-icon"
                     onClick={() => handleCopyProduct(item.id)}
                     disabled={isCopyPending && copyingId === item.id}
-                  >
-                    {isCopyPending && copyingId === item.id ? "Копіювання..." : "Копіювати"}
-                  </button>
+                  />
 
                   {hasVariants ? (
                     <span
@@ -523,10 +530,12 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
                             </div>
 
                             <div className="flex items-center justify-start gap-2 sm:justify-end">
-                              <LinkYellow
+                              <AdminIconActionLink
                                 href={`/admin/dashboard/products/${variant.id}`}
-                                title="Редагувати"
-                                className="admin-btn-primary px-3! py-2! text-xs!"
+                                icon={IconEdit}
+                                alt="Редагувати"
+                                className="admin-icon-action-edit"
+                                iconClassName="admin-icon-action-icon"
                               />
 
                               <ButtonXDellete

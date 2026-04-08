@@ -2,8 +2,9 @@
 
 import { deleteCharacteristic } from "@/app/actions/admin/characteristics/mutations";
 import { confirmActionToast } from "@/app/(admin)/admin/dashboard/confirm-action-toast";
-import ButtonYellow from "@/components/BattonYellow";
+import IconEdit from "@/assets/icons/edit.svg";
 import { useState } from "react";
+import { AdminIconActionButton } from "../../AdminIconAction";
 import ButtonXDellete from "../../ButtonXDellete";
 import { useCharacteristicStore } from "../store/useCharacteristicStore";
 
@@ -133,14 +134,15 @@ export default function ListCharacteristics({
                 </div>
 
                 <div className="admin-actions admin-characteristic-actions">
-                  <ButtonYellow
-                    className="admin-btn-secondary admin-characteristic-edit-btn"
+                  <AdminIconActionButton
+                    icon={IconEdit}
+                    alt="Редагувати"
+                    className="admin-icon-action-edit"
+                    iconClassName="admin-icon-action-icon"
                     onClick={() => openEdit(item.id)}
-                  >
-                    Редагувати
-                  </ButtonYellow>
+                  />
                   <ButtonXDellete
-                    className="h-8 w-8"
+                    className="h-10 w-10"
                     disabled={deletingId === item.id}
                     onClick={() => void handleDelete(item.id)}
                   />

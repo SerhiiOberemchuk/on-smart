@@ -8,13 +8,15 @@ export default function LinkYellow({
   className,
   target,
   rel,
+  children,
 }: {
-  title: string;
+  title?: string;
   href: "/catalogo" | "https://g.page/r/CRhuErfSy0siEAE/review" | string;
   ariaLabel?: string;
   className?: string;
   target?: string;
   rel?: string;
+  children?: React.ReactNode;
 }) {
   return (
     <Link
@@ -24,7 +26,7 @@ export default function LinkYellow({
       className={twMerge("btn rounded-sm bg-yellow-500 px-4 py-3 text-black", className)}
       aria-label={ariaLabel}
     >
-      {title}
+      {title || children}
     </Link>
   );
 }

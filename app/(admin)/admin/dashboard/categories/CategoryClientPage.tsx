@@ -6,8 +6,10 @@ import type {
 } from "@/app/actions/admin/categories/mutations";
 import { removeCategoryProductsById } from "@/app/actions/admin/categories/mutations";
 import { deleteFileFromS3 } from "@/app/actions/admin/files/mutations";
+import { AdminIconActionButton } from "@/app/(admin)/admin/dashboard/AdminIconAction";
 import ButtonXDellete from "@/app/(admin)/admin/dashboard/ButtonXDellete";
 import { confirmActionToast } from "@/app/(admin)/admin/dashboard/confirm-action-toast";
+import IconEdit from "@/assets/icons/edit.svg";
 import { CategoryTypes } from "@/types/category.types";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,18 +30,18 @@ function CategoryRowActions({
 }) {
   return (
     <div className="admin-actions">
-      <button
-        type="button"
+      <AdminIconActionButton
+        icon={IconEdit}
+        alt="Редагувати"
+        className="admin-icon-action-edit"
+        iconClassName="admin-icon-action-icon"
         onClick={() => onEdit(category)}
-        className="admin-btn-secondary px-3! py-1.5! text-xs!"
-      >
-        Редагувати
-      </button>
+      />
 
       <ButtonXDellete
         type="button"
         onClick={() => onDelete({ id: category.id, image: category.image })}
-        className="h-8 w-8 rounded-md"
+        className="h-10 w-10"
         disabled={isDeleting}
       />
     </div>

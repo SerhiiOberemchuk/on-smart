@@ -239,6 +239,17 @@ function buildIncludedMetaById(
   }, {});
 }
 
+function getDocumentDisplayName(link: string) {
+  if (!link.trim()) return "Файл ще не завантажено";
+
+  try {
+    const pathname = new URL(link).pathname;
+    return pathname.split("/").pop()?.trim() || "Файл документа";
+  } catch {
+    return link.split("/").pop()?.trim() || "Файл документа";
+  }
+}
+
 export default function PageEditBundle({
   bundle,
   bundleMeta,
@@ -1052,17 +1063,11 @@ export default function PageEditBundle({
                       key={`bundle-document-${index}`}
                       className="rounded border border-slate-600/55 p-3"
                     >
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
                         <InputAdminStyle
                           input_title="Назва документа"
                           value={document.title}
                           onChange={(event) => handleChangeDocument(index, "title", event.target.value)}
-                        />
-                        <InputAdminStyle
-                          input_title="Посилання на документ"
-                          value={document.link}
-                          onChange={(event) => handleChangeDocument(index, "link", event.target.value)}
-                          placeholder="https://..."
                         />
                         <InputAdminStyle
                           input_title="Файл"
