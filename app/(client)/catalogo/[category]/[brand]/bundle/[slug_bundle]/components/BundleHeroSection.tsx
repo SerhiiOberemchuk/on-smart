@@ -37,7 +37,7 @@ export default function BundleHeroSection({
         <ProductSlider
           product={bundleAsProduct}
           images={sliderImages}
-          brandLogo={bundle.brand_image}
+          brandLogo={bundle.brand_image ?? ""}
           brandName={bundle.brand_name}
         />
         <div className="w-full px-4 md:px-0 xl:flex-1">

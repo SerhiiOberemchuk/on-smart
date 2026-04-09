@@ -12,6 +12,7 @@ import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
 
 import { deleteFileFromS3 } from "../files/uploadFile";
+import { getSharedManagedFileReferences } from "../files/shared-file-references";
 import { updateTag } from "next/cache";
 
 function normalizePossibleJsonString(value: unknown): string {
@@ -120,12 +121,19 @@ export async function deleteProductById(id: ProductType["id"]) {
     });
 
     if (filesToDelete.size > 0) {
+      const sharedReferences = await getSharedManagedFileReferences(id);
+      const removableFiles = Array.from(filesToDelete).filter(
+        (fileUrl) => !sharedReferences.has(fileUrl),
+      );
+
+      if (removableFiles.length > 0) {
       const cleanupResults = await Promise.allSettled(
-        Array.from(filesToDelete).map((fileUrl) => deleteFileFromS3(fileUrl)),
+          removableFiles.map((fileUrl) => deleteFileFromS3(fileUrl)),
       );
       const rejected = cleanupResults.filter((item) => item.status === "rejected");
       if (rejected.length > 0) {
         console.error("[deleteProductById] S3 cleanup rejected:", rejected);
+      }
       }
     }
 
