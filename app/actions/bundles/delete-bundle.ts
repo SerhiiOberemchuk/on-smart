@@ -8,6 +8,7 @@ import { productsSchema } from "@/db/schemas/product.schema";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { and, eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
+import { getSharedManagedFileReferences } from "../files/shared-file-references";
 
 export async function deleteBundleById(bundleId: string) {
   if (!bundleId) {
@@ -75,7 +76,10 @@ export async function deleteBundleById(bundleId: string) {
       (url): url is string => typeof url === "string" && url.length > 0,
     );
 
-    await Promise.allSettled(fileUrls.map((url) => deleteFileFromS3(url)));
+    const sharedReferences = await getSharedManagedFileReferences(bundleId);
+    const removableFiles = fileUrls.filter((url) => !sharedReferences.has(url));
+
+    await Promise.allSettled(removableFiles.map((url) => deleteFileFromS3(url)));
 
     updateTag(CACHE_TAGS.bundle.all);
     updateTag(CACHE_TAGS.bundle.byId(bundleId));

@@ -13,7 +13,7 @@ import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 export type BundleBySlugType = ProductType & {
   category_name: string;
   brand_name: string;
-  brand_image: string;
+  brand_image: string | null;
   bundleMeta: BundleMetaType | null;
 };
 
@@ -50,8 +50,8 @@ export async function getBundleBySlug(slug: ProductType["slug"]): Promise<Bundle
         brand_image: brandProductsSchema.image,
       })
       .from(productsSchema)
-      .innerJoin(categoryProductsSchema, eq(productsSchema.category_id, categoryProductsSchema.id))
-      .innerJoin(brandProductsSchema, eq(productsSchema.brand_slug, brandProductsSchema.brand_slug))
+      .leftJoin(categoryProductsSchema, eq(productsSchema.category_id, categoryProductsSchema.id))
+      .leftJoin(brandProductsSchema, eq(productsSchema.brand_slug, brandProductsSchema.brand_slug))
       .leftJoin(bundleMetaSchema, eq(bundleMetaSchema.bundle_id, productsSchema.id))
       .where(
         and(
@@ -75,9 +75,9 @@ export async function getBundleBySlug(slug: ProductType["slug"]): Promise<Bundle
       data: {
         ...row.bundle,
         bundleMeta: row.bundleMeta,
-        category_name: row.category_name,
-        brand_name: row.brand_name,
-        brand_image: row.brand_image,
+        category_name: row.category_name ?? row.bundle.category_slug,
+        brand_name: row.brand_name ?? row.bundle.brand_slug,
+        brand_image: row.brand_image ?? null,
       },
       error: null,
     };
