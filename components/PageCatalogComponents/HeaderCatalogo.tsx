@@ -57,7 +57,8 @@ export default function HeaderCatalogo({
             </span>
             <SmartImage
               src={icon_arrow_top}
-              alt="arrow top"
+              alt=""
+              aria-hidden="true"
               className={twMerge(
                 "ml-auto transition-all duration-300",
                 isOpen ? "" : "rotate-x-180",

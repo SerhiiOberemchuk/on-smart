@@ -246,6 +246,7 @@ export default function CardDialog() {
               <button
                 type="button"
                 className="flex items-center gap-2.5 text-white"
+                aria-label="Chiudi il dialogo prodotto e torna indietro"
                 onClick={handleCloseDialog}
               >
                 <SmartImage src={iconBack} alt="Pulsante indietro" aria-hidden />
@@ -254,9 +255,10 @@ export default function CardDialog() {
               <button
                 type="button"
                 onClick={handleCloseDialog}
+                aria-label="Chiudi il dialogo prodotto"
                 className="rounded-sm border border-yellow-500 p-2.5 xl:hidden"
               >
-                <SmartImage src={iconClose} aria-hidden alt="Pulsante chiudre" />
+                <SmartImage src={iconClose} aria-hidden alt="" />
               </button>
             </div>
             <div className="flex flex-1 flex-col gap-2 overflow-y-scroll bg-black px-3 lg:px-5 xl:max-h-[680px] xl:flex-row">
@@ -322,7 +324,7 @@ export default function CardDialog() {
                           </fieldset>
                           <button
                             type="button"
-                            aria-label="Apri altri versioni"
+                            aria-label={`Mostra altre versioni di ${product?.name ?? "questo prodotto"}`}
                             className={twMerge(
                               "input_M_18 ml-auto text-white underline",
                               variantsToShow >= (variantsOfProduct?.length || 0) && "hidden",

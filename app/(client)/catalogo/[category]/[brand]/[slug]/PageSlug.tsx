@@ -207,7 +207,13 @@ export default async function PageSlug({
 
   return (
     <>
-      <Breadcrumbs category={product.category_slug} brand={product.brand_slug} productName={product.name} />
+      <Breadcrumbs
+        category={product.category_slug}
+        categoryLabel={categoryDisplayName}
+        brand={product.brand_slug}
+        brandLabel={brandDisplayName}
+        productName={product.name}
+      />
       <VisualProductSection
         product={product}
         images={sliderImages}

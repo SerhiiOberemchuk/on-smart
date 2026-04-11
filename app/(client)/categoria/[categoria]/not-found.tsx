@@ -1,5 +1,15 @@
+import type { Metadata } from "next";
 import LinkYellow from "@/components/YellowLink";
 import SmartImage from "@/components/SmartImage";
+
+export const metadata: Metadata = {
+  title: "Categoria non trovata | OnSmart",
+  description: "La categoria richiesta non è disponibile su OnSmart.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function ProductNotFound() {
   return (
@@ -9,7 +19,7 @@ export default function ProductNotFound() {
           4
           <SmartImage
             src="/404.png"
-            alt="Product Not Found"
+            alt="Illustrazione categoria non trovata"
             className="w-20 lg:w-44"
             width={176}
             height={176}
@@ -20,7 +30,7 @@ export default function ProductNotFound() {
         <h1 className="H2 mt-8 text-center xl:mt-16">Categoria non trovata.</h1>
 
         <p className="text_R mt-3 text-center">
-          La categoria che stai cercando potrebbe essere stata rimossa, rinominata o non è più
+          La categoria che stai cercando potrebbe essere stata rimossa, rinominata o non più
           disponibile nel nostro catalogo.
         </p>
 
@@ -29,4 +39,3 @@ export default function ProductNotFound() {
     </div>
   );
 }
-

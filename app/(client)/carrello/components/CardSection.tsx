@@ -20,6 +20,7 @@ import RepilogoComponent from "./RepilogoComponent";
 export default function CartSection() {
   const [fetchedProducts, setFetchedProducts] = useState<ProductType[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const [pendingProductIds, setPendingProductIds] = useState<string[]>([]);
   const hasValidatedOnceRef = useRef(false);
   const previousFetchedProductsRef = useRef<ProductType[]>([]);
 
@@ -39,6 +40,7 @@ export default function CartSection() {
     if (basket.length === 0) {
       setFetchedProducts([]);
       setIsLoadingProducts(false);
+      setPendingProductIds([]);
       hasValidatedOnceRef.current = false;
       return;
     }
@@ -62,6 +64,7 @@ export default function CartSection() {
 
         toast.error("Errore nel caricamento dei prodotti");
         setIsLoadingProducts(false);
+        setPendingProductIds([]);
         return;
       }
 
@@ -132,13 +135,13 @@ export default function CartSection() {
       if (hasValidatedOnceRef.current) {
         if (missingIds.length > 0) {
           toast.warning(
-            "Alcuni prodotti non sono più disponibili e sono stati rimossi dal carrello.",
+            "Alcuni prodotti non sono piu disponibili e sono stati rimossi dal carrello.",
           );
         }
 
         if (hiddenIds.length > 0) {
           toast.warning(
-            "Alcuni prodotti non sono più presenti nel nostro catalogo e sono stati rimossi dal carrello.",
+            "Alcuni prodotti non sono piu presenti nel nostro catalogo e sono stati rimossi dal carrello.",
           );
         }
 
@@ -149,12 +152,12 @@ export default function CartSection() {
         }
 
         if (invalidQuantityIds.length > 0) {
-          toast.info("Le quantità non valide sono state corrette.");
+          toast.info("Le quantita non valide sono state corrette.");
         }
 
         if (quantityAdjustedIds.length > 0) {
           toast.info(
-            "Le quantità di alcuni prodotti sono state aggiornate in base alla disponibilità.",
+            "Le quantita di alcuni prodotti sono state aggiornate in base alla disponibilita.",
           );
         }
 
@@ -170,10 +173,14 @@ export default function CartSection() {
         ),
       );
       setIsLoadingProducts(false);
+      setPendingProductIds([]);
     };
 
     load();
   }, [basket, hasHydrated, removeFromBasketById, updateBasket]);
+
+  const isInitialLoading = !hasHydrated || (isLoadingProducts && fetchedProducts.length === 0);
+  const pendingProductIdsSet = useMemo(() => new Set(pendingProductIds), [pendingProductIds]);
 
   const basketById = useMemo(
     () => new Map(basket.map((basketItem) => [basketItem.productId, basketItem])),
@@ -202,20 +209,22 @@ export default function CartSection() {
     const item = basketById.get(productId);
     const product = fetchedProductsById.get(productId);
 
-    if (!item || !product) return;
+    if (!item || !product || pendingProductIdsSet.has(productId)) return;
 
     if (item.quantity < product.inStock) {
+      setPendingProductIds((prev) => (prev.includes(productId) ? prev : [...prev, productId]));
       updateBasket([{ productId, quantity: item.quantity + 1 }]);
       return;
     }
 
-    toast.info("Quantità massima disponibile.");
+    toast.info("Quantita massima disponibile.");
   };
 
   const decrementQnt = (productId: string) => {
     const item = basketById.get(productId);
 
-    if (item && item.quantity > 1) {
+    if (item && item.quantity > 1 && !pendingProductIdsSet.has(productId)) {
+      setPendingProductIds((prev) => (prev.includes(productId) ? prev : [...prev, productId]));
       updateBasket([{ productId, quantity: item.quantity - 1 }]);
     }
   };
@@ -236,7 +245,7 @@ export default function CartSection() {
       <div className="container bg-background xl:bg-transparent">
         <div className="relative flex flex-col gap-4 xl:mt-5 xl:flex-row xl:gap-5">
           <ul className="mx-auto flex min-h-[320px] w-full max-w-[916px] flex-col gap-6 rounded-sm bg-background p-3 xl:mx-0">
-            {(!hasHydrated || isLoadingProducts) &&
+            {isInitialLoading &&
               basket.length > 0 &&
               Array.from({ length: Math.min(Math.max(basket.length, 1), 3) }).map((_, index) => (
                 <li
@@ -267,18 +276,19 @@ export default function CartSection() {
               ))}
 
             {hasHydrated &&
-              !isLoadingProducts &&
               fetchedProducts.map((product, index) => {
                 const item = basketById.get(product.id);
                 const price = calcProductPrice(product.id);
-                const canIncrement = item && item.quantity < product.inStock;
-                const canDecrement = item && item.quantity > 1;
+                const isPending = pendingProductIdsSet.has(product.id);
+                const canIncrement = item && item.quantity < product.inStock && !isPending;
+                const canDecrement = item && item.quantity > 1 && !isPending;
 
                 return (
                   <li
                     key={product.id}
                     className={clsx(
-                      "relative flex flex-col gap-3 xl:flex-row xl:gap-5",
+                      "relative flex flex-col gap-3 transition-opacity xl:flex-row xl:gap-5",
+                      isPending && "opacity-75",
                       index !== fetchedProducts.length - 1 &&
                         "border-b border-grey-hover-stroke pb-3 xl:pb-6",
                     )}
@@ -286,13 +296,14 @@ export default function CartSection() {
                     <button
                       onClick={() => removeFromBasketById(product.id)}
                       className="absolute top-0 right-0"
+                      aria-label={`Rimuovi ${product.nameFull} dal carrello`}
                     >
-                      <SmartImage src={icon_dell} alt="delete" />
+                      <SmartImage src={icon_dell} alt="" aria-hidden="true" />
                     </button>
 
                     <SmartImage
                       src={product.imgSrc}
-                      alt="product"
+                      alt={`Immagine del prodotto ${product.nameFull}`}
                       width={230}
                       height={230}
                       className="card_gradient h-auto w-16 rounded-sm object-contain object-left xl:w-60"
@@ -305,51 +316,68 @@ export default function CartSection() {
                         </h2>
                       </div>
 
-                      <div className="mt-2 flex items-center justify-between">
-                        <div className="flex h-11 w-[132px] items-center rounded-sm border border-stroke-grey text-[20px]">
-                          <button
-                            type="button"
-                            disabled={!canDecrement}
-                            className={clsx(
-                              "flex-1 text-white transition hover:scale-110",
-                              !canDecrement && "cursor-not-allowed opacity-50",
-                            )}
-                            onClick={() => canDecrement && decrementQnt(product.id)}
-                          >
-                            -
-                          </button>
+                      <div className="mt-2 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-11 w-[132px] items-center rounded-sm border border-stroke-grey text-[20px]">
+                            <button
+                              type="button"
+                              disabled={!canDecrement}
+                              aria-label={`Riduci la quantità di ${product.nameFull}`}
+                              className={clsx(
+                                "flex-1 text-white transition hover:scale-110",
+                                !canDecrement && "cursor-not-allowed opacity-50",
+                              )}
+                              onClick={() => canDecrement && decrementQnt(product.id)}
+                            >
+                              -
+                            </button>
 
-                          <div className="input_M_18 flex h-11 w-11 items-center justify-center text-white">
-                            {item?.quantity ?? 0}
+                            <div className="input_M_18 flex h-11 w-11 items-center justify-center text-white">
+                              {item?.quantity ?? 0}
+                            </div>
+
+                            <button
+                              type="button"
+                              disabled={!canIncrement}
+                              aria-label={`Aumenta la quantità di ${product.nameFull}`}
+                              className={clsx(
+                                "flex-1 text-white transition hover:scale-110",
+                                !canIncrement && "cursor-not-allowed opacity-50",
+                              )}
+                              onClick={() => canIncrement && incrementQnt(product.id)}
+                            >
+                              +
+                            </button>
                           </div>
 
-                          <button
-                            type="button"
-                            disabled={!canIncrement}
+                          <div
                             className={clsx(
-                              "flex-1 text-white transition hover:scale-110",
-                              !canIncrement && "cursor-not-allowed opacity-50",
+                              "flex min-w-[112px] items-center gap-2 text-sm text-text-grey transition-opacity",
+                              isPending ? "opacity-100" : "opacity-0",
                             )}
-                            onClick={() => canIncrement && incrementQnt(product.id)}
+                            aria-live="polite"
                           >
-                            +
-                          </button>
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-stroke-grey border-t-white" />
+                            <span>Aggiornamento...</span>
+                          </div>
                         </div>
 
-                        <PricesBox
-                          price={price.price}
-                          oldPrice={price.oldPrice}
-                          place="main-card-product"
-                        />
+                        <div className={clsx("transition-opacity", isPending && "opacity-60")}>
+                          <PricesBox
+                            price={price.price}
+                            oldPrice={price.oldPrice}
+                            place="main-card-product"
+                          />
+                        </div>
                       </div>
                     </div>
                   </li>
                 );
               })}
 
-            {hasHydrated && !isLoadingProducts && basket.length === 0 && (
+            {hasHydrated && basket.length === 0 && (
               <li className="text-center">
-                Il carrello è vuoto{" "}
+                Il carrello ГЁ vuoto{" "}
                 <Link href="/catalogo" className="underline">
                   Vai al catalogo
                 </Link>
@@ -357,7 +385,7 @@ export default function CartSection() {
             )}
           </ul>
 
-          {!hasHydrated || (isLoadingProducts && basket.length > 0) ? (
+          {isInitialLoading ? (
             <div className="sticky top-5 w-full xl:max-w-[426px]">
               <div className="sticky top-5 flex min-h-[260px] w-full flex-col gap-6 rounded-sm bg-background p-3">
                 <div className="h-8 w-2/3 animate-pulse rounded bg-grey-hover-stroke" />

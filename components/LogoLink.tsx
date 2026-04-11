@@ -10,7 +10,7 @@ export default function LogoLink({
   footer?: boolean;
 }) {
   return (
-    <Link href="/" className={twMerge("m-0 flex w-fit p-0", className)} aria-label="link a casa">
+    <Link href="/" className={twMerge("m-0 flex w-fit p-0", className)} aria-label="Vai alla home page">
       <SmartImage
         className={twMerge(
           footer === false && "h-[52px] w-[78px] md:h-[74px] md:w-[108px]",
@@ -19,7 +19,7 @@ export default function LogoLink({
         src={"/logo.svg"}
         width={108}
         height={74}
-        alt="logo link"
+        alt="OnSmart"
         loading="eager"
       />
     </Link>

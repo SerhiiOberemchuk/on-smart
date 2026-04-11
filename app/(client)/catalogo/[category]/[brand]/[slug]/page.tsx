@@ -17,7 +17,10 @@ function normalizeOptionalText(value: unknown) {
 }
 
 function normalizeImageUrl(value: unknown, fallback: string) {
-  return typeof value === "string" && value.trim().length > 0 ? value : fallback;
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value.startsWith("http") ? value : `${baseUrl}${value.startsWith("/") ? value : `/${value}`}`;
+  }
+  return fallback;
 }
 
 export async function generateMetadata({
@@ -37,7 +40,7 @@ export async function generateMetadata({
   const brandLabel = normalizeSlugLabel(data.brand_slug);
   const categoryLabel = normalizeSlugLabel(data.category_slug);
   const slugLabel = normalizeSlugLabel(data.slug);
-  const metadataImageUrl = normalizeImageUrl(data.imgSrc, "/logo.png");
+  const metadataImageUrl = normalizeImageUrl(data.imgSrc, `${baseUrl}/logo.png`);
   const descriptionWithEan = eanValue
     ? `${data.nameFull ?? ""}. Brand: ${brandLabel}. Categoria: ${categoryLabel}. EAN: ${eanValue}.`.trim()
     : `${data.nameFull ?? ""}. Brand: ${brandLabel}. Categoria: ${categoryLabel}.`.trim();

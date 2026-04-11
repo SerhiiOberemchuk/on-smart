@@ -53,24 +53,46 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
     name: `Prodotti del brand ${brand.name}`,
     itemListOrder: "https://schema.org/ItemListOrderAscending",
     numberOfItems: productsResponse.meta.total,
-    itemListElement: products.map((product, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      item: {
-        "@type": "Product",
-        name: product.name,
-        image: product.imgSrc,
-        brand: product.brand_slug,
-        description: product.nameFull,
-        offers: {
-          "@type": "Offer",
-          priceCurrency: "EUR",
+      itemListElement: products.map((product, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        item: {
+          "@type": "Product",
+          name: product.name,
+          image: product.imgSrc,
+          brand: {
+            "@type": "Brand",
+            name: brand.name,
+          },
+          description: product.nameFull,
+          category: product.category_slug.replace(/[-_]+/g, " ").trim(),
+          offers: {
+            "@type": "Offer",
+            priceCurrency: "EUR",
           price: product.price,
           url: `${baseUrl}${buildProductHref(product)}`,
           availability: "https://schema.org/InStock",
         },
       },
     })),
+  };
+  const breadcrumbsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: baseUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: brand.name,
+        item: `${baseUrl}/brand/${brand_slug}`,
+      },
+    ],
   };
 
   return (
@@ -109,11 +131,13 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
                   </li>
                 );
               })}
-              <LinkYellow
-                title="Mostra tutto"
-                href={`/catalogo?brand=${brand.brand_slug}`}
-                className="mr-auto flex"
-              />
+              <li>
+                <LinkYellow
+                  title="Mostra tutto"
+                  href={`/catalogo?brand=${brand.brand_slug}`}
+                  className="mr-auto flex"
+                />
+              </li>
             </ul>
           </div>
         </div>
@@ -143,6 +167,11 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
         id="brand-products-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productsJsonLd) }}
+      />
+      <Script
+        id="brand-breadcrumbs-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}
       />
     </>
   );

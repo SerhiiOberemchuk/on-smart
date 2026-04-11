@@ -41,18 +41,15 @@ export default function RiepilogoDatiConsegna({
   return (
     <div>
       <div className="flex items-center gap-2">
-        <SmartImage
-          src={icon_delivery_success}
-          alt="icon email confirmed"
-          aria-label="icon email confirmed"
-        />
+        <SmartImage src={icon_delivery_success} alt="" aria-hidden="true" />
         <h3 className="H5">Metodo di consegna</h3>
         {isModifica && (
           <Link
             href={PAGES.CHECKOUT_PAGES.DELIVERY}
+            aria-label="Modifica il metodo di consegna"
             className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
           >
-            <SmartImage src={icon_pencil} alt="icon pencil" aria-label="icon pencil" /> Modifica
+            <SmartImage src={icon_pencil} alt="" aria-hidden="true" /> Modifica
           </Link>
         )}
       </div>

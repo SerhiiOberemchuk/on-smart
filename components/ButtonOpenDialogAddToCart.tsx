@@ -9,16 +9,14 @@ import { ProductType } from "@/db/schemas/product.schema";
 export default function ButtonOpenDialogAddToCart(product: ProductType) {
   const { openDialog } = useCardDialogStore();
   return (
-    <>
-      <button
-        type="button"
-        aria-label="Aggiungi al carrello"
-        className="flex size-12 items-center justify-center rounded-sm bg-green-600 hover:bg-green-700"
-        onClick={() => openDialog(product)}
-      >
-        <SmartImage src={icon} alt="Aggiungi al carrello" />
-      </button>
-    </>
+    <button
+      type="button"
+      aria-label={`Apri il dialogo di acquisto per ${product.name}`}
+      className="flex size-12 items-center justify-center rounded-sm bg-green-600 hover:bg-green-700"
+      onClick={() => openDialog(product)}
+    >
+      <SmartImage src={icon} alt="" aria-hidden="true" />
+    </button>
   );
 }
 

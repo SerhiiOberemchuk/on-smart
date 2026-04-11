@@ -26,7 +26,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://on-smart.it"),
   title: { default: "OnSmart", template: "%s | OnSmart" },
   description:
-    "La videosorveglianza e uno dei modi piu affidabili per proteggere la tua proprieta.",
+    "OnSmart: videosorveglianza, antifurto, smart home e accessori professionali con spedizione rapida e supporto qualificato.",
+  alternates: {
+    canonical: "https://on-smart.it",
+  },
+  applicationName: "OnSmart",
   icons: {
     icon: [
       { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
@@ -36,6 +40,41 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   appleWebApp: { title: "ON-SMART" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  openGraph: {
+    title: "OnSmart",
+    description:
+      "Videosorveglianza, antifurto, smart home e accessori professionali per casa e azienda.",
+    url: "https://on-smart.it",
+    siteName: "OnSmart",
+    locale: "it_IT",
+    type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "OnSmart: sistemi di sicurezza, videosorveglianza e smart home",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "OnSmart",
+    description:
+      "Videosorveglianza, antifurto, smart home e accessori professionali per casa e azienda.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

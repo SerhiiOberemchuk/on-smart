@@ -52,6 +52,8 @@ export function buildBundleMetadata(bundle: BundlePageData): Metadata {
       description,
       url: canonicalUrl,
       type: "website",
+      siteName: "OnSmart",
+      locale: "it_IT",
       images: [
         {
           url: imageUrl,

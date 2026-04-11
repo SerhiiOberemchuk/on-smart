@@ -145,7 +145,9 @@ export default async function BundlePageContent({
     <>
       <Breadcrumbs
         category={bundle.category_slug}
+        categoryLabel={bundle.category_name}
         brand={bundle.brand_slug}
+        brandLabel={bundle.brand_name}
         productName={bundle.nameFull}
       />
       <BundleHeroSection

@@ -4,8 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "On Smart",
     short_name: "On Smart",
-    description:
-      "La videosorveglianza è uno dei modi più affidabili per proteggere la tua proprietà",
+    description: "On Smart: videosorveglianza, antifurto, smart home e accessori per la sicurezza.",
     start_url: "/",
     display: "standalone",
     background_color: "#fff",

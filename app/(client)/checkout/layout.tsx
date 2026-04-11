@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import { ReactNode, Suspense } from "react";
 import HeaderCart from "../carrello/components/HeaderCart";
 import LayoutRepilogoComponent from "@/components/CheckoutPagesComponents/components/LayoutRepilogoComponent";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function CheckoutLayout({ children }: { children: ReactNode }) {
   return (

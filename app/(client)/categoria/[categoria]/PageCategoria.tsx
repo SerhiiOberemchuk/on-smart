@@ -26,6 +26,11 @@ function normalizeCategoryDescription(description: string): string {
   return description.replace(/\|/g, ". ").replace(/\s+/g, " ").trim();
 }
 
+function toAbsoluteImageUrl(src: string) {
+  if (!src) return `${baseUrl}/og-image.png`;
+  return src.startsWith("http://") || src.startsWith("https://") ? src : `${baseUrl}${src}`;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { categoria } = await params;
   const categoryInfo = await getCategoryBySlug(categoria);
@@ -37,6 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = normalizeCategoryDescription(categoryInfo.data.description);
   const canonical = `${baseUrl}/categoria/${categoryInfo.data.category_slug}`;
   const title = `Categoria ${categoryInfo.data.title_full} | OnSmart`;
+  const imageUrl = toAbsoluteImageUrl(categoryInfo.data.image);
 
   return {
     title,
@@ -48,6 +54,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       index: true,
       follow: true,
       noarchive: false,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
     },
     openGraph: {
       title,
@@ -58,10 +71,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       locale: "it_IT",
       images: [
         {
-          url: categoryInfo.data.image || `${baseUrl}/og-image.png`,
+          url: imageUrl,
           width: 1200,
           height: 630,
-          alt: categoryInfo.data.title_full,
+          alt: `Prodotti della categoria ${categoryInfo.data.title_full} su OnSmart`,
         },
       ],
     },
@@ -69,7 +82,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [categoryInfo.data.image || `${baseUrl}/og-image.png`],
+      images: [imageUrl],
     },
   };
 }
@@ -113,7 +126,11 @@ export default async function PageCategoria({ params }: Props) {
           "@type": "Product",
           name: product.name,
           image: product.imgSrc,
-          brand: product.brand_slug,
+          brand: {
+            "@type": "Brand",
+            name: product.brand_slug.replace(/[-_]+/g, " ").trim(),
+          },
+          category: category.name,
           offers: {
             "@type": "Offer",
             priceCurrency: "EUR",
@@ -124,6 +141,24 @@ export default async function PageCategoria({ params }: Props) {
         },
       })),
     },
+  };
+  const breadcrumbsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: baseUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: category.name,
+        item: `${baseUrl}/categoria/${category.category_slug}`,
+      },
+    ],
   };
 
   return (
@@ -162,11 +197,13 @@ export default async function PageCategoria({ params }: Props) {
                   </li>
                 );
               })}
-              <LinkYellow
-                title="Mostra tutto"
-                href={`/catalogo?categoria=${category.category_slug}`}
-                className="mr-auto flex"
-              />
+              <li>
+                <LinkYellow
+                  title="Mostra tutto"
+                  href={`/catalogo?categoria=${category.category_slug}`}
+                  className="mr-auto flex"
+                />
+              </li>
             </ul>
           </div>
         </div>
@@ -193,6 +230,11 @@ export default async function PageCategoria({ params }: Props) {
         id="category-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Script
+        id="category-breadcrumbs-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}
       />
     </>
   );
