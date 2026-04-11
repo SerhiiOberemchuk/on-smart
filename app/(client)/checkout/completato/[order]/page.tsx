@@ -1,8 +1,18 @@
-﻿import CompletatoPage from "./PageCompletato";
+import type { Metadata } from "next";
+import CompletatoPage from "./PageCompletato";
 import { getOrderByNumberAction } from "@/app/actions/orders/get-order";
 import { getOrderPaymentByOrderNumberAction } from "@/app/actions/payments/payment-order-actions";
 import { Suspense } from "react";
 import { connection } from "next/server";
+
+export const metadata: Metadata = {
+  title: "Ordine completato | OnSmart",
+  description: "Conferma completamento ordine OnSmart.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function Page(props: PageProps<"/checkout/completato/[order]">) {
   return (

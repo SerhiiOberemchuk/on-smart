@@ -86,7 +86,7 @@ export default function CheckouteStep2ConsegnaDati() {
       <RiepilogoDatiCliente />
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3" id="form_consegna">
         <div className="flex items-center gap-2">
-          <SmartImage src={icon_delivery} alt="icon delivery" aria-label="icon delivery" />
+          <SmartImage src={icon_delivery} alt="" aria-hidden="true" />
           <legend className="H5">Scegli il metodo di consegna</legend>
         </div>
         <div className="flex items-center justify-between">

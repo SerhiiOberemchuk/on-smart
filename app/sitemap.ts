@@ -19,8 +19,6 @@ const STATIC_PATHS = [
 ] as const;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
-
   const [products, bundles, brands, categories] = await Promise.all([
     db
       .select({
@@ -58,35 +56,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticEntries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({
     url: `${baseUrl}${path}`,
-    lastModified: now,
     changeFrequency: "weekly",
     priority: path === "/" ? 1 : 0.8,
   }));
 
-  const categoryEntries: MetadataRoute.Sitemap = categories.map((item) => ({
-    url: `${baseUrl}/categoria/${encodeURIComponent(item.category_slug)}`,
-    lastModified: now,
+  const uniqueCategorySlugs = Array.from(new Set(categories.map((item) => item.category_slug)));
+  const uniqueBrandSlugs = Array.from(new Set(brands.map((item) => item.brand_slug)));
+
+  const categoryEntries: MetadataRoute.Sitemap = uniqueCategorySlugs.map((categorySlug) => ({
+    url: `${baseUrl}/categoria/${encodeURIComponent(categorySlug)}`,
     changeFrequency: "weekly",
     priority: 0.7,
   }));
 
-  const brandEntries: MetadataRoute.Sitemap = brands.map((item) => ({
-    url: `${baseUrl}/brand/${encodeURIComponent(item.brand_slug)}`,
-    lastModified: now,
+  const brandEntries: MetadataRoute.Sitemap = uniqueBrandSlugs.map((brandSlug) => ({
+    url: `${baseUrl}/brand/${encodeURIComponent(brandSlug)}`,
     changeFrequency: "weekly",
     priority: 0.7,
   }));
 
   const productEntries: MetadataRoute.Sitemap = products.map((item) => ({
     url: `${baseUrl}/catalogo/${encodeURIComponent(item.category_slug)}/${encodeURIComponent(item.brand_slug)}/${encodeURIComponent(item.slug)}`,
-    lastModified: now,
     changeFrequency: "daily",
     priority: 0.9,
   }));
 
   const bundleEntries: MetadataRoute.Sitemap = bundles.map((item) => ({
     url: `${baseUrl}/catalogo/${encodeURIComponent(item.category_slug)}/${encodeURIComponent(item.brand_slug)}/bundle/${encodeURIComponent(item.slug)}`,
-    lastModified: now,
     changeFrequency: "daily",
     priority: 0.9,
   }));

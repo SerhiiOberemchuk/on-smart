@@ -1,8 +1,28 @@
 "use client";
 
 import Link from "next/link";
-type Props = { category?: string; brand?: string; productName?: string; carello?: string };
-export default function Breadcrumbs({ category, brand, productName, carello }: Props) {
+
+function formatBreadcrumbLabel(value: string) {
+  return value.replace(/[-_]+/g, " ").trim();
+}
+
+type Props = {
+  category?: string;
+  categoryLabel?: string;
+  brand?: string;
+  brandLabel?: string;
+  productName?: string;
+  carello?: string;
+};
+
+export default function Breadcrumbs({
+  category,
+  categoryLabel,
+  brand,
+  brandLabel,
+  productName,
+  carello,
+}: Props) {
   return (
     <nav className="py-3 text-sm text-text-grey">
       <ul className="text_R container flex flex-wrap gap-1 capitalize">
@@ -21,7 +41,7 @@ export default function Breadcrumbs({ category, brand, productName, carello }: P
           <li>
             /{" "}
             <Link href={`/categoria/${encodeURIComponent(category)}`} className="hover:text-white">
-              {category}
+              {categoryLabel ?? formatBreadcrumbLabel(category)}
             </Link>
           </li>
         )}
@@ -29,7 +49,7 @@ export default function Breadcrumbs({ category, brand, productName, carello }: P
           <li>
             /{" "}
             <Link href={`/brand/${encodeURIComponent(brand)}`} className="hover:text-white">
-              {brand}
+              {brandLabel ?? formatBreadcrumbLabel(brand)}
             </Link>
           </li>
         )}

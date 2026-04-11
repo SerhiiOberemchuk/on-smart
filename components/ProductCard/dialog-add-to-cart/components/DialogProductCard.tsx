@@ -105,7 +105,7 @@ export const DialogProductCard = ({
                 src={image}
                 width={96}
                 height={96}
-                alt={image}
+                alt={`Anteprima del prodotto ${nameFull}`}
                 className="mx-auto aspect-auto h-24 object-contain object-center"
               />
             </li>
@@ -133,7 +133,7 @@ export const DialogProductCard = ({
               src={image}
               width={428}
               height={322}
-              alt="Pulsante aggiungi"
+              alt={`Immagine del prodotto ${nameFull}`}
               className="mx-auto aspect-auto h-[322px] object-contain object-center"
             />
           </SwiperSlide>
@@ -164,7 +164,7 @@ export const DialogProductCard = ({
           width={428}
           height={24}
           placeholder="empty"
-          alt="Product Image"
+          alt={`Logo del brand ${brand_slug}`}
           className="mx-auto h-6 object-contain object-center"
         />
         {place === "product-page" && (

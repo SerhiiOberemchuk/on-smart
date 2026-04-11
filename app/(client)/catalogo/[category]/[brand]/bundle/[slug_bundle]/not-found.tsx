@@ -1,5 +1,15 @@
-﻿import LinkYellow from "@/components/YellowLink";
+import type { Metadata } from "next";
+import LinkYellow from "@/components/YellowLink";
 import SmartImage from "@/components/SmartImage";
+
+export const metadata: Metadata = {
+  title: "Bundle non trovato | OnSmart",
+  description: "Il bundle richiesto non è disponibile su OnSmart.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function BundleNotFound() {
   return (
@@ -7,7 +17,13 @@ export default function BundleNotFound() {
       <div className="mx-auto flex max-w-[600px] flex-col">
         <div className="mx-auto flex items-center text-9xl lg:text-[300px]">
           4
-          <SmartImage src="/404.png" alt="Bundle Not Found" className="w-20 lg:w-44" width={176} height={176} />
+          <SmartImage
+            src="/404.png"
+            alt="Illustrazione bundle non trovato"
+            className="w-20 lg:w-44"
+            width={176}
+            height={176}
+          />
           4
         </div>
 
@@ -22,4 +38,3 @@ export default function BundleNotFound() {
     </div>
   );
 }
-

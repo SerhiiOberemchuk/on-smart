@@ -37,7 +37,7 @@ export default function CheckouteStep3Pagamento() {
       <RiepilogoDatiConsegna />
       <div>
         <div className="flex items-center gap-2">
-          <SmartImage src={icon_card} alt="icon banca " aria-label="icon banca " />
+          <SmartImage src={icon_card} alt="" aria-hidden="true" />
           <h3 className="H5">Scegli il metodo di pagamento</h3>
         </div>
         <ul className="mt-3 pl-8">

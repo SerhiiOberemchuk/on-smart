@@ -21,7 +21,7 @@ export default function ButtonAddToBasket({
       )}
       {...props}
     >
-      <SmartImage src={iconCart} alt="Pulsante aggiungi" />
+      <SmartImage src={iconCart} alt="" aria-hidden="true" />
       <span>Aggiungi</span>
     </button>
   );

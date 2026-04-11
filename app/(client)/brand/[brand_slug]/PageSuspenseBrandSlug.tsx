@@ -18,6 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonical = `${CONTACTS_ADDRESS.BASE_URL}/brand/${brand_slug}`;
   const title = `${data.name} - Prodotti ufficiali OnSmart`;
   const description = `Scopri i migliori prodotti del brand ${data.name}: videosorveglianza, accessori e soluzioni professionali disponibili su OnSmart.`;
+  const imageUrl = data.image || `${CONTACTS_ADDRESS.BASE_URL}/og-image.png`;
 
   return {
     title,
@@ -29,6 +30,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       index: true,
       follow: true,
       noarchive: false,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
     },
     openGraph: {
       title,
@@ -39,10 +47,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       locale: "it_IT",
       images: [
         {
-          url: data.image,
+          url: imageUrl,
           width: 1200,
           height: 630,
-          alt: `${data.name} Logo`,
+          alt: `Prodotti del brand ${data.name} su OnSmart`,
         },
       ],
     },
@@ -50,7 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [data.image],
+      images: [imageUrl],
     },
   };
 }

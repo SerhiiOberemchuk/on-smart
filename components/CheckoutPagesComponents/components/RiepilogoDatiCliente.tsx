@@ -44,14 +44,15 @@ export default function RiepilogoDatiCliente({
   return (
     <div>
       <div className="flex items-center gap-2">
-        <SmartImage src={icon_email_confirmed} alt="icon email confirmed" />
+        <SmartImage src={icon_email_confirmed} alt="" aria-hidden="true" />
         <h3 className="H5">I tuoi dati</h3>
         {isModifica && (
           <Link
             href={PAGES.CHECKOUT_PAGES.INFORMATION}
+            aria-label="Modifica i tuoi dati"
             className="ml-auto flex shrink-0 items-center gap-1 underline hover:text-yellow-600"
           >
-            <SmartImage src={icon_pencil} alt="icon pencil" /> Modifica
+            <SmartImage src={icon_pencil} alt="" aria-hidden="true" /> Modifica
           </Link>
         )}
       </div>

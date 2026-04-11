@@ -49,11 +49,11 @@ export function ItemFilteredOptions(props: FilterGroup) {
         <span>{props.title}</span>
         <SmartImage
           src={icon_arrow_top}
-          alt="arrow top"
+          alt=""
+          aria-hidden="true"
           className={twMerge("transition-all duration-300", isOpen ? "rotate-x-0" : "rotate-x-180")}
           width={24}
           height={24}
-          aria-label="arrow top"
         />
       </legend>
 
@@ -72,7 +72,11 @@ export function ItemFilteredOptions(props: FilterGroup) {
               <LabelInput {...option} param={props.param} />
             </li>
           ))}
-        {props.type === "range" && <InputRange {...props} />}
+        {props.type === "range" && (
+          <li>
+            <InputRange {...props} />
+          </li>
+        )}
       </ul>
     </fieldset>
   );

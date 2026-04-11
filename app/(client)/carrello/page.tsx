@@ -1,7 +1,17 @@
+import type { Metadata } from "next";
 import { getAllProducts } from "@/app/actions/product/get-all-products";
 import CardSection from "./components/CardSection";
 import ProductSuspensedListCarello from "./ProductSuspensedListCarello";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+  title: "Carrello | OnSmart",
+  description: "Carrello acquisti OnSmart.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 function CartRecommendations() {
   const productsAction = getAllProducts({ includeHidden: false });

@@ -115,7 +115,7 @@ export default function SelectProductSection({
 
               <button
                 type="button"
-                aria-label="Apri altri versioni"
+                aria-label={`Mostra altre versioni di ${product.name}`}
                 className={twMerge(
                   "input_M_18 mt-3 mr-0 ml-auto flex text-white underline",
                   variantsToShow >= (variantsProduct?.length || 0) && "hidden",

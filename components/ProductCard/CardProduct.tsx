@@ -38,13 +38,13 @@ export default function CardProduct({
     <article className={clsx(styles.card, className)}>
       <HeaderProductCard oldPrice={oldPrice} inStock={inStock} isOnOrder={isOnOrder} id={id} />
       <figure className="">
-        <Link href={productHref} aria-label={name} prefetch={false}>
+        <Link href={productHref} aria-label={`Apri il prodotto ${name}`} prefetch={false}>
           <SmartImage
             src={imgSrc}
             className="aspect-square object-contain object-center p-1 md:p-2 xl:p-3"
             width={310}
             height={310}
-            alt={name}
+            alt={`Immagine del prodotto ${name}`}
           />
         </Link>
         <figcaption className="relative mt-2 px-1 md:mt-3 md:px-2 xl:px-3">

@@ -1,5 +1,15 @@
+import type { Metadata } from "next";
 import LinkYellow from "@/components/YellowLink";
 import SmartImage from "@/components/SmartImage";
+
+export const metadata: Metadata = {
+  title: "Pagina non trovata | OnSmart",
+  description: "La pagina richiesta non è disponibile su OnSmart.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function NotFound() {
   return (
@@ -7,7 +17,13 @@ export default function NotFound() {
       <div className="mx-auto flex max-w-[600px] flex-col">
         <div className="mx-auto flex items-center text-9xl lg:text-[300px]">
           4
-          <SmartImage src="/404.png" alt="Not Found" className="w-20 lg:w-44" width={176} height={176} />
+          <SmartImage
+            src="/404.png"
+            alt="Illustrazione pagina non trovata"
+            className="w-20 lg:w-44"
+            width={176}
+            height={176}
+          />
           4
         </div>
         <h1 className="H2 mt-8 text-center xl:mt-16">Oops! Pagina non trovata.</h1>
