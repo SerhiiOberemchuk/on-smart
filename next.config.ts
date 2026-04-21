@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
   reactCompiler: true,
+  allowedDevOrigins: ["10.18.212.244"],
   images: {
     remotePatterns: [
       {

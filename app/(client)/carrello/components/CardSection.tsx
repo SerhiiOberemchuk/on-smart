@@ -317,8 +317,8 @@ export default function CartSection() {
                       </div>
 
                       <div className="mt-2 flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-11 w-[132px] items-center rounded-sm border border-stroke-grey text-[20px]">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="flex h-11 w-33 items-center rounded-sm border border-stroke-grey text-[20px]">
                             <button
                               type="button"
                               disabled={!canDecrement}

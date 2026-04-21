@@ -103,7 +103,7 @@ export default async function CarrelloPage() {
               ))}
             </ul>
           )}
-          <p className="H4M">e altri marchi selezionati in base alla qualità e all'affidabilitГ .</p>
+          <p className="H4M">e altri marchi selezionati in base alla qualità e all'affidabilità.</p>
         </div>
       </section>
       <section className="py-16">
@@ -246,4 +246,3 @@ function SectionHeader({ title }: { title: string }) {
     </header>
   );
 }
-

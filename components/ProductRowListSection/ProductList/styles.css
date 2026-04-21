@@ -9,6 +9,8 @@
   transition: all 0.3s ease;
 }
 
-.top_products_list .swiper-slide:hover {
-  transform: scale(1.03);
+@media (hover: hover) and (pointer: fine) {
+  .top_products_list .swiper-slide:hover {
+    transform: scale(1.03);
+  }
 }
