@@ -66,7 +66,7 @@ export default function Specifiche({
                 className="text_R flex justify-between px-1 py-2 odd:bg-grey-hover-stroke even:bg-transparent"
               >
                 <span className="text-text-grey">{item.name}:</span>{" "}
-                <span className="uppercase">{item.value}</span>
+                <span className="text-right uppercase">{item.value}</span>
               </li>
             ))}
           </ul>

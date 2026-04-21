@@ -10,9 +10,18 @@
   --card-height: auto;
   --card-transition: all 0.3s ease;
 }
-.card:hover {
-  transform: scale(1.02);
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    transform: scale(1.02);
+  }
 }
+
+@media (hover: none), (pointer: coarse) {
+  .card:hover {
+    transform: none;
+  }
+}
+
 @media (width >= 48rem) {
   .list {
     grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));

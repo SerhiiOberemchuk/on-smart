@@ -10,8 +10,8 @@ export type FilterGroup = typeof filtersSchema.$inferInsert;
 
 const SORT_OPTIONS = [
   { value: "new", label: "Novita" },
-  { value: "price-asc", label: "Prezzo piu alto" },
-  { value: "price-desc", label: "Prezzo piu basso" },
+  { value: "price-asc", label: "Prezzo piu basso" },
+  { value: "price-desc", label: "Prezzo piu alto" },
 ] as const;
 
 export type SortOptionValues = (typeof SORT_OPTIONS)[number]["value"];

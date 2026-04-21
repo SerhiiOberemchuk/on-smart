@@ -79,11 +79,6 @@
   width: 1.05rem;
 }
 
-.admin-icon-btn:hover {
-  border-color: var(--admin-accent);
-  background: rgba(247, 190, 58, 0.14);
-}
-
 .admin-mobile-toggle {
   display: inline-flex;
 }
@@ -100,11 +95,6 @@
   font-size: 0.875rem;
   font-weight: 500;
   color: #f4f7ff;
-}
-
-.admin-logout-btn:hover {
-  color: var(--admin-accent);
-  text-decoration: underline;
 }
 
 .admin-logout-btn:disabled {
@@ -203,15 +193,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.admin-sidebar-link:hover {
-  color: var(--admin-accent);
-  text-decoration: underline;
-}
-
-.admin-sidebar-link:hover .admin-sidebar-link-icon {
-  color: var(--admin-accent);
 }
 
 .admin-sidebar-link-active {
@@ -334,11 +315,6 @@
   border-radius: 0.9rem;
   border: 1px solid var(--admin-border);
   background: var(--admin-bg-card);
-}
-
-.admin-card-hover:hover {
-  border-color: var(--admin-border-strong);
-  background: var(--admin-bg-card-hover);
 }
 
 .admin-card-header {
@@ -547,10 +523,6 @@
   padding: 0.75rem 0.8rem;
   vertical-align: top;
   color: var(--admin-text);
-}
-
-.admin-table tbody tr:hover td {
-  background: rgba(140, 160, 193, 0.1);
 }
 
 .admin-empty {
@@ -798,11 +770,6 @@
     opacity 0.2s ease;
 }
 
-.admin-icon-action:hover {
-  border-color: rgba(247, 190, 58, 0.65);
-  background: rgba(247, 190, 58, 0.08);
-}
-
 .admin-icon-action-icon {
   transition: filter 0.2s ease, opacity 0.2s ease;
 }
@@ -817,17 +784,6 @@
     brightness(102%) contrast(102%);
 }
 
-.admin-icon-action-edit:hover {
-  border-color: rgba(96, 165, 250, 0.72);
-  background: rgba(96, 165, 250, 0.12);
-  color: #b9e0ff;
-}
-
-.admin-icon-action-edit:hover .admin-icon-action-icon {
-  filter: brightness(0) saturate(100%) invert(89%) sepia(18%) saturate(1248%) hue-rotate(176deg)
-    brightness(104%) contrast(102%);
-}
-
 .admin-icon-action-copy {
   border-color: rgba(52, 211, 153, 0.42);
   color: #6ee7b7;
@@ -838,35 +794,14 @@
     brightness(95%) contrast(94%);
 }
 
-.admin-icon-action-copy:hover {
-  border-color: rgba(52, 211, 153, 0.72);
-  background: rgba(52, 211, 153, 0.12);
-  color: #baf7da;
-}
-
-.admin-icon-action-copy:hover .admin-icon-action-icon {
-  filter: brightness(0) saturate(100%) invert(92%) sepia(24%) saturate(429%) hue-rotate(90deg)
-    brightness(103%) contrast(96%);
-}
-
 .admin-icon-action-delete {
   border-color: rgba(220, 38, 38, 0.7);
   color: #f87171;
 }
 
-.admin-icon-action-delete:hover {
-  border-color: rgba(248, 113, 113, 0.9);
-  background: rgba(220, 38, 38, 0.12);
-  color: #fca5a5;
-}
 .admin-link-action {
   font-size: 0.82rem;
   color: var(--admin-accent);
-}
-
-.admin-link-action:hover {
-  color: #ffd67b;
-  text-decoration: underline;
 }
 
 .admin-muted {
@@ -974,19 +909,10 @@
   color: #151515;
 }
 
-.admin-btn-primary:hover {
-  background: #ffd16d;
-}
-
 .admin-btn-secondary {
   border-color: rgba(247, 190, 58, 0.349);
   background: transparent;
   color: var(--admin-accent);
-}
-
-.admin-btn-secondary:hover {
-  border-color: rgba(247, 190, 58, 0.65);
-  background: rgba(247, 190, 58, 0.08);
 }
 
 .admin-btn-danger {
@@ -995,13 +921,90 @@
   color: #ffb6b6;
 }
 
-.admin-btn-danger:hover {
-  background: rgba(127, 29, 29, 0.4);
-}
-
 .admin-btn-primary:disabled,
 .admin-btn-secondary:disabled,
 .admin-btn-danger:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .admin-icon-btn:hover {
+    border-color: var(--admin-accent);
+    background: rgba(247, 190, 58, 0.14);
+  }
+
+  .admin-logout-btn:hover {
+    color: var(--admin-accent);
+    text-decoration: underline;
+  }
+
+  .admin-sidebar-link:hover {
+    color: var(--admin-accent);
+    text-decoration: underline;
+  }
+
+  .admin-sidebar-link:hover .admin-sidebar-link-icon {
+    color: var(--admin-accent);
+  }
+
+  .admin-card-hover:hover {
+    border-color: var(--admin-border-strong);
+    background: var(--admin-bg-card-hover);
+  }
+
+  .admin-table tbody tr:hover td {
+    background: rgba(140, 160, 193, 0.1);
+  }
+
+  .admin-icon-action:hover {
+    border-color: rgba(247, 190, 58, 0.65);
+    background: rgba(247, 190, 58, 0.08);
+  }
+
+  .admin-icon-action-edit:hover {
+    border-color: rgba(96, 165, 250, 0.72);
+    background: rgba(96, 165, 250, 0.12);
+    color: #b9e0ff;
+  }
+
+  .admin-icon-action-edit:hover .admin-icon-action-icon {
+    filter: brightness(0) saturate(100%) invert(89%) sepia(18%) saturate(1248%) hue-rotate(176deg)
+      brightness(104%) contrast(102%);
+  }
+
+  .admin-icon-action-copy:hover {
+    border-color: rgba(52, 211, 153, 0.72);
+    background: rgba(52, 211, 153, 0.12);
+    color: #baf7da;
+  }
+
+  .admin-icon-action-copy:hover .admin-icon-action-icon {
+    filter: brightness(0) saturate(100%) invert(92%) sepia(24%) saturate(429%) hue-rotate(90deg)
+      brightness(103%) contrast(96%);
+  }
+
+  .admin-icon-action-delete:hover {
+    border-color: rgba(248, 113, 113, 0.9);
+    background: rgba(220, 38, 38, 0.12);
+    color: #fca5a5;
+  }
+
+  .admin-link-action:hover {
+    color: #ffd67b;
+    text-decoration: underline;
+  }
+
+  .admin-btn-primary:hover {
+    background: #ffd16d;
+  }
+
+  .admin-btn-secondary:hover {
+    border-color: rgba(247, 190, 58, 0.65);
+    background: rgba(247, 190, 58, 0.08);
+  }
+
+  .admin-btn-danger:hover {
+    background: rgba(127, 29, 29, 0.4);
+  }
 }
