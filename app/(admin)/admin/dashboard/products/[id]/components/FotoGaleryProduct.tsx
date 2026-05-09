@@ -45,9 +45,9 @@ function SortableImage({ url, onDelete }: { url: string; onDelete: (url: string)
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={clsx(isDragging ? "opacity-70" : undefined)}
+      className={clsx(isDragging ? "opacity-70" : undefined, "@container")}
     >
-      <div className="relative mx-auto w-fit overflow-hidden rounded-lg border border-slate-600/55">
+      <div className="relative mx-auto w-full max-w-full overflow-hidden rounded-lg border border-slate-600/55">
         <ButtonXDellete
           className="absolute top-2 right-2 z-10 h-8 w-8"
           onClick={() => onDelete(url)}
