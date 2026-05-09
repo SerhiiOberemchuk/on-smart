@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import PageCategoria from "./PageCategoria";
 
+export { generateMetadata } from "./PageCategoria";
+
 export default function Page({ params }: { params: Promise<{ categoria: string }> }) {
   return (
     <Suspense>

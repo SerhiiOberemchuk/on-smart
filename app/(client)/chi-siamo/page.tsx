@@ -8,7 +8,7 @@ import { Metadata } from "next";
 import Script from "next/script";
 
 export const metadata: Metadata = {
-  title: "Chi siamo | On Smart – Videosorveglianza, Sicurezza, Soluzioni Smart",
+  title: "Chi siamo | On Smart - Videosorveglianza, Sicurezza, Soluzioni Smart",
   description:
     "Scopri la mission di On Smart: videosorveglianza, dispositivi smart, UPS e soluzioni professionali per la sicurezza di case, negozi e aziende. Marchi affidabili, assistenza tecnica e supporto qualificato.",
   alternates: {
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
         url: "/images/chi_siamo_banner.jpg",
         width: 1200,
         height: 630,
-        alt: "On Smart – Chi siamo",
+        alt: "On Smart - Chi siamo",
       },
     ],
     locale: "it_IT",
@@ -142,7 +142,7 @@ export default async function CarrelloPage() {
             <p className="H4M">
               Crediamo nelle soluzioni che facilitano la vita quotidiana, nel valore della
               protezione degli spazi in cui viviamo e lavoriamo, e nell'importanza di un'assistenza
-              che mette al centro le persone. Offriamo supporto con professionalitГ , attenzione e
+              che mette al centro le persone. Offriamo supporto con professionalità, attenzione e
               disponibilità, cercando sempre la soluzione più adatta alle esigenze reali.
             </p>
           </div>
