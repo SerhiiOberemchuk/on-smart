@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "react-toastify";
 import ButtonXDellete from "../../../ButtonXDellete";
+import clsx from "clsx";
 
 const updateGallery = async ({
   parent_product_id,
@@ -35,13 +36,7 @@ const updateGallery = async ({
   }
 };
 
-function SortableImage({
-  url,
-  onDelete,
-}: {
-  url: string;
-  onDelete: (url: string) => void;
-}) {
+function SortableImage({ url, onDelete }: { url: string; onDelete: (url: string) => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: url,
   });
@@ -50,10 +45,13 @@ function SortableImage({
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={isDragging ? "opacity-70" : undefined}
+      className={clsx(isDragging ? "opacity-70" : undefined)}
     >
-      <div className="relative mx-auto w-fit rounded-lg border border-slate-600/55">
-        <ButtonXDellete className="absolute top-2 right-2 h-8 w-8" onClick={() => onDelete(url)} />
+      <div className="relative mx-auto w-fit overflow-hidden rounded-lg border border-slate-600/55">
+        <ButtonXDellete
+          className="absolute top-2 right-2 z-10 h-8 w-8"
+          onClick={() => onDelete(url)}
+        />
         <button
           type="button"
           className="absolute top-2 left-2 z-10 cursor-grab rounded bg-slate-900/80 px-1.5 py-0.5 text-[10px] text-slate-100 active:cursor-grabbing"
@@ -175,7 +173,11 @@ export default function FotoGaleryProduct({ id }: { id: ProductType["id"] }) {
       <div {...getRootProps()} className="admin-dropzone cursor-pointer">
         <input {...getInputProps()} />
 
-        {isDragActive ? <p>Відпустіть файли тут...</p> : <p>Перетягніть фото або натисніть, щоб обрати</p>}
+        {isDragActive ? (
+          <p>Відпустіть файли тут...</p>
+        ) : (
+          <p>Перетягніть фото або натисніть, щоб обрати</p>
+        )}
 
         {isUploading ? <p className="mt-2 text-yellow-300">Завантаження...</p> : null}
         {isReordering ? <p className="mt-2 text-yellow-300">Оновлення порядку...</p> : null}

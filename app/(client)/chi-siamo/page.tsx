@@ -75,8 +75,8 @@ export default async function CarrelloPage() {
               ))}
             </ul>
             <p className="body_R_20">
-              Ogni articolo viene scelto valutando prestazioni, stabilitГ , facilità di
-              configurazione e compatibilitГ  con impianti moderni.
+              Ogni articolo viene scelto valutando prestazioni, stabilità, facilità di
+              configurazione e compatibilità con impianti moderni.
             </p>
           </div>
         </div>
@@ -151,7 +151,7 @@ export default async function CarrelloPage() {
       <section className="py-16">
         <SectionHeader title="Assistenza" />
         <div className="container mt-8 flex flex-col gap-5">
-          <h3 className="H4M max-w-[580px]">
+          <h3 className="H4M max-w-145 text-pretty">
             Per richieste, informazioni sui prodotti o supporto tecnico, è possibile contattarci via
             e-mail:
           </h3>

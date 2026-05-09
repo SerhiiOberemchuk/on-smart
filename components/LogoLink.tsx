@@ -1,4 +1,4 @@
-﻿import SmartImage from "@/components/SmartImage";
+﻿import Image from "next/image";
 import Link from "next/link";
 import { twMerge } from "tailwind-merge";
 
@@ -10,13 +10,17 @@ export default function LogoLink({
   footer?: boolean;
 }) {
   return (
-    <Link href="/" className={twMerge("m-0 flex w-fit p-0", className)} aria-label="Vai alla home page">
-      <SmartImage
+    <Link
+      href="/"
+      className={twMerge("m-0 flex w-fit p-0", className)}
+      aria-label="Vai alla home page"
+    >
+      <Image
         className={twMerge(
-          footer === false && "h-[52px] w-[78px] md:h-[74px] md:w-[108px]",
-          footer === true && "h-auto w-[98px] md:w-[178px]",
+          "h-13 w-19.5 object-cover object-center md:h-18.5 md:w-27",
+          footer === true && "h-auto w-24.5 md:w-44.5",
         )}
-        src={"/logo.svg"}
+        src={"/Logo-ON-SMART new.png"}
         width={108}
         height={74}
         alt="OnSmart"
@@ -25,4 +29,3 @@ export default function LogoLink({
     </Link>
   );
 }
-
