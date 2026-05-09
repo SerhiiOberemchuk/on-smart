@@ -135,7 +135,10 @@ export default async function PageCategoria({ params }: Props) {
             "@type": "Offer",
             priceCurrency: "EUR",
             price: product.price,
-            availability: "https://schema.org/InStock",
+            availability:
+              product.inStock > 0
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
             url: `${baseUrl}${buildProductHref(product)}`,
           },
         },

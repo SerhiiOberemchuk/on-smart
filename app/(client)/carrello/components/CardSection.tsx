@@ -157,7 +157,7 @@ export default function CartSection() {
 
         if (quantityAdjustedIds.length > 0) {
           toast.info(
-            "Le quantita di alcuni prodotti sono state aggiornate in base alla disponibilita.",
+            "Le quantità di alcuni prodotti sono state aggiornate in base alla disponibilità.",
           );
         }
 
@@ -377,7 +377,7 @@ export default function CartSection() {
 
             {hasHydrated && basket.length === 0 && (
               <li className="text-center">
-                Il carrello ГЁ vuoto{" "}
+                Il carrello è vuoto{" "}
                 <Link href="/catalogo" className="underline">
                   Vai al catalogo
                 </Link>

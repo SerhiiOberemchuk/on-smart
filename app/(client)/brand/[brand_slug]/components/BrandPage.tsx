@@ -53,25 +53,28 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
     name: `Prodotti del brand ${brand.name}`,
     itemListOrder: "https://schema.org/ItemListOrderAscending",
     numberOfItems: productsResponse.meta.total,
-      itemListElement: products.map((product, index) => ({
-        "@type": "ListItem",
-        position: index + 1,
-        item: {
-          "@type": "Product",
-          name: product.name,
-          image: product.imgSrc,
-          brand: {
-            "@type": "Brand",
-            name: brand.name,
-          },
-          description: product.nameFull,
-          category: product.category_slug.replace(/[-_]+/g, " ").trim(),
-          offers: {
-            "@type": "Offer",
-            priceCurrency: "EUR",
+    itemListElement: products.map((product, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Product",
+        name: product.name,
+        image: product.imgSrc,
+        brand: {
+          "@type": "Brand",
+          name: brand.name,
+        },
+        description: product.nameFull,
+        category: product.category_slug.replace(/[-_]+/g, " ").trim(),
+        offers: {
+          "@type": "Offer",
+          priceCurrency: "EUR",
           price: product.price,
           url: `${baseUrl}${buildProductHref(product)}`,
-          availability: "https://schema.org/InStock",
+          availability:
+            product.inStock > 0
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
         },
       },
     })),
