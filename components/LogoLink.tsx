@@ -17,8 +17,9 @@ export default function LogoLink({
     >
       <Image
         className={twMerge(
-          "h-13 w-19.5 object-cover object-center md:h-18.5 md:w-27",
-          footer === true && "h-auto w-24.5 md:w-44.5",
+          "object-cover object-center",
+          "h-13 w-19.5 md:h-18.5 md:w-27",
+          footer === true && "h-auto w-20 md:w-30",
         )}
         src={"/Logo-ON-SMART new.png"}
         width={108}
