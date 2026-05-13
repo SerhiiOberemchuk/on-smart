@@ -9,7 +9,8 @@ import { baseUrl } from "@/types/baseUrl";
 
 import ReviewList from "./ReviewList/ReviewList";
 
-const GOOGLE_REVIEW_URL = "https://g.page/r/CRhuErfSy0siEAE/review";
+const GOOGLE_REVIEW_URL =
+  "https://www.google.com/search?sca_esv=b88fcdf3d66975f7&hl=it&authuser=0&sxsrf=ANbL-n7fc3UoMTWwtDDPdGd8ro1qQP2abA:1770122098295&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOXphNPWTunj8ciK-v7YwVrPKzEpLgXEo1aJuHtGDiI3mOUFoL_f0-8g9PWV4wLC_stSLgR7ROacUEXRR6MKdY_76RySk&q=ON-SMART+Recensioni&sa=X&ved=2ahUKEwjE0ILXqr2SAxVwh_0HHR1-JdkQ0bkNegQIJBAF&biw=1920&bih=911&dpr=1&aic=0";
 
 function toIsoDateOrUndefined(value: string) {
   if (!value) return undefined;
