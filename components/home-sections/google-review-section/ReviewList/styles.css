@@ -15,6 +15,18 @@
   bottom: 0px;
 }
 
+.review-tooltip {
+  z-index: 2147483647 !important;
+  max-width: min(520px, calc(100vw - 32px));
+  height: auto;
+  border-radius: 4px;
+  background-color: rgba(29, 29, 29, 0.98) !important;
+  color: var(--color-white) !important;
+  font-size: 16px;
+  line-height: 1.35;
+  white-space: normal;
+}
+
 @media (width >= 64rem) {
   .review_list .swiper-wrapper {
     padding-bottom: 0;
