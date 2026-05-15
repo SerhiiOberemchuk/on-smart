@@ -32,6 +32,9 @@ export const metadata: Metadata = {
     canonical: baseUrl,
   },
   applicationName: "OnSmart",
+  verification: {
+    google: "Bus1aCcYooja0SCsxpxMoqtpZKMjqz47fl0BtySOU8I",
+  },
   icons: {
     icon: [
       { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
