@@ -1,3 +1,5 @@
+import { baseUrl } from "@/types/baseUrl";
+
 export const CONTACTS_ADDRESS = {
   PHONE_NUMBER: "+393516930878",
   EMAIL: "assistenza@on-smart.it",
@@ -22,5 +24,5 @@ export const CONTACTS_ADDRESS = {
     BIC: "SELBIT2BXXX",
     BANK_NAME: "Sella",
   },
-  BASE_URL: "https://on-smart.it",
+  BASE_URL: baseUrl,
 };

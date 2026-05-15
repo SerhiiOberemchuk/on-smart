@@ -4,6 +4,7 @@ import { ProductType } from "@/db/schemas/product.schema";
 import { klarnaAuthHeader, klarnaBaseUrl } from "@/lib/klarna";
 import { BasceketStoreStateType } from "@/store/basket-store";
 import { CheckoutTypesDataFirstStep, CheckoutTypesDataStepConsegna } from "@/store/checkout-store";
+import { baseUrl } from "@/types/baseUrl";
 import { PAGES } from "@/types/pages.types";
 
 export type KlarnaSessionResponseType = {
@@ -35,7 +36,7 @@ export async function createKlarnaSessionAction({
   totalPrice: number;
   basket: BasceketStoreStateType["basket"];
 }): Promise<KlarnaSessionResponseType> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = baseUrl;
   const safeOrderNumber = orderNumber || "NO-ORDER-NUMBER";
 
   const payload = {
