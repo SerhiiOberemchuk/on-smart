@@ -1,4 +1,8 @@
 import type { NextConfig } from "next";
+import { baseUrl } from "./types/baseUrl";
+
+const canonicalHost = new URL(baseUrl).hostname;
+const redirectHost = canonicalHost.replace(/^www\./, "");
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -18,15 +22,21 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "2mb",
     },
   },
-  // async redirects() {
-  //   return [
-  //     {
-  //       source: "/index.html",
-  //       destination: "/",
-  //       permanent: true,
-  //     },
-  //   ];
-  // },
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: redirectHost }],
+        destination: `${baseUrl}/:path*`,
+        permanent: true,
+      },
+      {
+        source: "/index.html",
+        destination: "/",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

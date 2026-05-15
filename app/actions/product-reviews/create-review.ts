@@ -7,6 +7,7 @@ import { updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { eq } from "drizzle-orm";
 import { transporterAssistance } from "@/lib/mail-transporter";
+import { baseUrl } from "@/types/baseUrl";
 
 type ProductReviewActionState = {
   success: boolean;
@@ -58,9 +59,7 @@ async function sendReviewEmails(payload: ProductReviewNotificationPayload) {
   if (!adminEmail) return;
 
   const fromEmail = process.env.MAIL_USER_ASSISTENZA;
-  const productPublicUrl = process.env.NEXT_PUBLIC_SITE_URL
-    ? `${process.env.NEXT_PUBLIC_SITE_URL}/catalogo/${encodeURIComponent(payload.productCategorySlug)}/${encodeURIComponent(payload.productBrandSlug)}/${encodeURIComponent(payload.productSlug)}`
-    : null;
+  const productPublicUrl = `${baseUrl}/catalogo/${encodeURIComponent(payload.productCategorySlug)}/${encodeURIComponent(payload.productBrandSlug)}/${encodeURIComponent(payload.productSlug)}`;
 
   const adminText = [
     "Nuova recensione prodotto (in attesa di approvazione)",
@@ -112,7 +111,7 @@ async function sendReviewEmails(payload: ProductReviewNotificationPayload) {
 async function sendReviewTelegramNotification(payload: ProductReviewNotificationPayload) {
   const token = process.env.TG_BOT_TOKEN;
   const chatId = process.env.TG_CHAT_ID;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const siteUrl = baseUrl;
   const isProduction = process.env.NODE_ENV === "production";
 
   if (!token || !chatId) return;

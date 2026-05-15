@@ -4,8 +4,9 @@ import { ProductType } from "@/db/schemas/product.schema";
 import { klarnaAuthHeader, klarnaBaseUrl } from "@/lib/klarna";
 import { BasceketStoreStateType } from "@/store/basket-store";
 import { CheckoutTypesDataFirstStep, CheckoutTypesDataStepConsegna } from "@/store/checkout-store";
+import { baseUrl } from "@/types/baseUrl";
 import { PAGES } from "@/types/pages.types";
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const siteUrl = baseUrl;
 
 type PlaceKlarnaOrderResult =
   | { success: true; orderId: string; redirectUrl: string }

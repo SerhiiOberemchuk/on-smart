@@ -1,8 +1,9 @@
 "use server";
 
 import { URL_DASHBOARD } from "@/app/(admin)/admin/dashboard/dashboard-admin.types";
+import { baseUrl } from "@/types/baseUrl";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL;
+const BASE_URL = baseUrl;
 
 const isLocalhost =
   !BASE_URL ||

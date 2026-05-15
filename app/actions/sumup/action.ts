@@ -1,6 +1,7 @@
 "use server";
 
 import { PAGES } from "@/types/pages.types";
+import { baseUrl } from "@/types/baseUrl";
 import SumUp from "@sumup/sdk";
 import { SUM_UP_CONSTANTS } from "./sumup-constans";
 
@@ -8,7 +9,7 @@ const client = new SumUp({
   apiKey: process.env?.SUMUP_API_KEY,
 });
 
-const baseSiteURL = process.env.NEXT_PUBLIC_SITE_URL;
+const baseSiteURL = baseUrl;
 
 export async function deactivateCheckoutSumUp({ id }: { id: string }) {
   try {

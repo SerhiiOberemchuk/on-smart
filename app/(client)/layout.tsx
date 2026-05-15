@@ -13,6 +13,7 @@ import { ToastContainer } from "react-toastify";
 import { ReactNode } from "react";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import CookieBanner from "@/components/cookie-consent/CookieBanner";
+import { baseUrl } from "@/types/baseUrl";
 
 const fixelFont = localFont({
   src: "../../fonts/FixelVariable.woff2",
@@ -23,12 +24,12 @@ const fixelFont = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://on-smart.it"),
+  metadataBase: new URL(baseUrl),
   title: { default: "OnSmart", template: "%s | OnSmart" },
   description:
     "OnSmart: videosorveglianza, antifurto, smart home e accessori professionali con spedizione rapida e supporto qualificato.",
   alternates: {
-    canonical: "https://on-smart.it",
+    canonical: baseUrl,
   },
   applicationName: "OnSmart",
   icons: {
@@ -55,7 +56,7 @@ export const metadata: Metadata = {
     title: "OnSmart",
     description:
       "Videosorveglianza, antifurto, smart home e accessori professionali per casa e azienda.",
-    url: "https://on-smart.it",
+    url: baseUrl,
     siteName: "OnSmart",
     locale: "it_IT",
     type: "website",
