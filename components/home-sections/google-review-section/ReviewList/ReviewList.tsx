@@ -14,24 +14,24 @@ import "@/app/styles/swiper.css";
 
 import "./styles.css";
 
+const REVIEW_TOOLTIP_ID = "review-tooltip";
+
 export default function ReviewList({ reviews }: { reviews: GoogleReview[] }) {
   if (!reviews.length) return null;
 
   return (
-    <Swiper
-      id="review_list_slider"
-      aria-label="Recensioni Google dei clienti OnSmart"
-      slidesPerView={"auto"}
-      spaceBetween={20}
-      modules={[Pagination, Navigation]}
-      pagination={{ clickable: true }}
-      navigation={{ nextEl: "#review_list_slider_next", prevEl: "#review_list_slider_prev" }}
-      className="review_list"
-    >
-      {reviews.map((item) => {
-        const tooltipId = `review-tooltip-${item.id}`;
-
-        return (
+    <>
+      <Swiper
+        id="review_list_slider"
+        aria-label="Recensioni Google dei clienti OnSmart"
+        slidesPerView={"auto"}
+        spaceBetween={20}
+        modules={[Pagination, Navigation]}
+        pagination={{ clickable: true }}
+        navigation={{ nextEl: "#review_list_slider_next", prevEl: "#review_list_slider_prev" }}
+        className="review_list"
+      >
+        {reviews.map((item) => (
           <SwiperSlide key={item.id}>
             <article className="flex w-[326px] flex-col justify-between gap-3 rounded-sm border border-stroke-grey bg-background px-3 py-6">
               <header className="relative flex items-start justify-between">
@@ -52,20 +52,26 @@ export default function ReviewList({ reviews }: { reviews: GoogleReview[] }) {
               <div className="flex flex-col gap-2">
                 <p
                   className="input_R_18 line-clamp-3"
-                  data-tooltip-id={tooltipId}
+                  data-tooltip-id={REVIEW_TOOLTIP_ID}
                   data-tooltip-content={item.reviewText}
+                  data-tooltip-place="top"
                 >
                   {item.reviewText}
                 </p>
-                <Tooltip id={tooltipId} place="left" style={{ zIndex: 1000, maxWidth: 500, height: "auto" }} />
 
                 <h3 className="input_R_18 ml-auto">{item.clientName}</h3>
               </div>
             </article>
           </SwiperSlide>
-        );
-      })}
-    </Swiper>
+        ))}
+      </Swiper>
+      <Tooltip
+        id={REVIEW_TOOLTIP_ID}
+        className="review-tooltip"
+        positionStrategy="fixed"
+        opacity={1}
+      />
+    </>
   );
 }
 
