@@ -66,7 +66,7 @@ export async function createSumUpCheckout(
       return { success: false, error: "Missing SUMUP_MERCHANT_CODE" };
     }
     if (!baseSiteURL) {
-      return { success: false, error: "Missing SITE_URL" };
+      return { success: false, error: "Missing base site URL" };
     }
 
     const payload: SumUpHostedCheckoutRequest = {
