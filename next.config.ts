@@ -2,7 +2,9 @@ import type { NextConfig } from "next";
 import { baseUrl } from "./types/baseUrl";
 
 const canonicalHost = new URL(baseUrl).hostname;
-const redirectHost = canonicalHost.replace(/^www\./, "");
+const redirectHost = canonicalHost.startsWith("www.")
+  ? canonicalHost.replace(/^www\./, "")
+  : `www.${canonicalHost}`;
 
 const nextConfig: NextConfig = {
   output: "standalone",

@@ -1,1 +1,1 @@
-export const baseUrl = "https://www.on-smart.it";
+export const baseUrl = "https://on-smart.it";
