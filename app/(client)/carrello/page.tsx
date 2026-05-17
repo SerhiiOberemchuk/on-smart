@@ -5,7 +5,7 @@ import ProductSuspensedListCarello from "./ProductSuspensedListCarello";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Carrello | OnSmart",
+  title: "Carrello",
   description: "Carrello acquisti OnSmart.",
   robots: {
     index: false,

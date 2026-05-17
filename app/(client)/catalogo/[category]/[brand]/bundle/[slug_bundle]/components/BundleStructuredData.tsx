@@ -1,8 +1,6 @@
-import Script from "next/script";
-
 export default function BundleStructuredData({ data }: { data: object }) {
   return (
-    <Script
+    <script
       id="bundle-jsonld"
       type="application/ld+json"
       dangerouslySetInnerHTML={{

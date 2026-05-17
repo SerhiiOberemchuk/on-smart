@@ -1,5 +1,4 @@
 ﻿import { Metadata } from "next";
-import Script from "next/script";
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
 import { baseUrl } from "@/types/baseUrl";
 import { getCategoryBySlug } from "@/app/actions/category/category-actions";
@@ -9,6 +8,7 @@ import Link from "next/link";
 import LinkYellow from "@/components/YellowLink";
 import { getAllProductsFiltered } from "@/app/actions/product/get-all-products-filtered";
 import { ProductType } from "@/db/schemas/product.schema";
+import { buildSeoDescription, buildSeoTitle, normalizeSeoText } from "@/lib/seo/metadata";
 
 type Props = { params: Promise<{ categoria: string }> };
 
@@ -23,7 +23,7 @@ function buildProductHref(product: ProductType): string {
 }
 
 function normalizeCategoryDescription(description: string): string {
-  return description.replace(/\|/g, ". ").replace(/\s+/g, " ").trim();
+  return normalizeSeoText(description);
 }
 
 function toAbsoluteImageUrl(src: string) {
@@ -39,9 +39,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     notFound();
   }
 
-  const description = normalizeCategoryDescription(categoryInfo.data.description);
+  const categoryName = categoryInfo.data.name || categoryInfo.data.title_full;
+  const description = buildSeoDescription({
+    parts: [
+      `Scopri ${categoryName}: prodotti selezionati, marchi affidabili, disponibilità aggiornata e spedizione in Italia.`,
+      normalizeCategoryDescription(categoryInfo.data.description),
+    ],
+    fallback: `Prodotti ${categoryName} per sicurezza e smart home disponibili su OnSmart.`,
+  });
   const canonical = `${baseUrl}/categoria/${categoryInfo.data.category_slug}`;
-  const title = `Categoria ${categoryInfo.data.title_full} | OnSmart`;
+  const title = buildSeoTitle(`${categoryInfo.data.title_full} - Prodotti, prezzi e offerte`);
   const imageUrl = toAbsoluteImageUrl(categoryInfo.data.image);
 
   return {
@@ -111,7 +118,7 @@ export default async function PageCategoria({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: `Categoria ${category.name}`,
-    description: category.description,
+    description: normalizeCategoryDescription(category.description),
     url: `${baseUrl}/categoria/${category.category_slug}`,
     inLanguage: "it-IT",
     mainEntity: {
@@ -125,7 +132,7 @@ export default async function PageCategoria({ params }: Props) {
         item: {
           "@type": "Product",
           name: product.name,
-          image: product.imgSrc,
+          image: toAbsoluteImageUrl(product.imgSrc),
           brand: {
             "@type": "Brand",
             name: product.brand_slug.replace(/[-_]+/g, " ").trim(),
@@ -135,6 +142,7 @@ export default async function PageCategoria({ params }: Props) {
             "@type": "Offer",
             priceCurrency: "EUR",
             price: product.price,
+            itemCondition: "https://schema.org/NewCondition",
             availability:
               product.inStock > 0
                 ? "https://schema.org/InStock"
@@ -229,12 +237,12 @@ export default async function PageCategoria({ params }: Props) {
         </section>
       )}
 
-      <Script
+      <script
         id="category-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Script
+      <script
         id="category-breadcrumbs-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}

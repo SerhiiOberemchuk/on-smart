@@ -1,11 +1,10 @@
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import { Metadata } from "next";
-import Script from "next/script";
 
 export const metadata: Metadata = {
-  title: "Garanzia e Diritto di Recesso | OnSmart",
+  title: "Garanzia e diritto di recesso",
   description:
-    "Informazioni complete sulla garanzia legale, sui resi e sul diritto di recesso per i prodotti acquistati su OnSmart. Durata della garanzia, condizioni, limitazioni e procedure ufficiali.",
+    "Informazioni complete sulla garanzia legale, sui resi e sul diritto di recesso per i prodotti acquistati su OnSmart: durata, condizioni, limitazioni e procedure ufficiali.",
   alternates: {
     canonical: `${CONTACTS_ADDRESS.BASE_URL}/garanzia`,
   },
@@ -98,9 +97,9 @@ export default function Garanzia() {
         <p>
           4. Rimborso Fatte salve eventuali spese per danni all`imballo originale, On Smart
           rimborserà al cliente l`importo pagato (escluse le spese di spedizione iniziali) entro 14
-          giorni dal ricevimento del reso, utilizzando lo stesso metodo di pagamento dell`ordine o
+          giorni dal ricevimento del reso, utilizzando lo stesso metodo di pagamento dell'ordine o
           tramite bonifico bancario. In quest`ultimo caso, i dati bancari devono essere corretti e
-          intestati allo stesso nominativo dell`ordine originale.
+          intestati allo stesso nominativo dell'ordine originale.
         </p>
 
         <p>
@@ -112,7 +111,7 @@ export default function Garanzia() {
           www.on-smart.it Ultimo aggiornamento: novembre 2025
         </p>
       </div>{" "}
-      <Script
+      <script
         id="garanzia-webpage-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -126,7 +125,7 @@ export default function Garanzia() {
           }),
         }}
       />
-      <Script
+      <script
         id="garanzia-breadcrumb-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{

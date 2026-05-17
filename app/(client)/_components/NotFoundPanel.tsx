@@ -1,0 +1,41 @@
+import LinkYellow from "@/components/YellowLink";
+import SmartImage from "@/components/SmartImage";
+
+type NotFoundPanelProps = {
+  title: string;
+  description: string;
+  imageAlt: string;
+  actionHref?: string;
+  actionTitle?: string;
+};
+
+export default function NotFoundPanel({
+  title,
+  description,
+  imageAlt,
+  actionHref = "/catalogo",
+  actionTitle = "Torna al catalogo",
+}: NotFoundPanelProps) {
+  return (
+    <div className="container flex items-center justify-center py-10">
+      <div className="mx-auto flex max-w-[640px] flex-col">
+        <div className="mx-auto flex items-center text-9xl leading-none lg:text-[300px]">
+          4
+          <SmartImage
+            src="/404.png"
+            alt={imageAlt}
+            className="w-20 lg:w-44"
+            width={176}
+            height={176}
+          />
+          4
+        </div>
+
+        <h1 className="H2 mt-8 text-center xl:mt-16">{title}</h1>
+        <p className="text_R mt-3 text-center">{description}</p>
+
+        <LinkYellow href={actionHref} className="mx-auto mt-3 xl:mt-8" title={actionTitle} />
+      </div>
+    </div>
+  );
+}

@@ -5,7 +5,6 @@ import FeedbackFormSection from "@/components/home-sections/feedback-form-sectio
 import GoogleReviewSection from "@/components/home-sections/google-review-section/GoogleReviewSection";
 import HeroSection from "@/components/home-sections/hero-section/HeroSection";
 import TopSalesSection from "@/components/home-sections/top-sales-section/TopSalesSection";
-import Script from "next/script";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import { Suspense } from "react";
 import FallbackHeroSection from "@/components/home-sections/hero-section/FallbackHeroSection";
@@ -18,7 +17,7 @@ import {
 } from "@/components/home-sections/fallbacks/HomeSectionFallbacks";
 
 export const metadata: Metadata = {
-  title: "OnSmart - Elettronica, Videosorveglianza, Smart Home al miglior prezzo",
+  title: "Elettronica, videosorveglianza e smart home al miglior prezzo",
   description:
     "Acquista online elettronica, sistemi di videosorveglianza, smart home e accessori per la sicurezza. Consegna veloce, prezzi competitivi e supporto professionale.",
   keywords: [
@@ -112,7 +111,7 @@ async function HomeContent() {
       <Suspense fallback={<FeedbackFormSectionFallback />}>
         <FeedbackFormSection />
       </Suspense>
-      <Script
+      <script
         id="home_page_main"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -143,7 +142,7 @@ async function HomeContent() {
           }),
         }}
       />
-      <Script
+      <script
         id="home_page_website"
         type="application/ld+json"
         dangerouslySetInnerHTML={{

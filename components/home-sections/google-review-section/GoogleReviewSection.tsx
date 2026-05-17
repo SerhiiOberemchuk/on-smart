@@ -1,5 +1,3 @@
-import Script from "next/script";
-
 import ButtonsScrollSwiper from "@/components/ButtonsScrollSwiper";
 import LinkYellow from "@/components/YellowLink";
 import { getGoogleReviewsAction } from "@/app/actions/goodle-reviews/get-google-reviews";
@@ -106,7 +104,7 @@ export default async function GoogleReviewSection() {
       />
 
       {jsonLd ? (
-        <Script
+        <script
           id="google-review-section-jsonld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

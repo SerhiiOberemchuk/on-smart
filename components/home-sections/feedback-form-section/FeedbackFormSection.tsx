@@ -1,5 +1,3 @@
-import Script from "next/script";
-
 import FormFeedback from "@/components/FormFeedback/FormFeedback";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import { baseUrl } from "@/types/baseUrl";
@@ -52,7 +50,7 @@ export default function FeedbackFormSection() {
         </div>
       </div>
 
-      <Script
+      <script
         id="feedback-form-section-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

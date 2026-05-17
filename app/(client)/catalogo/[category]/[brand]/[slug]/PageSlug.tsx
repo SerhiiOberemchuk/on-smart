@@ -149,7 +149,8 @@ export default async function PageSlug({
       priceCurrency: "EUR",
       price: Number(product.price ?? 0),
       itemCondition: "https://schema.org/NewCondition",
-      availability: product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      availability:
+        product.inStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
     },
 
     ...(product.rating && reviewCount > 0 && {
@@ -163,7 +164,10 @@ export default async function PageSlug({
     ...(reviewCount > 0 && {
       review: reviews.map((r) => ({
         "@type": "Review",
-        author: r.client_name,
+        author: {
+          "@type": "Person",
+          name: r.client_name,
+        },
         reviewBody: r.comment,
         reviewRating: {
           "@type": "Rating",
