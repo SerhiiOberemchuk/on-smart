@@ -34,6 +34,9 @@ export const metadata: Metadata = {
   applicationName: "OnSmart",
   verification: {
     google: "Bus1aCcYooja0SCsxpxMoqtpZKMjqz47fl0BtySOU8I",
+    other: {
+      "msvalidate.01": "4CC5472328D38C599ED3D0D8DE1788DB",
+    },
   },
   icons: {
     icon: [
