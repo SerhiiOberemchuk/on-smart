@@ -16,7 +16,6 @@ import {
 } from "@/lib/catalog/catalog-query";
 import { getCatalogFilters } from "@/lib/get-catalog-filters";
 import { baseUrl } from "@/types/baseUrl";
-import Script from "next/script";
 import { Metadata } from "next/types";
 import { Suspense } from "react";
 
@@ -25,9 +24,9 @@ type CatalogFilterState = {
 };
 
 export const metadata: Metadata = {
-  title: "Catalogo prodotti - Videosorveglianza, Antifurti, Smart Home | OnSmart",
+  title: "Catalogo prodotti per videosorveglianza, antifurti e smart home",
   description:
-    "Sfoglia il catalogo completo OnSmart: sistemi di videosorveglianza, antifurti, sensori, domotica, accessori e prodotti professionali per la sicurezza.",
+    "Sfoglia il catalogo OnSmart: telecamere, antifurti, sensori, domotica e accessori professionali con prezzi aggiornati e spedizione in Italia.",
   keywords: [
     "videosorveglianza",
     "antifurto",
@@ -189,7 +188,7 @@ async function CatalogJsonLdContent({
   };
 
   return (
-    <Script
+    <script
       id="catalogo-jsonld"
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

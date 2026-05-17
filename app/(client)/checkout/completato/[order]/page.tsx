@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 
 export const metadata: Metadata = {
-  title: "Ordine completato | OnSmart",
+  title: "Ordine completato",
   description: "Conferma completamento ordine OnSmart.",
   robots: {
     index: false,

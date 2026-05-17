@@ -135,13 +135,13 @@ export default function CartSection() {
       if (hasValidatedOnceRef.current) {
         if (missingIds.length > 0) {
           toast.warning(
-            "Alcuni prodotti non sono piu disponibili e sono stati rimossi dal carrello.",
+            "Alcuni prodotti non sono più disponibili e sono stati rimossi dal carrello.",
           );
         }
 
         if (hiddenIds.length > 0) {
           toast.warning(
-            "Alcuni prodotti non sono piu presenti nel nostro catalogo e sono stati rimossi dal carrello.",
+            "Alcuni prodotti non sono più presenti nel nostro catalogo e sono stati rimossi dal carrello.",
           );
         }
 

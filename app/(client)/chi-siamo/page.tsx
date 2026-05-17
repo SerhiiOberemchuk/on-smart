@@ -5,17 +5,16 @@ import icon_quote from "@/assets/icons/icon_quote.svg";
 import icon_mail from "@/assets/icons/icon_mail.svg";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import { Metadata } from "next";
-import Script from "next/script";
 
 export const metadata: Metadata = {
-  title: "Chi siamo | On Smart - Videosorveglianza, Sicurezza, Soluzioni Smart",
+  title: "Chi siamo - Videosorveglianza, sicurezza e soluzioni smart",
   description:
     "Scopri la mission di On Smart: videosorveglianza, dispositivi smart, UPS e soluzioni professionali per la sicurezza di case, negozi e aziende. Marchi affidabili, assistenza tecnica e supporto qualificato.",
   alternates: {
     canonical: `${CONTACTS_ADDRESS.BASE_URL}/chi-siamo`,
   },
   openGraph: {
-    title: "Chi siamo | On Smart",
+    title: "Chi siamo - OnSmart",
     description:
       "Soluzioni affidabili per la sicurezza: videosorveglianza, tecnologia smart, UPS e dispositivi professionali. La filosofia e l'approccio di On Smart.",
     url: `${CONTACTS_ADDRESS.BASE_URL}/chi-siamo`,
@@ -161,7 +160,7 @@ export default async function CarrelloPage() {
           </a>
         </div>
       </section>
-      <Script
+      <script
         id="json-ld-chi-siamo"
         type="application/ld+json"
         dangerouslySetInnerHTML={{

@@ -18,6 +18,16 @@ import {
   toNumber,
 } from "./bundle-page.utils";
 
+function toAbsoluteUrl(url: string) {
+  return /^https?:\/\//i.test(url) ? url : `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
+function normalizeOptionalText(value: unknown) {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 export default async function BundlePageContent({
   params,
   bundle,
@@ -99,24 +109,48 @@ export default async function BundlePageContent({
     .filter((item) => item.client_name.length > 0 && item.comment.length > 0);
 
   const absoluteBundleUrl = `${baseUrl}${canonicalPath}`;
+  const eanValue = normalizeOptionalText(bundle.ean);
+  const eanSchemaField = eanValue
+    ? eanValue.length === 13
+      ? { gtin13: eanValue }
+      : eanValue.length === 14
+        ? { gtin14: eanValue }
+        : { gtin: eanValue }
+    : {};
+
   const bundleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
+    url: absoluteBundleUrl,
     name: bundle.name,
     description: bundleDescriptionForSeo || bundle.nameFull,
     sku: bundle.id,
-    productID: bundle.ean,
+    productID: eanValue ?? bundle.id,
+    mpn: bundle.id,
+    identifier: eanValue
+      ? {
+          "@type": "PropertyValue",
+          propertyID: "EAN",
+          value: eanValue,
+        }
+      : {
+          "@type": "PropertyValue",
+          propertyID: "SKU",
+          value: bundle.id,
+        },
+    ...eanSchemaField,
     category: bundle.category_name,
     brand: {
       "@type": "Brand",
       name: bundle.brand_name,
     },
-    image: sliderImages,
+    image: sliderImages.map((url) => toAbsoluteUrl(url)),
     offers: {
       "@type": "Offer",
       url: absoluteBundleUrl,
       priceCurrency: "EUR",
       price: Number(bundle.price ?? 0),
+      itemCondition: "https://schema.org/NewCondition",
       availability: availability.schema,
     },
     ...(approvedReviews.length > 0
@@ -129,7 +163,10 @@ export default async function BundlePageContent({
           },
           review: approvedReviews.map((item) => ({
             "@type": "Review",
-            author: item.client_name,
+            author: {
+              "@type": "Person",
+              name: item.client_name,
+            },
             reviewBody: item.comment,
             reviewRating: {
               "@type": "Rating",

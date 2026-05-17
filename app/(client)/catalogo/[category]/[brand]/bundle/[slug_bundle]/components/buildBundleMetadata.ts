@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { baseUrl } from "@/types/baseUrl";
 import type { BundlePageData } from "./bundle-page.types";
+import { buildSeoDescription, buildSeoTitle, formatEuroPrice } from "@/lib/seo/metadata";
 
 export function buildBundleMetadata(bundle: BundlePageData): Metadata {
   const eanValue = bundle.ean?.trim();
@@ -9,9 +10,18 @@ export function buildBundleMetadata(bundle: BundlePageData): Metadata {
     : `${baseUrl}${bundle.imgSrc.startsWith("/") ? bundle.imgSrc : `/${bundle.imgSrc}`}`;
   const canonicalUrl = `${baseUrl}/catalogo/${bundle.category_slug}/${bundle.brand_slug}/bundle/${bundle.slug}`;
   const bundleDescription = (bundle.bundleMeta?.description ?? "").replace(/\s+/g, " ").trim();
-  const descriptionWithEan = eanValue
-    ? `${bundleDescription || bundle.nameFull}. Brand: ${bundle.brand_name}. Categoria: ${bundle.category_name}. EAN: ${eanValue}.`.trim()
-    : `${bundleDescription || bundle.nameFull}. Brand: ${bundle.brand_name}. Categoria: ${bundle.category_name}.`.trim();
+  const formattedPrice = formatEuroPrice(bundle.price);
+  const descriptionWithEan = buildSeoDescription({
+    parts: [
+      `Scopri il kit ${bundle.nameFull || bundle.name} di ${bundle.brand_name}.`,
+      formattedPrice ? `Prezzo ${formattedPrice}.` : "Prezzo aggiornato.",
+      `Componenti inclusi, vantaggi, disponibilità e spedizione in Italia.`,
+      `Soluzione per ${bundle.category_name}.`,
+      eanValue ? `EAN: ${eanValue}.` : undefined,
+      bundleDescription,
+    ],
+    fallback: `${bundle.nameFull}. Kit ${bundle.brand_name} nella categoria ${bundle.category_name}: componenti, prezzo e disponibilità.`,
+  });
   const keywordCandidates = [
     bundle.name,
     bundle.nameFull,
@@ -25,12 +35,12 @@ export function buildBundleMetadata(bundle: BundlePageData): Metadata {
     ...(bundle.bundleMeta?.advantages ?? []),
   ].filter(Boolean) as string[];
   const keywords = Array.from(new Set(keywordCandidates));
-  const description =
-    descriptionWithEan ||
-    `${bundle.nameFull}. Bundle ${bundle.brand_name} nella categoria ${bundle.category_name}.`;
+  const description = descriptionWithEan;
 
   return {
-    title: `${bundle.name} | Kit ${bundle.brand_name} ${eanValue ? `| EAN ${eanValue}` : ""}`.trim(),
+    title: buildSeoTitle(
+      `Kit ${bundle.name} ${bundle.brand_name}${eanValue ? ` EAN ${eanValue}` : ""} - Prezzo e componenti`,
+    ),
     description,
     keywords,
     alternates: {

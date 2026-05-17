@@ -1,4 +1,3 @@
-import Script from "next/script";
 import Carousel from "./carousel/Carousel";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import { slidesBanners } from "@/types/main-page-hero-banners.data";
@@ -16,7 +15,7 @@ export default function HeroSection() {
       </p>
       <Carousel />
 
-      <Script
+      <script
         id="home_hero_images"
         type="application/ld+json"
         dangerouslySetInnerHTML={{

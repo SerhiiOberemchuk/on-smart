@@ -5,6 +5,11 @@ import { baseUrl } from "@/types/baseUrl";
 import PageSlug from "./PageSlug";
 import { Suspense } from "react";
 import ProductPageFallback from "./ProductPageFallback";
+import {
+  buildSeoDescription,
+  buildSeoTitle,
+  formatEuroPrice,
+} from "@/lib/seo/metadata";
 
 function normalizeSlugLabel(value: unknown) {
   return typeof value === "string" ? value.replace(/[-_]+/g, " ").trim() : "";
@@ -41,9 +46,17 @@ export async function generateMetadata({
   const categoryLabel = normalizeSlugLabel(data.category_slug);
   const slugLabel = normalizeSlugLabel(data.slug);
   const metadataImageUrl = normalizeImageUrl(data.imgSrc, `${baseUrl}/logo.png`);
-  const descriptionWithEan = eanValue
-    ? `${data.nameFull ?? ""}. Brand: ${brandLabel}. Categoria: ${categoryLabel}. EAN: ${eanValue}.`.trim()
-    : `${data.nameFull ?? ""}. Brand: ${brandLabel}. Categoria: ${categoryLabel}.`.trim();
+  const formattedPrice = formatEuroPrice(data.price);
+  const descriptionWithEan = buildSeoDescription({
+    parts: [
+      `Acquista ${data.nameFull || data.name} di ${brandLabel}.`,
+      formattedPrice ? `Prezzo ${formattedPrice}.` : "Prezzo aggiornato.",
+      `Disponibilità, spedizione in Italia e supporto tecnico OnSmart.`,
+      `Categoria: ${categoryLabel}.`,
+      eanValue ? `EAN: ${eanValue}.` : undefined,
+    ],
+    fallback: `${data.nameFull || data.name} ${brandLabel}: prezzo, disponibilità e spedizione in Italia su OnSmart.`,
+  });
   const keywordCandidates = [
     data.name,
     data.nameFull,
@@ -58,7 +71,9 @@ export async function generateMetadata({
   const canonicalUrl = `${baseUrl}/catalogo/${data.category_slug}/${data.brand_slug}/${data.slug}`;
 
   return {
-    title: `${data.name} | ${brandLabel} ${eanValue ? `| EAN ${eanValue}` : ""}`.trim(),
+    title: buildSeoTitle(
+      `${data.name} ${brandLabel}${eanValue ? ` EAN ${eanValue}` : ""} - Prezzo e disponibilità`,
+    ),
     description: descriptionWithEan,
     keywords,
     alternates: {

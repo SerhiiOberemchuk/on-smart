@@ -1,6 +1,5 @@
 ﻿import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
-import Script from "next/script";
 
 import { baseUrl } from "@/types/baseUrl";
 import { BrandTypes } from "@/types/brands.types";
@@ -81,7 +80,7 @@ export default async function ListBrends({
           </li>
         ))}
       </ul>
-      <Script
+      <script
         id="brand-section-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

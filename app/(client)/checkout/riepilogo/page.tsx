@@ -43,7 +43,7 @@ function RiepilogoContent() {
     }
 
     toast.error(
-      "Pagamento non riuscito. Prova piu tardi oppure scegli un altro metodo di pagamento.",
+      "Pagamento non riuscito. Prova più tardi oppure scegli un altro metodo di pagamento.",
       PERSISTENT_PAYMENT_TOAST_OPTIONS,
     );
     router.replace(PAGES.CHECKOUT_PAGES.SUMMARY);

@@ -1,5 +1,3 @@
-import Script from "next/script";
-
 import { getTopSalesProducts } from "@/app/actions/product/get-top-sales-products";
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
 import { ProductType } from "@/db/schemas/product.schema";
@@ -63,6 +61,7 @@ export default async function TopSalesSection() {
             url,
             priceCurrency: "EUR",
             price: product.price,
+            itemCondition: "https://schema.org/NewCondition",
             availability:
               product.inStock > 0
                 ? "https://schema.org/InStock"
@@ -82,7 +81,7 @@ export default async function TopSalesSection() {
         isBottomLink={true}
       />
 
-      <Script
+      <script
         id="top-sales-section-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

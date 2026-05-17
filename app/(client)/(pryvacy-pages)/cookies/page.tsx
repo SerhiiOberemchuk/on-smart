@@ -1,20 +1,19 @@
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import { Metadata } from "next";
-import Script from "next/script";
 
 export const metadata: Metadata = {
-  title: "Cookie Policy | On Smart – Utilizzo dei Cookie e Preferenze",
+  title: "Cookie Policy - Utilizzo dei cookie e preferenze",
   description:
-    "Cookie Policy di On Smart: informazioni sull’uso dei cookie tecnici, analitici, di terze parti e di profilazione. Scopri come gestire le preferenze e come trattiamo i dati di navigazione.",
+    "Cookie Policy di OnSmart: informazioni sull'uso dei cookie tecnici, analitici, di terze parti e di profilazione. Scopri come gestire le preferenze e come trattiamo i dati di navigazione.",
   alternates: {
     canonical: `${CONTACTS_ADDRESS.BASE_URL}/cookies`,
   },
   openGraph: {
-    title: "Cookie Policy | On Smart",
+    title: "Cookie Policy",
     description:
-      "Informazioni dettagliate sull’uso dei cookie, tipologie utilizzate, durata, gestione delle preferenze e servizi di terze parti.",
+      "Informazioni dettagliate sull'uso dei cookie, tipologie utilizzate, durata, gestione delle preferenze e servizi di terze parti.",
     url: `${CONTACTS_ADDRESS.BASE_URL}/cookies`,
-    siteName: "On Smart",
+    siteName: "OnSmart",
     locale: "it_IT",
     type: "article",
   },
@@ -24,7 +23,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function InformativaSullaPrivacy() {
+export default function CookiePolicy() {
   return (
     <section>
       <h1 className="H2 mb-6 text-white">Cookie Policy</h1>
@@ -33,57 +32,52 @@ export default function InformativaSullaPrivacy() {
           <h2>1. Cosa sono i cookie</h2>
           <p>
             I cookie sono piccoli file di testo che i siti web visitati inviano al dispositivo
-            dell`utente, dove vengono memorizzati per essere poi ritrasmessi agli stessi siti in
-            occasione di visite successive. Servono per migliorare l`esperienza di navigazione,
+            dell'utente, dove vengono memorizzati per essere poi ritrasmessi agli stessi siti in
+            occasione di visite successive. Servono per migliorare l'esperienza di navigazione,
             memorizzare preferenze o raccogliere informazioni statistiche anonime.
           </p>
         </li>
         <li>
           <h2>2. Tipologie di cookie utilizzati</h2>
           <p>
-            Il sito on-smart.it utilizza le seguenti tipologie di cookie: Cookie tecnici: necessari
-            al corretto funzionamento del sito (ad esempio per il carrello, la gestione degli ordini
-            o la lingua). Non richiedono il consenso dell`utente. Cookie analitici: utilizzati per
-            raccogliere informazioni statistiche anonime sull`uso del sito tramite Google Analytics
-            (numero di visitatori, pagine visitate, durata della visita, ecc.). Cookie di terze
-            parti: provenienti da servizi esterni come PayPal, Google o social network, necessari
-            per garantire funzionalità di pagamento o analisi. Cookie di profilazione: utilizzati
-            per mostrare contenuti o offerte personalizzate. Vengono installati solo previo consenso
-            esplicito.
+            Il sito on-smart.it utilizza cookie tecnici necessari al corretto funzionamento del sito,
+            cookie analitici per raccogliere statistiche anonime sull'uso del sito, cookie di terze
+            parti collegati a servizi esterni come pagamenti e analytics, e cookie di profilazione
+            installati solo previo consenso esplicito.
           </p>
         </li>
         <li>
           <h2>3. Gestione dei cookie</h2>
           <p>
-            Al primo accesso al sito, un banner informa l`utente sull`uso dei cookie e consente di:
-            Accettare tutti i cookie; Rifiutare quelli non essenziali; Personalizzare le preferenze.
-            Le preferenze possono essere modificate in qualsiasi momento tramite le impostazioni del
-            browser o il link “Gestisci cookie”.{" "}
+            Al primo accesso al sito, un banner informa l'utente sull'uso dei cookie e consente di
+            accettare tutti i cookie, rifiutare quelli non essenziali o personalizzare le
+            preferenze. Le preferenze possono essere modificate in qualsiasi momento tramite le
+            impostazioni del browser o il link "Gestisci cookie".
           </p>
         </li>
         <li>
-          <h2>4. Cookie di terze parti utilizzati:</h2>
+          <h2>4. Cookie di terze parti utilizzati</h2>
           <p>
-            Google Analytics (Google LLC): servizio di analisi web che utilizza cookie per
-            raccogliere dati anonimi sul traffico. <br /> Maggiori informazioni su
-            policies.google.com/privacy. <br /> PayPal (PayPal Europe S.à r.l.): per la gestione dei
-            pagamenti online. <br /> Informativa completa su paypal.com/privacy.
+            Google Analytics può utilizzare cookie per raccogliere dati anonimi sul traffico.
+            PayPal e altri provider di pagamento possono impostare cookie necessari alla gestione
+            dei pagamenti online. Le rispettive informative sono disponibili sui siti dei singoli
+            fornitori.
           </p>
         </li>
         <li>
-          <h2> 5. Durata dei cookie</h2>
+          <h2>5. Durata dei cookie</h2>
           <p>
-            I cookie hanno una durata variabile: di sessione: vengono eliminati alla chiusura del
-            browser; persistenti: restano memorizzati fino alla scadenza o cancellazione manuale da
-            parte dell`utente.
+            I cookie hanno una durata variabile: alcuni vengono eliminati alla chiusura del browser,
+            mentre altri restano memorizzati fino alla scadenza prevista o alla cancellazione
+            manuale da parte dell'utente.
           </p>
         </li>
         <li>
-          <h2> 6. Come disabilitare i cookie </h2>
+          <h2>6. Come disabilitare i cookie</h2>
           <p>
-            L`utente può gestire o disabilitare i cookie tramite le impostazioni del proprio
-            browser: Google Chrome: support.google.com/chrome/answer/95647 Mozilla Firefox:
-            support.mozilla.org Safari: support.apple.com Microsoft Edge: support.microsoft.com
+            L'utente può gestire o disabilitare i cookie tramite le impostazioni del proprio
+            browser. Le istruzioni sono disponibili nelle guide ufficiali di Google Chrome, Mozilla
+            Firefox, Safari e Microsoft Edge.
           </p>
         </li>
         <li>
@@ -95,7 +89,7 @@ export default function InformativaSullaPrivacy() {
           </p>
         </li>
       </ul>
-      <Script
+      <script
         id="json-ld-cookie-policy"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -104,11 +98,11 @@ export default function InformativaSullaPrivacy() {
             "@type": "WebPage",
             name: "Cookie Policy",
             description:
-              "Informazioni sull'uso dei cookie su on-smart.it: cookie tecnici, analitici, di terze parti e di profilazione. Dettagli sulla gestione delle preferenze e durata dei cookie.",
-            url: `${CONTACTS_ADDRESS.BASE_URL}/cookie-policy`,
+              "Informazioni sull'uso dei cookie su on-smart.it: cookie tecnici, analitici, di terze parti e di profilazione. Dettagli sulla gestione delle preferenze e sulla durata dei cookie.",
+            url: `${CONTACTS_ADDRESS.BASE_URL}/cookies`,
             publisher: {
               "@type": "Organization",
-              name: "On Smart",
+              name: "OnSmart",
               url: `${CONTACTS_ADDRESS.BASE_URL}`,
               logo: {
                 "@type": "ImageObject",
@@ -121,7 +115,7 @@ export default function InformativaSullaPrivacy() {
                 name: "Cosa sono i cookie?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "I cookie sono piccoli file di testo che vengono memorizzati nel dispositivo dell’utente per migliorare la navigazione e fornire funzionalità avanzate.",
+                  text: "I cookie sono piccoli file di testo memorizzati nel dispositivo dell'utente per migliorare la navigazione e fornire funzionalità avanzate.",
                 },
               },
               {
@@ -142,18 +136,10 @@ export default function InformativaSullaPrivacy() {
               },
               {
                 "@type": "Question",
-                name: "Quali servizi di terze parti utilizzano cookie?",
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: "Servizi come Google Analytics e PayPal possono impostare cookie per analisi e pagamenti.",
-                },
-              },
-              {
-                "@type": "Question",
                 name: "Qual è la durata dei cookie?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Alcuni cookie durano solo fino alla chiusura del browser, mentre altri persistono per più tempo fino alla scadenza.",
+                  text: "Alcuni cookie durano solo fino alla chiusura del browser, mentre altri persistono fino alla scadenza prevista.",
                 },
               },
             ],

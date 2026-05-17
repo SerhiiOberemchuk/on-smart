@@ -1,11 +1,10 @@
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
 import { Metadata } from "next";
-import Script from "next/script";
 
 export const metadata: Metadata = {
-  title: "Informativa sulla Privacy | OnSmart",
+  title: "Informativa sulla privacy",
   description:
-    "Scopri come OnSmart raccoglie, utilizza e protegge i dati personali conforme al GDPR.",
+    "Scopri come OnSmart raccoglie, utilizza e protegge i dati personali in conformità al GDPR.",
   alternates: {
     canonical: `${CONTACTS_ADDRESS.BASE_URL}/informativa-sulla-privacy`,
   },
@@ -127,7 +126,7 @@ export default function InformativaSullaPrivacy() {
           </p>
         </li>
       </ol>
-      <Script
+      <script
         id="garanzia-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -159,7 +158,7 @@ export default function InformativaSullaPrivacy() {
         }}
       />
 
-      <Script
+      <script
         id="garanzia-faq-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{

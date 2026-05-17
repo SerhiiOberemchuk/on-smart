@@ -2,7 +2,6 @@
 import SmartImage from "@/components/SmartImage";
 import LinkYellow from "@/components/YellowLink";
 import { baseUrl } from "@/types/baseUrl";
-import Script from "next/script";
 import { BrandTypes } from "@/types/brands.types";
 import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
 import Link from "next/link";
@@ -18,6 +17,19 @@ function buildProductHref(product: ProductType): string {
   }
 
   return `/catalogo/${product.category_slug}/${product.brand_slug}/${product.slug}`;
+}
+
+function toAbsoluteImageUrl(src: string) {
+  if (!src) return `${baseUrl}/og-image.png`;
+  return src.startsWith("http://") || src.startsWith("https://") ? src : `${baseUrl}${src}`;
+}
+
+function normalizeDescription(description: string) {
+  return description
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join(" ");
 }
 
 export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes["brand_slug"] }) {
@@ -42,9 +54,10 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
     "@context": "https://schema.org",
     "@type": "Brand",
     name: brand.name,
-    logo: brand.image,
+    logo: toAbsoluteImageUrl(brand.image),
+    image: toAbsoluteImageUrl(brand.image),
     url: `${baseUrl}/brand/${brand_slug}`,
-    description: brand.description,
+    description: normalizeDescription(brand.description),
   };
 
   const productsJsonLd = {
@@ -59,7 +72,7 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
       item: {
         "@type": "Product",
         name: product.name,
-        image: product.imgSrc,
+        image: toAbsoluteImageUrl(product.imgSrc),
         brand: {
           "@type": "Brand",
           name: brand.name,
@@ -70,6 +83,7 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
           "@type": "Offer",
           priceCurrency: "EUR",
           price: product.price,
+          itemCondition: "https://schema.org/NewCondition",
           url: `${baseUrl}${buildProductHref(product)}`,
           availability:
             product.inStock > 0
@@ -161,17 +175,17 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
           </div>
         </section>
       )}
-      <Script
+      <script
         id="brand-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(brandJsonLd) }}
       />
-      <Script
+      <script
         id="brand-products-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productsJsonLd) }}
       />
-      <Script
+      <script
         id="brand-breadcrumbs-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}

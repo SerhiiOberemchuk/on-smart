@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
 import { notFound } from "next/navigation";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
+import { buildSeoDescription, buildSeoTitle, normalizeSeoText } from "@/lib/seo/metadata";
 
 type Props = { params: Promise<{ brand_slug: string }> };
 
@@ -16,8 +17,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const canonical = `${CONTACTS_ADDRESS.BASE_URL}/brand/${brand_slug}`;
-  const title = `${data.name} - Prodotti ufficiali OnSmart`;
-  const description = `Scopri i migliori prodotti del brand ${data.name}: videosorveglianza, accessori e soluzioni professionali disponibili su OnSmart.`;
+  const title = buildSeoTitle(`${data.name} - Prodotti per sicurezza e smart home`);
+  const description = buildSeoDescription({
+    parts: [
+      `Scopri i prodotti ${data.name}: telecamere, antifurti, accessori e soluzioni professionali disponibili su OnSmart.`,
+      normalizeSeoText(data.description),
+    ],
+    fallback: `Prodotti ${data.name} per videosorveglianza, sicurezza e smart home disponibili su OnSmart.`,
+  });
   const imageUrl = data.image || `${CONTACTS_ADDRESS.BASE_URL}/og-image.png`;
 
   return {
