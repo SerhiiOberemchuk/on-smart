@@ -20,14 +20,11 @@ const STATIC_PATHS = [
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   "use cache";
-  cacheLife("days");
+  // cacheLife("days");
 
-  const [productsResponse, bundlesResponse, brandsResponse, categoriesResponse] = await Promise.all([
-    getAllProducts(),
-    getAllBundles(),
-    getAllBrands(),
-    getAllCategoryProducts(),
-  ]);
+  const [productsResponse, bundlesResponse, brandsResponse, categoriesResponse] = await Promise.all(
+    [getAllProducts(), getAllBundles(), getAllBrands(), getAllCategoryProducts()],
+  );
 
   const products = (productsResponse.success ? productsResponse.data : []).filter(
     (product) => product.productType === "product" && product.parent_product_id === null,
