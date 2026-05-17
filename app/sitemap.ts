@@ -20,7 +20,7 @@ const STATIC_PATHS = [
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   "use cache";
-  // cacheLife("days");
+  cacheLife("default");
 
   const [productsResponse, bundlesResponse, brandsResponse, categoriesResponse] = await Promise.all(
     [getAllProducts(), getAllBundles(), getAllBrands(), getAllCategoryProducts()],
