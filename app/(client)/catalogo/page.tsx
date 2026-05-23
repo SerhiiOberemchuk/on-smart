@@ -15,9 +15,11 @@ import {
   hasCatalogFiltersApplied,
 } from "@/lib/catalog/catalog-query";
 import { getCatalogFilters } from "@/lib/get-catalog-filters";
+import { JsonLd } from "@/lib/seo/JsonLd";
 import { baseUrl } from "@/types/baseUrl";
 import { Metadata } from "next/types";
 import { Suspense } from "react";
+import type { CollectionPage, WithContext } from "schema-dts";
 
 type CatalogFilterState = {
   isAnyFilterApplied: boolean;
@@ -185,15 +187,9 @@ async function CatalogJsonLdContent({
         url: `${baseUrl}${buildProductHref(product)}`,
       })),
     },
-  };
+  } satisfies WithContext<CollectionPage>;
 
-  return (
-    <script
-      id="catalogo-jsonld"
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
-  );
+  return <JsonLd id="catalogo-jsonld" data={jsonLd} />;
 }
 
 function CatalogoContent({

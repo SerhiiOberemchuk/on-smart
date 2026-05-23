@@ -8,7 +8,14 @@ import Link from "next/link";
 import LinkYellow from "@/components/YellowLink";
 import { getAllProductsFiltered } from "@/app/actions/product/get-all-products-filtered";
 import { ProductType } from "@/db/schemas/product.schema";
+import { JsonLd } from "@/lib/seo/JsonLd";
 import { buildSeoDescription, buildSeoTitle, normalizeSeoText } from "@/lib/seo/metadata";
+import {
+  buildOfferPriceSpecification,
+  buildOfferShippingAndReturnPolicy,
+  buildProductPhysicalProperties,
+} from "@/lib/seo/product-structured-data";
+import type { BreadcrumbList, CollectionPage, WithContext } from "schema-dts";
 
 type Props = { params: Promise<{ categoria: string }> };
 
@@ -126,33 +133,43 @@ export default async function PageCategoria({ params }: Props) {
       name: `Prodotti della categoria ${category.name}`,
       numberOfItems: productsResponse.meta.total,
       itemListOrder: "https://schema.org/ItemListOrderAscending",
-      itemListElement: products.map((product, index) => ({
-        "@type": "ListItem",
-        position: index + 1,
-        item: {
-          "@type": "Product",
-          name: product.name,
-          image: toAbsoluteImageUrl(product.imgSrc),
-          brand: {
-            "@type": "Brand",
-            name: product.brand_slug.replace(/[-_]+/g, " ").trim(),
+      itemListElement: products.map((product, index) => {
+        const productPrice = Number(product.price ?? 0);
+
+        return {
+          "@type": "ListItem",
+          position: index + 1,
+          item: {
+            "@type": "Product",
+            name: product.name,
+            image: toAbsoluteImageUrl(product.imgSrc),
+            brand: {
+              "@type": "Brand",
+              name: product.brand_slug.replace(/[-_]+/g, " ").trim(),
+            },
+            category: category.name,
+            ...buildProductPhysicalProperties(product),
+            offers: {
+              "@type": "Offer",
+              priceCurrency: "EUR",
+              price: productPrice,
+              itemCondition: "https://schema.org/NewCondition",
+              availability:
+                product.inStock > 0
+                  ? "https://schema.org/InStock"
+                  : "https://schema.org/OutOfStock",
+              url: `${baseUrl}${buildProductHref(product)}`,
+              ...buildOfferPriceSpecification({
+                currentPrice: product.price,
+                oldPrice: product.oldPrice,
+              }),
+              ...buildOfferShippingAndReturnPolicy(productPrice),
+            },
           },
-          category: category.name,
-          offers: {
-            "@type": "Offer",
-            priceCurrency: "EUR",
-            price: product.price,
-            itemCondition: "https://schema.org/NewCondition",
-            availability:
-              product.inStock > 0
-                ? "https://schema.org/InStock"
-                : "https://schema.org/OutOfStock",
-            url: `${baseUrl}${buildProductHref(product)}`,
-          },
-        },
-      })),
+        };
+      }),
     },
-  };
+  } satisfies WithContext<CollectionPage>;
   const breadcrumbsJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -170,7 +187,7 @@ export default async function PageCategoria({ params }: Props) {
         item: `${baseUrl}/categoria/${category.category_slug}`,
       },
     ],
-  };
+  } satisfies WithContext<BreadcrumbList>;
 
   return (
     <>
@@ -237,16 +254,8 @@ export default async function PageCategoria({ params }: Props) {
         </section>
       )}
 
-      <script
-        id="category-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <script
-        id="category-breadcrumbs-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}
-      />
+      <JsonLd id="category-jsonld" data={jsonLd} />
+      <JsonLd id="category-breadcrumbs-jsonld" data={breadcrumbsJsonLd} />
     </>
   );
 }

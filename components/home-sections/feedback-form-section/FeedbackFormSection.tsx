@@ -1,6 +1,8 @@
 import FormFeedback from "@/components/FormFeedback/FormFeedback";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
+import { JsonLd } from "@/lib/seo/JsonLd";
 import { baseUrl } from "@/types/baseUrl";
+import type { ContactPage, WithContext } from "schema-dts";
 
 export default function FeedbackFormSection() {
   const headingId = "feedback-form-section-heading";
@@ -21,7 +23,7 @@ export default function FeedbackFormSection() {
       description:
         "Modulo di contatto per richiedere informazioni, consulenze tecniche o collaborazioni con OnSmart.",
     },
-  };
+  } satisfies WithContext<ContactPage>;
 
   return (
     <section
@@ -50,11 +52,7 @@ export default function FeedbackFormSection() {
         </div>
       </div>
 
-      <script
-        id="feedback-form-section-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd id="feedback-form-section-jsonld" data={jsonLd} />
     </section>
   );
 }

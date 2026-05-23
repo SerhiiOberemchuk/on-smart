@@ -1,11 +1,5 @@
-export default function BundleStructuredData({ data }: { data: object }) {
-  return (
-    <script
-      id="bundle-jsonld"
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(data),
-      }}
-    />
-  );
+import { JsonLd, type JsonLdData } from "@/lib/seo/JsonLd";
+
+export default function BundleStructuredData({ data }: { data: JsonLdData }) {
+  return <JsonLd id="bundle-jsonld" data={data} />;
 }

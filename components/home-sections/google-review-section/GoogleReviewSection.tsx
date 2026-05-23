@@ -3,7 +3,9 @@ import LinkYellow from "@/components/YellowLink";
 import { getGoogleReviewsAction } from "@/app/actions/goodle-reviews/get-google-reviews";
 import { address } from "@/json/adress";
 import { telephone } from "@/json/telephone";
+import { JsonLd } from "@/lib/seo/JsonLd";
 import { baseUrl } from "@/types/baseUrl";
+import type { ElectronicsStore, PostalAddress, WithContext } from "schema-dts";
 
 import ReviewList from "./ReviewList/ReviewList";
 
@@ -25,6 +27,7 @@ export default async function GoogleReviewSection() {
   const averageRating = hasReviews
     ? reviews.reduce((sum, item) => sum + Number(item.rating), 0) / reviews.length
     : 5;
+  const storeAddress: PostalAddress = { ...address, "@type": "PostalAddress" };
 
   const jsonLd = hasReviews
     ? {
@@ -35,7 +38,7 @@ export default async function GoogleReviewSection() {
         image: `${baseUrl}/logo.png`,
         priceRange: "EUR",
         telephone,
-        address,
+        address: storeAddress,
         aggregateRating: {
           "@type": "AggregateRating",
           ratingValue: averageRating.toFixed(1),
@@ -59,7 +62,7 @@ export default async function GoogleReviewSection() {
           },
           reviewAspect: "customer service",
         })),
-      }
+      } satisfies WithContext<ElectronicsStore>
     : null;
 
   return (
@@ -103,13 +106,7 @@ export default async function GoogleReviewSection() {
         className="mx-auto flex w-fit"
       />
 
-      {jsonLd ? (
-        <script
-          id="google-review-section-jsonld"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      ) : null}
+      {jsonLd ? <JsonLd id="google-review-section-jsonld" data={jsonLd} /> : null}
     </section>
   );
 }

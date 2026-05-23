@@ -1,8 +1,10 @@
 ﻿import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
 
+import { JsonLd } from "@/lib/seo/JsonLd";
 import { baseUrl } from "@/types/baseUrl";
 import { BrandTypes } from "@/types/brands.types";
+import type { ItemList, WithContext } from "schema-dts";
 
 type BrandListResult = {
   success: boolean;
@@ -54,7 +56,7 @@ export default async function ListBrends({
         },
       };
     }),
-  };
+  } satisfies WithContext<ItemList>;
 
   return (
     <>
@@ -80,11 +82,7 @@ export default async function ListBrends({
           </li>
         ))}
       </ul>
-      <script
-        id="brand-section-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd id="brand-section-jsonld" data={jsonLd} />
     </>
   );
 }

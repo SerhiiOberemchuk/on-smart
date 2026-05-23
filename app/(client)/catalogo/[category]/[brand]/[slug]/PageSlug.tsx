@@ -10,8 +10,15 @@ import ProductCharacteristicsSection from "@/components/ProductPageSections/Prod
 import VisualProductSection from "@/components/ProductPageSections/VisualTopSection/VisualProductSection";
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
 import type { ProductType } from "@/db/schemas/product.schema";
+import { JsonLd } from "@/lib/seo/JsonLd";
+import {
+  buildOfferPriceSpecification,
+  buildOfferShippingAndReturnPolicy,
+  buildProductPhysicalProperties,
+} from "@/lib/seo/product-structured-data";
 import { baseUrl } from "@/types/baseUrl";
 import { notFound } from "next/navigation";
+import type { BreadcrumbList, Product, WithContext } from "schema-dts";
 
 function toAbsoluteUrl(url: string) {
   return /^https?:\/\//i.test(url) ? url : `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
@@ -31,6 +38,12 @@ function normalizeImageList(values: unknown[]) {
   return values.filter(
     (value): value is string => typeof value === "string" && value.trim().length > 0,
   );
+}
+
+function toIsoDateOrUndefined(value: unknown) {
+  if (!value) return undefined;
+  const date = value instanceof Date ? value : new Date(String(value));
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
 async function getVariantsForProduct(product: ProductType): Promise<ProductType[] | null> {
@@ -108,6 +121,7 @@ export default async function PageSlug({
   const productImages = sliderImages.map((url) => toAbsoluteUrl(url));
   const reviews = productDetails?.characteristics_valutazione ?? [];
   const reviewCount = reviews.length;
+  const productPrice = Number(product.price ?? 0);
   const eanSchemaField = eanValue
     ? eanValue.length === 13
       ? { gtin13: eanValue }
@@ -139,6 +153,7 @@ export default async function PageSlug({
           value: product.id,
         },
     ...eanSchemaField,
+    ...buildProductPhysicalProperties(product),
     brand: {
       "@type": "Brand",
       name: brandDisplayName,
@@ -147,10 +162,15 @@ export default async function PageSlug({
       "@type": "Offer",
       url: productUrl,
       priceCurrency: "EUR",
-      price: Number(product.price ?? 0),
+      price: productPrice,
       itemCondition: "https://schema.org/NewCondition",
       availability:
         product.inStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      ...buildOfferPriceSpecification({
+        currentPrice: product.price,
+        oldPrice: product.oldPrice,
+      }),
+      ...buildOfferShippingAndReturnPolicy(productPrice),
     },
 
     ...(product.rating && reviewCount > 0 && {
@@ -168,6 +188,7 @@ export default async function PageSlug({
           "@type": "Person",
           name: r.client_name,
         },
+        datePublished: toIsoDateOrUndefined(r.created_at),
         reviewBody: r.comment,
         reviewRating: {
           "@type": "Rating",
@@ -176,7 +197,7 @@ export default async function PageSlug({
         },
       })),
     }),
-  };
+  } satisfies WithContext<Product>;
 
   const breadcrumbsJsonLd = {
     "@context": "https://schema.org",
@@ -207,7 +228,7 @@ export default async function PageSlug({
         item: productUrl,
       },
     ],
-  };
+  } satisfies WithContext<BreadcrumbList>;
 
   return (
     <>
@@ -234,20 +255,8 @@ export default async function PageSlug({
           isBottomLink={false}
         />
       ) : null}
-      <script
-        id="product-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(productJsonLd),
-        }}
-      />
-      <script
-        id="product-breadcrumbs-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbsJsonLd),
-        }}
-      />
+      <JsonLd id="product-jsonld" data={productJsonLd} />
+      <JsonLd id="product-breadcrumbs-jsonld" data={breadcrumbsJsonLd} />
     </>
   );
 }

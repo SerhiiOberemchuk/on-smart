@@ -2,12 +2,18 @@ import { getFotoFromGallery } from "@/app/actions/foto-galery/get-foto-from-gall
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
 import { getProductSpecificheById } from "@/app/actions/product-specifiche/get-product-specifiche";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import {
+  buildOfferPriceSpecification,
+  buildOfferShippingAndReturnPolicy,
+  buildProductPhysicalProperties,
+} from "@/lib/seo/product-structured-data";
 import { baseUrl } from "@/types/baseUrl";
 import { redirect } from "next/navigation";
 import BundleDetailsTabsSection from "./BundleDetailsTabsSection";
 import BundleHeroSection from "./BundleHeroSection";
 import BundleStructuredData from "./BundleStructuredData";
 import type { BundlePageData, BundlePageParams, IncludedBundleProduct } from "./bundle-page.types";
+import type { ItemAvailability, Product, WithContext } from "schema-dts";
 import {
   getBundleAvailability,
   mapBundleToProduct,
@@ -139,6 +145,7 @@ export default async function BundlePageContent({
           value: bundle.id,
         },
     ...eanSchemaField,
+    ...buildProductPhysicalProperties(bundle),
     category: bundle.category_name,
     brand: {
       "@type": "Brand",
@@ -149,9 +156,14 @@ export default async function BundlePageContent({
       "@type": "Offer",
       url: absoluteBundleUrl,
       priceCurrency: "EUR",
-      price: Number(bundle.price ?? 0),
+      price: currentPrice,
       itemCondition: "https://schema.org/NewCondition",
-      availability: availability.schema,
+      availability: availability.schema as ItemAvailability,
+      ...buildOfferPriceSpecification({
+        currentPrice: bundle.price,
+        oldPrice: bundle.oldPrice,
+      }),
+      ...buildOfferShippingAndReturnPolicy(currentPrice),
     },
     ...(approvedReviews.length > 0
       ? {
@@ -176,7 +188,7 @@ export default async function BundlePageContent({
           })),
         }
       : {}),
-  };
+  } satisfies WithContext<Product>;
 
   return (
     <>
