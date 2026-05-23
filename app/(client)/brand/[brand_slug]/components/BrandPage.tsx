@@ -8,6 +8,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllProductsFiltered } from "@/app/actions/product/get-all-products-filtered";
 import { ProductType } from "@/db/schemas/product.schema";
+import { JsonLd } from "@/lib/seo/JsonLd";
+import {
+  buildOfferPriceSpecification,
+  buildOfferShippingAndReturnPolicy,
+  buildProductPhysicalProperties,
+} from "@/lib/seo/product-structured-data";
+import type { Brand, BreadcrumbList, ItemList, WithContext } from "schema-dts";
 
 const BRAND_PRODUCTS_LIMIT = 24;
 
@@ -58,7 +65,7 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
     image: toAbsoluteImageUrl(brand.image),
     url: `${baseUrl}/brand/${brand_slug}`,
     description: normalizeDescription(brand.description),
-  };
+  } satisfies WithContext<Brand>;
 
   const productsJsonLd = {
     "@context": "https://schema.org",
@@ -66,33 +73,43 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
     name: `Prodotti del brand ${brand.name}`,
     itemListOrder: "https://schema.org/ItemListOrderAscending",
     numberOfItems: productsResponse.meta.total,
-    itemListElement: products.map((product, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      item: {
-        "@type": "Product",
-        name: product.name,
-        image: toAbsoluteImageUrl(product.imgSrc),
-        brand: {
-          "@type": "Brand",
-          name: brand.name,
+    itemListElement: products.map((product, index) => {
+      const productPrice = Number(product.price ?? 0);
+
+      return {
+        "@type": "ListItem",
+        position: index + 1,
+        item: {
+          "@type": "Product",
+          name: product.name,
+          image: toAbsoluteImageUrl(product.imgSrc),
+          brand: {
+            "@type": "Brand",
+            name: brand.name,
+          },
+          description: product.nameFull,
+          category: product.category_slug.replace(/[-_]+/g, " ").trim(),
+          ...buildProductPhysicalProperties(product),
+          offers: {
+            "@type": "Offer",
+            priceCurrency: "EUR",
+            price: productPrice,
+            itemCondition: "https://schema.org/NewCondition",
+            url: `${baseUrl}${buildProductHref(product)}`,
+            availability:
+              product.inStock > 0
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
+            ...buildOfferPriceSpecification({
+              currentPrice: product.price,
+              oldPrice: product.oldPrice,
+            }),
+            ...buildOfferShippingAndReturnPolicy(productPrice),
+          },
         },
-        description: product.nameFull,
-        category: product.category_slug.replace(/[-_]+/g, " ").trim(),
-        offers: {
-          "@type": "Offer",
-          priceCurrency: "EUR",
-          price: product.price,
-          itemCondition: "https://schema.org/NewCondition",
-          url: `${baseUrl}${buildProductHref(product)}`,
-          availability:
-            product.inStock > 0
-              ? "https://schema.org/InStock"
-              : "https://schema.org/OutOfStock",
-        },
-      },
-    })),
-  };
+      };
+    }),
+  } satisfies WithContext<ItemList>;
   const breadcrumbsJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -110,7 +127,7 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
         item: `${baseUrl}/brand/${brand_slug}`,
       },
     ],
-  };
+  } satisfies WithContext<BreadcrumbList>;
 
   return (
     <>
@@ -175,21 +192,9 @@ export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes
           </div>
         </section>
       )}
-      <script
-        id="brand-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(brandJsonLd) }}
-      />
-      <script
-        id="brand-products-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productsJsonLd) }}
-      />
-      <script
-        id="brand-breadcrumbs-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}
-      />
+      <JsonLd id="brand-jsonld" data={brandJsonLd} />
+      <JsonLd id="brand-products-jsonld" data={productsJsonLd} />
+      <JsonLd id="brand-breadcrumbs-jsonld" data={breadcrumbsJsonLd} />
     </>
   );
 }

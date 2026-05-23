@@ -1,7 +1,14 @@
 import { getTopSalesProducts } from "@/app/actions/product/get-top-sales-products";
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
 import { ProductType } from "@/db/schemas/product.schema";
+import { JsonLd } from "@/lib/seo/JsonLd";
+import {
+  buildOfferPriceSpecification,
+  buildOfferShippingAndReturnPolicy,
+  buildProductPhysicalProperties,
+} from "@/lib/seo/product-structured-data";
 import { baseUrl } from "@/types/baseUrl";
+import type { ItemList, WithContext } from "schema-dts";
 
 function getProductUrl(product: ProductType) {
   const category = encodeURIComponent(product.category_slug);
@@ -41,6 +48,7 @@ export default async function TopSalesSection() {
     itemListElement: initialProducts.map((product, index) => {
       const url = getProductUrl(product);
       const image = product.imgSrc.startsWith("https") ? product.imgSrc : `${baseUrl}${product.imgSrc}`;
+      const productPrice = Number(product.price ?? 0);
 
       return {
         "@type": "ListItem",
@@ -56,21 +64,27 @@ export default async function TopSalesSection() {
             name: product.brand_slug || "OnSmart",
           },
           description: product.nameFull,
+          ...buildProductPhysicalProperties(product),
           offers: {
             "@type": "Offer",
             url,
             priceCurrency: "EUR",
-            price: product.price,
+            price: productPrice,
             itemCondition: "https://schema.org/NewCondition",
             availability:
               product.inStock > 0
                 ? "https://schema.org/InStock"
                 : "https://schema.org/OutOfStock",
+            ...buildOfferPriceSpecification({
+              currentPrice: product.price,
+              oldPrice: product.oldPrice,
+            }),
+            ...buildOfferShippingAndReturnPolicy(productPrice),
           },
         },
       };
     }),
-  };
+  } satisfies WithContext<ItemList>;
 
   return (
     <>
@@ -81,11 +95,7 @@ export default async function TopSalesSection() {
         isBottomLink={true}
       />
 
-      <script
-        id="top-sales-section-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd id="top-sales-section-jsonld" data={jsonLd} />
     </>
   );
 }

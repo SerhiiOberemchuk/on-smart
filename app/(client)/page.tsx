@@ -6,6 +6,8 @@ import GoogleReviewSection from "@/components/home-sections/google-review-sectio
 import HeroSection from "@/components/home-sections/hero-section/HeroSection";
 import TopSalesSection from "@/components/home-sections/top-sales-section/TopSalesSection";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
+import { JsonLd } from "@/lib/seo/JsonLd";
+import { buildOnlineStoreJsonLd } from "@/lib/seo/store-structured-data";
 import { Suspense } from "react";
 import FallbackHeroSection from "@/components/home-sections/hero-section/FallbackHeroSection";
 import {
@@ -15,6 +17,7 @@ import {
   GoogleReviewSectionFallback,
   TopSalesSectionFallback,
 } from "@/components/home-sections/fallbacks/HomeSectionFallbacks";
+import type { WebSite, WithContext } from "schema-dts";
 
 export const metadata: Metadata = {
   title: "Elettronica, videosorveglianza e smart home al miglior prezzo",
@@ -88,6 +91,16 @@ function HomePageFallback() {
 }
 
 async function HomeContent() {
+  const onlineStoreJsonLd = buildOnlineStoreJsonLd();
+
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "OnSmart",
+    url: CONTACTS_ADDRESS.BASE_URL,
+    inLanguage: "it-IT",
+  } satisfies WithContext<WebSite>;
+
   return (
     <>
       <h1 className="sr-only">
@@ -111,50 +124,8 @@ async function HomeContent() {
       <Suspense fallback={<FeedbackFormSectionFallback />}>
         <FeedbackFormSection />
       </Suspense>
-      <script
-        id="home_page_main"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            name: "OnSmart",
-            description:
-              "E-commerce di elettronica, videosorveglianza e smart home per casa e azienda.",
-            legalName: CONTACTS_ADDRESS.OWNER.COMPANY_NAME,
-            url: CONTACTS_ADDRESS.BASE_URL,
-            logo: `${CONTACTS_ADDRESS.BASE_URL}/logo.png`,
-            inLanguage: "it-IT",
-            sameAs: ["https://www.facebook.com/onsmart", "https://www.instagram.com/onsmart"],
-            address: {
-              "@type": "PostalAddress",
-              addressLocality: CONTACTS_ADDRESS.ADDRESS.CITY,
-              addressRegion: CONTACTS_ADDRESS.ADDRESS.REGION,
-              postalCode: CONTACTS_ADDRESS.ADDRESS.POSTAL_CODE,
-              addressCountry: CONTACTS_ADDRESS.ADDRESS.COUNTRY,
-            },
-            contactPoint: {
-              "@type": "ContactPoint",
-              telephone: CONTACTS_ADDRESS.PHONE_NUMBER,
-              contactType: "customer service",
-              availableLanguage: "Italian",
-            },
-          }),
-        }}
-      />
-      <script
-        id="home_page_website"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            name: "OnSmart",
-            url: CONTACTS_ADDRESS.BASE_URL,
-            inLanguage: "it-IT",
-          }),
-        }}
-      />
+      <JsonLd id="home_page_main" data={onlineStoreJsonLd} />
+      <JsonLd id="home_page_website" data={websiteJsonLd} />
     </>
   );
 }

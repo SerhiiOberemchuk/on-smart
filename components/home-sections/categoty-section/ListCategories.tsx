@@ -2,7 +2,9 @@
 import Link from "next/link";
 
 import { GetAllCategoriesResponse } from "@/app/actions/category/category-actions";
+import { JsonLd } from "@/lib/seo/JsonLd";
 import { baseUrl } from "@/types/baseUrl";
+import type { ItemList, WithContext } from "schema-dts";
 
 import styles from "./category.module.css";
 
@@ -49,7 +51,7 @@ export default async function ListCategories({
         },
       };
     }),
-  };
+  } satisfies WithContext<ItemList>;
 
   return (
     <>
@@ -79,11 +81,7 @@ export default async function ListCategories({
           </li>
         ))}
       </ul>
-      <script
-        id="category-section-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd id="category-section-jsonld" data={jsonLd} />
     </>
   );
 }
