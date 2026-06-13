@@ -106,7 +106,6 @@ export default function SumUpModalButton() {
         setIsProcessingResponse(true);
 
         try {
-          console.log("SumUp response:", { type, body });
           const created = createdRef.current;
           if (!created) {
             redirectToSumUpErrorState("sumup_missing_order_ref");

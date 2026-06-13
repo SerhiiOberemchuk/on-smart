@@ -34,7 +34,6 @@ export async function getAccessToken(): Promise<Result<string>> {
   if (!clientId || !secret) return { ok: false, error: { message: "PayPal credentials missing" } };
 
   const auth = Buffer.from(`${clientId}:${secret}`).toString("base64");
-  console.log(baseUrl());
 
   try {
     const res = await fetch(`${baseUrl()}/v1/oauth2/token`, {
@@ -46,7 +45,6 @@ export async function getAccessToken(): Promise<Result<string>> {
       body: "grant_type=client_credentials",
       cache: "no-store",
     });
-    console.log("getAccessToken", res);
 
     const debugId = res.headers.get("paypal-debug-id");
     const text = await res.text();
@@ -94,7 +92,6 @@ export async function paypalApi<T>(
       body: opts.body ? JSON.stringify(opts.body) : undefined,
       cache: "no-store",
     });
-    console.log("paypalApi: ", res);
 
     const debugId = res.headers.get("paypal-debug-id");
     const text = await res.text();

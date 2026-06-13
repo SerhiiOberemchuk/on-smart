@@ -8,6 +8,7 @@ import { useCheckoutStore } from "@/store/checkout-store";
 import BonificoDati from "./BonificoDati";
 import { MetodsPayment } from "@/types/bonifico.data";
 import { PAGES } from "@/types/pages.types";
+import { PAYPAL_COMMISSION_LABEL } from "@/utils/get-prices";
 
 export default function RiepilogoDatiPagamento({
   isModifica = true,
@@ -46,7 +47,9 @@ export default function RiepilogoDatiPagamento({
             )}
             {dataCheckoutStepPagamentoFinal.paymentMethod === "paypal" && (
               <p className="pl-8 text-text-grey">
-                Pagamento completato in modo sicuro tramite PayPal.
+                Pagamento completato in modo sicuro tramite PayPal.{" "}
+                <span className="text-yellow-500">{PAYPAL_COMMISSION_LABEL}</span> sull&apos;importo
+                totale (inclusa l&apos;opzione &quot;paga in rate&quot;).
               </p>
             )}
             {dataCheckoutStepPagamentoFinal.paymentMethod === "klarna" && (

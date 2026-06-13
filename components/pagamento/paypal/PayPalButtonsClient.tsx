@@ -13,7 +13,7 @@ import { deleteOrderByOrderId } from "@/app/actions/orders/delete-order";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useBasketStore } from "@/store/basket-store";
 import { PAGES } from "@/types/pages.types";
-import { getTotalPriceToPay } from "@/utils/get-prices";
+import { getTotalPriceToPayWithCommission } from "@/utils/get-prices";
 import { makeOrderNumber } from "@/utils/order-number";
 import { ulid } from "ulid";
 import { updateOrderInfoByOrderIDAction } from "@/app/actions/orders/udate-order-info";
@@ -76,9 +76,10 @@ export default function PayPalButtonsClient(props: Props) {
 
     setShowMessages(false);
 
-    const next = getTotalPriceToPay({
+    const next = getTotalPriceToPayWithCommission({
       totalPrice,
       deliveryMetod: dataFirstStep.deliveryMethod,
+      paymentMethod: "paypal",
     }).toFixed(2);
 
     setPriceToPay(next);

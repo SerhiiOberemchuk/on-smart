@@ -12,7 +12,14 @@ import {
   useCheckoutStore,
 } from "@/store/checkout-store";
 import { PAGES } from "@/types/pages.types";
-import { getDeliveryPrice, getIvaValue, getTotalPriceToPay } from "@/utils/get-prices";
+import {
+  getDeliveryPrice,
+  getIvaValue,
+  getPaymentCommission,
+  getTotalPriceToPay,
+  getTotalPriceToPayWithCommission,
+  PAYPAL_COMMISSION_LABEL,
+} from "@/utils/get-prices";
 
 export default function RepilogoComponent({
   totalPrice,
@@ -22,10 +29,18 @@ export default function RepilogoComponent({
   basket: BasketTypeUseCheckoutStore;
   isInputSconto?: boolean;
 }) {
-  const { setCheckoutData, setStep, step, dataFirstStep, setDelyveryPrice } = useCheckoutStore();
+  const { setCheckoutData, setStep, step, dataFirstStep, setDelyveryPrice, dataCheckoutStepPagamento } =
+    useCheckoutStore();
   const path = usePathname();
   const router = useRouter();
   const isCartPage = path === "/carrello";
+
+  const paymentMethod = dataCheckoutStepPagamento?.paymentMethod;
+  const baseTotalToPay = getTotalPriceToPay({
+    totalPrice,
+    deliveryMetod: dataFirstStep.deliveryMethod,
+  });
+  const commission = getPaymentCommission({ amount: baseTotalToPay, paymentMethod });
 
   useEffect(() => {
     if (!isCartPage) return;
@@ -80,12 +95,20 @@ export default function RepilogoComponent({
           ))}
         </ul>
 
+        {commission > 0 && (
+          <div className="flex items-center gap-2 justify-between text-yellow-500">
+            <span className="text_R">{PAYPAL_COMMISSION_LABEL}</span>
+            <span className="input_R_18">{commission.toFixed(2)} €</span>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <h4 className="H3 mr-1">Totale</h4>
           <span className="H4M">
-            {getTotalPriceToPay({
+            {getTotalPriceToPayWithCommission({
               totalPrice,
               deliveryMetod: dataFirstStep.deliveryMethod,
+              paymentMethod,
             }).toFixed(2)}{" "}
             €
           </span>

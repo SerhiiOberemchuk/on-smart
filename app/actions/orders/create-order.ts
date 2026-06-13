@@ -138,7 +138,7 @@ export async function createOrderAction({
         isMailSended = false;
       }
       try {
-        const telegramResult = await sendTelegramMessage({
+        await sendTelegramMessage({
           orderNumber,
           orderId,
           customerDisplayName,
@@ -152,7 +152,6 @@ export async function createOrderAction({
               ? dataFirstStep.deliveryPrice.toFixed(2)
               : "0",
         });
-        console.log("Telegram message result:", telegramResult);
       } catch (error) {
         console.error("Telegram message bot error: ", error);
       }
