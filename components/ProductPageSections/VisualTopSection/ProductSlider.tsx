@@ -50,7 +50,7 @@ export default function ProductSlider({
         key={`thumbs-${id}`}
         direction={"vertical"}
         spaceBetween={14}
-        slidesPerView={"auto"}
+        slidesPerView={5}
         freeMode={true}
         watchSlidesProgress={true}
         modules={[FreeMode]}
