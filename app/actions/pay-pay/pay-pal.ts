@@ -31,14 +31,12 @@ export async function createPayPalOrderAction({ total, referenceId }: PayPalDraf
       },
     },
   });
-  console.log(res);
 
   if (!res.ok) {
     console.error("PayPal create order failed:", res.error);
     return { ok: false, error: res.error };
   }
 
-  console.log("PayPal created order id:", res.data.id);
   return { ok: true, orderId: res.data.id };
 }
 

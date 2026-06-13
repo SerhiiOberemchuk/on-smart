@@ -1,12 +1,11 @@
 .product_vertical_slider {
   display: none;
   margin-inline: 0;
-  overflow: visible;
+  overflow: hidden;
   padding: 1px;
 }
 
 .product_vertical_slider .swiper-wrapper {
-  gap: 0.875rem;
   margin-bottom: auto;
 }
 .product_vertical_slider .swiper-wrapper .swiper-slide {

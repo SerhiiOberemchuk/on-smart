@@ -49,16 +49,17 @@ export default function ProductSlider({
       <Swiper
         key={`thumbs-${id}`}
         direction={"vertical"}
-        spaceBetween={0}
-        slidesPerView={7}
+        spaceBetween={14}
+        slidesPerView={"auto"}
+        freeMode={true}
         watchSlidesProgress={true}
         modules={[FreeMode]}
-        className="product_vertical_slider hidden w-24 md:block"
+        className="product_vertical_slider hidden max-h-133 w-24 md:block"
       >
         {sliderImages.map((image, index) => (
           <SwiperSlide
             key={index}
-            className={`card_gradient cursor-pointer rounded-sm ${
+            className={`card_gradient h-24 w-24 cursor-pointer rounded-sm ${
               index === activeSlideIndex ? "ring-1 ring-yellow-500/60" : ""
             }`}
             onClick={() => mainSwiper?.slideToLoop(index)}

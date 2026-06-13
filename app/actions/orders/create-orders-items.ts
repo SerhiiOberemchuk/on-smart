@@ -27,8 +27,6 @@ export async function createOrderItems({
   }
   const basketMap = new Map(basket.map((item) => [item.productId, item.quantity]));
 
-  console.log(basketMap);
-
   const orderItems: Omit<OrderItemsTypes, "id" | "createdAt" | "updatedAt">[] = productsInBasket
     .filter((product) => basketMap.has(product.id))
     .map((product) => ({
