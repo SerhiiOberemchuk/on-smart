@@ -178,6 +178,10 @@ type ReadResult<T> =
 - For mutations: full `updateTag` invalidation is present.
 - No new hardcoded cache-tag strings were introduced.
 - Action return type is stable and typed.
+- No `"use cache"` on session-dependent reads; account/private pages render dynamically (see section 17).
+- No `loading.tsx` files introduced (section 18).
+- No file exceeds 300 lines; files trending past ~150 lines are split by responsibility (section 18).
+- Every DB/session-dependent component is wrapped in `<Suspense>` with a structured skeleton (section 18).
 - No mojibake/encoding corruption in changed files.
   - Required check before finish: `rg -n "Р [РЂ-Уї]{1,2}Р [РЂ-Уї]|[ГђГ‘][A-Za-z]|пїЅ" <changed-files>`
 
@@ -214,9 +218,32 @@ type ReadResult<T> =
 - `error.tsx` is the last-resort protection for unexpected render-time failures; it does not replace typed read wrappers.
 - Use typed wrappers for expected data failures (`NOT_FOUND`, `DB_ERROR`, empty-state fallback) and `error.tsx` for everything that still escapes.
 - Prefer smaller route segments when the page has independently recoverable areas.
-- When a page area can fail independently and is driven by `searchParams`, prefer splitting it into a separate route segment or slot so it can own its own `loading.tsx` and `error.tsx`.
+- When a page area can fail independently and is driven by `searchParams`, prefer splitting it into a separate route segment or slot so it can own its own `error.tsx`; its data islands keep their own `<Suspense>` skeletons (`loading.tsx` is forbidden — section 18).
 
 Catalog guidance:
 
 - The catalog page is a good candidate for segmented rendering because filters, header/meta counters, and product list are independent read surfaces.
 - If the page is split further, each segment must keep search-param-driven behavior deterministic and must not duplicate expensive DB reads unnecessarily.
+
+## 17. Private (Per-User) Data — Caching
+
+The Next.js `"use cache"` store is shared across all users. Caching session-dependent data with a static key leaks one user's data to another — a critical correctness/privacy failure on a live shop.
+
+- Never place `"use cache"` in any function whose result depends on the session user (orders history, profile, addresses, wishlist, the session itself).
+- Per-user reads run dynamic: the page/action obtains the session (via `headers()`/`cookies()`, e.g. `requireCustomerSession()`) and queries the DB directly through plain uncached actions.
+- The `*CachedCore` pattern (section 4) is forbidden for account/private data in v1. No `CACHE_TAGS.account` namespace exists — deliberately.
+- If a future, measured need to cache per-user data arises: `userId` must be an explicit argument of the cached core (part of the cache key), with per-user tags added to `types/cache-trigers.constant.ts` first, and owner sign-off.
+- Account/private route segments (e.g. `/account/*`) are never prerendered or statically generated; verify in the build output.
+- Shared caches (products, brands, categories) remain fully cacheable. Joining cached public data to an uncached per-user id list is the correct pattern.
+
+Full context: `docs/specs/client-accounts/03-account-area.md` §6.
+
+## 18. Component Granularity, Orchestrators & Instant Shell
+
+The project runs `cacheComponents: true`: prerendering extracts each page's static HTML shell automatically, and uncached/runtime data access must sit under `<Suspense>` (bundled guide: `node_modules/next/dist/docs/01-app/02-guides/migrating-to-cache-components.md`). The rules:
+
+- **`loading.tsx` is forbidden.** Every navigation must instantly return the page's static structure; a route-level `loading.tsx` hides it behind a single full-area fallback. (Two legacy files are tracked for migration in `docs/to-do.md` #21 — never add new ones.)
+- **Pages and sections are thin orchestrators.** `page.tsx` returns static structure (headings, layout, static copy) immediately and composes small components; it awaits only what truly blocks rendering (404 check, `searchParams` parsing).
+- **Data-dependent UI lives in small async Server Components that fetch their own data**, each wrapped in `<Suspense>` at its own boundary with a **structured skeleton** fallback matching the island's shape (never a bare spinner). For client interactivity, pass a non-awaited `Promise<T>` prop read with `use()` under `<Suspense>` (section 15).
+- **File size:** target ~150 lines per file/component; anything over **300 lines MUST be split** (review blocker). One file = one zone of responsibility.
+- **No custom solutions:** implement patterns exactly as the library's official documentation prescribes (Next.js — bundled docs above); do not invent alternatives to documented APIs.

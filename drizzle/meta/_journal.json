@@ -225,6 +225,13 @@
       "when": 1775221113149,
       "tag": "0031_dizzy_zarda",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "5",
+      "when": 1783252534022,
+      "tag": "0032_account_tables",
+      "breakpoints": true
     }
   ]
 }

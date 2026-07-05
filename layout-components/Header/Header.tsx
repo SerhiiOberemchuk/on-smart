@@ -4,6 +4,7 @@ import Search from "./components/Search";
 import Cart from "./components/Cart";
 import MobileMenu from "./components/MobileMenu";
 import SearchMobile from "./components/SearchMobile";
+import AccountButton, { AccountButtonSkeleton } from "./components/AccountButton";
 import { Suspense } from "react";
 
 export default function Header() {
@@ -19,6 +20,9 @@ export default function Header() {
             <Search />
           </Suspense>
           <SearchMobile />
+          <Suspense fallback={<AccountButtonSkeleton />}>
+            <AccountButton />
+          </Suspense>
           <Cart />
           <MobileMenu />
         </div>

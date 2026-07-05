@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { signOutUser } from "@/app/actions/auth";
+import { signOutCustomer } from "@/app/actions/account/auth/sign-out";
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -147,7 +147,7 @@ export default function AdminDashboardShell({ children }: { children: React.Reac
         </div>
 
         <div className="admin-topbar-right">
-          <form action={signOutUser}>
+          <form action={signOutCustomer}>
             <AdminSignOutButton />
           </form>
         </div>

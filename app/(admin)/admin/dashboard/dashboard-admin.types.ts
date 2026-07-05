@@ -1,6 +1,6 @@
 ﻿export const URL_DASHBOARD = {
   ROOT: "/admin",
-  AUTH: "/admin/auth",
+  AUTH: "/accedi",
   DASHBOARD: "/admin/dashboard",
   SUB_DASHBOARD: {
     PRODUCTS: "/products",

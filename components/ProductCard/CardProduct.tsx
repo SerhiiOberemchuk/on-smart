@@ -6,6 +6,7 @@ import PricesBox from "../PricesBox";
 import StarsRating from "../StarsRating";
 import styles from "./product-styles.module.css";
 import ButtonOpenDialogAddToCart from "../ButtonOpenDialogAddToCart";
+import WishlistHeart from "../WishlistHeart";
 import { ProductType } from "@/db/schemas/product.schema";
 import clsx from "clsx";
 
@@ -35,7 +36,8 @@ export default function CardProduct({
     : `/catalogo/${category_slug}/${brand_slug}/${slug}`;
 
   return (
-    <article className={clsx(styles.card, className)}>
+    <article className={clsx("relative", styles.card, className)}>
+      <WishlistHeart productId={id} className="absolute top-2 right-2 z-10" />
       <HeaderProductCard oldPrice={oldPrice} inStock={inStock} isOnOrder={isOnOrder} id={id} />
       <figure className="">
         <Link href={productHref} aria-label={`Apri il prodotto ${name}`} prefetch={false}>

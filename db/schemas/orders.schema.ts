@@ -1,3 +1,4 @@
+import { user } from "@/auth-schema";
 import {
   CLIENT_TYPE_LIST,
   CURRENCY_LIST,
@@ -28,7 +29,9 @@ export const ordersSchema = mysqlTable(
   {
     id: varchar("id", { length: 36 }).primaryKey().notNull(),
 
-    userId: varchar("user_id", { length: 36 }),
+    userId: varchar("user_id", { length: 36 }).references(() => user.id, {
+      onDelete: "set null",
+    }),
 
     orderNumber: varchar("order_number", { length: 64 }).notNull().unique(),
 
@@ -181,7 +184,11 @@ export const paymentsSchema = mysqlTable(
 
 export type OrderPaymentTypes = typeof paymentsSchema.$inferSelect;
 
-export const ordersRelations = relations(ordersSchema, ({ many }) => ({
+export const ordersRelations = relations(ordersSchema, ({ one, many }) => ({
+  user: one(user, {
+    fields: [ordersSchema.userId],
+    references: [user.id],
+  }),
   items: many(orderItemsSchema),
   payments: many(paymentsSchema),
 }));
