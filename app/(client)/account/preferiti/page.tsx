@@ -27,7 +27,7 @@ async function PreferitiGrid() {
     return (
       <div className="flex flex-col items-start gap-4">
         <p className="helper_text">Non hai ancora prodotti tra i preferiti.</p>
-        <Link href="/catalogo" className="rounded-md bg-yellow-500 px-4 py-2 font-medium text-black">
+        <Link href="/catalogo" className="rounded-sm bg-yellow-500 px-4 py-2 font-medium text-black">
           Vai al catalogo
         </Link>
       </div>
@@ -47,7 +47,7 @@ function GridSkeleton() {
   return (
     <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
       {[0, 1, 2, 3].map((i) => (
-        <div key={i} className="h-80 w-full animate-pulse rounded-md bg-black/10" />
+        <div key={i} className="h-80 w-full animate-pulse rounded-sm bg-white/10" />
       ))}
     </div>
   );

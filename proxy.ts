@@ -13,9 +13,22 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/accedi", request.url));
   }
 
+  // The order-completed pages (incl. the SumUp return handler) must stay reachable
+  // even without a session — payment redirects can land here logged out.
+  if (pathname.startsWith("/checkout/completato")) {
+    return NextResponse.next();
+  }
+
   const hasSessionCookie = SESSION_COOKIE_NAMES.some((name) => request.cookies.has(name));
 
   if (!hasSessionCookie) {
+    // Checkout requires an account — guests must register first (spec decision #7).
+    if (pathname.startsWith("/checkout")) {
+      const registerUrl = new URL("/registrati", request.url);
+      registerUrl.searchParams.set("redirect", "/carrello");
+      return NextResponse.redirect(registerUrl);
+    }
+
     const loginUrl = new URL("/accedi", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
@@ -25,5 +38,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/account/:path*"],
+  matcher: ["/admin/:path*", "/account/:path*", "/checkout/:path*"],
 };

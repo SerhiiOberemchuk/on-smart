@@ -1,25 +1,15 @@
 "use client";
 
-import clsx from "clsx";
-import { useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 import ButtonYellow from "@/components/BattonYellow";
-import {
+import type {
   BasketTypeUseCheckoutStore,
   TotalPriseTypeuseCheckoutStore,
-  useCheckoutStore,
-} from "@/store/checkout-store";
-import { PAGES } from "@/types/pages.types";
-import {
-  getDeliveryPrice,
-  getIvaValue,
-  getPaymentCommission,
-  getTotalPriceToPay,
-  getTotalPriceToPayWithCommission,
-  PAYPAL_COMMISSION_LABEL,
-} from "@/utils/get-prices";
+} from "@/types/checkout-flow.types";
+import { DELIVERY_DATA } from "@/types/delivery.data";
+import { getIvaValue, getTotalPriceToPay } from "@/utils/get-prices";
 
 export default function RepilogoComponent({
   totalPrice,
@@ -29,42 +19,20 @@ export default function RepilogoComponent({
   basket: BasketTypeUseCheckoutStore;
   isInputSconto?: boolean;
 }) {
-  const { setCheckoutData, setStep, step, dataFirstStep, setDelyveryPrice, dataCheckoutStepPagamento } =
-    useCheckoutStore();
-  const path = usePathname();
   const router = useRouter();
-  const isCartPage = path === "/carrello";
 
-  const paymentMethod = dataCheckoutStepPagamento?.paymentMethod;
-  const baseTotalToPay = getTotalPriceToPay({
-    totalPrice,
-    deliveryMetod: dataFirstStep.deliveryMethod,
-  });
-  const commission = getPaymentCommission({ amount: baseTotalToPay, paymentMethod });
-
-  useEffect(() => {
-    if (!isCartPage) return;
-    setCheckoutData({ totalPrice, basket });
-  }, [basket, isCartPage, setCheckoutData, totalPrice]);
+  const shippingEstimate =
+    totalPrice > DELIVERY_DATA.FREE_THRESHOLD_TOTAL_PRISE ? 0 : DELIVERY_DATA.PRISE_DELIVERY;
+  const total = getTotalPriceToPay({ totalPrice });
 
   const handleProceedToOrder = () => {
     if (basket.length === 0) {
       toast.warn("Il carrello è vuoto");
       return;
     }
-
-    if (!step) {
-      setStep(1);
-    }
-
-    setCheckoutData({ totalPrice, basket });
-    router.push(PAGES.CHECKOUT_PAGES.INFORMATION);
+    // The /checkout page routes by session (account checkout vs guest registration).
+    router.push("/checkout");
   };
-
-  useEffect(() => {
-    const deliveryValue = getDeliveryPrice(totalPrice);
-    setDelyveryPrice({ deliveryPrice: deliveryValue });
-  }, [totalPrice, setDelyveryPrice]);
 
   return (
     <div className="sticky top-5 w-full xl:max-w-[426px]">
@@ -74,17 +42,11 @@ export default function RepilogoComponent({
           {[
             { title: "articolo (li)", price: totalPrice },
             { title: "IVA (inclusa)", price: getIvaValue(totalPrice) },
-            {
-              title: "Spedizione",
-              price:
-                dataFirstStep?.deliveryMethod === "RITIRO_NEGOZIO"
-                  ? 0
-                  : dataFirstStep.deliveryPrice,
-            },
+            { title: "Spedizione", price: shippingEstimate },
           ].map((item, index) => (
             <li key={index} className="flex items-center justify-between">
               <span className="text_R">
-                <span className={clsx(index !== 0 && "hidden")}>
+                <span className={index !== 0 ? "hidden" : undefined}>
                   {" "}
                   {basket.reduce((acc, basketItem) => acc + basketItem.quantity, 0)}
                 </span>{" "}
@@ -95,30 +57,14 @@ export default function RepilogoComponent({
           ))}
         </ul>
 
-        {commission > 0 && (
-          <div className="flex items-center gap-2 justify-between text-yellow-500">
-            <span className="text_R">{PAYPAL_COMMISSION_LABEL}</span>
-            <span className="input_R_18">{commission.toFixed(2)} €</span>
-          </div>
-        )}
-
         <div className="flex items-center justify-between">
           <h4 className="H3 mr-1">Totale</h4>
-          <span className="H4M">
-            {getTotalPriceToPayWithCommission({
-              totalPrice,
-              deliveryMetod: dataFirstStep.deliveryMethod,
-              paymentMethod,
-            }).toFixed(2)}{" "}
-            €
-          </span>
+          <span className="H4M">{total.toFixed(2)} €</span>
         </div>
 
-        {isCartPage && (
-          <ButtonYellow type="button" disabled={basket.length === 0} onClick={handleProceedToOrder}>
-            Procedi all'ordine
-          </ButtonYellow>
-        )}
+        <ButtonYellow type="button" disabled={basket.length === 0} onClick={handleProceedToOrder}>
+          Procedi all&apos;ordine
+        </ButtonYellow>
       </div>
     </div>
   );

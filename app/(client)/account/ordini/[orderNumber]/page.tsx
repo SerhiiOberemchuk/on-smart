@@ -14,10 +14,10 @@ export const metadata: Metadata = {
 export default function OrderDetailPage({ params }: { params: Promise<{ orderNumber: string }> }) {
   return (
     <section className="flex flex-col gap-6">
-      <Link href="/account/ordini" className="text-yellow-primary underline">
+      <Link href="/account/ordini" className="text-yellow-500 underline">
         ← Torna agli ordini
       </Link>
-      <Suspense fallback={<div className="h-64 w-full animate-pulse rounded-md bg-black/10" />}>
+      <Suspense fallback={<div className="h-64 w-full animate-pulse rounded-sm bg-white/10" />}>
         <OrderDetail params={params} />
       </Suspense>
     </section>
@@ -47,7 +47,7 @@ async function OrderDetail({ params }: { params: Promise<{ orderNumber: string }
         </p>
       </div>
 
-      <div className="rounded-md border border-stroke-grey">
+      <div className="rounded-sm border border-stroke-grey">
         {items.map((item) => (
           <div
             key={item.id}
@@ -109,7 +109,7 @@ async function OrderDetail({ params }: { params: Promise<{ orderNumber: string }
         </p>
 
         {payment?.status === "PENDING_BONIFICO" && (
-          <div className="mt-2 flex flex-col gap-1 rounded-md border border-stroke-grey p-4">
+          <div className="mt-2 flex flex-col gap-1 rounded-sm border border-stroke-grey p-4">
             <p className="font-medium">Dati per il bonifico</p>
             {bonificoData.map((row) => (
               <p key={row.title} className="helper_text">

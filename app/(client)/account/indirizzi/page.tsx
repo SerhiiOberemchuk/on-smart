@@ -12,7 +12,7 @@ export default function IndirizziPage() {
   return (
     <section>
       <h1 className="H2 mb-6">I miei indirizzi</h1>
-      <Suspense fallback={<div className="h-64 w-full animate-pulse rounded-md bg-black/10" />}>
+      <Suspense fallback={<div className="h-64 w-full animate-pulse rounded-sm bg-white/10" />}>
         <AddressLoader />
       </Suspense>
     </section>

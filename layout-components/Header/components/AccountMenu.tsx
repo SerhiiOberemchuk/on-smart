@@ -45,13 +45,13 @@ export default function AccountMenu({ name, isAdmin }: { name: string; isAdmin: 
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-50 mt-1 flex w-56 flex-col rounded-md border border-stroke-grey bg-background py-2 shadow-lg"
+          className="absolute right-0 z-50 mt-1 flex w-56 flex-col rounded-sm border border-stroke-grey bg-background py-2 shadow-lg"
         >
           {isAdmin && (
             <Link
               role="menuitem"
               href="/admin/dashboard"
-              className="px-4 py-2 font-medium hover:bg-black/5"
+              className="px-4 py-2 font-medium hover:bg-white/5"
               onClick={() => setOpen(false)}
             >
               Amministrazione
@@ -60,7 +60,7 @@ export default function AccountMenu({ name, isAdmin }: { name: string; isAdmin: 
           <Link
             role="menuitem"
             href="/account/ordini"
-            className="px-4 py-2 hover:bg-black/5"
+            className="px-4 py-2 hover:bg-white/5"
             onClick={() => setOpen(false)}
           >
             I miei ordini
@@ -68,7 +68,7 @@ export default function AccountMenu({ name, isAdmin }: { name: string; isAdmin: 
           <Link
             role="menuitem"
             href="/account/profilo"
-            className="px-4 py-2 hover:bg-black/5"
+            className="px-4 py-2 hover:bg-white/5"
             onClick={() => setOpen(false)}
           >
             Il mio profilo
@@ -76,7 +76,7 @@ export default function AccountMenu({ name, isAdmin }: { name: string; isAdmin: 
           <Link
             role="menuitem"
             href="/account/indirizzi"
-            className="px-4 py-2 hover:bg-black/5"
+            className="px-4 py-2 hover:bg-white/5"
             onClick={() => setOpen(false)}
           >
             I miei indirizzi
@@ -84,7 +84,7 @@ export default function AccountMenu({ name, isAdmin }: { name: string; isAdmin: 
           <Link
             role="menuitem"
             href="/account/preferiti"
-            className="px-4 py-2 hover:bg-black/5"
+            className="px-4 py-2 hover:bg-white/5"
             onClick={() => setOpen(false)}
           >
             I miei preferiti
@@ -105,7 +105,7 @@ function SignOutButton() {
     <button
       type="submit"
       disabled={pending}
-      className="flex w-full items-center gap-2 px-4 py-2 text-left hover:bg-black/5 disabled:pointer-events-none disabled:opacity-60"
+      className="flex w-full items-center gap-2 px-4 py-2 text-left hover:bg-white/5 disabled:pointer-events-none disabled:opacity-60"
     >
       {pending && (
         <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">

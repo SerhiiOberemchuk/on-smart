@@ -2,8 +2,8 @@
 
 import { createOrderAction } from "@/app/actions/orders/create-order";
 import ButtonYellow from "@/components/BattonYellow";
-import { useCheckoutStore } from "@/store/checkout-store";
 import { PAGES } from "@/types/pages.types";
+import type { PaymentWidgetData } from "@/types/payment-widget.types";
 import { startTransition, useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useBasketStore } from "@/store/basket-store";
@@ -15,17 +15,17 @@ const PERSISTENT_PAYMENT_TOAST_OPTIONS = {
   closeOnClick: true,
 } as const;
 
-export default function BonificoPaymentWidget() {
+export default function BonificoPaymentWidget({
+  totalPrice,
+  basket,
+  productsInBasket,
+  dataFirstStep,
+  dataCheckoutStepConsegna,
+  dataCheckoutStepPagamento,
+  paymentErrorPath,
+}: PaymentWidgetData & { paymentErrorPath: string }) {
   const router = useRouter();
-  const {
-    dataCheckoutStepConsegna,
-    dataFirstStep,
-    basket,
-    totalPrice,
-    dataCheckoutStepPagamento,
-    clearAllCheckoutData,
-  } = useCheckoutStore();
-  const { productsInBasket, clearBasketStore } = useBasketStore();
+  const { clearBasketStore } = useBasketStore();
 
   const [stateOrder, actionOrder, pendingOrder] = useActionState(
     async () =>
@@ -68,7 +68,6 @@ export default function BonificoPaymentWidget() {
 
     didRunRef.current = true;
     const clear = setTimeout(() => {
-      clearAllCheckoutData();
       clearBasketStore();
     }, 1000);
     router.push(`${PAGES.CHECKOUT_PAGES.COMPLETED}/${stateOrder.orderNumber}`);
@@ -77,7 +76,6 @@ export default function BonificoPaymentWidget() {
     router,
     stateOrder.success,
     stateOrder.orderNumber,
-    clearAllCheckoutData,
     clearBasketStore,
     stateOrder.orderId,
   ]);
@@ -90,8 +88,8 @@ export default function BonificoPaymentWidget() {
       "Pagamento non riuscito. Prova piu tardi oppure scegli un altro metodo di pagamento.",
       PERSISTENT_PAYMENT_TOAST_OPTIONS,
     );
-    router.push(`${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=bonifico_order_create_failed`);
-  }, [router, stateOrder.error]);
+    router.push(`${paymentErrorPath}?payment_error=bonifico_order_create_failed`);
+  }, [router, stateOrder.error, paymentErrorPath]);
 
   return (
     <>

@@ -29,7 +29,7 @@ export default async function VerificaEmailPage({
         {sp.email ? (
           <ResendVerification email={sp.email} redirect={redirectTarget} />
         ) : (
-          <Link href="/accedi" className="text-yellow-primary underline">
+          <Link href="/accedi" className="text-yellow-500 underline">
             Vai al login
           </Link>
         )}
@@ -54,12 +54,12 @@ export default async function VerificaEmailPage({
       <p className="helper_text">Il tuo account è attivo.</p>
       <Link
         href={primaryHref}
-        className="rounded-md bg-yellow-500 px-4 py-3 text-center font-medium text-black transition hover:bg-yellow-400"
+        className="rounded-sm bg-yellow-500 px-4 py-3 text-center font-medium text-black transition hover:bg-yellow-400"
       >
         {primaryLabel}
       </Link>
       {(backToCart || isAdmin) && (
-        <Link href="/account" className="text-yellow-primary underline">
+        <Link href="/account" className="text-yellow-500 underline">
           Vai al mio account
         </Link>
       )}

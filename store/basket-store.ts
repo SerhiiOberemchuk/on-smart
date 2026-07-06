@@ -1,7 +1,7 @@
 import { ProductType } from "@/db/schemas/product.schema";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { BasketTypeUseCheckoutStore } from "./checkout-store";
+import { BasketTypeUseCheckoutStore } from "@/types/checkout-flow.types";
 
 export type BasceketStoreStateType = {
   isPopupOpen: boolean;

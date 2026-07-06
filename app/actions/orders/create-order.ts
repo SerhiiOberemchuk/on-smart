@@ -15,8 +15,10 @@ import {
   BasketTypeUseCheckoutStore,
   CheckoutTypesDataFirstStep,
   CheckoutTypesDataStepConsegna,
-} from "@/store/checkout-store";
+} from "@/types/checkout-flow.types";
 import { makeOrderNumber } from "@/utils/order-number";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { ulid } from "ulid";
 import { sendMailOrders } from "../mail/mail-orders";
 import { sendTelegramMessage } from "../telegram/send-message";
@@ -51,6 +53,12 @@ export async function createOrderAction({
     ...dataFirstStep,
     ...dataCheckoutStepConsegna,
   };
+
+  // userId is always derived server-side from the session (spec invariant #2) —
+  // never trusted from the client payload. Guests (no session) => null (unchanged).
+  const session = await auth.api.getSession({ headers: await headers() });
+  data.userId = session?.user?.id ?? null;
+
   const orderNumber = customOrderNumberId?.number || makeOrderNumber("OS");
   const orderId = customOrderNumberId?.id || ulid();
   const basketMap = new Map<string, number>();

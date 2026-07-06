@@ -25,7 +25,7 @@ async function SumUpCallbackContent({
   const { order: orderNumber } = await params;
   const searchParamsState = await searchParams;
   const summaryWithError = (reason: string) =>
-    `${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=${encodeURIComponent(reason)}`;
+    `/checkout?payment_error=${encodeURIComponent(reason)}`;
 
   const checkoutId = searchParamsState[SUM_UP_CONSTANTS.SEARCH_PARAM_CHECKOUT_ID.TITLE];
   const order_id = searchParamsState["order_id"];

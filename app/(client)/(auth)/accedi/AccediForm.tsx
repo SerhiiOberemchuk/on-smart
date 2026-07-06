@@ -27,7 +27,7 @@ export default function AccediForm({ redirect }: { redirect: string }) {
           required
           autoComplete="current-password"
         />
-        {state.errorMessage && <p className="text-sm text-red-600">{state.errorMessage}</p>}
+        {state.errorMessage && <p className="text-sm text-red-400">{state.errorMessage}</p>}
         <SubmitButton>Accedi</SubmitButton>
       </form>
 
@@ -36,12 +36,12 @@ export default function AccediForm({ redirect }: { redirect: string }) {
       )}
 
       <div className="helper_text flex flex-col items-center gap-1 text-center">
-        <Link href="/password-dimenticata" className="text-yellow-primary underline">
+        <Link href="/password-dimenticata" className="text-yellow-500 underline">
           Password dimenticata?
         </Link>
         <span>
           Non hai un account?{" "}
-          <Link href={registratiHref} className="text-yellow-primary underline">
+          <Link href={registratiHref} className="text-yellow-500 underline">
             Registrati
           </Link>
         </span>

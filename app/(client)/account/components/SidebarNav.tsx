@@ -19,8 +19,8 @@ export default function SidebarNav() {
             key={link.href}
             href={link.href}
             className={clsx(
-              "rounded-md px-4 py-2 transition hover:bg-black/5",
-              active && "bg-black/5 font-medium",
+              "rounded-sm px-4 py-2 transition hover:bg-white/5",
+              active && "bg-white/5 font-medium",
             )}
           >
             {link.label}
@@ -41,7 +41,7 @@ function SignOutButton() {
     <button
       type="submit"
       disabled={pending}
-      className="flex w-full items-center gap-2 rounded-md px-4 py-2 text-left transition hover:bg-black/5 disabled:pointer-events-none disabled:opacity-60"
+      className="flex w-full items-center gap-2 rounded-sm px-4 py-2 text-left transition hover:bg-white/5 disabled:pointer-events-none disabled:opacity-60"
     >
       {pending && (
         <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">

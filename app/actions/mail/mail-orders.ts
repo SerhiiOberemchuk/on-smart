@@ -6,7 +6,7 @@ import {
   BasketTypeUseCheckoutStore,
   CheckoutTypesDataFirstStep,
   CheckoutTypesDataStepConsegna,
-} from "@/store/checkout-store";
+} from "@/types/checkout-flow.types";
 import { MetodsPayment } from "@/types/bonifico.data";
 import { renderOrderEmailTemplate } from "./order-mail-template";
 

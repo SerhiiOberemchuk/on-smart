@@ -15,7 +15,7 @@ export default function ProfiloPage() {
     <section className="flex max-w-xl flex-col gap-10">
       <div>
         <h1 className="H2 mb-6">Il mio profilo</h1>
-        <Suspense fallback={<div className="h-96 w-full animate-pulse rounded-md bg-black/10" />}>
+        <Suspense fallback={<div className="h-96 w-full animate-pulse rounded-sm bg-white/10" />}>
           <ProfiloLoader />
         </Suspense>
       </div>

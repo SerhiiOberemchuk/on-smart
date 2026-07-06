@@ -1,6 +1,7 @@
 ﻿import SmartImage from "@/components/SmartImage";
 import icon_success from "@/assets/icons/icon_success.svg";
 import type { OrderTypes, OrderPaymentTypes } from "@/db/schemas/orders.schema";
+import Link from "next/link";
 import CompletionCleanup from "./CompletionCleanup";
 
 type OrderResponse = {
@@ -65,6 +66,15 @@ export default function CompletatoPage({
           L`ordine è stato correttamente inviato. Riceverai una mail di conferma con i dettagli
           dell'ordine e la fattura. Per qualsiasi domanda o assistenza, non esitare a contattarci.
         </p>
+
+        {order.order?.userId ? (
+          <Link
+            href={`/account/ordini/${order.order.orderNumber}`}
+            className="mt-3 rounded-sm bg-yellow-500 px-4 py-2 font-medium text-black transition hover:bg-yellow-400"
+          >
+            Vedi l&apos;ordine nel tuo account
+          </Link>
+        ) : null}
       </div>
 
       {order.order ? (

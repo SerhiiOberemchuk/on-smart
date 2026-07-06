@@ -17,7 +17,7 @@ export default function ReimpostaPasswordForm({ token }: { token: string }) {
       <div className="flex flex-col gap-4 text-center">
         <h1 className="H5">Password aggiornata</h1>
         <p className="helper_text">Ora puoi accedere con la nuova password.</p>
-        <Link href="/accedi" className="text-yellow-primary underline">
+        <Link href="/accedi" className="text-yellow-500 underline">
           Vai al login
         </Link>
       </div>
@@ -29,7 +29,7 @@ export default function ReimpostaPasswordForm({ token }: { token: string }) {
       <div className="flex flex-col gap-4 text-center">
         <h1 className="H5">Link non valido</h1>
         <p className="helper_text">Il link di reimpostazione non è valido o è scaduto.</p>
-        <Link href="/password-dimenticata" className="text-yellow-primary underline">
+        <Link href="/password-dimenticata" className="text-yellow-500 underline">
           Richiedi un nuovo link
         </Link>
       </div>
@@ -56,7 +56,7 @@ export default function ReimpostaPasswordForm({ token }: { token: string }) {
         minLength={8}
         autoComplete="new-password"
       />
-      {state.errorMessage && <p className="text-sm text-red-600">{state.errorMessage}</p>}
+      {state.errorMessage && <p className="text-sm text-red-400">{state.errorMessage}</p>}
       <SubmitButton>Salva la nuova password</SubmitButton>
     </form>
   );

@@ -10,8 +10,7 @@ import { createOrderAction } from "@/app/actions/orders/create-order";
 import { updateOrderPaymentAction } from "@/app/actions/payments/payment-order-actions";
 
 import { PAGES } from "@/types/pages.types";
-import { useCheckoutStore } from "@/store/checkout-store";
-import { useBasketStore } from "@/store/basket-store";
+import type { PaymentWidgetData } from "@/types/payment-widget.types";
 import { getTotalPriceToPay } from "@/utils/get-prices";
 import { SUM_UP_CONSTANTS } from "@/app/actions/sumup/sumup-constans";
 
@@ -25,12 +24,16 @@ const PERSISTENT_PAYMENT_TOAST_OPTIONS = {
   closeOnClick: true,
 } as const;
 
-export default function SumUpModalButton() {
+export default function SumUpModalButton({
+  totalPrice,
+  basket,
+  productsInBasket,
+  dataFirstStep,
+  dataCheckoutStepConsegna,
+  paymentErrorPath,
+}: PaymentWidgetData & { paymentErrorPath: string }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-
-  const { totalPrice, dataCheckoutStepConsegna, dataFirstStep, basket } = useCheckoutStore();
-  const { productsInBasket } = useBasketStore();
 
   const [open, setOpen] = useState(false);
   const [attempt, setAttempt] = useState(1);
@@ -79,9 +82,9 @@ export default function SumUpModalButton() {
         "Pagamento non riuscito. Prova piu tardi oppure scegli un altro metodo di pagamento.",
         PERSISTENT_PAYMENT_TOAST_OPTIONS,
       );
-      router.push(`${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=${encodeURIComponent(reason)}`);
+      router.push(`${paymentErrorPath}?payment_error=${encodeURIComponent(reason)}`);
     },
-    [router],
+    [router, paymentErrorPath],
   );
 
   useEffect(() => {

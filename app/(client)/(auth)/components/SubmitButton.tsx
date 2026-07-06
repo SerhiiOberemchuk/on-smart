@@ -9,7 +9,7 @@ export function SubmitButton({ children }: { children: React.ReactNode }) {
     <button
       type="submit"
       disabled={pending}
-      className="flex w-full items-center justify-center gap-2 rounded-md bg-yellow-500 py-3 font-medium text-black transition hover:bg-yellow-400 disabled:pointer-events-none disabled:opacity-60"
+      className="flex w-full items-center justify-center gap-2 rounded-sm bg-yellow-500 py-3 font-medium text-black transition hover:bg-yellow-400 disabled:pointer-events-none disabled:opacity-60"
     >
       {pending && (
         <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">

@@ -27,7 +27,7 @@ async function OrdersList() {
     return (
       <div className="flex flex-col items-start gap-4">
         <p className="helper_text">Non hai ancora effettuato ordini.</p>
-        <Link href="/catalogo" className="rounded-md bg-yellow-500 px-4 py-2 font-medium text-black">
+        <Link href="/catalogo" className="rounded-sm bg-yellow-500 px-4 py-2 font-medium text-black">
           Vai al catalogo
         </Link>
       </div>
@@ -40,7 +40,7 @@ async function OrdersList() {
         <li key={order.orderNumber}>
           <Link
             href={`/account/ordini/${order.orderNumber}`}
-            className="flex flex-col gap-2 rounded-md border border-stroke-grey p-4 transition hover:bg-black/5 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-2 rounded-sm border border-stroke-grey p-4 transition hover:bg-white/5 sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
               <p className="font-medium">Ordine {order.orderNumber}</p>
@@ -65,7 +65,7 @@ function OrdersSkeleton() {
   return (
     <div className="flex flex-col gap-3">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="h-20 w-full animate-pulse rounded-md bg-black/10" />
+        <div key={i} className="h-20 w-full animate-pulse rounded-sm bg-white/10" />
       ))}
     </div>
   );

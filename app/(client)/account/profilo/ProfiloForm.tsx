@@ -150,7 +150,7 @@ export default function ProfiloForm({
       </fieldset>
 
       {state.message && (
-        <p className={clsx("text-sm", state.success ? "text-green-700" : "text-red-600")}>
+        <p className={clsx("text-sm", state.success ? "text-green-400" : "text-red-400")}>
           {state.message}
         </p>
       )}

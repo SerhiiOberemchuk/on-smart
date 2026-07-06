@@ -23,16 +23,18 @@ Client-only; **there is no server-side cart**.
 - Cart page `/carrello`: item list (`CardSection.tsx`), summary sidebar (`RepilogoComponent.tsx`), "Acquistati insieme" recommendations. Totals computed client-side in `utils/get-prices.ts` / `utils/useCalcTotalSum.tsx` — **for display only**; the server recomputes everything at order creation (§4).
 - The discount-code input (`InputSconto.tsx`) is **UI-only** — no server-side discount logic exists (see §8).
 
-## 3. Checkout — step-by-step trace
+## 3. Checkout — single-page, account-only
 
-A strictly-sequential 4-step wizard. State machine: `store/checkout-store.ts` (`useCheckoutStore`, **sessionStorage** key `"checkout-storage"`) holds `step: 0–4`, `totalPrice`, `basket`, and three data blocks (`dataFirstStep`, `dataCheckoutStepConsegna`, `dataCheckoutStepPagamento`). Each checkout page guards on `step` and redirects backward if not reached. Route constants: `types/pages.types.ts`. Shared page shell: `components/CheckoutPagesComponents/PageLayoutCheckout.tsx`.
+The multi-step guest wizard and `store/checkout-store.ts` were **removed** (client-accounts Phase 8, 2026-07). Checkout now **requires a logged-in account**: `proxy.ts` gates `/checkout/:path*` (guests → `/registrati?redirect=/carrello`); old step URLs (`/checkout/informazioni` etc.) redirect to `/checkout` via `next.config.ts`.
 
-1. **Start (`/carrello`)** — `RepilogoComponent.handleProceedToOrder`: rejects an empty basket, stores `{totalPrice, basket}`, sets `step = 1`, navigates to `/checkout/informazioni`.
-2. **Step 1 — `/checkout/informazioni`** (`CheckouteStep1FormClientData.tsx`, react-hook-form). Customer chooses **Privato** or **Azienda** and fills contact + billing data. Privato: nome/cognome, optional "Richiedi Fattura" → codice fiscale. Azienda: referente, ragione sociale, partita IVA (11), PEC or Codice Univoco (7). Common: email, telefono, indirizzo/civico/città/CAP/nazione/provincia. Validation is native HTML constraints via RHF `register` (no schema library — by design, see architecture ADR-2). Submit → `setDataFirstStepCheckout`, `step = 2`.
-3. **Step 2 — `/checkout/consegna`** (`CheckouteStep2ConsegnaDati.tsx`). Delivery method: `CONSEGNA_CORRIERE` (courier) or `RITIRO_NEGOZIO` (free pickup, Avellino). Azienda + courier may enter a separate shipping address (`sameAsBilling` toggle → `deliveryAdress` JSON). Delivery price per §5. Submit → `step = 3`.
-4. **Step 3 — `/checkout/pagamento`** (`CheckouteStep3Pagamento.tsx`). Read-only recap of steps 1–2 + payment-method radio list (`PAYMENT_METHODS` in `types/bonifico.data.ts`). Selecting PayPal shows the +4% surcharge and the total updates live; Bonifico reveals bank details (`BonificoDati.tsx`). Submit → `step = 4`.
-5. **Step 4 — `/checkout/riepilogo`** (`CheckouteStep4Riepilogo.tsx`). Final review; renders the widget for the chosen method from `components/pagamento/{paypal,sumup,klarna,bonifico}/`. **The order is created and paid here** (§4). Reads `?payment_error=…` and toasts failures.
-6. **Completion — `/checkout/completato/[order]`** (`PageCompletato.tsx`). Server-loads order + payment by order number, shows the recap; `CompletionCleanup.tsx` clears both Zustand stores. SumUp has an extra server callback page `completato/[order]/sumup/` (§5).
+1. **Start (`/carrello`)** — `RepilogoComponent.handleProceedToOrder` rejects an empty basket and navigates to `/checkout`.
+2. **`/checkout`** (`app/(client)/checkout/page.tsx` → `AccountCheckoutClient.tsx`). Server-side session gate; a `<Suspense>` island fetches the customer's `customer_profiles` + `user_addresses`. One page, all preselected from the account:
+   - **Order summary** from the cart (`store/basket-store.ts`).
+   - **CONSEGNA** — `CONSEGNA_CORRIERE` / `RITIRO_NEGOZIO` (free pickup, Avellino), default from the profile; for courier, a saved-address picker.
+   - **FATTURAZIONE** — Privato/Azienda identity from the profile (email read-only). Incomplete → link to `/account/profilo`.
+   - **PAGAMENTO** — `PAYMENT_METHODS` radio (`types/bonifico.data.ts`), default preselected; PayPal shows the +4% surcharge live.
+   - The chosen widget (`components/pagamento/{paypal,sumup,klarna,bonifico}/`) receives its data as **props** (from the account + cart) and creates + pays the order. Payment errors → `/checkout?payment_error=…`.
+3. **Completion — `/checkout/completato/[order]`** (`PageCompletato.tsx`). Server-loads order + payment by number; `CompletionCleanup.tsx` clears the cart (`basket-store`). SumUp has an extra server callback page `completato/[order]/sumup/` (§5). These pages stay reachable logged-out (payment redirects).
 
 ## 4. Order creation (server-authoritative)
 
@@ -43,7 +45,7 @@ A strictly-sequential 4-step wizard. State machine: `store/checkout-store.ts` (`
 3. Recomputes subtotal + delivery (courier only) server-side.
 4. In **one DB transaction** inserts `orders`, `order_items` (title/brand/category/image snapshot per row), and `payments` (`db/schemas/orders.schema.ts`).
 5. Order id = `ulid()`; order number = `makeOrderNumber("OS")` (`utils/order-number.ts`).
-6. `orders.userId` is currently always `null` (guest checkout). This changes with the client-accounts spec ([specs/client-accounts/04-checkout-integration.md](./specs/client-accounts/04-checkout-integration.md)).
+6. `orders.userId` is derived **server-side from the session** (never trusted from the client). Since checkout is account-only, new orders always carry the customer's `userId`; historic guest orders keep `null`.
 7. `sendMessages` flag: bonifico sends confirmation email + Telegram inline; online-payment methods pass `false` and defer notification to `notifyOrderById` after successful capture (§6).
 
 Order/payment status enums: `types/orders.types.ts`, `types/payments.types.ts`. Status updates: `app/actions/orders/udate-order-info.ts` (note the filename typo — kept, see §8) and `app/actions/payments/payment-order-actions.ts`.

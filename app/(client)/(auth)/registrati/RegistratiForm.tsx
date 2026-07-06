@@ -20,7 +20,7 @@ export default function RegistratiForm({ redirect }: { redirect: string }) {
           Ti abbiamo inviato un link di conferma a <strong>{state.email}</strong>. Conferma il tuo
           indirizzo per attivare l&apos;account.
         </p>
-        <Link href="/accedi" className="text-yellow-primary underline">
+        <Link href="/accedi" className="text-yellow-500 underline">
           Vai al login
         </Link>
       </div>
@@ -51,11 +51,11 @@ export default function RegistratiForm({ redirect }: { redirect: string }) {
         minLength={8}
         autoComplete="new-password"
       />
-      {state.errorMessage && <p className="text-sm text-red-600">{state.errorMessage}</p>}
+      {state.errorMessage && <p className="text-sm text-red-400">{state.errorMessage}</p>}
       <SubmitButton>Registrati</SubmitButton>
       <p className="helper_text text-center">
         Hai già un account?{" "}
-        <Link href={accediHref} className="text-yellow-primary underline">
+        <Link href={accediHref} className="text-yellow-500 underline">
           Accedi
         </Link>
       </p>

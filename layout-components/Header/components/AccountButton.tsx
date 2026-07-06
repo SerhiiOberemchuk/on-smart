@@ -29,8 +29,8 @@ export default async function AccountButton() {
 export function AccountButtonSkeleton() {
   return (
     <div className="flex items-center gap-2.5 p-3 md:px-4 md:py-2">
-      <div className="h-6 w-6 animate-pulse rounded-full bg-black/10" />
-      <span className="hidden h-4 w-14 animate-pulse rounded bg-black/10 xs:block" />
+      <div className="h-6 w-6 animate-pulse rounded-full bg-white/10" />
+      <span className="hidden h-4 w-14 animate-pulse rounded bg-white/10 xs:block" />
     </div>
   );
 }

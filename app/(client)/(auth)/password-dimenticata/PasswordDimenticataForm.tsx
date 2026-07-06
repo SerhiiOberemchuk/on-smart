@@ -17,7 +17,7 @@ export default function PasswordDimenticataForm() {
       <div className="flex flex-col gap-4 text-center">
         <h1 className="H5">Controlla la tua email</h1>
         <p className="helper_text">{state.errorMessage}</p>
-        <Link href="/accedi" className="text-yellow-primary underline">
+        <Link href="/accedi" className="text-yellow-500 underline">
           Torna al login
         </Link>
       </div>
@@ -33,7 +33,7 @@ export default function PasswordDimenticataForm() {
       <InputBlock title="Email" name="email" type="email" required autoComplete="email" />
       <SubmitButton>Invia il link</SubmitButton>
       <p className="helper_text text-center">
-        <Link href="/accedi" className="text-yellow-primary underline">
+        <Link href="/accedi" className="text-yellow-500 underline">
           Torna al login
         </Link>
       </p>

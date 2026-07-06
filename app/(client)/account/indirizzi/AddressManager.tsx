@@ -21,14 +21,14 @@ export default function AddressManager({ addresses }: { addresses: UserAddressTy
       {addresses.length > 0 && (
         <ul className="grid gap-4 sm:grid-cols-2">
           {addresses.map((address) => (
-            <li key={address.id} className="flex flex-col gap-2 rounded-md border border-stroke-grey p-4">
+            <li key={address.id} className="flex flex-col gap-2 rounded-sm border border-stroke-grey p-4">
               <div className="flex flex-wrap items-center gap-2">
                 {address.label && <span className="font-medium">{address.label}</span>}
                 {address.isDefaultShipping && (
-                  <span className="rounded bg-black/5 px-2 py-0.5 text-xs">Spedizione</span>
+                  <span className="rounded bg-white/5 px-2 py-0.5 text-xs">Spedizione</span>
                 )}
                 {address.isDefaultBilling && (
-                  <span className="rounded bg-black/5 px-2 py-0.5 text-xs">Fatturazione</span>
+                  <span className="rounded bg-white/5 px-2 py-0.5 text-xs">Fatturazione</span>
                 )}
               </div>
               <p className="helper_text">
@@ -73,7 +73,7 @@ export default function AddressManager({ addresses }: { addresses: UserAddressTy
         <button
           type="button"
           onClick={() => setShowForm(true)}
-          className="self-start rounded-md border border-stroke-grey px-4 py-2 transition hover:bg-black/5"
+          className="self-start rounded-sm border border-stroke-grey px-4 py-2 transition hover:bg-white/5"
         >
           + Aggiungi indirizzo
         </button>
@@ -88,7 +88,7 @@ function AddAddressForm({ onClose }: { onClose: () => void }) {
   return (
     <form
       action={formAction}
-      className="flex max-w-md flex-col gap-4 rounded-md border border-stroke-grey p-4"
+      className="flex max-w-md flex-col gap-4 rounded-sm border border-stroke-grey p-4"
     >
       <h2 className="H5">Nuovo indirizzo</h2>
       <InputBlock title="Etichetta (es. Casa)" name="label" />
@@ -107,7 +107,7 @@ function AddAddressForm({ onClose }: { onClose: () => void }) {
         <input type="checkbox" name="isDefaultBilling" /> Predefinito per fatturazione
       </label>
       {state.message && (
-        <p className={clsx("text-sm", state.success ? "text-green-700" : "text-red-600")}>
+        <p className={clsx("text-sm", state.success ? "text-green-400" : "text-red-400")}>
           {state.message}
         </p>
       )}
@@ -118,7 +118,7 @@ function AddAddressForm({ onClose }: { onClose: () => void }) {
         <button
           type="button"
           onClick={onClose}
-          className="rounded-md border border-stroke-grey px-4 py-2 transition hover:bg-black/5"
+          className="rounded-sm border border-stroke-grey px-4 py-2 transition hover:bg-white/5"
         >
           Annulla
         </button>
@@ -136,7 +136,7 @@ function FormButton({ children, danger }: { children: React.ReactNode; danger?: 
       disabled={pending}
       className={clsx(
         "underline disabled:pointer-events-none disabled:opacity-60",
-        danger ? "text-red-600" : "text-yellow-primary",
+        danger ? "text-red-400" : "text-yellow-500",
       )}
     >
       {pending ? "..." : children}

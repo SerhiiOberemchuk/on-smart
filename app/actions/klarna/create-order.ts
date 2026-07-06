@@ -3,7 +3,7 @@
 import { ProductType } from "@/db/schemas/product.schema";
 import { klarnaAuthHeader, klarnaBaseUrl } from "@/lib/klarna";
 import { BasceketStoreStateType } from "@/store/basket-store";
-import { CheckoutTypesDataFirstStep, CheckoutTypesDataStepConsegna } from "@/store/checkout-store";
+import { CheckoutTypesDataFirstStep, CheckoutTypesDataStepConsegna } from "@/types/checkout-flow.types";
 import { baseUrl } from "@/types/baseUrl";
 import { PAGES } from "@/types/pages.types";
 const siteUrl = baseUrl;

@@ -37,6 +37,12 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: true,
       },
+      // Legacy guest checkout wizard removed — old step URLs go to the single-page checkout.
+      {
+        source: "/checkout/:step(informazioni|consegna|pagamento|riepilogo)",
+        destination: "/checkout",
+        permanent: false,
+      },
     ];
   },
 };
