@@ -1,13 +1,19 @@
 "use client";
 
 import { signOutCustomer } from "@/app/actions/account/auth/sign-out";
-import userIcon from "@/assets/icons/user.svg";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 
-export default function AccountMenu({ name, isAdmin }: { name: string; isAdmin: boolean }) {
+export default function AccountMenu({
+  firstName,
+  initials,
+  isAdmin,
+}: {
+  firstName: string;
+  initials: string;
+  isAdmin: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -34,12 +40,15 @@ export default function AccountMenu({ name, isAdmin }: { name: string; isAdmin: 
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="flex items-center gap-2.5 p-3 md:px-4 md:py-2"
+        className="flex items-center p-2 md:px-3"
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-label="Account"
+        title={firstName}
       >
-        <Image src={userIcon} width={24} alt="" title="Account" />
-        <span className="btn hidden max-w-28 truncate xs:block">{name}</span>
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-500 text-sm font-semibold text-black">
+          {initials}
+        </span>
       </button>
 
       {open && (
@@ -47,6 +56,9 @@ export default function AccountMenu({ name, isAdmin }: { name: string; isAdmin: 
           role="menu"
           className="absolute right-0 z-50 mt-1 flex w-56 flex-col rounded-sm border border-stroke-grey bg-background py-2 shadow-lg"
         >
+          <div className="truncate border-b border-stroke-grey px-4 pb-2" title={firstName}>
+            Ciao, <span className="font-medium">{firstName}</span>
+          </div>
           {isAdmin && (
             <Link
               role="menuitem"
