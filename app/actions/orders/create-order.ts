@@ -55,9 +55,13 @@ export async function createOrderAction({
   };
 
   // userId is always derived server-side from the session (spec invariant #2) —
-  // never trusted from the client payload. Guests (no session) => null (unchanged).
+  // never trusted from the client payload. Ordering is account-only after cutover:
+  // the proxy matcher blocks guest UI, and this guard blocks direct action invocation.
   const session = await auth.api.getSession({ headers: await headers() });
-  data.userId = session?.user?.id ?? null;
+  if (!session?.user?.id) {
+    return { success: false, error: "Authentication required" };
+  }
+  data.userId = session.user.id;
 
   const orderNumber = customOrderNumberId?.number || makeOrderNumber("OS");
   const orderId = customOrderNumberId?.id || ulid();

@@ -8,7 +8,7 @@ import { setDefaultAddress } from "@/app/actions/account/addresses/set-default-a
 import { InputBlock } from "@/components/InputBloc";
 import type { UserAddressType } from "@/db/schemas/user-addresses.schema";
 import clsx from "clsx";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 const INITIAL: AddressFormState = { success: false, message: null };
@@ -82,8 +82,18 @@ export default function AddressManager({ addresses }: { addresses: UserAddressTy
   );
 }
 
-function AddAddressForm({ onClose }: { onClose: () => void }) {
+export function AddAddressForm({
+  onClose,
+  onSaved,
+}: {
+  onClose: () => void;
+  onSaved?: () => void;
+}) {
   const [state, formAction] = useActionState(createAddress, INITIAL);
+
+  useEffect(() => {
+    if (state.success) onSaved?.();
+  }, [state, onSaved]);
 
   return (
     <form

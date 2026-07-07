@@ -1,8 +1,11 @@
 import type { OrderTypes } from "@/db/schemas/orders.schema";
+import Link from "next/link";
+import { URL_DASHBOARD } from "../../../dashboard-admin.types";
 import { getClientTypeLabel, safeValue } from "./formatters";
 
 type OrderCustomerCardProps = {
   order: OrderTypes;
+  accountUser: { id: string; name: string; email: string } | null;
   clientDisplayName: string;
   billingLine: string;
   billingCityLine: string;
@@ -11,6 +14,7 @@ type OrderCustomerCardProps = {
 
 export function OrderCustomerCard({
   order,
+  accountUser,
   clientDisplayName,
   billingLine,
   billingCityLine,
@@ -24,7 +28,23 @@ export function OrderCustomerCard({
       <div className="mb-3 font-semibold">Клієнт</div>
 
       <div className="space-y-4 text-sm">
-        <div>
+        {accountUser ? (
+          <div>
+            <div className="mb-2 text-xs font-semibold tracking-wide text-neutral-300 uppercase">
+              Акаунт клієнта
+            </div>
+            <div className="font-medium">{safeValue(accountUser.name)}</div>
+            <div className="text-xs break-all text-neutral-400">{accountUser.email}</div>
+            <Link
+              href={`${URL_DASHBOARD.DASHBOARD}${URL_DASHBOARD.SUB_DASHBOARD.ORDERS}?userId=${accountUser.id}`}
+              className="mt-1 inline-block text-xs text-amber-300 hover:underline"
+            >
+              Всі замовлення клієнта
+            </Link>
+          </div>
+        ) : null}
+
+        <div className={accountUser ? "border-t border-slate-600/45 pt-4" : undefined}>
           <div className="text-xs text-neutral-400">Тип клієнта</div>
           <div className="font-medium">{getClientTypeLabel(order.clientType)}</div>
         </div>

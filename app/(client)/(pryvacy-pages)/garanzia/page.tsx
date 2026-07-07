@@ -59,7 +59,7 @@ export default function Garanzia() {
         <h2 className="H2 mt-10 text-white">Resi</h2>
 
         <p>
-          Diritto di recesso (ai sensi dell`art. 64 e seguenti D.Lgs. 206/2005) 1. Condizioni
+          Diritto di recesso (ai sensi degli artt. 52 e seguenti D.Lgs. 206/2005) 1. Condizioni
           generali Il cliente che agisce come consumatore (persona fisica che acquista per fini non
           professionali e senza partita IVA) ha diritto di recedere dal contratto di acquisto entro
           14 giorni dal ricevimento del bene, senza penalità e senza specificarne il motivo. Il
@@ -68,11 +68,19 @@ export default function Garanzia() {
         </p>
 
         <p>
-          2. Procedura di recesso Per esercitare il diritto di recesso, il cliente deve inviare una
-          richiesta via e-mail a assistenza@on-smart.it, indicando i dati bancari per il rimborso.
-          On Smart risponderà inviando al cliente: Un modulo da compilare e firmare; Un numero di
-          autorizzazione al reso (RMA). Il modulo deve essere stampato, inserito nel pacco insieme
-          al prodotto e rispedito a On Smart entro 10 giorni dall`autorizzazione.
+          2. Procedura di recesso Puoi esercitare il diritto di recesso direttamente online tramite
+          la funzione{" "}
+          <a href="/recesso" className="text-yellow-500 underline">
+            Recedere dal contratto qui
+          </a>{" "}
+          (art. 54-bis D.Lgs. 206/2005): accedi al tuo account, seleziona l`ordine nella sezione
+          «Diritto di recesso» (o nella pagina del singolo ordine) e premi «Conferma recesso» —
+          riceverai subito una conferma di ricezione via email con data e ora di trasmissione. Per
+          gli ordini effettuati senza account è disponibile un modulo sulla stessa pagina. In alternativa puoi inviare una dichiarazione esplicita di recesso via
+          e-mail a assistenza@on-smart.it. Dopo la comunicazione riceverai via email le istruzioni
+          per la restituzione con il modulo di reso e il numero di autorizzazione (RMA) e, per i
+          rimborsi tramite bonifico, la richiesta dei dati bancari. Il prodotto va rispedito a On
+          Smart senza indebito ritardo e comunque entro 14 giorni dalla comunicazione del recesso.
         </p>
 
         <p>

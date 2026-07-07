@@ -22,7 +22,10 @@ import {
 } from "@/utils/get-prices";
 import clsx from "clsx";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import ConsegnaSection from "./components/ConsegnaSection";
+import FatturazioneSection from "./components/FatturazioneSection";
 
 const CHECKOUT_ERROR_PATH = "/checkout";
 
@@ -35,6 +38,7 @@ export default function AccountCheckoutClient({
   profile: CustomerProfileType | null;
   addresses: UserAddressType[];
 }) {
+  const router = useRouter();
   const { basket, productsInBasket } = useBasketStore();
 
   const totalPrice = useMemo(
@@ -58,8 +62,14 @@ export default function AccountCheckoutClient({
   const [paymentMethod, setPaymentMethod] = useState<PaymentProviderTypes | "">(
     profile?.defaultPaymentMethod ?? "",
   );
+  const [requestInvoice, setRequestInvoice] = useState(
+    profile?.requestInvoiceDefault ?? false,
+  );
 
-  const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? null;
+  // Fall back to the default address so an address added inline (after
+  // router.refresh) is picked up without an extra click.
+  const selectedAddress =
+    addresses.find((a) => a.id === selectedAddressId) ?? defaultAddress;
   const isPickup = deliveryMethod === "RITIRO_NEGOZIO";
   const deliveryPrice = getDeliveryPrice(totalPrice);
 
@@ -79,7 +89,7 @@ export default function AccountCheckoutClient({
       email,
       numeroTelefono: profile?.numeroTelefono ?? "",
       clientType: profile?.clientType ?? "privato",
-      requestInvoice: profile?.requestInvoiceDefault ?? false,
+      requestInvoice,
       orderStatus: "PENDING_PAYMENT",
       deliveryMethod,
       deliveryPrice,
@@ -104,7 +114,7 @@ export default function AccountCheckoutClient({
       shippedAt: null,
       deliveredAt: null,
     }),
-    [email, profile, deliveryMethod, deliveryPrice, isPickup, selectedAddress],
+    [email, profile, requestInvoice, deliveryMethod, deliveryPrice, isPickup, selectedAddress],
   );
 
   const dataCheckoutStepConsegna: CheckoutTypesDataStepConsegna = {
@@ -177,83 +187,24 @@ export default function AccountCheckoutClient({
         </ul>
       </section>
 
-      <section className="flex flex-col gap-3 rounded-sm border border-stroke-grey p-4">
-        <h2 className="H5">Consegna</h2>
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            name="deliveryMethod"
-            checked={deliveryMethod === "CONSEGNA_CORRIERE"}
-            onChange={() => setDeliveryMethod("CONSEGNA_CORRIERE")}
-          />
-          Corriere ({deliveryPrice === 0 ? "gratuita" : `${deliveryPrice.toFixed(2)} €`})
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            name="deliveryMethod"
-            checked={isPickup}
-            onChange={() => setDeliveryMethod("RITIRO_NEGOZIO")}
-          />
-          Ritiro in negozio (Avellino, gratuito)
-        </label>
+      <ConsegnaSection
+        deliveryMethod={deliveryMethod}
+        onDeliveryMethodChange={setDeliveryMethod}
+        deliveryPrice={deliveryPrice}
+        addresses={addresses}
+        selectedAddressId={selectedAddress?.id ?? null}
+        onSelectAddress={setSelectedAddressId}
+        onAddressSaved={() => router.refresh()}
+      />
 
-        {!isPickup && (
-          <div className="mt-2 flex flex-col gap-2">
-            {addresses.length === 0 ? (
-              <p className="helper_text">
-                Nessun indirizzo salvato.{" "}
-                <Link href="/account/indirizzi" className="text-yellow-500 underline">
-                  Aggiungi un indirizzo
-                </Link>
-              </p>
-            ) : (
-              addresses.map((address) => (
-                <label key={address.id} className="flex items-start gap-2">
-                  <input
-                    type="radio"
-                    name="address"
-                    checked={selectedAddressId === address.id}
-                    onChange={() => setSelectedAddressId(address.id)}
-                  />
-                  <span className="helper_text">
-                    {address.label ? `${address.label} — ` : ""}
-                    {address.indirizzo} {address.numeroCivico}, {address.cap} {address.citta} (
-                    {address.provinciaRegione})
-                  </span>
-                </label>
-              ))
-            )}
-          </div>
-        )}
-      </section>
-
-      <section className="flex flex-col gap-2 rounded-sm border border-stroke-grey p-4">
-        <div className="flex items-center justify-between">
-          <h2 className="H5">Fatturazione</h2>
-          <Link href="/account/profilo" className="text-yellow-500 text-sm underline">
-            Modifica nel profilo
-          </Link>
-        </div>
-        {profileComplete ? (
-          <p className="helper_text">
-            {profile?.clientType === "azienda"
-              ? profile?.ragioneSociale
-              : `${profile?.nome ?? ""} ${profile?.cognome ?? ""}`.trim()}
-            <br />
-            {email} · {profile?.numeroTelefono}
-            {profile?.partitaIva ? <> · P. IVA {profile.partitaIva}</> : null}
-          </p>
-        ) : (
-          <p className="helper_text text-red-400">
-            Completa i tuoi dati di fatturazione nel{" "}
-            <Link href="/account/profilo" className="underline">
-              profilo
-            </Link>{" "}
-            per procedere.
-          </p>
-        )}
-      </section>
+      <FatturazioneSection
+        email={email}
+        profile={profile}
+        profileComplete={profileComplete}
+        requestInvoice={requestInvoice}
+        onRequestInvoiceChange={setRequestInvoice}
+        onProfileSaved={() => router.refresh()}
+      />
 
       <section className="flex flex-col gap-2 rounded-sm border border-stroke-grey p-4">
         <h2 className="H5">Pagamento</h2>
@@ -285,6 +236,9 @@ export default function AccountCheckoutClient({
       <section className={clsx("rounded-sm border border-stroke-grey p-4", !canPay && "opacity-70")}>
         {needsAddress && (
           <p className="helper_text mb-3 text-red-400">Seleziona o aggiungi un indirizzo di consegna.</p>
+        )}
+        {!profileComplete && (
+          <p className="helper_text mb-3 text-red-400">Completa i dati di fatturazione per procedere.</p>
         )}
         {!paymentMethod && (
           <p className="helper_text mb-3">Seleziona un metodo di pagamento.</p>

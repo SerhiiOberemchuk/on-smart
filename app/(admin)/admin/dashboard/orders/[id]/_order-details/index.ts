@@ -5,6 +5,7 @@ export { OrderManagementCard } from "./OrderManagementCard";
 export { InvoiceActionsCard } from "./InvoiceActionsCard";
 export { OrderCustomerCard } from "./OrderCustomerCard";
 export { OrderShippingCard } from "./OrderShippingCard";
+export { OrderWithdrawalCard } from "./OrderWithdrawalCard";
 export { buildBillingCityLine, buildBillingLine, buildCityLine, buildClientDisplayName, buildDeliveryLine, calculateOrderTotals, toDateTimeLocalValue } from "./formatters";
 export { getDeliveryAddressEntries } from "./delivery-address";
 export { canGenerateInvoice, getInvoiceAvailabilityReason } from "./invoice-policy";

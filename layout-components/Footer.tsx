@@ -59,7 +59,11 @@ export default async function Footer() {
           <div>
             <Link href="/informativa-sulla-privacy">Informativa sulla privacy</Link> |{" "}
             <Link href="/cookies">Cookie Policy</Link> | <ManageCookiesButton /> |{" "}
-            <Link href="/informativa-sulla-privacy">Termini e condizioni</Link>
+            <Link href="/informativa-sulla-privacy">Termini e condizioni</Link> |{" "}
+            {/* Art. 54-bis Codice del Consumo: the withdrawal function must be
+                labelled "recedere dal contratto qui", continuously available
+                and prominently displayed on the online interface. */}
+            <Link href="/recesso">Recedere dal contratto qui</Link>
           </div>
         </div>
       </div>

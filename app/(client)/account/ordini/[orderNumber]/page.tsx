@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ORDER_STATUS_LABEL, PAYMENT_STATUS_LABEL, formatOrderDate } from "../order-labels";
+import RecessoSection from "./RecessoSection";
 
 export const metadata: Metadata = {
   title: "Dettaglio ordine — On-Smart",
@@ -29,7 +30,7 @@ async function OrderDetail({ params }: { params: Promise<{ orderNumber: string }
   const data = await getAccountOrderDetail(orderNumber);
   if (!data) notFound();
 
-  const { order, items, payment } = data;
+  const { order, items, payment, withdrawal } = data;
   const isPickup = order.deliveryMethod === "RITIRO_NEGOZIO";
   const delivery = isPickup ? 0 : Number(order.deliveryPrice) || 0;
   const subtotal = items.reduce(
@@ -119,6 +120,19 @@ async function OrderDetail({ params }: { params: Promise<{ orderNumber: string }
           </div>
         )}
       </div>
+
+      {order.orderStatus !== "CANCELED" && order.orderStatus !== "REFUNDED" && (
+        <RecessoSection
+          orderNumber={order.orderNumber}
+          defaultNome={
+            order.clientType === "azienda"
+              ? (order.ragioneSociale ?? "")
+              : `${order.nome ?? ""} ${order.cognome ?? ""}`.trim()
+          }
+          defaultEmail={order.email}
+          withdrawal={withdrawal}
+        />
+      )}
     </div>
   );
 }

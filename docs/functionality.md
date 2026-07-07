@@ -30,17 +30,17 @@ The multi-step guest wizard and `store/checkout-store.ts` were **removed** (clie
 1. **Start (`/carrello`)** — `RepilogoComponent.handleProceedToOrder` rejects an empty basket and navigates to `/checkout`.
 2. **`/checkout`** (`app/(client)/checkout/page.tsx` → `AccountCheckoutClient.tsx`). Server-side session gate; a `<Suspense>` island fetches the customer's `customer_profiles` + `user_addresses`. One page, all preselected from the account:
    - **Order summary** from the cart (`store/basket-store.ts`).
-   - **CONSEGNA** — `CONSEGNA_CORRIERE` / `RITIRO_NEGOZIO` (free pickup, Avellino), default from the profile; for courier, a saved-address picker.
-   - **FATTURAZIONE** — Privato/Azienda identity from the profile (email read-only). Incomplete → link to `/account/profilo`.
+   - **CONSEGNA** (`components/ConsegnaSection.tsx`) — `CONSEGNA_CORRIERE` / `RITIRO_NEGOZIO` (free pickup, Avellino), default from the profile; for courier, a saved-address picker plus an inline "+ Nuovo indirizzo" form (reuses `AddAddressForm` / `createAddress`, saves to `user_addresses`, auto-selected after `router.refresh()`).
+   - **FATTURAZIONE** (`components/FatturazioneSection.tsx`) — Privato/Azienda identity from the profile (email read-only) with a per-order "Richiedi fattura" toggle preset from `requestInvoiceDefault`. Incomplete profile → an inline mini-form (`components/CheckoutBillingForm.tsx`, reuses `updateCustomerProfile`; hidden fields carry the existing order defaults so they are not wiped).
    - **PAGAMENTO** — `PAYMENT_METHODS` radio (`types/bonifico.data.ts`), default preselected; PayPal shows the +4% surcharge live.
    - The chosen widget (`components/pagamento/{paypal,sumup,klarna,bonifico}/`) receives its data as **props** (from the account + cart) and creates + pays the order. Payment errors → `/checkout?payment_error=…`.
-3. **Completion — `/checkout/completato/[order]`** (`PageCompletato.tsx`). Server-loads order + payment by number; `CompletionCleanup.tsx` clears the cart (`basket-store`). SumUp has an extra server callback page `completato/[order]/sumup/` (§5). These pages stay reachable logged-out (payment redirects).
+3. **Completion — `/checkout/completato/[order]`** (`PageCompletato.tsx`). Server-loads order + payment by number; `CompletionCleanup.tsx` clears the cart (`basket-store`); orders with a `userId` show a "Vedi l'ordine nel tuo account" link. SumUp has an extra server callback page `completato/[order]/sumup/` (§5). These pages stay reachable logged-out (payment redirects).
 
 ## 4. Order creation (server-authoritative)
 
 `app/actions/orders/create-order.ts` (`createOrderAction`):
 
-1. Rejects an empty basket.
+1. Rejects an empty basket and rejects callers without a session (ordering is account-only; the guard also covers direct action invocation).
 2. Re-fetches every product from DB; validates it **exists, is not hidden, and is in stock**. Client-sent prices are ignored — unit prices come from the DB.
 3. Recomputes subtotal + delivery (courier only) server-side.
 4. In **one DB transaction** inserts `orders`, `order_items` (title/brand/category/image snapshot per row), and `payments` (`db/schemas/orders.schema.ts`).
@@ -70,6 +70,17 @@ SMTP via nodemailer, `lib/mail-transporter.ts`: `transporterOrders` (orders mail
 - **Order confirmation:** `app/actions/notify-order-by-id/notify-order-by-id.ts` (`notifyOrderById`) and `app/actions/mail/mail-orders.ts` build HTML from `app/actions/mail/order-mail-template.ts` and send **two emails**: store inbox (`[NUOVO ORDINE] #…`) and customer (`Conferma Ordine #…`). Plus a **Telegram** message (`app/actions/telegram/send-message.ts`) with an "Apri ordine" admin deep-link. Mail failures are caught and logged — they never block the order.
 - **Assistance form:** `app/actions/mail/mail-assistance.ts` (via assistenza mailbox).
 - **Product reviews:** `app/actions/product-reviews/create-review.ts` — emails assistenza + Telegram on new review.
+
+## 6-bis. Withdrawal function — "funzione di recesso" (art. 54-bis Codice del Consumo)
+
+Mandatory for contracts concluded from 19 June 2026 (D.Lgs. 209/2025, transposing Dir. (EU) 2023/2673 art. 11a). The online withdrawal statement asks name + order number + email; the submit button is the statutory "funzione di conferma" and is labelled exactly **"Conferma recesso"**; the entry links use the statutory label **"Recedere dal contratto qui"**.
+
+- **Entry page:** `/recesso` (`app/(client)/(pryvacy-pages)/recesso/page.tsx`) — describes the process, CTA "Recedere dal contratto qui" → `/account/recesso`, plus a collapsed **guest fallback form** (`GuestRecessoFallback.tsx`) for orders concluded without an account — legally required until every guest order's withdrawal window closes (recital 36: withdrawal must not be more burdensome than conclusion; guests concluded without login). Linked from the footer legal row on every page (continuous availability, comma 3), the privacy-pages sidebar, `/garanzia` §2 and the sitemap.
+- **Account function (primary):** `/account/recesso` (`getAccountWithdrawalOrders`) — the customer **picks the order from their own list** (radio, with item titles; CANCELED/REFUNDED excluded, orders with an existing request shown with status), nome/email prefilled (recital 37: a logged-in consumer must not re-identify). Sidebar entry "Diritto di recesso". Also per-order: `RecessoSection` on `/account/ordini/[orderNumber]` (fixed order, prefilled).
+- **Submission:** `app/actions/withdrawal/submit-withdrawal-request.ts` (shared form `components/WithdrawalForm.tsx`) — session optional, enumeration-safe (never reveals whether an order exists; the order is linked only when the email matches or the logged-in user owns it, otherwise recorded unlinked for manual triage). Duplicate active requests per orderNumber+email are rejected.
+- **Receipt (comma 6):** `lib/withdrawal-mail.ts` sends the acknowledgment on a durable medium — content of the statement + **date and time of transmission** (Europe/Rome) — via `transporterAssistance`, immediately and automatically. A mail failure does not undo the registered statement; it is flagged in the Telegram alert (`app/actions/telegram/send-withdrawal-message.ts`).
+- **Storage:** `withdrawal_requests` table (`db/schemas/withdrawal-requests.schema.ts`, migration `drizzle/0033_withdrawal_requests.sql`) — a legal record: snapshots of nome/email/orderNumber; FKs to orders/user are `set null`. Status enum RECEIVED → PROCESSING → ACCEPTED/REJECTED.
+- **Admin:** `OrderWithdrawalCard` on the order detail (amber-bordered, Ukrainian labels) shows each request with the legally-relevant submission timestamp and a status selector (`app/actions/admin/withdrawals/update-withdrawal-status.ts`).
 
 ## 7. Admin panel (`/admin/dashboard/*`, Ukrainian UI)
 

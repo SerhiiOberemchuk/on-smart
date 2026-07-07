@@ -2,6 +2,7 @@
 
 import { updateOrderInfoByOrderIDAction } from "@/app/actions/admin/orders/mutations";
 import type { OrderItemsTypes, OrderPaymentTypes, OrderTypes } from "@/db/schemas/orders.schema";
+import type { WithdrawalRequestType } from "@/db/schemas/withdrawal-requests.schema";
 import type { OrderStatusTypes } from "@/types/orders.types";
 import { use, useState, useTransition } from "react";
 import { toast } from "react-toastify";
@@ -13,6 +14,7 @@ import {
   OrderPaymentsCard,
   OrderProductsCard,
   OrderShippingCard,
+  OrderWithdrawalCard,
   buildBillingCityLine,
   buildBillingLine,
   buildCityLine,
@@ -30,6 +32,8 @@ type GetOrderFullInfoByIdResponseType = Promise<{
   order: OrderTypes | null;
   orderItems: OrderItemsTypes[] | null;
   payments: OrderPaymentTypes | null;
+  accountUser: { id: string; name: string; email: string } | null;
+  withdrawals: WithdrawalRequestType[];
   error: unknown;
 }>;
 
@@ -38,7 +42,7 @@ export default function PageOrderByID({
 }: {
   orderInfoAction: GetOrderFullInfoByIdResponseType;
 }) {
-  const { order, orderItems, payments, error } = use(orderInfoAction);
+  const { order, orderItems, payments, accountUser, withdrawals, error } = use(orderInfoAction);
 
   const [pending, startTransition] = useTransition();
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -157,6 +161,8 @@ export default function PageOrderByID({
         </div>
 
         <div className="space-y-4">
+          <OrderWithdrawalCard withdrawals={withdrawals} />
+
           <OrderManagementCard
             status={status}
             onStatusChange={setStatus}
@@ -183,6 +189,7 @@ export default function PageOrderByID({
 
           <OrderCustomerCard
             order={currentOrder}
+            accountUser={accountUser}
             clientDisplayName={clientDisplayName}
             billingLine={billingLine}
             billingCityLine={billingCityLine}

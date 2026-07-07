@@ -2,6 +2,7 @@
 
 import { OrderTypes } from "@/db/schemas/orders.schema";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { URL_DASHBOARD } from "../dashboard-admin.types";
 import { getDeliveryMethodLabel, getOrderStatusLabel } from "./[id]/_order-details/formatters";
@@ -157,6 +158,9 @@ export default function PageOrdersClient({
 }) {
   const { orders, error } = serverActionOrders;
 
+  // Optional account filter (?userId=) — linked from the order detail "Клієнт" block.
+  const userIdFilter = useSearchParams().get("userId");
+
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<OrderStatus | "ALL">("ALL");
   const [dateFilter, setDateFilter] = useState<DateFilterOption>("ALL");
@@ -177,6 +181,8 @@ export default function PageOrdersClient({
 
     return [...(orders ?? [])]
       .filter((order) => {
+        if (userIdFilter && order.userId !== userIdFilter) return false;
+
         const hasStatus = status === "ALL" ? true : order.orderStatus === status;
         const hasPeriod = isWithinPeriod(order.createdAt, dateFilter);
         if (!hasStatus || !hasPeriod) return false;
@@ -205,7 +211,7 @@ export default function PageOrdersClient({
         return searchableText.includes(normalizedQuery);
       })
       .sort((left, right) => sortOrders(left, right, sortBy));
-  }, [orders, query, status, dateFilter, sortBy]);
+  }, [orders, userIdFilter, query, status, dateFilter, sortBy]);
 
   const allOrdersCount = orders?.length ?? 0;
   const filteredOrdersCount = filteredOrders.length;
@@ -219,6 +225,17 @@ export default function PageOrdersClient({
             Всього: {allOrdersCount}
             {filteredOrdersCount !== allOrdersCount ? ` • Відфільтровано: ${filteredOrdersCount}` : ""}
           </p>
+          {userIdFilter ? (
+            <p className="admin-subtitle">
+              Показано замовлення одного клієнта.{" "}
+              <Link
+                href={URL_DASHBOARD.DASHBOARD + URL_DASHBOARD.SUB_DASHBOARD.ORDERS}
+                className="text-amber-300 hover:underline"
+              >
+                Скинути фільтр
+              </Link>
+            </p>
+          ) : null}
         </div>
 
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:max-w-full sm:flex-row sm:flex-wrap sm:justify-end">

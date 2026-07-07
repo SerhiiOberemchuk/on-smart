@@ -2,7 +2,7 @@ import { transporterAssistance } from "@/lib/mail-transporter";
 
 type AuthMailKind = "verify-email" | "reset-password";
 
-function emailShell(heading: string, bodyHtml: string): string {
+export function emailShell(heading: string, bodyHtml: string): string {
   return `
     <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee;">
       <div style="background-color: #f8f8f8; padding: 20px; text-align: center; border-bottom: 3px solid #EAB308;">

@@ -9,13 +9,18 @@ import {
   type OrderPaymentTypes,
   type OrderTypes,
 } from "@/db/schemas/orders.schema";
-import { and, eq } from "drizzle-orm";
+import {
+  withdrawalRequestsSchema,
+  type WithdrawalRequestType,
+} from "@/db/schemas/withdrawal-requests.schema";
+import { and, desc, eq } from "drizzle-orm";
 import { requireCustomerSession } from "../_shared/require-customer-session";
 
 export type AccountOrderDetail = {
   order: OrderTypes;
   items: OrderItemsTypes[];
   payment: OrderPaymentTypes | null;
+  withdrawal: WithdrawalRequestType | null;
 };
 
 export async function getAccountOrderDetail(orderNumber: string): Promise<AccountOrderDetail | null> {
@@ -42,8 +47,14 @@ export async function getAccountOrderDetail(orderNumber: string): Promise<Accoun
       .from(paymentsSchema)
       .where(eq(paymentsSchema.orderId, order.id))
       .limit(1);
+    const [withdrawal] = await db
+      .select()
+      .from(withdrawalRequestsSchema)
+      .where(eq(withdrawalRequestsSchema.orderId, order.id))
+      .orderBy(desc(withdrawalRequestsSchema.createdAt))
+      .limit(1);
 
-    return { order, items, payment: payment ?? null };
+    return { order, items, payment: payment ?? null, withdrawal: withdrawal ?? null };
   } catch (error) {
     console.error("[getAccountOrderDetail]", error);
     return null;

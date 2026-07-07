@@ -14,6 +14,7 @@ const STATIC_PATHS = [
   "/garanzia",
   "/informativa-sulla-privacy",
   "/pagamento",
+  "/recesso",
   "/spedizione",
 ] as const;
 
