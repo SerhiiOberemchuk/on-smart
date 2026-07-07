@@ -87,6 +87,13 @@ function SidebarItemIcon({ icon }: { icon: DashboardLinkIcon }) {
           <path d="M8 15h4" />
         </svg>
       );
+    case "returns":
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+          <path d="M9 14 4 9l5-5" />
+          <path d="M4 9h11a5 5 0 0 1 5 5v1a5 5 0 0 1-5 5H8" />
+        </svg>
+      );
     default:
       return null;
   }

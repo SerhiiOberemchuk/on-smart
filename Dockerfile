@@ -98,6 +98,11 @@ RUN chown node:node .next
 COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 
+# Drizzle migrations run at container start (the Aruba DB is unreachable during
+# build), so the migration files and runner script must ship with the image.
+COPY --from=builder --chown=node:node /app/drizzle ./drizzle
+COPY --from=builder --chown=node:node /app/scripts/migrate.mjs ./scripts/migrate.mjs
+
 # If you want to persist the fetch cache generated during the build so that
 # cached responses are available immediately on startup, uncomment this line:
 # COPY --from=builder --chown=node:node /app/.next/cache ./.next/cache
@@ -108,5 +113,7 @@ USER node
 # Expose port 3000 to allow HTTP traffic
 EXPOSE 3000
 
-# Start Next.js standalone server
-CMD ["node", "server.js"]
+# Apply pending DB migrations first (status is printed to the container
+# console), then start the Next.js standalone server. `exec` hands PID 1 over
+# to the server so it receives container stop signals directly.
+CMD ["sh", "-c", "node scripts/migrate.mjs && exec node server.js"]

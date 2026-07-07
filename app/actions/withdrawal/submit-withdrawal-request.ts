@@ -4,7 +4,7 @@ import { db } from "@/db/db";
 import { ordersSchema } from "@/db/schemas/orders.schema";
 import { withdrawalRequestsSchema } from "@/db/schemas/withdrawal-requests.schema";
 import { auth } from "@/lib/auth";
-import { sendWithdrawalReceiptMail } from "@/lib/withdrawal-mail";
+import { sendWithdrawalMails } from "@/lib/withdrawal-mail";
 import type { WithdrawalFormState } from "@/types/withdrawal.types";
 import { and, eq, inArray } from "drizzle-orm";
 import { headers } from "next/headers";
@@ -83,15 +83,14 @@ export async function submitWithdrawalRequest(
       createdAt: submittedAt,
     });
 
-    // Receipt on a durable medium with content + date/time (comma 6). The
-    // statement is already registered, so a mail failure must not undo it —
-    // the Telegram alert flags it for manual follow-up.
-    let mailSent = true;
+    // Receipt on a durable medium with content + date/time (comma 6), plus an
+    // owner copy. The statement is already registered, so a mail failure must
+    // not undo it — the Telegram alert flags a missing customer receipt.
+    let customerSent = false;
     try {
-      await sendWithdrawalReceiptMail({ to: email, nome, orderNumber, message, submittedAt });
+      ({ customerSent } = await sendWithdrawalMails({ to: email, nome, orderNumber, message, submittedAt }));
     } catch (mailError) {
-      console.error("[submitWithdrawalRequest] receipt mail failed:", mailError);
-      mailSent = false;
+      console.error("[submitWithdrawalRequest] withdrawal mails failed:", mailError);
     }
 
     try {
@@ -101,7 +100,7 @@ export async function submitWithdrawalRequest(
         nome,
         email,
         note: message,
-        mailSent,
+        mailSent: customerSent,
       });
     } catch (telegramError) {
       console.error("[submitWithdrawalRequest] telegram failed:", telegramError);
