@@ -25,7 +25,7 @@ Client-only; **there is no server-side cart**.
 
 ## 3. Checkout — single-page, account-only
 
-The multi-step guest wizard and `store/checkout-store.ts` were **removed** (client-accounts Phase 8, 2026-07). Checkout now **requires a logged-in account**: `proxy.ts` gates `/checkout/:path*` (guests → `/registrati?redirect=/carrello`); old step URLs (`/checkout/informazioni` etc.) redirect to `/checkout` via `next.config.ts`.
+The multi-step guest wizard and `store/checkout-store.ts` were **removed** (client-accounts Phase 8, 2026-07). Checkout now **requires a logged-in account**: `proxy.ts` gates `/checkout/:path*` (guests → `/accedi?redirect=/carrello`; the login page links to registration — supersedes the earlier "strictly /registrati" of spec decision #7); old step URLs (`/checkout/informazioni` etc.) redirect to `/checkout` via `next.config.ts`.
 
 1. **Start (`/carrello`)** — `RepilogoComponent.handleProceedToOrder` rejects an empty basket and navigates to `/checkout`.
 2. **`/checkout`** (`app/(client)/checkout/page.tsx` → `AccountCheckoutClient.tsx`). Server-side session gate; a `<Suspense>` island fetches the customer's `customer_profiles` + `user_addresses`. One page, all preselected from the account:

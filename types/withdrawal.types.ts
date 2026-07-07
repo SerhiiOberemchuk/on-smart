@@ -20,6 +20,14 @@ export const WITHDRAWAL_STATUS_LABEL_IT: Record<WithdrawalStatusType, string> = 
   REJECTED: "Non accolta",
 };
 
+/** Storefront text colour per status (dark background). */
+export const WITHDRAWAL_STATUS_TEXT_CLASS: Record<WithdrawalStatusType, string> = {
+  RECEIVED: "text-yellow-500",
+  PROCESSING: "text-blue-300",
+  ACCEPTED: "text-green-300",
+  REJECTED: "text-red-300",
+};
+
 export type WithdrawalFormState = {
   success: boolean;
   message: string | null;

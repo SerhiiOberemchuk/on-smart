@@ -21,9 +21,17 @@
     caret-color: var(--white);
   }
   body {
-    overflow-x: hidden;
+    /* `clip` (not `hidden`) prevents horizontal overflow without turning body
+       into a scroll container — otherwise the sticky <header> would detach and
+       scroll away. */
+    overflow-x: clip;
     background: var(--black);
     color: var(--foreground);
+  }
+  html {
+    /* Offset anchor / scrollIntoView targets (e.g. catalog "#products") so they
+       are not hidden beneath the sticky header. */
+    scroll-padding-top: 5.5rem;
   }
   button,
   a {

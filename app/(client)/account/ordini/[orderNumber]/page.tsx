@@ -4,7 +4,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ORDER_STATUS_LABEL, PAYMENT_STATUS_LABEL, formatOrderDate } from "../order-labels";
+import clsx from "clsx";
+import {
+  ORDER_STATUS_LABEL,
+  PAYMENT_STATUS_LABEL,
+  formatOrderDate,
+  orderStatusBadgeClass,
+  paymentStatusBadgeClass,
+} from "../order-labels";
 import RecessoSection from "./RecessoSection";
 
 export const metadata: Metadata = {
@@ -41,11 +48,17 @@ async function OrderDetail({ params }: { params: Promise<{ orderNumber: string }
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h1 className="H2">Ordine {order.orderNumber}</h1>
-        <p className="helper_text mt-1">
-          {formatOrderDate(order.createdAt)} · {ORDER_STATUS_LABEL[order.orderStatus] ?? order.orderStatus}
-        </p>
+        <span
+          className={clsx(
+            "rounded-full border px-3 py-1 text-xs",
+            orderStatusBadgeClass(order.orderStatus),
+          )}
+        >
+          {ORDER_STATUS_LABEL[order.orderStatus] ?? order.orderStatus}
+        </span>
+        <p className="helper_text w-full">{formatOrderDate(order.createdAt)}</p>
       </div>
 
       <div className="rounded-sm border border-stroke-grey">
@@ -104,9 +117,18 @@ async function OrderDetail({ params }: { params: Promise<{ orderNumber: string }
 
       <div className="flex flex-col gap-1">
         <h2 className="H5 mb-1">Pagamento</h2>
-        <p className="helper_text">
-          {payment ? payment.provider : "—"}
-          {payment ? ` · ${PAYMENT_STATUS_LABEL[payment.status] ?? payment.status}` : ""}
+        <p className="helper_text flex items-center gap-2">
+          <span className="capitalize">{payment ? payment.provider : "—"}</span>
+          {payment && (
+            <span
+              className={clsx(
+                "rounded-full border px-2.5 py-0.5 text-xs",
+                paymentStatusBadgeClass(payment.status),
+              )}
+            >
+              {PAYMENT_STATUS_LABEL[payment.status] ?? payment.status}
+            </span>
+          )}
         </p>
 
         {payment?.status === "PENDING_BONIFICO" && (

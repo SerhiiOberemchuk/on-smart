@@ -22,11 +22,12 @@ export async function proxy(request: NextRequest) {
   const hasSessionCookie = SESSION_COOKIE_NAMES.some((name) => request.cookies.has(name));
 
   if (!hasSessionCookie) {
-    // Checkout requires an account — guests must register first (spec decision #7).
+    // Checkout requires an account — guests are sent to login by default
+    // (the /accedi page links to registration). Return to the cart afterwards.
     if (pathname.startsWith("/checkout")) {
-      const registerUrl = new URL("/registrati", request.url);
-      registerUrl.searchParams.set("redirect", "/carrello");
-      return NextResponse.redirect(registerUrl);
+      const loginUrl = new URL("/accedi", request.url);
+      loginUrl.searchParams.set("redirect", "/carrello");
+      return NextResponse.redirect(loginUrl);
     }
 
     const loginUrl = new URL("/accedi", request.url);

@@ -1,6 +1,9 @@
 import { getAccountWithdrawalOrders } from "@/app/actions/account/withdrawal/get-account-withdrawal-orders";
 import WithdrawalForm from "@/components/WithdrawalForm";
-import { WITHDRAWAL_STATUS_LABEL_IT } from "@/types/withdrawal.types";
+import {
+  WITHDRAWAL_STATUS_LABEL_IT,
+  WITHDRAWAL_STATUS_TEXT_CLASS,
+} from "@/types/withdrawal.types";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -61,7 +64,7 @@ async function RecessoContent() {
       )}
 
       {submitted.length > 0 && (
-        <div className="flex flex-col gap-2 rounded-sm border border-stroke-grey p-4">
+        <div className="flex flex-col gap-2 rounded-sm border border-stroke-grey bg-white/2 p-4">
           <h2 className="H5">Dichiarazioni inviate</h2>
           {submitted.map((order) => (
             <p key={order.orderNumber} className="helper_text">
@@ -71,7 +74,10 @@ async function RecessoContent() {
               >
                 {order.orderNumber}
               </Link>{" "}
-              — stato: <strong>{WITHDRAWAL_STATUS_LABEL_IT[order.withdrawalStatus!]}</strong>
+              — stato:{" "}
+              <strong className={WITHDRAWAL_STATUS_TEXT_CLASS[order.withdrawalStatus!]}>
+                {WITHDRAWAL_STATUS_LABEL_IT[order.withdrawalStatus!]}
+              </strong>
             </p>
           ))}
         </div>

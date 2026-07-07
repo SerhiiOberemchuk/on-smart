@@ -25,10 +25,14 @@ export default function AddressManager({ addresses }: { addresses: UserAddressTy
               <div className="flex flex-wrap items-center gap-2">
                 {address.label && <span className="font-medium">{address.label}</span>}
                 {address.isDefaultShipping && (
-                  <span className="rounded bg-white/5 px-2 py-0.5 text-xs">Spedizione</span>
+                  <span className="rounded border border-blue-500/40 bg-blue-500/15 px-2 py-0.5 text-xs text-blue-300">
+                    Spedizione
+                  </span>
                 )}
                 {address.isDefaultBilling && (
-                  <span className="rounded bg-white/5 px-2 py-0.5 text-xs">Fatturazione</span>
+                  <span className="rounded border border-green-500/40 bg-green-500/15 px-2 py-0.5 text-xs text-green-300">
+                    Fatturazione
+                  </span>
                 )}
               </div>
               <p className="helper_text">
@@ -73,7 +77,7 @@ export default function AddressManager({ addresses }: { addresses: UserAddressTy
         <button
           type="button"
           onClick={() => setShowForm(true)}
-          className="self-start rounded-sm border border-stroke-grey px-4 py-2 transition hover:bg-white/5"
+          className="self-start rounded-sm border border-stroke-grey px-4 py-2 transition hover:border-yellow-500/60 hover:bg-white/5"
         >
           + Aggiungi indirizzo
         </button>
@@ -128,7 +132,7 @@ export function AddAddressForm({
         <button
           type="button"
           onClick={onClose}
-          className="rounded-sm border border-stroke-grey px-4 py-2 transition hover:bg-white/5"
+          className="rounded-sm border border-stroke-grey px-4 py-2 transition hover:border-yellow-500/60 hover:bg-white/5"
         >
           Annulla
         </button>

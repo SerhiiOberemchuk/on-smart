@@ -3,6 +3,7 @@
 import { signInCustomer } from "@/app/actions/account/auth/sign-in";
 import type { AuthActionState } from "@/app/actions/account/auth/auth-action.types";
 import { InputBlock } from "@/components/InputBloc";
+import { useWishlistStore } from "@/store/wishlist-store";
 import Link from "next/link";
 import { useActionState } from "react";
 import ResendVerification from "../components/ResendVerification";
@@ -16,7 +17,11 @@ export default function AccediForm({ redirect }: { redirect: string }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <form action={formAction} className="flex flex-col gap-5">
+      <form
+        action={formAction}
+        onSubmit={() => useWishlistStore.getState().reset()}
+        className="flex flex-col gap-5"
+      >
         <h1 className="H5 text-center">Accedi</h1>
         <input type="hidden" name="redirect" value={redirect} />
         <InputBlock title="Email" name="email" type="email" required autoComplete="email" />

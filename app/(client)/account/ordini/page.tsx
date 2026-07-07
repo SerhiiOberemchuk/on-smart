@@ -2,7 +2,7 @@ import { getAccountOrders } from "@/app/actions/account/orders/get-account-order
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { ORDER_STATUS_LABEL, formatOrderDate } from "./order-labels";
+import OrdiniClient from "./OrdiniClient";
 
 export const metadata: Metadata = {
   title: "I miei ordini — On-Smart",
@@ -27,38 +27,17 @@ async function OrdersList() {
     return (
       <div className="flex flex-col items-start gap-4">
         <p className="helper_text">Non hai ancora effettuato ordini.</p>
-        <Link href="/catalogo" className="rounded-sm bg-yellow-500 px-4 py-2 font-medium text-black">
+        <Link
+          href="/catalogo"
+          className="rounded-sm bg-yellow-500 px-4 py-2 font-medium text-black transition hover:bg-yellow-400"
+        >
           Vai al catalogo
         </Link>
       </div>
     );
   }
 
-  return (
-    <ul className="flex flex-col gap-3">
-      {orders.map((order) => (
-        <li key={order.orderNumber}>
-          <Link
-            href={`/account/ordini/${order.orderNumber}`}
-            className="flex flex-col gap-2 rounded-sm border border-stroke-grey p-4 transition hover:bg-white/5 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div>
-              <p className="font-medium">Ordine {order.orderNumber}</p>
-              <p className="helper_text">
-                {formatOrderDate(order.createdAt)} · {order.itemCount} art.
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="helper_text">
-                {ORDER_STATUS_LABEL[order.orderStatus] ?? order.orderStatus}
-              </span>
-              <span className="font-medium">{order.total.toFixed(2)} €</span>
-            </div>
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
+  return <OrdiniClient orders={orders} />;
 }
 
 function OrdersSkeleton() {

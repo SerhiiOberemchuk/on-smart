@@ -11,6 +11,7 @@ type WishlistState = {
   hydrate: () => Promise<void>;
   toggle: (productId: string) => Promise<void>;
   closeLoginPrompt: () => void;
+  reset: () => void;
 };
 
 export const useWishlistStore = create<WishlistState>((set, get) => ({
@@ -57,4 +58,11 @@ export const useWishlistStore = create<WishlistState>((set, get) => ({
   },
 
   closeLoginPrompt: () => set({ loginPromptOpen: false }),
+
+  // The store is a client-side singleton that survives client navigations, so
+  // it must be reset when the account identity changes (sign-in / sign-out) —
+  // otherwise stale hearts persist until a full reload. Back to "idle" so the
+  // next WishlistHeart mount re-hydrates against the current session.
+  reset: () =>
+    set({ ids: [], isAuthenticated: false, status: "idle", loginPromptOpen: false, loginRedirect: "/" }),
 }));

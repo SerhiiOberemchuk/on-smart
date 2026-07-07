@@ -1,6 +1,7 @@
 "use client";
 
 import { signOutCustomer } from "@/app/actions/account/auth/sign-out";
+import { useWishlistStore } from "@/store/wishlist-store";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
@@ -101,7 +102,11 @@ export default function AccountMenu({
           >
             I miei preferiti
           </Link>
-          <form action={signOutCustomer} className="mt-1 border-t border-stroke-grey pt-1">
+          <form
+            action={signOutCustomer}
+            onSubmit={() => useWishlistStore.getState().reset()}
+            className="mt-1 border-t border-stroke-grey pt-1"
+          >
             <SignOutButton />
           </form>
         </div>

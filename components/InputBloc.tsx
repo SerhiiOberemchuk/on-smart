@@ -12,7 +12,11 @@ export function InputBlock({
   return (
     <label htmlFor={inputId} className={twMerge("helper_text flex flex-col gap-1", className)}>
       {title}
-      <input id={inputId} className="border-b border-stroke-grey text-text-grey outline-0" {...rest} />
+      <input
+        id={inputId}
+        className="border-b border-stroke-grey text-text-grey outline-0 transition-colors focus:border-yellow-500"
+        {...rest}
+      />
     </label>
   );
 }

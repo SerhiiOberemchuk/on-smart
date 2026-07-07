@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import AccountNavIcon from "./components/AccountNavIcon";
 import { ACCOUNT_LINKS } from "./components/account-nav";
 import SidebarNav from "./components/SidebarNav";
 
@@ -20,7 +21,12 @@ function SidebarFallback() {
   return (
     <nav className="flex flex-col gap-1">
       {ACCOUNT_LINKS.map((link) => (
-        <Link key={link.href} href={link.href} className="rounded-sm px-4 py-2 hover:bg-white/5">
+        <Link
+          key={link.href}
+          href={link.href}
+          className="flex items-center gap-3 rounded-sm px-4 py-2.5 text-white transition hover:bg-white/5"
+        >
+          <AccountNavIcon name={link.icon} className="h-5 w-5 shrink-0 text-text-grey" />
           {link.label}
         </Link>
       ))}
