@@ -1,4 +1,4 @@
-import { CheckoutTypesDataFirstStep, CheckoutTypesDataStepConsegna } from "@/store/checkout-store";
+import { CheckoutTypesDataFirstStep, CheckoutTypesDataStepConsegna } from "@/types/checkout-flow.types";
 
 export type OrderMailItem = {
   name: string;

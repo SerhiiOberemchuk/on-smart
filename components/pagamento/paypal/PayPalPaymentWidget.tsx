@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import { PayPalScriptProvider, ReactPayPalScriptOptions } from "@paypal/react-paypal-js";
 import PayPalButtonsClient from "./PayPalButtonsClient";
 import { getPayPalClientIdAction } from "@/app/actions/pay-pay/pay-pal";
+import type { PaymentWidgetData } from "@/types/payment-widget.types";
 
-export default function PayPalPaymentWidget() {
+export default function PayPalPaymentWidget(
+  props: PaymentWidgetData & { paymentErrorPath: string },
+) {
   const [clientId, setClientId] = useState<string | null>(null);
   const [payPalENV, setPayPalENV] = useState<ReactPayPalScriptOptions["environment"]>(undefined);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +64,7 @@ export default function PayPalPaymentWidget() {
           enableFunding: "paylater",
         }}
       >
-        <PayPalButtonsClient style={{ layout: "vertical" }} />
+        <PayPalButtonsClient style={{ layout: "vertical" }} {...props} />
       </PayPalScriptProvider>
     </>
   );

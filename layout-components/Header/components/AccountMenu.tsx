@@ -1,0 +1,136 @@
+"use client";
+
+import { signOutCustomer } from "@/app/actions/account/auth/sign-out";
+import { useWishlistStore } from "@/store/wishlist-store";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
+
+export default function AccountMenu({
+  firstName,
+  initials,
+  isAdmin,
+}: {
+  firstName: string;
+  initials: string;
+  isAdmin: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function onPointerDown(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false);
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        className="flex items-center p-2 md:px-3"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Account"
+        title={firstName}
+      >
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-500 text-sm font-semibold text-black">
+          {initials}
+        </span>
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 z-50 mt-1 flex w-56 flex-col rounded-sm border border-stroke-grey bg-background py-2 shadow-lg"
+        >
+          <div className="truncate border-b border-stroke-grey px-4 pb-2" title={firstName}>
+            Ciao, <span className="font-medium">{firstName}</span>
+          </div>
+          {isAdmin && (
+            <Link
+              role="menuitem"
+              href="/admin/dashboard"
+              className="px-4 py-2 font-medium hover:bg-white/5"
+              onClick={() => setOpen(false)}
+            >
+              Amministrazione
+            </Link>
+          )}
+          <Link
+            role="menuitem"
+            href="/account/ordini"
+            className="px-4 py-2 hover:bg-white/5"
+            onClick={() => setOpen(false)}
+          >
+            I miei ordini
+          </Link>
+          <Link
+            role="menuitem"
+            href="/account/profilo"
+            className="px-4 py-2 hover:bg-white/5"
+            onClick={() => setOpen(false)}
+          >
+            Il mio profilo
+          </Link>
+          <Link
+            role="menuitem"
+            href="/account/indirizzi"
+            className="px-4 py-2 hover:bg-white/5"
+            onClick={() => setOpen(false)}
+          >
+            I miei indirizzi
+          </Link>
+          <Link
+            role="menuitem"
+            href="/account/preferiti"
+            className="px-4 py-2 hover:bg-white/5"
+            onClick={() => setOpen(false)}
+          >
+            I miei preferiti
+          </Link>
+          <form
+            action={signOutCustomer}
+            onSubmit={() => useWishlistStore.getState().reset()}
+            className="mt-1 border-t border-stroke-grey pt-1"
+          >
+            <SignOutButton />
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SignOutButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="flex w-full items-center gap-2 px-4 py-2 text-left hover:bg-white/5 disabled:pointer-events-none disabled:opacity-60"
+    >
+      {pending && (
+        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
+          <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+        </svg>
+      )}
+      Esci
+    </button>
+  );
+}

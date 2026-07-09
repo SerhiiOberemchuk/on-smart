@@ -15,7 +15,7 @@
   --stroke-grey: #4c4c4c;
   --grey-hover-stroke: #373737;
   --header-footer: rgba(31, 30, 30, 0.8);
-  --background: #1a1919;
+    --background: #1a1919;
   --black: #121212;
   --blue: #2882b6;
 
@@ -42,6 +42,7 @@
   --color-stroke-grey: #4c4c4c;
   --color-grey-hover-stroke: #373737;
   --color-header-footer: rgba(31, 30, 30, 0.8);
+  --color-header-footer-100: rgba(31, 30, 30, 1);
   --color-background: #1a1919;
   --color-black: #121212;
   --color-blue: #2882b6;

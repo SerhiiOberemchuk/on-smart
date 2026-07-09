@@ -1,6 +1,6 @@
 ﻿export const URL_DASHBOARD = {
   ROOT: "/admin",
-  AUTH: "/admin/auth",
+  AUTH: "/accedi",
   DASHBOARD: "/admin/dashboard",
   SUB_DASHBOARD: {
     PRODUCTS: "/products",
@@ -12,6 +12,7 @@
     STOCK: "/stock",
     ORDERS: "/orders",
     PAYMENTS: "/payments",
+    RETURNS: "/returns",
   },
 };
 
@@ -24,7 +25,8 @@ export type DashboardLinkIcon =
   | "banners"
   | "stock"
   | "orders"
-  | "payments";
+  | "payments"
+  | "returns";
 
 export const dashboardLinks = [
   {
@@ -79,6 +81,12 @@ export const dashboardLinks = [
     href: URL_DASHBOARD.DASHBOARD + URL_DASHBOARD.SUB_DASHBOARD.PAYMENTS,
     title: "Оплати",
     icon: "payments",
+    active: true,
+  },
+  {
+    href: URL_DASHBOARD.DASHBOARD + URL_DASHBOARD.SUB_DASHBOARD.RETURNS,
+    title: "Відмови (recesso)",
+    icon: "returns",
     active: true,
   },
 ] satisfies ReadonlyArray<{

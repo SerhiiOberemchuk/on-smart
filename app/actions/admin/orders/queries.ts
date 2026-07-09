@@ -2,6 +2,7 @@
 
 import { eq } from "drizzle-orm";
 
+import { user } from "@/auth-schema";
 import { db } from "@/db/db";
 import {
   orderItemsSchema,
@@ -11,6 +12,10 @@ import {
   OrderTypes,
   paymentsSchema,
 } from "@/db/schemas/orders.schema";
+import {
+  withdrawalRequestsSchema,
+  type WithdrawalRequestType,
+} from "@/db/schemas/withdrawal-requests.schema";
 import { withRetrySelective } from "@/utils/with-retry-selective";
 
 import { requireAdminSession } from "../_shared/require-admin-session";
@@ -23,10 +28,14 @@ export type GetOrderResponseType = Promise<{
   error?: undefined | unknown;
 }>;
 
+export type OrderAccountUser = { id: string; name: string; email: string };
+
 export type GetOrderFullInfoByIdResponseType = Promise<{
   order: OrderTypes | null;
   orderItems: OrderItemsTypes[] | null;
   payments: OrderPaymentTypes | null;
+  accountUser: OrderAccountUser | null;
+  withdrawals: WithdrawalRequestType[];
   error: unknown;
 }>;
 
@@ -68,7 +77,14 @@ export async function getOrderFullInfoById({
   await requireAdminSession();
 
   if (!id) {
-    return { error: "Order id is required", order: null, orderItems: null, payments: null };
+    return {
+      error: "Order id is required",
+      order: null,
+      orderItems: null,
+      payments: null,
+      accountUser: null,
+      withdrawals: [],
+    };
   }
 
   try {
@@ -76,9 +92,31 @@ export async function getOrderFullInfoById({
     const orderItems = await db.select().from(orderItemsSchema).where(eq(orderItemsSchema.orderId, id));
     const [payments] = await db.select().from(paymentsSchema).where(eq(paymentsSchema.orderId, id));
 
-    return { order: order ?? null, orderItems, error: null, payments: payments ?? null };
+    const [accountUser] = order?.userId
+      ? await db
+          .select({ id: user.id, name: user.name, email: user.email })
+          .from(user)
+          .where(eq(user.id, order.userId))
+      : [];
+
+    // Matched by orderNumber so unlinked requests (orderId null) also surface.
+    const withdrawals = order
+      ? await db
+          .select()
+          .from(withdrawalRequestsSchema)
+          .where(eq(withdrawalRequestsSchema.orderNumber, order.orderNumber))
+      : [];
+
+    return {
+      order: order ?? null,
+      orderItems,
+      error: null,
+      payments: payments ?? null,
+      accountUser: accountUser ?? null,
+      withdrawals,
+    };
   } catch (error) {
-    return { error, order: null, orderItems: null, payments: null };
+    return { error, order: null, orderItems: null, payments: null, accountUser: null, withdrawals: [] };
   }
 }
 

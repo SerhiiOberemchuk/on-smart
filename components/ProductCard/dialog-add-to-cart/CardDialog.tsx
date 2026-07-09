@@ -19,7 +19,7 @@ import ButtonAddToBasket from "@/components/ButtonAddToBasket";
 import InfoPopupAddedToBasket from "@/components/InfoPopupAddedToBasket";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
 import { ProductType } from "@/db/schemas/product.schema";
-import { BasketTypeUseCheckoutStore } from "@/store/checkout-store";
+import { BasketTypeUseCheckoutStore } from "@/types/checkout-flow.types";
 
 const NUMBER_OF_VARIANTS_TO_SHOW = 2;
 const dialogVariantsCache = new Map<string, ProductType[] | null>();

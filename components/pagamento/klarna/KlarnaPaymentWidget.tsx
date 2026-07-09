@@ -18,10 +18,8 @@ import { createOrderAction } from "@/app/actions/orders/create-order";
 import { updateOrderPaymentAction } from "@/app/actions/payments/payment-order-actions";
 import { deleteOrderByOrderId } from "@/app/actions/orders/delete-order";
 
-import { useCheckoutStore } from "@/store/checkout-store";
-import { useBasketStore } from "@/store/basket-store";
-
 import { PAGES } from "@/types/pages.types";
+import type { PaymentWidgetData } from "@/types/payment-widget.types";
 import { getTotalPriceToPay } from "@/utils/get-prices";
 import { makeOrderNumber } from "@/utils/order-number";
 import { ulid } from "ulid";
@@ -43,12 +41,16 @@ type CreatedOrderRef = {
   orderNumber: string;
 };
 
-export default function KlarnaPaymentWidget() {
+export default function KlarnaPaymentWidget({
+  totalPrice,
+  basket,
+  productsInBasket,
+  dataFirstStep,
+  dataCheckoutStepConsegna,
+  dataCheckoutStepPagamento,
+  paymentErrorPath,
+}: PaymentWidgetData & { paymentErrorPath: string }) {
   const router = useRouter();
-
-  const { dataFirstStep, dataCheckoutStepConsegna, totalPrice, dataCheckoutStepPagamento } =
-    useCheckoutStore();
-  const { productsInBasket, basket } = useBasketStore();
 
   const [sessionData, setSessionData] = useState<KlarnaSessionResponseType | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -82,12 +84,12 @@ export default function KlarnaPaymentWidget() {
       "Pagamento Klarna non riuscito. Riprova piu tardi o scegli un altro metodo di pagamento.",
       PERSISTENT_PAYMENT_TOAST_OPTIONS,
     );
-    router.push(`${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=${encodeURIComponent(reason)}`);
+    router.push(`${paymentErrorPath}?payment_error=${encodeURIComponent(reason)}`);
   };
 
   const redirectToKlarnaPendingReviewState = () => {
     router.push(
-      `${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=${encodeURIComponent("klarna_paid_persist_failed")}`,
+      `${paymentErrorPath}?payment_error=${encodeURIComponent("klarna_paid_persist_failed")}`,
     );
   };
 

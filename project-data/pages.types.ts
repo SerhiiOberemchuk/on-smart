@@ -7,6 +7,7 @@ export type Pages =
   | "/garanzia"
   | "/informativa-sulla-privacy"
   | "/cookies"
+  | "/recesso"
   | "/termini-e-condizioni";
 
 export const list_nav: {
@@ -26,6 +27,7 @@ export const privacy_nav_links: {
   { href: "/informativa-sulla-privacy", label: "Informativa sulla privacy" },
   { href: "/cookies", label: "Cookies" },
   { href: "/garanzia", label: "Garanzia" },
+  { href: "/recesso", label: "Diritto di recesso" },
   { href: "/pagamento", label: "Pagamento" },
   { href: "/spedizione", label: "Spedizione e consegna" },
 ];

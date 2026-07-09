@@ -3,7 +3,7 @@
 import { db } from "@/db/db";
 import { orderItemsSchema, OrderItemsTypes } from "@/db/schemas/orders.schema";
 import { ProductType } from "@/db/schemas/product.schema";
-import { BasketTypeUseCheckoutStore } from "@/store/checkout-store";
+import { BasketTypeUseCheckoutStore } from "@/types/checkout-flow.types";
 import { updateTag } from "next/cache";
 import { CACHE_TAG_GET_ORDER_INFO } from "./cache-tags";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";

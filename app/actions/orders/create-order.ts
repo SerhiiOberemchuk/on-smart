@@ -15,8 +15,10 @@ import {
   BasketTypeUseCheckoutStore,
   CheckoutTypesDataFirstStep,
   CheckoutTypesDataStepConsegna,
-} from "@/store/checkout-store";
+} from "@/types/checkout-flow.types";
 import { makeOrderNumber } from "@/utils/order-number";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { ulid } from "ulid";
 import { sendMailOrders } from "../mail/mail-orders";
 import { sendTelegramMessage } from "../telegram/send-message";
@@ -51,6 +53,16 @@ export async function createOrderAction({
     ...dataFirstStep,
     ...dataCheckoutStepConsegna,
   };
+
+  // userId is always derived server-side from the session (spec invariant #2) —
+  // never trusted from the client payload. Ordering is account-only after cutover:
+  // the proxy matcher blocks guest UI, and this guard blocks direct action invocation.
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) {
+    return { success: false, error: "Authentication required" };
+  }
+  data.userId = session.user.id;
+
   const orderNumber = customOrderNumberId?.number || makeOrderNumber("OS");
   const orderId = customOrderNumberId?.id || ulid();
   const basketMap = new Map<string, number>();

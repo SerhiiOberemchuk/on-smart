@@ -10,16 +10,16 @@ import { createOrderAction } from "@/app/actions/orders/create-order";
 import { updateOrderPaymentAction } from "@/app/actions/payments/payment-order-actions";
 import { deleteOrderByOrderId } from "@/app/actions/orders/delete-order";
 
-import { useCheckoutStore } from "@/store/checkout-store";
-import { useBasketStore } from "@/store/basket-store";
 import { PAGES } from "@/types/pages.types";
+import type { PaymentWidgetData } from "@/types/payment-widget.types";
 import { getTotalPriceToPayWithCommission } from "@/utils/get-prices";
 import { makeOrderNumber } from "@/utils/order-number";
 import { ulid } from "ulid";
 import { updateOrderInfoByOrderIDAction } from "@/app/actions/orders/udate-order-info";
 import { notifyOrderById } from "@/app/actions/notify-order-by-id/notify-order-by-id";
 
-type Props = Pick<PayPalButtonsComponentOptions, "message" | "fundingSource" | "style">;
+type Props = Pick<PayPalButtonsComponentOptions, "message" | "fundingSource" | "style"> &
+  PaymentWidgetData & { paymentErrorPath: string };
 
 type CreatedOrderRef = {
   orderId: string;
@@ -27,13 +27,18 @@ type CreatedOrderRef = {
   providerOrderId?: string | null;
 };
 
-export default function PayPalButtonsClient(props: Props) {
+export default function PayPalButtonsClient({
+  totalPrice,
+  basket,
+  productsInBasket,
+  dataFirstStep,
+  dataCheckoutStepConsegna,
+  dataCheckoutStepPagamento,
+  paymentErrorPath,
+  ...buttonProps
+}: Props) {
   const router = useRouter();
   const [{ isPending: isSdkPending }] = usePayPalScriptReducer();
-
-  const { totalPrice, dataCheckoutStepConsegna, basket, dataFirstStep, dataCheckoutStepPagamento } =
-    useCheckoutStore();
-  const { productsInBasket } = useBasketStore();
 
   const [priceToPay, setPriceToPay] = useState("0.00");
   const [showMessages, setShowMessages] = useState(false);
@@ -60,16 +65,16 @@ export default function PayPalButtonsClient(props: Props) {
 
   const redirectToPayPalErrorState = useCallback(
     (reason: string) => {
-      router.push(`${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=${encodeURIComponent(reason)}`);
+      router.push(`${paymentErrorPath}?payment_error=${encodeURIComponent(reason)}`);
     },
-    [router],
+    [router, paymentErrorPath],
   );
 
   const redirectToPayPalPendingReviewState = useCallback(() => {
     router.push(
-      `${PAGES.CHECKOUT_PAGES.SUMMARY}?payment_error=${encodeURIComponent("paypal_paid_persist_failed")}`,
+      `${paymentErrorPath}?payment_error=${encodeURIComponent("paypal_paid_persist_failed")}`,
     );
-  }, [router]);
+  }, [router, paymentErrorPath]);
 
   useEffect(() => {
     if (!totalPrice) return;
@@ -117,7 +122,7 @@ export default function PayPalButtonsClient(props: Props) {
       </div>
 
       <PayPalButtons
-        {...props}
+        {...buttonProps}
         forceReRender={[priceToPay, currency]}
         disabled={!canPay || isSdkPending || isProcessingPayPal}
         createOrder={async () => {
