@@ -11,6 +11,7 @@
     BANNERS: "/banners",
     STOCK: "/stock",
     ORDERS: "/orders",
+    CUSTOMERS: "/customers",
     PAYMENTS: "/payments",
     RETURNS: "/returns",
   },
@@ -25,6 +26,7 @@ export type DashboardLinkIcon =
   | "banners"
   | "stock"
   | "orders"
+  | "customers"
   | "payments"
   | "returns";
 
@@ -75,6 +77,12 @@ export const dashboardLinks = [
     href: URL_DASHBOARD.DASHBOARD + URL_DASHBOARD.SUB_DASHBOARD.ORDERS,
     title: "Замовлення",
     icon: "orders",
+    active: true,
+  },
+  {
+    href: URL_DASHBOARD.DASHBOARD + URL_DASHBOARD.SUB_DASHBOARD.CUSTOMERS,
+    title: "Клієнти",
+    icon: "customers",
     active: true,
   },
   {
