@@ -11,6 +11,8 @@ import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { CACHE_TAG_GET_ORDER_INFO } from "./cache-tags";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export type DeleteOrderResult =
   | {
@@ -20,10 +22,15 @@ export type DeleteOrderResult =
     }
   | {
       success: false;
-      errorCode: "INVALID_INPUT" | "DB_ERROR";
+      errorCode: "INVALID_INPUT" | "DB_ERROR" | "UNAUTHORIZED" | "NOT_DELETABLE";
       errorMessage: string;
     };
 
+// Callable from the checkout widgets (PayPal/Klarna) to roll back a draft order
+// when the payment is canceled or fails. It must therefore stay client-callable,
+// so it authorizes every call itself: only the authenticated owner may delete,
+// and only while the order is still an unpaid draft (PENDING_PAYMENT). This is
+// what prevents the IDOR where any id could delete any (even paid) order.
 export async function deleteOrderByOrderId({
   id,
 }: Pick<OrderTypes, "id">): Promise<DeleteOrderResult> {
@@ -32,6 +39,42 @@ export async function deleteOrderByOrderId({
       success: false,
       errorCode: "INVALID_INPUT",
       errorMessage: "Order id is required",
+    };
+  }
+
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) {
+    return {
+      success: false,
+      errorCode: "UNAUTHORIZED",
+      errorMessage: "Authentication required",
+    };
+  }
+
+  const existing = await db
+    .select({ userId: ordersSchema.userId, orderStatus: ordersSchema.orderStatus })
+    .from(ordersSchema)
+    .where(eq(ordersSchema.id, id));
+  const order = existing[0];
+
+  // Already gone — treat as success so rollback stays idempotent.
+  if (!order) {
+    return { success: true, errorCode: null, errorMessage: null };
+  }
+
+  if (order.userId !== session.user.id) {
+    return {
+      success: false,
+      errorCode: "UNAUTHORIZED",
+      errorMessage: "You are not allowed to delete this order",
+    };
+  }
+
+  if (order.orderStatus !== "PENDING_PAYMENT") {
+    return {
+      success: false,
+      errorCode: "NOT_DELETABLE",
+      errorMessage: "Only unpaid draft orders can be deleted",
     };
   }
 

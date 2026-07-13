@@ -4,6 +4,7 @@ import { PAGES } from "@/types/pages.types";
 import { baseUrl } from "@/types/baseUrl";
 import SumUp from "@sumup/sdk";
 import { SUM_UP_CONSTANTS } from "./sumup-constans";
+import { readJsonResponse } from "@/utils/read-json-response";
 
 const client = new SumUp({
   apiKey: process.env?.SUMUP_API_KEY,
@@ -100,9 +101,9 @@ export async function createSumUpCheckout(
       };
     }
 
-    const data = (await res.json()) as SumUpHostedCheckoutResponse;
+    const data = await readJsonResponse<SumUpHostedCheckoutResponse>(res);
 
-    if (!data.hosted_checkout_url) {
+    if (!data || !data.hosted_checkout_url) {
       return { success: false, error: "SumUp did not return hosted_checkout_url" };
     }
 
@@ -130,6 +131,9 @@ export async function getSumUpCheckoutStatus(checkoutId: string) {
     throw new Error(`SumUp status failed: ${res.status}${text ? ` - ${text}` : ""}`);
   }
 
-  const data = (await res.json()) as { id: string; status: SumUpCardResponseBody["status"] };
+  const data = await readJsonResponse<{ id: string; status: SumUpCardResponseBody["status"] }>(res);
+  if (!data) {
+    throw new Error("SumUp status: empty or invalid response body");
+  }
   return data;
 }

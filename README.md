@@ -26,7 +26,7 @@ npm run dev                   # Next.js dev server with Turbopack
 
 Scripts: `npm run dev` · `npm run lint` · `npm test` (Vitest) · `npm run build` · `npm start`. All three quality gates (lint, test, build) must pass before any change is considered done.
 
-Database migrations are generated in `drizzle/` but **applied manually by the project owner only** — never by CI or agents.
+Database migrations are generated in `drizzle/` and **auto-applied at container start** by `scripts/migrate.mjs` (strict by default: a failed migration blocks startup; set `MIGRATE_STRICT=0` to fail-open onto the old schema). Authoring and review of migrations stay with the project owner — CI/agents never generate or apply them unreviewed.
 
 ## Documentation
 

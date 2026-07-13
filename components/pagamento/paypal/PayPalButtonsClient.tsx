@@ -15,8 +15,6 @@ import type { PaymentWidgetData } from "@/types/payment-widget.types";
 import { getTotalPriceToPayWithCommission } from "@/utils/get-prices";
 import { makeOrderNumber } from "@/utils/order-number";
 import { ulid } from "ulid";
-import { updateOrderInfoByOrderIDAction } from "@/app/actions/orders/udate-order-info";
-import { notifyOrderById } from "@/app/actions/notify-order-by-id/notify-order-by-id";
 
 type Props = Pick<PayPalButtonsComponentOptions, "message" | "fundingSource" | "style"> &
   PaymentWidgetData & { paymentErrorPath: string };
@@ -204,9 +202,12 @@ export default function PayPalButtonsClient({
 
           const referenceId = created.orderNumber;
 
+          // Capture verifies the payment AND persists PAYED/PAID + notifies,
+          // all server-side. The client only reacts to the outcome.
           const cap = await capturePayPalOrderAction({
             orderId: ppOrderId,
             referenceId,
+            internalOrderId: created.orderId,
           });
 
           if (!cap.ok) {
@@ -226,40 +227,13 @@ export default function PayPalButtonsClient({
             return;
           }
 
-          const paymentPersist = await updateOrderPaymentAction({
-            orderNumber: referenceId,
-            data: { status: "PAYED", providerOrderId: ppOrderId, notes: null },
-          });
-
-          if (!paymentPersist.success) {
-            console.error("updateOrderPaymentAction SUCCESS after capture ok:", paymentPersist);
+          if (!cap.persisted) {
+            // Payment succeeded but the server could not persist it — send the
+            // customer to the pending-review state (never show a hard error).
+            console.error("PayPal captured but order persistence failed:", referenceId);
             resetDraftOrderIdentity();
             redirectToPayPalPendingReviewState();
             return;
-          }
-
-          const orderPersist = await updateOrderInfoByOrderIDAction({
-            orderId: created.orderId,
-            dataToUpdate: { orderStatus: "PAID" },
-          });
-
-          if (!orderPersist.success) {
-            console.error("updateOrderInfoByOrderIDAction after PayPal capture ok:", orderPersist);
-            resetDraftOrderIdentity();
-            redirectToPayPalPendingReviewState();
-            return;
-          }
-
-          if (!didNotifyRef.current) {
-            didNotifyRef.current = true;
-
-            try {
-              await notifyOrderById({
-                orderId: created.orderId,
-              });
-            } catch (e) {
-              console.error("notifyOrderById failed:", e);
-            }
           }
 
           resetDraftOrderIdentity();

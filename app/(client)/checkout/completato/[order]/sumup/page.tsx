@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSumUpCheckoutStatus } from "@/app/actions/sumup/action";
 import { updateOrderPaymentAction } from "@/app/actions/payments/payment-order-actions";
-import { updateOrderInfoByOrderIDAction } from "@/app/actions/orders/udate-order-info";
+import { persistPaidOrder } from "@/app/actions/orders/_internal/persist-paid-order";
 import { SUM_UP_CONSTANTS } from "@/app/actions/sumup/sumup-constans";
 import { PAGES } from "@/types/pages.types";
 import { getOrderFullInfoById } from "@/app/actions/orders/get-order";
@@ -43,16 +43,16 @@ async function SumUpCallbackContent({
 
   const currentOrder = order;
 
+  // Non-success payment transitions only (FAILED / PENDING). The PAID state is
+  // persisted via persistPaidOrder below, after SumUp's status is verified.
   async function persistPaymentState({
     paymentData,
-    orderStatus,
   }: {
     paymentData: Partial<{
-      status: "CREATED" | "PENDING" | "PAYED" | "FAILED" | "CANCELED";
+      status: "CREATED" | "PENDING" | "FAILED" | "CANCELED";
       providerOrderId: string | null;
       notes: string | null;
     }>;
-    orderStatus?: "PAID";
   }) {
     const paymentUpdate = await updateOrderPaymentAction({
       orderNumber,
@@ -73,30 +73,6 @@ async function SumUpCallbackContent({
       };
     }
 
-    if (!orderStatus) {
-      return { success: true as const };
-    }
-
-    const orderUpdate = await updateOrderInfoByOrderIDAction({
-      orderId: currentOrder.id,
-      dataToUpdate: { orderStatus },
-    });
-
-    if (!orderUpdate.success) {
-      console.error("[SumUpCallbackPage] order update failed", {
-        orderId: currentOrder.id,
-        orderNumber,
-        checkoutId,
-        errorCode: orderUpdate.errorCode,
-        errorMessage: orderUpdate.errorMessage,
-      });
-
-      return {
-        success: false as const,
-        stage: "order_update" as const,
-      };
-    }
-
     return { success: true as const };
   }
 
@@ -105,26 +81,23 @@ async function SumUpCallbackContent({
     const status = resp.status;
 
     if (status === "PAID") {
-      const persistResult = await persistPaymentState({
-        paymentData: {
-          status: "PAYED",
-          providerOrderId: checkoutId as string,
-          notes: `SumUp status: ${status}`,
-        },
-        orderStatus: "PAID",
+      // Payment verified server-side with SumUp — persist PAYED + PAID in the
+      // trusted server-only helper (never via the client-reachable action).
+      const persisted = await persistPaidOrder({
+        orderId: currentOrder.id,
+        orderNumber,
+        providerOrderId: checkoutId as string,
+        notes: `SumUp status: ${status}`,
       });
 
-      if (!persistResult.success) {
+      if (!persisted) {
         redirect(summaryWithError("sumup_paid_persist_failed"));
       }
 
-      if (true) {
-        try {
-          await notifyOrderById({ orderId: currentOrder.id });
-          console.log(" Messaggio notificato con successo");
-        } catch (e) {
-          console.error("Notify error:", e);
-        }
+      try {
+        await notifyOrderById({ orderId: currentOrder.id });
+      } catch (e) {
+        console.error("Notify error:", e);
       }
 
       redirect(`${PAGES.CHECKOUT_PAGES.COMPLETED}/${orderNumber}?sumup=paid`);

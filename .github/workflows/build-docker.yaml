@@ -18,13 +18,20 @@ jobs:
       #       username: ${{ secrets.DOCKERHUB_USERNAME }}
       #       password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # Also tag with the immutable commit SHA so a specific build can be
+      # pinned/rolled back, while :latest stays the moving deploy target.
       - name: Build Docker image
-        run: docker build -t serhiioberemchuk/on-smart:latest .
+        run: |
+          docker build \
+            -t serhiioberemchuk/on-smart:latest \
+            -t serhiioberemchuk/on-smart:${{ github.sha }} \
+            .
 
       - name: Push Docker image
         run: |
           docker login -u serhiioberemchuk -p ${{ secrets.DOCKERHUB_TOKEN }}
           docker push serhiioberemchuk/on-smart:latest
+          docker push serhiioberemchuk/on-smart:${{ github.sha }}
 
     #   - name: Trigger Aruba Redeploy
     #     run: |

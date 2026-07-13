@@ -85,6 +85,15 @@ export default function FormFeedback({
     >
       {type === "product-review" ? <input type="hidden" name="productId" value={productId} /> : null}
       {type === "bundle-review" ? <input type="hidden" name="bundleId" value={bundleId} /> : null}
+      {/* Honeypot: hidden from real users; bots that fill it are silently dropped server-side. */}
+      <input
+        type="text"
+        name="company"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", height: 0, width: 0, opacity: 0 }}
+      />
       {type === "product-review" || type === "bundle-review" ? <InputsRating /> : null}
 
       <div className="flex flex-col gap-3 lg:flex-row">

@@ -25,8 +25,6 @@ import { makeOrderNumber } from "@/utils/order-number";
 import { ulid } from "ulid";
 
 import { KlarnaAuthorizeResponse, KlarnaPaymentsLoadResponse } from "@/types/klarna";
-import { updateOrderInfoByOrderIDAction } from "@/app/actions/orders/udate-order-info";
-import { notifyOrderById } from "@/app/actions/notify-order-by-id/notify-order-by-id";
 import Script from "next/script";
 
 const containerId = "klarna_container";
@@ -62,7 +60,6 @@ export default function KlarnaPaymentWidget({
 
   const createdRef = useRef<CreatedOrderRef | null>(null);
   const isCreatingRef = useRef(false);
-  const didNotifyRef = useRef(false);
 
   const priceToPay = useMemo<number>(() => {
     if (!totalPrice) return 0;
@@ -229,6 +226,7 @@ export default function KlarnaPaymentWidget({
           const placedOrder = await placeKlarnaOrder({
             authorizationToken: res.authorization_token,
             orderNumber,
+            internalOrderId: created.orderId,
             dataFirstStep,
             dataCheckoutStepConsegna,
             productsInBasket,
@@ -255,39 +253,12 @@ export default function KlarnaPaymentWidget({
             return;
           }
 
-          const paymentPersist = await updateOrderPaymentAction({
-            orderNumber,
-            data: {
-              status: "PAYED",
-              providerOrderId: placedOrder.orderId,
-            },
-          });
-
-          if (!paymentPersist.success) {
-            console.error("Klarna payment persist failed after provider success:", paymentPersist);
+          // placeKlarnaOrder persisted PAYED/PAID + notified server-side after
+          // Klarna accepted the order. The client only reacts to the outcome.
+          if (!placedOrder.persisted) {
+            console.error("Klarna placed but order persistence failed:", orderNumber);
             redirectToKlarnaPendingReviewState();
             return;
-          }
-
-          const orderPersist = await updateOrderInfoByOrderIDAction({
-            orderId: created.orderId,
-            dataToUpdate: { orderStatus: "PAID" },
-          });
-
-          if (!orderPersist.success) {
-            console.error("Klarna order persist failed after provider success:", orderPersist);
-            redirectToKlarnaPendingReviewState();
-            return;
-          }
-
-          if (!didNotifyRef.current) {
-            didNotifyRef.current = true;
-
-            try {
-              await notifyOrderById({ orderId: created.orderId });
-            } catch (error) {
-              console.error("notifyOrderById failed:", error);
-            }
           }
 
           if (placedOrder.redirectUrl) {

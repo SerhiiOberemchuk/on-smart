@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   reactCompiler: true,
   allowedDevOrigins: ["10.18.212.244"],
+  // Load sharp from node_modules at runtime instead of tracing/bundling it, so
+  // the native linux binaries copied into the standalone image (see Dockerfile)
+  // are used rather than the broken wasm32 fallback.
+  serverExternalPackages: ["sharp"],
   images: {
     remotePatterns: [
       {
@@ -22,6 +26,10 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       bodySizeLimit: "2mb",
+      // Behind Aruba's reverse proxy + apex↔www redirects the forwarded
+      // Origin/Host can differ from the server's own; without this Next may
+      // reject Server Actions ("Failed to find Server Action").
+      allowedOrigins: [canonicalHost, redirectHost],
     },
   },
   async redirects() {

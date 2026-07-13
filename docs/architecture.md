@@ -104,8 +104,8 @@ Context: guest-first store, minimal infra. Decision: cart lives in localStorage;
 **ADR-4 — `use cache` + central tag registry (not route-level revalidation).**
 Context: Next 16 `cacheComponents`; fine-grained entity caching needed. Decision: cached cores with tags from `types/cache-trigers.constant.ts`; mutations invalidate exact tags. Consequences: precise invalidation, no hardcoded strings; every new entity needs its tag namespace added to the registry first.
 
-**ADR-5 — Migrations generated in repo, applied manually by the owner.**
-Context: live store, single production DB, no staging environment. Decision: agents/CI never run `drizzle-kit` migrate or apply SQL; schema edits are prepared in code, the owner reviews and applies SQL manually. Consequences: schema changes have a human gate; features depending on new tables ship only after the owner confirms application.
+**ADR-5 — Migrations generated in repo, auto-applied at container start (strict).**
+Context: live store, single production DB reachable only from inside Aruba's network (unreachable at build time), no staging environment. Decision: migration SQL is generated and reviewed in code by the owner; at container start `scripts/migrate.mjs` applies any pending migrations before the server boots, and is **strict by default** — a failed migration blocks startup (set `MIGRATE_STRICT=0` to fail-open onto the old schema). A guarded admin-only endpoint (`app/api/run-migrations/route.ts`) lets the owner trigger the same run manually. Consequences: schema changes keep a human gate at authoring/review time, but application is automatic and gated on success; agents/CI must never author or apply migrations without owner review.
 
 **ADR-6 — Better Auth (not next-auth / hand-rolled).**
 Context: needed admin auth on MySQL/Drizzle with room to grow. Decision: Better Auth with the Drizzle adapter; use its plugins (`admin`, `nextCookies`) and generated schema as-is. Consequences: customer accounts (email verification, password reset, sessions) are config, not custom code; `auth-schema.ts` stays CLI-generated.

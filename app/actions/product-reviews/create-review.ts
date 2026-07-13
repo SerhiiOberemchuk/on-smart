@@ -5,7 +5,7 @@ import { productReviewsSchema } from "@/db/schemas/product-reviews.schema";
 import { productsSchema } from "@/db/schemas/product.schema";
 import { updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { transporterAssistance } from "@/lib/mail-transporter";
 import { baseUrl } from "@/types/baseUrl";
 
@@ -29,6 +29,8 @@ type ProductReviewNotificationPayload = {
 
 const MIN_RATING = 1;
 const MAX_RATING = 5;
+const MAX_NAME_LENGTH = 120;
+const MAX_COMMENT_LENGTH = 2000;
 const TELEGRAM_API_BASE_URL = "https://api.telegram.org";
 
 function getFormValue(formData: FormData, key: string) {
@@ -161,6 +163,12 @@ export async function createProductReview(
   _prevState: ProductReviewActionState,
   data: FormData,
 ): Promise<ProductReviewActionState> {
+  // Honeypot: real users never see this field. If a bot filled it, pretend the
+  // submission succeeded but do nothing (no insert, no notification spam).
+  if (getFormValue(data, "company")) {
+    return { success: true };
+  }
+
   const product_id = getFormValue(data, "productId");
   const client_name = getFormValue(data, "nome");
   const email = getFormValue(data, "email");
@@ -175,7 +183,32 @@ export async function createProductReview(
     return { success: false, message: "Inserisci un indirizzo email valido." };
   }
 
+  if (client_name.length > MAX_NAME_LENGTH || comment.length > MAX_COMMENT_LENGTH) {
+    return { success: false, message: "Il testo inserito è troppo lungo." };
+  }
+
   try {
+    // Throttle spam floods: refuse a new review while this email already has a
+    // pending (unapproved) review for the same product.
+    const [pending] = await db
+      .select({ id: productReviewsSchema.id })
+      .from(productReviewsSchema)
+      .where(
+        and(
+          eq(productReviewsSchema.product_id, product_id),
+          eq(productReviewsSchema.email, email),
+          eq(productReviewsSchema.is_approved, false),
+        ),
+      )
+      .limit(1);
+
+    if (pending) {
+      return {
+        success: false,
+        message: "Hai già inviato una recensione per questo prodotto, è in attesa di approvazione.",
+      };
+    }
+
     const [product] = await db
       .select({
         id: productsSchema.id,

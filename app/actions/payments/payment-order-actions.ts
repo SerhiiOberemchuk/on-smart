@@ -46,6 +46,13 @@ export async function getOrderPaymentByOrderNumberAction({
   }
 }
 
+// The success states PAYED/SUCCESS are fraud-sensitive and must only be written
+// by the server after a provider capture is verified (see persist-paid-order.ts).
+// This action stays callable from the checkout widgets and the (possibly
+// logged-out) SumUp callback for non-success transitions only, so it refuses to
+// set a success status regardless of caller.
+const CLIENT_FORBIDDEN_PAYMENT_STATUSES: ReadonlySet<string> = new Set(["PAYED", "SUCCESS"]);
+
 export async function updateOrderPaymentAction({
   orderNumber,
   data,
@@ -58,6 +65,14 @@ export async function updateOrderPaymentAction({
       success: false,
       errorCode: "INVALID_INPUT",
       errorMessage: "Order number is required",
+    };
+  }
+
+  if (data.status && CLIENT_FORBIDDEN_PAYMENT_STATUSES.has(data.status)) {
+    return {
+      success: false,
+      errorCode: "INVALID_INPUT",
+      errorMessage: "Payment success status can only be set by the server after provider verification",
     };
   }
 

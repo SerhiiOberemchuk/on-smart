@@ -16,6 +16,8 @@ type BundleReviewActionState = {
 
 const MIN_RATING = 1;
 const MAX_RATING = 5;
+const MAX_NAME_LENGTH = 120;
+const MAX_COMMENT_LENGTH = 2000;
 
 function getFormValue(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -36,6 +38,11 @@ export async function createBundleReview(
   _prevState: BundleReviewActionState,
   data: FormData,
 ): Promise<BundleReviewActionState> {
+  // Honeypot: real users never see this field; drop bot submissions silently.
+  if (getFormValue(data, "company")) {
+    return { success: true };
+  }
+
   const bundleId = getFormValue(data, "bundleId");
   const clientName = getFormValue(data, "nome");
   const email = getFormValue(data, "email");
@@ -48,6 +55,10 @@ export async function createBundleReview(
 
   if (!isValidEmail(email)) {
     return { success: false, message: "Inserisci un indirizzo email valido." };
+  }
+
+  if (clientName.length > MAX_NAME_LENGTH || comment.length > MAX_COMMENT_LENGTH) {
+    return { success: false, message: "Il testo inserito è troppo lungo." };
   }
 
   try {
@@ -82,6 +93,16 @@ export async function createBundleReview(
     };
 
     const currentReviews = bundleMeta?.reviews ?? [];
+
+    // Throttle spam: one review per email per bundle (bundle reviews are shown
+    // immediately, so this matters more than for moderated product reviews).
+    if (currentReviews.some((review) => review.email === email)) {
+      return {
+        success: false,
+        message: "Hai già inviato una recensione per questo bundle.",
+      };
+    }
+
     const nextReviews = [nextReview, ...currentReviews];
 
     await db

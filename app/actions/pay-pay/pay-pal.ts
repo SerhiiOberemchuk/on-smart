@@ -3,6 +3,8 @@
 import { paypalApi } from "@/lib/paypal";
 import { PayPalOrderCaptureResponse } from "@/types/paypal.types";
 import { ReactPayPalScriptOptions } from "@paypal/react-paypal-js";
+import { persistPaidOrder } from "@/app/actions/orders/_internal/persist-paid-order";
+import { notifyOrderById } from "@/app/actions/notify-order-by-id/notify-order-by-id";
 
 export type PayPalDraft = {
   total: string;
@@ -40,7 +42,11 @@ export async function createPayPalOrderAction({ total, referenceId }: PayPalDraf
   return { ok: true, orderId: res.data.id };
 }
 
-export async function capturePayPalOrderAction(input: { orderId: string; referenceId: string }) {
+export async function capturePayPalOrderAction(input: {
+  orderId: string;
+  referenceId: string;
+  internalOrderId: string;
+}) {
   const requestId = `capture-${input.referenceId}-${input.orderId}`;
 
   const res = await paypalApi<PayPalOrderCaptureResponse>(
@@ -50,10 +56,26 @@ export async function capturePayPalOrderAction(input: { orderId: string; referen
 
   if (!res.ok) {
     console.error("PayPal capture failed:", res.error);
-    return { ok: false, error: res.error };
+    return { ok: false as const, error: res.error };
   }
 
-  return { ok: true, data: res.data };
+  // Payment is captured and verified here on the server — mark the order PAID
+  // in the same trusted context instead of trusting the client to do it.
+  const persisted = await persistPaidOrder({
+    orderId: input.internalOrderId,
+    orderNumber: input.referenceId,
+    providerOrderId: input.orderId,
+  });
+
+  if (persisted) {
+    try {
+      await notifyOrderById({ orderId: input.internalOrderId });
+    } catch (error) {
+      console.error("notifyOrderById after PayPal capture failed:", error);
+    }
+  }
+
+  return { ok: true as const, data: res.data, persisted };
 }
 
 export async function getPayPalClientIdAction() {

@@ -98,6 +98,15 @@ RUN chown node:node .next
 COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 
+# sharp ships platform-specific native binaries via optional deps. Next's
+# standalone file-tracing does NOT reliably bundle @img/sharp-linux-x64 +
+# @img/sharp-libvips-linux-x64, so at runtime sharp falls back to the wasm32
+# build (which also needs @emnapi/runtime) and crashes the process. Copy the
+# native packages installed by `npm ci` in the (linux/glibc/x64) dependencies
+# stage so both image upload and next/image optimization work.
+COPY --from=dependencies --chown=node:node /app/node_modules/sharp ./node_modules/sharp
+COPY --from=dependencies --chown=node:node /app/node_modules/@img ./node_modules/@img
+
 # Drizzle migrations run at container start (the Aruba DB is unreachable during
 # build), so the migration files and runner script must ship with the image.
 COPY --from=builder --chown=node:node /app/drizzle ./drizzle

@@ -6,6 +6,7 @@ import { BasceketStoreStateType } from "@/store/basket-store";
 import { CheckoutTypesDataFirstStep, CheckoutTypesDataStepConsegna } from "@/types/checkout-flow.types";
 import { baseUrl } from "@/types/baseUrl";
 import { PAGES } from "@/types/pages.types";
+import { readJsonResponse } from "@/utils/read-json-response";
 
 export type KlarnaSessionResponseType = {
   session_id: string;
@@ -121,11 +122,24 @@ export async function createKlarnaSessionAction({
     // throw new Error(`Klarna create session failed: ${res.status} ${text}`);
   }
 
-  const data = await res.json();
+  const data = await readJsonResponse<{
+    session_id: string;
+    client_token: string;
+    payment_method_categories: KlarnaSessionResponseType["payment_method_categories"];
+  }>(res);
+
+  if (!data) {
+    return {
+      error: "Klarna create session: empty or invalid response body",
+      session_id: "",
+      client_token: "",
+      payment_method_categories: [],
+    };
+  }
 
   return {
-    session_id: data.session_id as string,
-    client_token: data.client_token as string,
+    session_id: data.session_id,
+    client_token: data.client_token,
     payment_method_categories: data.payment_method_categories,
   };
 }

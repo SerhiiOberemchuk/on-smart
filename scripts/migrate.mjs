@@ -3,8 +3,9 @@
 // Invoked by the Dockerfile CMD before `node server.js`; prints a clear status
 // to the container console.
 //
-// Behavior on failure: logs the error and exits 0 so the shop still starts on
-// the old schema (fail-open). Set MIGRATE_STRICT=1 to block startup instead.
+// Behavior on failure: strict by default — logs the error and exits non-zero so
+// a broken migration blocks startup instead of silently running on the old
+// schema. Set MIGRATE_STRICT=0 to fail-open (start on the old schema anyway).
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -94,13 +95,16 @@ try {
 } catch (error) {
   console.error("[migrate] FAILED:", error.code ?? "", error.sqlMessage ?? error.message);
   console.error("[migrate] full error:", error);
-  if (process.env.MIGRATE_STRICT === "1") {
-    console.error("[migrate] MIGRATE_STRICT=1 — blocking application startup.");
-    process.exit(1);
+  if (process.env.MIGRATE_STRICT === "0") {
+    console.error(
+      "[migrate] MIGRATE_STRICT=0 — WARNING: starting the application on the CURRENT (old) schema. " +
+        "Fix the migration and redeploy.",
+    );
+    process.exit(0);
   }
   console.error(
-    "[migrate] WARNING: starting the application on the CURRENT (old) schema. " +
-      "Fix the migration and redeploy, or set MIGRATE_STRICT=1 to block startup on failure.",
+    "[migrate] blocking application startup (strict mode is the default). " +
+      "Fix the migration and redeploy, or set MIGRATE_STRICT=0 to start on the old schema anyway.",
   );
-  process.exit(0);
+  process.exit(1);
 }
