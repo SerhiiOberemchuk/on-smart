@@ -1,7 +1,7 @@
 "use server";
 
 import { ProductType } from "@/db/schemas/product.schema";
-import { klarnaAuthHeader, klarnaBaseUrl } from "@/lib/klarna";
+import { buildKlarnaOrderLines, klarnaAuthHeader, klarnaBaseUrl } from "@/lib/klarna";
 import { BasceketStoreStateType } from "@/store/basket-store";
 import { CheckoutTypesDataFirstStep, CheckoutTypesDataStepConsegna } from "@/types/checkout-flow.types";
 import { baseUrl } from "@/types/baseUrl";
@@ -27,18 +27,28 @@ export async function createKlarnaSessionAction({
   dataFirstStep,
   dataCheckoutStepConsegna,
   productsInBasket,
-  totalPrice,
+  deliveryPrice,
+  commission,
   basket,
 }: {
   orderNumber: string | undefined;
   dataFirstStep: CheckoutTypesDataFirstStep;
   dataCheckoutStepConsegna: CheckoutTypesDataStepConsegna;
   productsInBasket: ProductType[];
-  totalPrice: number;
+  deliveryPrice: number;
+  commission: number;
   basket: BasceketStoreStateType["basket"];
 }): Promise<KlarnaSessionResponseType> {
   const siteUrl = baseUrl;
   const safeOrderNumber = orderNumber || "NO-ORDER-NUMBER";
+
+  const order_lines = buildKlarnaOrderLines({
+    productsInBasket,
+    basket,
+    deliveryPrice,
+    commission,
+  });
+  const order_amount = order_lines.reduce((sum, line) => sum + line.total_amount, 0);
 
   const payload = {
     billing_address: {
@@ -79,18 +89,8 @@ export async function createKlarnaSessionAction({
     purchase_country: "IT",
     purchase_currency: "EUR",
     locale: "it-IT",
-    order_amount: Number((totalPrice * 100).toFixed(0)),
-
-    order_lines: productsInBasket.map((product) => {
-      const basketItem = basket.find((item) => item.productId === product.id);
-      const unit_price = Number((Number(product.price) * 100).toFixed(0));
-      return {
-        name: product.nameFull,
-        quantity: basketItem ? basketItem.quantity : 1,
-        unit_price,
-        total_amount: Number((unit_price * (basketItem ? basketItem.quantity : 1)).toFixed(0)),
-      };
-    }),
+    order_amount,
+    order_lines,
 
     merchant_reference1: safeOrderNumber,
     merchant_urls: {

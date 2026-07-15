@@ -65,7 +65,7 @@ export const dashboardLinks = [
     href: URL_DASHBOARD.DASHBOARD + URL_DASHBOARD.SUB_DASHBOARD.BANNERS,
     title: "Банери",
     icon: "banners",
-    active: false,
+    active: true,
   },
   {
     href: URL_DASHBOARD.DASHBOARD + URL_DASHBOARD.SUB_DASHBOARD.STOCK,

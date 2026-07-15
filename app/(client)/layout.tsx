@@ -5,13 +5,14 @@ import clsx from "clsx";
 import "../styles/globals.css";
 
 import Header from "@/layout-components/Header/Header";
+import TopBanner from "@/layout-components/TopBanner/TopBanner";
 import Footer from "@/layout-components/Footer";
 import CardDialog from "@/components/ProductCard/dialog-add-to-cart/CardDialog";
 import WishlistLoginDialog from "@/components/WishlistLoginDialog";
 import ClientErrorBoundary from "@/components/ClientErrorBoundary";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ToastContainer } from "react-toastify";
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import CookieBanner from "@/components/cookie-consent/CookieBanner";
 import { baseUrl } from "@/types/baseUrl";
@@ -92,6 +93,9 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <GoogleAnalytics gtagId={process.env.GOOGLE_GTAG} />
         <NuqsAdapter>
           <Header />
+          <Suspense>
+            <TopBanner />
+          </Suspense>
           <main className="flex-1">{children}</main>
           <Footer />
           <ClientErrorBoundary>

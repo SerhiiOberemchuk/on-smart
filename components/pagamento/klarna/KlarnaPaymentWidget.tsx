@@ -20,7 +20,7 @@ import { deleteOrderByOrderId } from "@/app/actions/orders/delete-order";
 
 import { PAGES } from "@/types/pages.types";
 import type { PaymentWidgetData } from "@/types/payment-widget.types";
-import { getTotalPriceToPay } from "@/utils/get-prices";
+import { getPaymentCommission, getTotalPriceToPay } from "@/utils/get-prices";
 import { makeOrderNumber } from "@/utils/order-number";
 import { ulid } from "ulid";
 
@@ -61,14 +61,23 @@ export default function KlarnaPaymentWidget({
   const createdRef = useRef<CreatedOrderRef | null>(null);
   const isCreatingRef = useRef(false);
 
-  const priceToPay = useMemo<number>(() => {
-    if (!totalPrice) return 0;
-    return Number(
-      getTotalPriceToPay({
-        totalPrice,
-        deliveryMetod: dataFirstStep.deliveryMethod,
-      }).toFixed(2),
+  const { priceToPay, deliveryPrice, commission } = useMemo(() => {
+    if (!totalPrice) return { priceToPay: 0, deliveryPrice: 0, commission: 0 };
+
+    const base = getTotalPriceToPay({
+      totalPrice,
+      deliveryMetod: dataFirstStep.deliveryMethod,
+    });
+    const delivery = Number((base - totalPrice).toFixed(2));
+    const klarnaCommission = Number(
+      getPaymentCommission({ amount: base, paymentMethod: "klarna" }).toFixed(2),
     );
+
+    return {
+      priceToPay: Number((base + klarnaCommission).toFixed(2)),
+      deliveryPrice: delivery,
+      commission: klarnaCommission,
+    };
   }, [totalPrice, dataFirstStep.deliveryMethod]);
 
   const selectedCategory = useMemo<string | null>(
@@ -112,7 +121,8 @@ export default function KlarnaPaymentWidget({
           dataFirstStep,
           dataCheckoutStepConsegna,
           productsInBasket,
-          totalPrice: priceToPay,
+          deliveryPrice,
+          commission,
           basket,
         });
         if (session.error) {
@@ -134,7 +144,8 @@ export default function KlarnaPaymentWidget({
     dataFirstStep,
     dataCheckoutStepConsegna,
     productsInBasket,
-    priceToPay,
+    deliveryPrice,
+    commission,
     basket,
   ]);
 
@@ -230,7 +241,8 @@ export default function KlarnaPaymentWidget({
             dataFirstStep,
             dataCheckoutStepConsegna,
             productsInBasket,
-            totalPrice: priceToPay,
+            deliveryPrice,
+            commission,
             basket,
           });
 

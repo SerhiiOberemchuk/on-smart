@@ -14,9 +14,9 @@ import { useBasketStore } from "@/store/basket-store";
 import { PAYMENT_METHODS } from "@/types/bonifico.data";
 import type { PaymentProviderTypes } from "@/types/payments.types";
 import {
-  PAYPAL_COMMISSION_LABEL,
   getDeliveryPrice,
   getPaymentCommission,
+  getPaymentCommissionLabel,
   getTotalPriceToPay,
   getTotalPriceToPayWithCommission,
 } from "@/utils/get-prices";
@@ -217,8 +217,10 @@ export default function AccountCheckoutClient({
               onChange={() => setPaymentMethod(method.paymentMethod)}
             />
             {method.title}
-            {method.paymentMethod === "paypal" && (
-              <span className="text-yellow-500">{PAYPAL_COMMISSION_LABEL}</span>
+            {getPaymentCommissionLabel(method.paymentMethod) && (
+              <span className="text-yellow-500">
+                {getPaymentCommissionLabel(method.paymentMethod)}
+              </span>
             )}
           </label>
         ))}
@@ -227,7 +229,7 @@ export default function AccountCheckoutClient({
       <section className="flex flex-col gap-3 self-end text-right">
         {commission > 0 && (
           <p className="helper_text text-yellow-500">
-            {PAYPAL_COMMISSION_LABEL}: {commission.toFixed(2)} €
+            {getPaymentCommissionLabel(paymentMethod || undefined)}: {commission.toFixed(2)} €
           </p>
         )}
         <p className="text-lg font-medium">Totale: {grandTotal.toFixed(2)} €</p>

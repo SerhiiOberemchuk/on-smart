@@ -5,6 +5,9 @@ import { PaymentProviderTypes } from "@/types/payments.types";
 export const PAYPAL_COMMISSION_RATE = 0.04;
 export const PAYPAL_COMMISSION_LABEL = "+4% commissione";
 
+export const KLARNA_COMMISSION_RATE = 0.05;
+export const KLARNA_COMMISSION_LABEL = "+5% commissione";
+
 export function getTotalPriceToPay({
   totalPrice,
   deliveryMetod,
@@ -22,7 +25,8 @@ export function getTotalPriceToPay({
 
 /**
  * Commission applied on top of the amount for the selected payment method.
- * Currently only PayPal carries a 4% surcharge (also covers PayPal's "paga in rate").
+ * PayPal carries a 4% surcharge (also covers PayPal's "paga in rate"),
+ * Klarna a 5% surcharge.
  */
 export function getPaymentCommission({
   amount,
@@ -31,7 +35,19 @@ export function getPaymentCommission({
   amount: number;
   paymentMethod?: PaymentProviderTypes;
 }) {
-  return paymentMethod === "paypal" ? amount * PAYPAL_COMMISSION_RATE : 0;
+  if (paymentMethod === "paypal") return amount * PAYPAL_COMMISSION_RATE;
+  if (paymentMethod === "klarna") return amount * KLARNA_COMMISSION_RATE;
+  return 0;
+}
+
+/**
+ * Human-readable commission label for the selected payment method,
+ * or null when the method carries no surcharge.
+ */
+export function getPaymentCommissionLabel(paymentMethod?: PaymentProviderTypes) {
+  if (paymentMethod === "paypal") return PAYPAL_COMMISSION_LABEL;
+  if (paymentMethod === "klarna") return KLARNA_COMMISSION_LABEL;
+  return null;
 }
 
 /**

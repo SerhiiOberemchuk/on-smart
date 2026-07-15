@@ -43,6 +43,9 @@ export const CACHE_TAGS = {
     info: "CACHE_TAG_GET_ORDER_INFO",
     byId: (id: string) => id,
   },
+  siteBanner: {
+    current: "site_banner_current",
+  },
 } as const;
 
 export const CACHE_TRIGGERS_TAGS = {
