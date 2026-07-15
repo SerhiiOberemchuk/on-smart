@@ -5,41 +5,28 @@ import { toast } from "react-toastify";
 
 import { saveSiteBanner } from "@/app/actions/admin/site-banner/mutations";
 import type { SiteBannerType } from "@/db/schemas/site-banner.schema";
+import { BANNER_ICONS } from "@/layout-components/TopBanner/banner-icons";
 import {
+  SITE_BANNER_ICON_OPTIONS,
   SITE_BANNER_VARIANT_OPTIONS,
   SITE_BANNER_VARIANT_STYLES,
+  type SiteBannerIcon,
   type SiteBannerVariant,
 } from "@/types/site-banner.types";
-
-function MegaphoneIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-5 w-5 shrink-0"
-      aria-hidden
-    >
-      <path d="M3 11v2a1 1 0 0 0 1 1h2l4 3V7L6 10H4a1 1 0 0 0-1 1Z" />
-      <path d="M10 7 18 4v16l-8-3" />
-      <path d="M18 9a3 3 0 0 1 0 6" />
-    </svg>
-  );
-}
 
 export default function BannerPageClient({ initialData }: { initialData: SiteBannerType | null }) {
   const [message, setMessage] = useState(initialData?.message ?? "");
   const [isActive, setIsActive] = useState(initialData?.isActive ?? false);
   const [variant, setVariant] = useState<SiteBannerVariant>(initialData?.variant ?? "info");
+  const [icon, setIcon] = useState<SiteBannerIcon>(initialData?.icon ?? "megaphone");
   const [linkUrl, setLinkUrl] = useState(initialData?.linkUrl ?? "");
   const [linkLabel, setLinkLabel] = useState(initialData?.linkLabel ?? "");
   const [isPending, startTransition] = useTransition();
 
   const trimmedMessage = message.trim();
   const previewClass = SITE_BANNER_VARIANT_STYLES[variant] ?? SITE_BANNER_VARIANT_STYLES.info;
+  // `none` maps to null on purpose — don't `??` it back to a default icon.
+  const PreviewIcon = icon in BANNER_ICONS ? BANNER_ICONS[icon] : BANNER_ICONS.megaphone;
   const willShow = isActive && trimmedMessage.length > 0;
 
   const handleSave = () => {
@@ -53,6 +40,7 @@ export default function BannerPageClient({ initialData }: { initialData: SiteBan
         message,
         isActive,
         variant,
+        icon,
         linkUrl: linkUrl.trim() || null,
         linkLabel: linkLabel.trim() || null,
       });
@@ -84,7 +72,7 @@ export default function BannerPageClient({ initialData }: { initialData: SiteBan
         {willShow ? (
           <div className={`overflow-hidden rounded-md ${previewClass}`}>
             <div className="flex items-center justify-center gap-3 px-4 py-2.5 text-center text-sm font-medium">
-              <MegaphoneIcon />
+              {PreviewIcon ? <PreviewIcon className="h-5 w-5 shrink-0" /> : null}
               <p className="leading-snug">
                 {trimmedMessage}
                 {linkUrl.trim() ? (
@@ -139,6 +127,37 @@ export default function BannerPageClient({ initialData }: { initialData: SiteBan
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="admin-field">
+          <span className="admin-field-label">Іконка</span>
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-11">
+            {SITE_BANNER_ICON_OPTIONS.map((opt) => {
+              const OptionIcon = BANNER_ICONS[opt.value];
+              const selected = icon === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setIcon(opt.value)}
+                  title={opt.label}
+                  aria-label={opt.label}
+                  aria-pressed={selected}
+                  className={`flex aspect-square items-center justify-center rounded-md border transition-colors ${
+                    selected
+                      ? "border-yellow-500 bg-yellow-500/15 text-yellow-400"
+                      : "border-slate-600/55 text-slate-300 hover:border-slate-400 hover:text-white"
+                  }`}
+                >
+                  {OptionIcon ? (
+                    <OptionIcon className="h-5 w-5" />
+                  ) : (
+                    <span className="text-[11px] font-medium">Без</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

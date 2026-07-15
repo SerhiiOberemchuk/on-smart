@@ -8,7 +8,7 @@ import {
   type OrderPaymentTypes,
   type OrderTypes,
 } from "@/db/schemas/orders.schema";
-import { desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lte } from "drizzle-orm";
 import { requireCustomerSession } from "../_shared/require-customer-session";
 
 export type AccountOrderListItem = {
@@ -20,15 +20,39 @@ export type AccountOrderListItem = {
   itemCount: number;
 };
 
-export async function getAccountOrders(): Promise<AccountOrderListItem[]> {
+/** Epoch-ms window; `null` means unbounded on that side. */
+export type OrdersDateRange = { fromMs: number | null; toMs: number | null };
+
+// Whether the customer has any order at all — used to tell the true "no orders"
+// state apart from "no orders in the selected period" without loading them all.
+export async function hasAccountOrders(): Promise<boolean> {
+  const session = await requireCustomerSession();
+  try {
+    const rows = await db
+      .select({ id: ordersSchema.id })
+      .from(ordersSchema)
+      .where(eq(ordersSchema.userId, session.user.id))
+      .limit(1);
+    return rows.length > 0;
+  } catch (error) {
+    console.error("[hasAccountOrders]", error);
+    return false;
+  }
+}
+
+export async function getAccountOrders(range?: OrdersDateRange): Promise<AccountOrderListItem[]> {
   const session = await requireCustomerSession();
   const userId = session.user.id;
 
   try {
+    const conditions = [eq(ordersSchema.userId, userId)];
+    if (range?.fromMs != null) conditions.push(gte(ordersSchema.createdAt, new Date(range.fromMs)));
+    if (range?.toMs != null) conditions.push(lte(ordersSchema.createdAt, new Date(range.toMs)));
+
     const orders = await db
       .select()
       .from(ordersSchema)
-      .where(eq(ordersSchema.userId, userId))
+      .where(and(...conditions))
       .orderBy(desc(ordersSchema.createdAt));
 
     if (orders.length === 0) return [];

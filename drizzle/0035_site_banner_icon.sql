@@ -1,0 +1,1 @@
+ALTER TABLE `site_banner` ADD `icon` enum('megaphone','info','warning','gift','calendar','clock','truck','tag','sparkles','bell','none') DEFAULT 'megaphone' NOT NULL;

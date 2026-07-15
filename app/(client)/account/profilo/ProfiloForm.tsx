@@ -3,12 +3,21 @@
 import { SubmitButton } from "@/app/(client)/(auth)/components/SubmitButton";
 import { updateCustomerProfile } from "@/app/actions/account/profile/update-customer-profile";
 import type { ProfileFormState } from "@/app/actions/account/profile/profile-action.types";
+import { CustomSelect } from "@/components/CustomSelect";
 import { InputBlock } from "@/components/InputBloc";
 import type { CustomerProfileType } from "@/db/schemas/customer-profile.schema";
 import clsx from "clsx";
 import { useActionState, useState } from "react";
 
 const INITIAL: ProfileFormState = { success: false, message: null };
+
+const PAYMENT_METHOD_OPTIONS = [
+  { value: "", label: "Chiedi ogni volta" },
+  { value: "sumup", label: "Carta (SumUp)" },
+  { value: "paypal", label: "PayPal" },
+  { value: "klarna", label: "Klarna" },
+  { value: "bonifico", label: "Bonifico" },
+];
 
 export default function ProfiloForm({
   profile,
@@ -99,7 +108,7 @@ export default function ProfiloForm({
         </>
       )}
 
-      <fieldset className="flex flex-col gap-3 border-t border-stroke-grey pt-5">
+      <fieldset className="flex flex-col gap-3 border-t border-none  pt-5">
         <legend className="H5">Preferenze ordine</legend>
 
         <div className="flex flex-col gap-1">
@@ -124,20 +133,14 @@ export default function ProfiloForm({
           </label>
         </div>
 
-        <label className="helper_text flex flex-col gap-1">
-          Pagamento predefinito
-          <select
+        <div className="helper_text flex flex-col gap-1">
+          <span>Pagamento predefinito</span>
+          <CustomSelect
             name="defaultPaymentMethod"
+            options={PAYMENT_METHOD_OPTIONS}
             defaultValue={profile?.defaultPaymentMethod ?? ""}
-            className="border-b border-stroke-grey text-text-grey outline-0"
-          >
-            <option value="">Chiedi ogni volta</option>
-            <option value="sumup">Carta (SumUp)</option>
-            <option value="paypal">PayPal</option>
-            <option value="klarna">Klarna</option>
-            <option value="bonifico">Bonifico</option>
-          </select>
-        </label>
+          />
+        </div>
 
         <label className="flex items-center gap-2">
           <input

@@ -1,10 +1,21 @@
 "use client";
 
-import type { AccountOrderListItem } from "@/app/actions/account/orders/get-account-orders";
+import {
+  getAccountOrders,
+  type AccountOrderListItem,
+} from "@/app/actions/account/orders/get-account-orders";
+import { CustomSelect } from "@/components/CustomSelect";
 import { ORDER_STATUS_LIST, type OrderStatusTypes } from "@/types/orders.types";
 import clsx from "clsx";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ORDER_CONTROL_CLASS,
+  PERIOD_OPTIONS,
+  PeriodDateRange,
+  type PeriodOption,
+  resolvePeriodRange,
+} from "../components/order-period";
 import { ORDER_STATUS_LABEL, formatOrderDate, orderStatusBadgeClass } from "./order-labels";
 
 type SortOption = "NEWEST" | "OLDEST" | "TOTAL_DESC" | "TOTAL_ASC";
@@ -16,15 +27,43 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "TOTAL_ASC", label: "Totale: dal più basso" },
 ];
 
-const controlClass =
-  "rounded-sm border border-stroke-grey bg-background px-3 py-2 text-sm outline-none transition focus:border-yellow-500";
-
-export default function OrdiniClient({ orders }: { orders: AccountOrderListItem[] }) {
+export default function OrdiniClient({
+  initialOrders,
+}: {
+  initialOrders: AccountOrderListItem[];
+}) {
+  const [orders, setOrders] = useState(initialOrders);
+  const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<OrderStatusTypes | "ALL">("ALL");
   const [sort, setSort] = useState<SortOption>("NEWEST");
+  const [period, setPeriod] = useState<PeriodOption>("30D");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
-  // Only offer statuses the customer actually has.
+  // The default 30-day set arrives from the server; only re-fetch when the
+  // period changes so we never load every order up front.
+  const isFirst = useRef(true);
+  useEffect(() => {
+    if (isFirst.current) {
+      isFirst.current = false;
+      return;
+    }
+    if (period === "CUSTOM" && !fromDate && !toDate) return;
+
+    let active = true;
+    setLoading(true);
+    const range = resolvePeriodRange(period, fromDate, toDate);
+    getAccountOrders({ fromMs: range.from, toMs: range.to })
+      .then((data) => active && setOrders(data))
+      .catch(() => {})
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, [period, fromDate, toDate]);
+
+  // Only offer statuses present in the loaded set.
   const statuses = useMemo(() => {
     const present = new Set(orders.map((order) => order.orderStatus));
     return ORDER_STATUS_LIST.filter((option) => present.has(option));
@@ -56,45 +95,66 @@ export default function OrdiniClient({ orders }: { orders: AccountOrderListItem[
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Cerca per numero ordine…"
-          className={clsx(controlClass, "flex-1 sm:min-w-56")}
+          className={clsx(ORDER_CONTROL_CLASS, "flex-1 sm:min-w-56")}
         />
-        <select
+        <CustomSelect
+          variant="box"
+          className="w-full sm:w-52"
           value={status}
-          onChange={(event) => setStatus(event.target.value as OrderStatusTypes | "ALL")}
-          className={controlClass}
-        >
-          <option value="ALL">Tutti gli stati</option>
-          {statuses.map((option) => (
-            <option key={option} value={option}>
-              {ORDER_STATUS_LABEL[option]}
-            </option>
-          ))}
-        </select>
-        <select
+          onChange={(v) => setStatus(v as OrderStatusTypes | "ALL")}
+          options={[
+            { value: "ALL", label: "Tutti gli stati" },
+            ...statuses.map((option) => ({ value: option, label: ORDER_STATUS_LABEL[option] })),
+          ]}
+        />
+        <CustomSelect
+          variant="box"
+          className="w-full sm:w-52"
+          value={period}
+          onChange={(v) => setPeriod(v as PeriodOption)}
+          options={PERIOD_OPTIONS}
+        />
+        <CustomSelect
+          variant="box"
+          className="w-full sm:w-52"
           value={sort}
-          onChange={(event) => setSort(event.target.value as SortOption)}
-          className={controlClass}
-        >
-          {SORT_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          onChange={(v) => setSort(v as SortOption)}
+          options={SORT_OPTIONS}
+        />
       </div>
 
+      {period === "CUSTOM" && (
+        <PeriodDateRange
+          fromDate={fromDate}
+          toDate={toDate}
+          onFromChange={setFromDate}
+          onToChange={setToDate}
+        />
+      )}
+
       <p className="helper_text">
-        {filtered.length === orders.length
-          ? `${orders.length} ordini`
-          : `${filtered.length} di ${orders.length} ordini`}
+        {loading
+          ? "Caricamento…"
+          : filtered.length === orders.length
+            ? `${orders.length} ordini`
+            : `${filtered.length} di ${orders.length} ordini`}
       </p>
 
-      {filtered.length === 0 ? (
-        <p className="rounded-sm border border-stroke-grey p-4 text-text-grey">
-          Nessun ordine corrisponde ai filtri.
-        </p>
+      {!loading && filtered.length === 0 ? (
+        <div className="flex flex-col items-start gap-2 rounded-sm border border-stroke-grey p-4 text-text-grey">
+          <p>Nessun ordine nel periodo selezionato.</p>
+          {period !== "ALL" && (
+            <button
+              type="button"
+              onClick={() => setPeriod("ALL")}
+              className="text-yellow-500 underline underline-offset-2"
+            >
+              Mostra tutti gli ordini
+            </button>
+          )}
+        </div>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className={clsx("flex flex-col gap-3", loading && "opacity-60")}>
           {filtered.map((order) => (
             <li key={order.orderNumber}>
               <Link

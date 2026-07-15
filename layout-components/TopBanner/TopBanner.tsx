@@ -3,24 +3,7 @@ import Link from "next/link";
 import { getActiveSiteBanner } from "@/app/actions/site-banner/get-site-banner";
 import { SITE_BANNER_VARIANT_STYLES } from "@/types/site-banner.types";
 
-function MegaphoneIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-5 w-5 shrink-0"
-      aria-hidden
-    >
-      <path d="M3 11v2a1 1 0 0 0 1 1h2l4 3V7L6 10H4a1 1 0 0 0-1 1Z" />
-      <path d="M10 7 18 4v16l-8-3" />
-      <path d="M18 9a3 3 0 0 1 0 6" />
-    </svg>
-  );
-}
+import { BANNER_ICONS } from "./banner-icons";
 
 export default async function TopBanner() {
   const banner = await getActiveSiteBanner();
@@ -28,11 +11,17 @@ export default async function TopBanner() {
   if (!banner || !banner.message) return null;
 
   const variantClass = SITE_BANNER_VARIANT_STYLES[banner.variant] ?? SITE_BANNER_VARIANT_STYLES.info;
+  // `none` maps to null on purpose — don't `??` it back to a default icon.
+  const Icon = banner.icon in BANNER_ICONS ? BANNER_ICONS[banner.icon] : BANNER_ICONS.megaphone;
 
   return (
-    <div className={`w-full ${variantClass}`} role="region" aria-label="Оголошення">
+    <div
+      className={`w-full border-t border-black/10 ${variantClass}`}
+      role="region"
+      aria-label="Оголошення"
+    >
       <div className="container flex items-center justify-center gap-3 px-4 py-2.5 text-center text-sm font-medium sm:text-[15px]">
-        <MegaphoneIcon />
+        {Icon ? <Icon className="h-5 w-5 shrink-0" /> : null}
 
         <p className="max-w-4xl leading-snug">
           {banner.message}

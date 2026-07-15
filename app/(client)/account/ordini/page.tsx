@@ -1,8 +1,14 @@
-import { getAccountOrders } from "@/app/actions/account/orders/get-account-orders";
+import {
+  getAccountOrders,
+  hasAccountOrders,
+} from "@/app/actions/account/orders/get-account-orders";
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import OrdiniClient from "./OrdiniClient";
+
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 export const metadata: Metadata = {
   title: "I miei ordini — On-Smart",
@@ -21,9 +27,13 @@ export default function OrdiniPage() {
 }
 
 async function OrdersList() {
-  const orders = await getAccountOrders();
+  // Per-user + current time → dynamic; opt in before reading Date.now().
+  await connection();
+  // Load only the last 30 days by default; the client fetches wider ranges on demand.
+  const orders = await getAccountOrders({ fromMs: Date.now() - THIRTY_DAYS_MS, toMs: null });
+  const hasAny = orders.length > 0 ? true : await hasAccountOrders();
 
-  if (orders.length === 0) {
+  if (!hasAny) {
     return (
       <div className="flex flex-col items-start gap-4">
         <p className="helper_text">Non hai ancora effettuato ordini.</p>
@@ -37,7 +47,7 @@ async function OrdersList() {
     );
   }
 
-  return <OrdiniClient orders={orders} />;
+  return <OrdiniClient initialOrders={orders} />;
 }
 
 function OrdersSkeleton() {

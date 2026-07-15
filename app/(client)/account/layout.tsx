@@ -7,7 +7,10 @@ import SidebarNav from "./components/SidebarNav";
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="container flex flex-col gap-8 py-8 lg:flex-row">
-      <aside className="lg:w-64 lg:shrink-0">
+      <aside
+        className="lg:sticky lg:h-fit lg:w-64 lg:shrink-0 lg:self-start"
+        style={{ top: "calc(var(--header-height, 96px) + 0.5rem)" }}
+      >
         <Suspense fallback={<SidebarFallback />}>
           <SidebarNav />
         </Suspense>

@@ -3,8 +3,10 @@
 import { customerProfilesSchema } from "@/db/schemas/customer-profile.schema";
 import { db } from "@/db/db";
 import { CLIENT_TYPE_LIST, DELIVERY_METHOD_LIST } from "@/types/orders.types";
+import { CACHE_TAGS } from "@/types/cache-trigers.constant";
 import { PAYMENT_PROVIDER_LIST } from "@/types/payments.types";
 import { eq } from "drizzle-orm";
+import { updateTag } from "next/cache";
 import { requireCustomerSession } from "../_shared/require-customer-session";
 import type { ProfileFormState } from "./profile-action.types";
 
@@ -63,6 +65,11 @@ export async function updateCustomerProfile(
     console.error("[updateCustomerProfile]", error);
     return { success: false, message: "Impossibile salvare i dati. Riprova." };
   }
+
+  // Invalidate the per-user profile cache so every server component that reads
+  // it (profile page, checkout, cart) re-renders with the new defaults — no
+  // hard reload needed.
+  updateTag(CACHE_TAGS.customerProfile.byUser(userId));
 
   return { success: true, message: "Dati salvati." };
 }

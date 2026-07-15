@@ -6,7 +6,12 @@ import { updateTag } from "next/cache";
 import { db } from "@/db/db";
 import { siteBannerSchema } from "@/db/schemas/site-banner.schema";
 import { CACHE_TAGS } from "@/types/cache-trigers.constant";
-import { SITE_BANNER_VARIANT_LIST, type SiteBannerVariant } from "@/types/site-banner.types";
+import {
+  SITE_BANNER_ICON_LIST,
+  SITE_BANNER_VARIANT_LIST,
+  type SiteBannerIcon,
+  type SiteBannerVariant,
+} from "@/types/site-banner.types";
 
 import { requireAdminSession } from "../_shared/require-admin-session";
 
@@ -14,6 +19,7 @@ export type SaveSiteBannerInput = {
   message: string;
   isActive: boolean;
   variant: SiteBannerVariant;
+  icon: SiteBannerIcon;
   linkUrl: string | null;
   linkLabel: string | null;
 };
@@ -25,10 +31,15 @@ export async function saveSiteBanner(input: SaveSiteBannerInput) {
     ? input.variant
     : "info";
 
+  const icon: SiteBannerIcon = SITE_BANNER_ICON_LIST.includes(input.icon)
+    ? input.icon
+    : "megaphone";
+
   const values = {
     message: input.message.trim() || null,
     isActive: input.isActive,
     variant,
+    icon,
     linkUrl: input.linkUrl?.trim() || null,
     linkLabel: input.linkLabel?.trim() || null,
   };

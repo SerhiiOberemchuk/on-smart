@@ -9,21 +9,28 @@ import type {
   TotalPriseTypeuseCheckoutStore,
 } from "@/types/checkout-flow.types";
 import { DELIVERY_DATA } from "@/types/delivery.data";
+import type { DeliveryMethod } from "@/types/orders.types";
 import { getIvaValue, getTotalPriceToPay } from "@/utils/get-prices";
 
 export default function RepilogoComponent({
   totalPrice,
   basket,
+  deliveryMethod = "CONSEGNA_CORRIERE",
 }: {
   totalPrice: TotalPriseTypeuseCheckoutStore;
   basket: BasketTypeUseCheckoutStore;
+  deliveryMethod?: DeliveryMethod;
   isInputSconto?: boolean;
 }) {
   const router = useRouter();
 
-  const shippingEstimate =
-    totalPrice > DELIVERY_DATA.FREE_THRESHOLD_TOTAL_PRISE ? 0 : DELIVERY_DATA.PRISE_DELIVERY;
-  const total = getTotalPriceToPay({ totalPrice });
+  const isPickup = deliveryMethod === "RITIRO_NEGOZIO";
+  const shippingEstimate = isPickup
+    ? 0
+    : totalPrice > DELIVERY_DATA.FREE_THRESHOLD_TOTAL_PRISE
+      ? 0
+      : DELIVERY_DATA.PRISE_DELIVERY;
+  const total = getTotalPriceToPay({ totalPrice, deliveryMetod: deliveryMethod });
 
   const handleProceedToOrder = () => {
     if (basket.length === 0) {
@@ -42,7 +49,7 @@ export default function RepilogoComponent({
           {[
             { title: "articolo (li)", price: totalPrice },
             { title: "IVA (inclusa)", price: getIvaValue(totalPrice) },
-            { title: "Spedizione", price: shippingEstimate },
+            { title: isPickup ? "Ritiro in negozio" : "Spedizione", price: shippingEstimate },
           ].map((item, index) => (
             <li key={index} className="flex items-center justify-between">
               <span className="text_R">

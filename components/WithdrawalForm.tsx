@@ -4,7 +4,7 @@ import { SubmitButton } from "@/app/(client)/(auth)/components/SubmitButton";
 import { submitWithdrawalRequest } from "@/app/actions/withdrawal/submit-withdrawal-request";
 import { InputBlock } from "@/components/InputBloc";
 import type { WithdrawalFormState } from "@/types/withdrawal.types";
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 
 const INITIAL: WithdrawalFormState = { success: false, message: null };
 
@@ -22,6 +22,7 @@ export default function WithdrawalForm({
   defaultEmail = "",
   orderNumber,
   orderChoices,
+  onSuccess,
 }: {
   defaultNome?: string;
   defaultEmail?: string;
@@ -29,8 +30,18 @@ export default function WithdrawalForm({
   orderNumber?: string;
   /** When set, the consumer picks the order from their own list (account flow). */
   orderChoices?: WithdrawalOrderChoice[];
+  /** Fired once when the statement is accepted (to reflect it in a list). */
+  onSuccess?: (orderNumber?: string) => void;
 }) {
   const [state, formAction] = useActionState(submitWithdrawalRequest, INITIAL);
+  const notifiedRef = useRef(false);
+
+  useEffect(() => {
+    if (state.success && !notifiedRef.current) {
+      notifiedRef.current = true;
+      onSuccess?.(orderNumber);
+    }
+  }, [state.success, onSuccess, orderNumber]);
 
   if (state.success) {
     return (

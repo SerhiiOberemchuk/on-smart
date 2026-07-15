@@ -26,8 +26,7 @@ export default function ConsegnaSection({
   const isPickup = deliveryMethod === "RITIRO_NEGOZIO";
 
   return (
-    <section className="flex flex-col gap-3 rounded-sm border border-stroke-grey p-4">
-      <h2 className="H5">Consegna</h2>
+    <div className="flex flex-col gap-3">
       <label className="flex items-center gap-2">
         <input
           type="radio"
@@ -84,6 +83,6 @@ export default function ConsegnaSection({
           )}
         </div>
       )}
-    </section>
+    </div>
   );
 }

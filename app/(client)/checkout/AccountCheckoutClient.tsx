@@ -24,6 +24,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import CheckoutReviewSection from "./components/CheckoutReviewSection";
 import ConsegnaSection from "./components/ConsegnaSection";
 import FatturazioneSection from "./components/FatturazioneSection";
 
@@ -149,6 +150,36 @@ export default function AccountCheckoutClient({
     paymentMethod: paymentMethod || undefined,
   });
 
+  // Collapsed "review" summaries for each section.
+  const deliverySummary = isPickup
+    ? "Ritiro in negozio (Avellino, gratuito)"
+    : selectedAddress
+      ? `Corriere (${deliveryPrice === 0 ? "gratuita" : `${deliveryPrice.toFixed(2)} €`}) · ${selectedAddress.indirizzo} ${selectedAddress.numeroCivico}, ${selectedAddress.cap} ${selectedAddress.citta}`
+      : "Corriere · nessun indirizzo selezionato";
+
+  const billingName =
+    profile?.clientType === "azienda"
+      ? profile?.ragioneSociale
+      : `${profile?.nome ?? ""} ${profile?.cognome ?? ""}`.trim();
+  const billingSummary = profileComplete
+    ? `${billingName} · Fattura: ${requestInvoice ? "Sì" : "No"}`
+    : "Completa i dati di fatturazione";
+
+  const paymentTitle = paymentMethod
+    ? (PAYMENT_METHODS.find((m) => m.paymentMethod === paymentMethod)?.title ?? paymentMethod)
+    : null;
+  const paymentCommissionLabel = getPaymentCommissionLabel(paymentMethod || undefined);
+  const paymentSummary = paymentTitle ? (
+    <span>
+      {paymentTitle}
+      {paymentCommissionLabel && (
+        <span className="text-yellow-500"> {paymentCommissionLabel}</span>
+      )}
+    </span>
+  ) : (
+    "Nessun metodo di pagamento selezionato"
+  );
+
   if (cartEmpty) {
     return (
       <div className="container flex flex-col items-start gap-4 py-10">
@@ -187,44 +218,57 @@ export default function AccountCheckoutClient({
         </ul>
       </section>
 
-      <ConsegnaSection
-        deliveryMethod={deliveryMethod}
-        onDeliveryMethodChange={setDeliveryMethod}
-        deliveryPrice={deliveryPrice}
-        addresses={addresses}
-        selectedAddressId={selectedAddress?.id ?? null}
-        onSelectAddress={setSelectedAddressId}
-        onAddressSaved={() => router.refresh()}
-      />
+      <CheckoutReviewSection title="Consegna" summary={deliverySummary} defaultOpen={needsAddress}>
+        <ConsegnaSection
+          deliveryMethod={deliveryMethod}
+          onDeliveryMethodChange={setDeliveryMethod}
+          deliveryPrice={deliveryPrice}
+          addresses={addresses}
+          selectedAddressId={selectedAddress?.id ?? null}
+          onSelectAddress={setSelectedAddressId}
+          onAddressSaved={() => router.refresh()}
+        />
+      </CheckoutReviewSection>
 
-      <FatturazioneSection
-        email={email}
-        profile={profile}
-        profileComplete={profileComplete}
-        requestInvoice={requestInvoice}
-        onRequestInvoiceChange={setRequestInvoice}
-        onProfileSaved={() => router.refresh()}
-      />
+      <CheckoutReviewSection
+        title="Fatturazione"
+        summary={billingSummary}
+        defaultOpen={!profileComplete}
+      >
+        <FatturazioneSection
+          email={email}
+          profile={profile}
+          profileComplete={profileComplete}
+          requestInvoice={requestInvoice}
+          onRequestInvoiceChange={setRequestInvoice}
+          onProfileSaved={() => router.refresh()}
+        />
+      </CheckoutReviewSection>
 
-      <section className="flex flex-col gap-2 rounded-sm border border-stroke-grey p-4">
-        <h2 className="H5">Pagamento</h2>
-        {PAYMENT_METHODS.map((method) => (
-          <label key={method.paymentMethod} className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="paymentMethod"
-              checked={paymentMethod === method.paymentMethod}
-              onChange={() => setPaymentMethod(method.paymentMethod)}
-            />
-            {method.title}
-            {getPaymentCommissionLabel(method.paymentMethod) && (
-              <span className="text-yellow-500">
-                {getPaymentCommissionLabel(method.paymentMethod)}
-              </span>
-            )}
-          </label>
-        ))}
-      </section>
+      <CheckoutReviewSection
+        title="Pagamento"
+        summary={paymentSummary}
+        defaultOpen={!paymentMethod}
+      >
+        <div className="flex flex-col gap-2">
+          {PAYMENT_METHODS.map((method) => (
+            <label key={method.paymentMethod} className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="paymentMethod"
+                checked={paymentMethod === method.paymentMethod}
+                onChange={() => setPaymentMethod(method.paymentMethod)}
+              />
+              {method.title}
+              {getPaymentCommissionLabel(method.paymentMethod) && (
+                <span className="text-yellow-500">
+                  {getPaymentCommissionLabel(method.paymentMethod)}
+                </span>
+              )}
+            </label>
+          ))}
+        </div>
+      </CheckoutReviewSection>
 
       <section className="flex flex-col gap-3 self-end text-right">
         {commission > 0 && (

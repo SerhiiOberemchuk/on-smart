@@ -46,6 +46,9 @@ export const CACHE_TAGS = {
   siteBanner: {
     current: "site_banner_current",
   },
+  customerProfile: {
+    byUser: (userId: string) => `customer_profile_${userId}`,
+  },
 } as const;
 
 export const CACHE_TRIGGERS_TAGS = {

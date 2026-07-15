@@ -9,8 +9,7 @@ import { Suspense } from "react";
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 bg-header-footer-100 py-4 shadow-md">
-      
+    <header className="bg-header-footer-100 py-3 shadow-md">
       <div className="container flex items-center">
         <LogoLink />
         <div className="ml-auto flex max-w-2xl flex-wrap items-center sm:w-full xl:max-w-6xl">

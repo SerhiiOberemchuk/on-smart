@@ -6,6 +6,7 @@ import "../styles/globals.css";
 
 import Header from "@/layout-components/Header/Header";
 import TopBanner from "@/layout-components/TopBanner/TopBanner";
+import StickyHeaderShell from "@/layout-components/StickyHeaderShell";
 import Footer from "@/layout-components/Footer";
 import CardDialog from "@/components/ProductCard/dialog-add-to-cart/CardDialog";
 import WishlistLoginDialog from "@/components/WishlistLoginDialog";
@@ -92,10 +93,12 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       <body className={clsx(fixelFont.className, "flex min-h-svh flex-col")}>
         <GoogleAnalytics gtagId={process.env.GOOGLE_GTAG} />
         <NuqsAdapter>
-          <Header />
-          <Suspense>
-            <TopBanner />
-          </Suspense>
+          <StickyHeaderShell>
+            <Header />
+            <Suspense>
+              <TopBanner />
+            </Suspense>
+          </StickyHeaderShell>
           <main className="flex-1">{children}</main>
           <Footer />
           <ClientErrorBoundary>

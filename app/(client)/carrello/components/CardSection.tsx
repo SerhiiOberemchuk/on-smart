@@ -9,6 +9,7 @@ import icon_dell from "@/assets/icons/icon_delete.svg";
 import { getProductsByIds } from "@/app/actions/product/get-products-by-array-ids";
 import type { ProductType } from "@/db/schemas/product.schema";
 import { useBasketStore } from "@/store/basket-store";
+import type { DeliveryMethod } from "@/types/orders.types";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PricesBox from "@/components/PricesBox";
@@ -17,7 +18,11 @@ import SmartImage from "@/components/SmartImage";
 import HeaderCart from "./HeaderCart";
 import RepilogoComponent from "./RepilogoComponent";
 
-export default function CartSection() {
+export default function CartSection({
+  defaultDeliveryMethod = "CONSEGNA_CORRIERE",
+}: {
+  defaultDeliveryMethod?: DeliveryMethod;
+}) {
   const [fetchedProducts, setFetchedProducts] = useState<ProductType[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [pendingProductIds, setPendingProductIds] = useState<string[]>([]);
@@ -408,7 +413,11 @@ export default function CartSection() {
               </div>
             </div>
           ) : (
-            <RepilogoComponent totalPrice={calcTotal()} basket={basket} />
+            <RepilogoComponent
+              totalPrice={calcTotal()}
+              basket={basket}
+              deliveryMethod={defaultDeliveryMethod}
+            />
           )}
         </div>
       </div>

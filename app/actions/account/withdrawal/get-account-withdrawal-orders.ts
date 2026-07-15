@@ -4,7 +4,7 @@ import { db } from "@/db/db";
 import { orderItemsSchema, ordersSchema } from "@/db/schemas/orders.schema";
 import { withdrawalRequestsSchema } from "@/db/schemas/withdrawal-requests.schema";
 import type { WithdrawalStatusType } from "@/types/withdrawal.types";
-import { desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lte, notInArray } from "drizzle-orm";
 import { requireCustomerSession } from "../_shared/require-customer-session";
 
 export type WithdrawalOrderOption = {
@@ -16,21 +16,53 @@ export type WithdrawalOrderOption = {
   withdrawalStatus: WithdrawalStatusType | null;
 };
 
+/** Epoch-ms window; `null` means unbounded on that side. */
+export type WithdrawalDateRange = { fromMs: number | null; toMs: number | null };
+
 export type AccountWithdrawalData = {
   nome: string;
   email: string;
   orders: WithdrawalOrderOption[];
 };
 
+// Whether the customer has any order eligible for recesso at all (not
+// CANCELED/REFUNDED), regardless of period — to tell "no eligible orders" apart
+// from "none in the selected period" without loading them all.
+export async function hasAccountWithdrawalOrders(): Promise<boolean> {
+  const session = await requireCustomerSession();
+  try {
+    const rows = await db
+      .select({ id: ordersSchema.id })
+      .from(ordersSchema)
+      .where(
+        and(
+          eq(ordersSchema.userId, session.user.id),
+          notInArray(ordersSchema.orderStatus, ["CANCELED", "REFUNDED"]),
+        ),
+      )
+      .limit(1);
+    return rows.length > 0;
+  } catch (error) {
+    console.error("[hasAccountWithdrawalOrders]", error);
+    return false;
+  }
+}
+
 // Orders the logged-in customer can pick in the account withdrawal function
 // (art. 54-bis: the consumer confirms the contract identification instead of
 // typing it). CANCELED/REFUNDED orders are excluded; orders with an existing
 // request are returned with their status so the page can show them.
-export async function getAccountWithdrawalOrders(): Promise<AccountWithdrawalData> {
+export async function getAccountWithdrawalOrders(
+  range?: WithdrawalDateRange,
+): Promise<AccountWithdrawalData> {
   const session = await requireCustomerSession();
   const userId = session.user.id;
 
   try {
+    const conditions = [eq(ordersSchema.userId, userId)];
+    if (range?.fromMs != null) conditions.push(gte(ordersSchema.createdAt, new Date(range.fromMs)));
+    if (range?.toMs != null) conditions.push(lte(ordersSchema.createdAt, new Date(range.toMs)));
+
     const orders = await db
       .select({
         id: ordersSchema.id,
@@ -39,7 +71,7 @@ export async function getAccountWithdrawalOrders(): Promise<AccountWithdrawalDat
         orderStatus: ordersSchema.orderStatus,
       })
       .from(ordersSchema)
-      .where(eq(ordersSchema.userId, userId))
+      .where(and(...conditions))
       .orderBy(desc(ordersSchema.createdAt));
 
     const visible = orders.filter(

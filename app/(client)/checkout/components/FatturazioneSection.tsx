@@ -20,18 +20,14 @@ export default function FatturazioneSection({
   onProfileSaved: () => void;
 }) {
   return (
-    <section className="flex flex-col gap-2 rounded-sm border border-stroke-grey p-4">
-      <div className="flex items-center justify-between">
-        <h2 className="H5">Fatturazione</h2>
-        {profileComplete && (
-          <Link href="/account/profilo" className="text-yellow-500 text-sm underline">
-            Modifica nel profilo
-          </Link>
-        )}
-      </div>
-
+    <div className="flex flex-col gap-2">
       {profileComplete ? (
         <>
+          <div className="flex justify-end">
+            <Link href="/account/profilo" className="text-yellow-500 text-sm underline">
+              Modifica nel profilo
+            </Link>
+          </div>
           <p className="helper_text">
             {profile?.clientType === "azienda"
               ? profile?.ragioneSociale
@@ -52,6 +48,6 @@ export default function FatturazioneSection({
       ) : (
         <CheckoutBillingForm profile={profile} onSaved={onProfileSaved} />
       )}
-    </section>
+    </div>
   );
 }
