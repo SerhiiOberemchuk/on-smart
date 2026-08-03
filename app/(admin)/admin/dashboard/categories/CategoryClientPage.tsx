@@ -4,16 +4,20 @@ import type {
   GetAllCategoriesFailure,
   GetAllCategoriesSuccess,
 } from "@/app/actions/admin/categories/mutations";
+import type { CatalogCountRow } from "@/app/actions/admin/brands/queries";
 import { removeCategoryProductsById } from "@/app/actions/admin/categories/mutations";
 import { deleteFileFromS3 } from "@/app/actions/admin/files/mutations";
 import { AdminIconActionButton } from "@/app/(admin)/admin/dashboard/AdminIconAction";
+import AdminPagination, { usePagination } from "@/app/(admin)/admin/dashboard/AdminPagination";
+import AdminSearchInput from "@/app/(admin)/admin/dashboard/AdminSearchInput";
+import AdminBadge from "@/app/(admin)/admin/dashboard/AdminBadge";
 import ButtonXDellete from "@/app/(admin)/admin/dashboard/ButtonXDellete";
 import { confirmActionToast } from "@/app/(admin)/admin/dashboard/confirm-action-toast";
 import IconEdit from "@/assets/icons/edit.svg";
 import { CategoryTypes } from "@/types/category.types";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo, useEffect } from "react";
 import { toast } from "react-toastify";
 import ModalCategoryForm from "./ModalCategoryForm";
 
@@ -50,14 +54,65 @@ function CategoryRowActions({
 
 export default function CategoriesClientPage({
   initialData,
+  productCounts,
 }: {
   initialData: GetAllCategoriesSuccess | GetAllCategoriesFailure;
+  productCounts: CatalogCountRow[];
 }) {
   const [categories, setCategories] = useState<CategoryTypes[]>(initialData.data || []);
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState<CategoryTypes | null>(null);
   const [idToDelete, setIdToDelete] = useState<string | null>(null);
   const [isPendingDell, startTransitionDell] = useTransition();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortKey, setSortKey] = useState<"NAME_ASC" | "NAME_DESC" | "COUNT_DESC" | "COUNT_ASC">(
+    "NAME_ASC",
+  );
+
+  const countsBySlug = useMemo(
+    () => new Map(productCounts.map((r) => [r.slug, r])),
+    [productCounts],
+  );
+
+  const filteredSorted = useMemo(() => {
+    const searchLower = searchQuery.toLowerCase();
+
+    const filtered = categories.filter((cat) =>
+      searchLower === ""
+        ? true
+        : cat.name.toLowerCase().includes(searchLower) ||
+            cat.category_slug.toLowerCase().includes(searchLower) ||
+            cat.title_full.toLowerCase().includes(searchLower),
+    );
+
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortKey === "NAME_ASC") {
+        return a.name.localeCompare(b.name);
+      } else if (sortKey === "NAME_DESC") {
+        return b.name.localeCompare(a.name);
+      } else if (sortKey === "COUNT_DESC") {
+        const countA = countsBySlug.get(a.category_slug)?.total ?? 0;
+        const countB = countsBySlug.get(b.category_slug)?.total ?? 0;
+        return countB - countA;
+      } else if (sortKey === "COUNT_ASC") {
+        const countA = countsBySlug.get(a.category_slug)?.total ?? 0;
+        const countB = countsBySlug.get(b.category_slug)?.total ?? 0;
+        return countA - countB;
+      }
+      return 0;
+    });
+
+    return sorted;
+  }, [categories, searchQuery, sortKey, countsBySlug]);
+
+  const { page, pageSize, totalPages, pageItems, setPage, setPageSize } = usePagination(
+    filteredSorted,
+    20,
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, sortKey, setPage]);
 
   const openModal = (data: CategoryTypes | null = null) => {
     setEditData(data);
@@ -112,6 +167,31 @@ export default function CategoriesClientPage({
 
       {categories.length ? (
         <>
+          <div className="mb-4 flex flex-wrap gap-3">
+            <AdminSearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Пошук за назвою або слагом..."
+              className="flex-1 min-w-64"
+            />
+            <select
+              value={sortKey}
+              onChange={(e) => setSortKey(e.target.value as typeof sortKey)}
+              className="admin-select"
+            >
+              <option value="NAME_ASC">Назва: А–Я</option>
+              <option value="NAME_DESC">Назва: Я–А</option>
+              <option value="COUNT_DESC">Товарів: більше</option>
+              <option value="COUNT_ASC">Товарів: менше</option>
+            </select>
+          </div>
+
+          {filteredSorted.length > 0 && (
+            <p className="admin-muted mb-4 text-sm">
+              Всього: {categories.length} • Показано: {filteredSorted.length}
+            </p>
+          )}
+
           <div className="admin-table-wrap hidden lg:block">
             <table className="admin-table">
               <thead>
@@ -122,81 +202,124 @@ export default function CategoriesClientPage({
                   <th>Назва</th>
                   <th>Заголовок</th>
                   <th>Опис</th>
+                  <th>Товарів</th>
                   <th>Дії</th>
                 </tr>
               </thead>
 
               <tbody>
-                {categories.map((cat) => (
-                  <tr key={cat.id}>
-                    <td className="max-w-[120px] truncate">{cat.id}</td>
-                    <td>
-                      <Link href={cat.image} target="_blank">
-                        <Image
-                          src={cat.image}
-                          alt={cat.name}
-                          width={66}
-                          height={66}
-                          loading="eager"
-                          className="h-16 w-16 rounded-md border border-slate-600/55 object-cover"
+                {pageItems.map((cat) => {
+                  const count = countsBySlug.get(cat.category_slug);
+                  return (
+                    <tr key={cat.id}>
+                      <td className="max-w-[120px] truncate">{cat.id}</td>
+                      <td>
+                        <Link href={cat.image} target="_blank">
+                          <Image
+                            src={cat.image}
+                            alt={cat.name}
+                            width={66}
+                            height={66}
+                            loading="eager"
+                            className="h-16 w-16 rounded-md border border-slate-600/55 object-cover"
+                          />
+                        </Link>
+                      </td>
+                      <td>{cat.category_slug}</td>
+                      <td>{cat.name}</td>
+                      <td className="max-w-[260px]">{cat.title_full}</td>
+                      <td className="max-w-[420px]">
+                        <span className="line-clamp-2 text-slate-300">{cat.description}</span>
+                      </td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          {count ? (
+                            <span>{count.total}</span>
+                          ) : (
+                            <span className="admin-muted">0</span>
+                          )}
+                          {count && count.hidden > 0 && (
+                            <AdminBadge tone="amber">{count.hidden} прих.</AdminBadge>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <CategoryRowActions
+                          category={cat}
+                          onEdit={openModal}
+                          onDelete={handleDelete}
+                          isDeleting={isPendingDell && idToDelete === cat.id}
                         />
-                      </Link>
-                    </td>
-                    <td>{cat.category_slug}</td>
-                    <td>{cat.name}</td>
-                    <td className="max-w-[260px]">{cat.title_full}</td>
-                    <td className="max-w-[420px]">
-                      <span className="line-clamp-2 text-slate-300">{cat.description}</span>
-                    </td>
-                    <td>
-                      <CategoryRowActions
-                        category={cat}
-                        onEdit={openModal}
-                        onDelete={handleDelete}
-                        isDeleting={isPendingDell && idToDelete === cat.id}
-                      />
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
           <ul className="grid grid-cols-1 gap-3 lg:hidden">
-            {categories.map((cat) => (
-              <li key={cat.id} className="admin-card admin-card-content">
-                <div className="flex gap-3">
-                  <Link href={cat.image} target="_blank" className="shrink-0">
-                    <Image
-                      src={cat.image}
-                      alt={cat.name}
-                      width={72}
-                      height={72}
-                      loading="eager"
-                      className="h-[72px] w-[72px] rounded-md border border-slate-600/55 object-cover"
-                    />
-                  </Link>
+            {pageItems.map((cat) => {
+              const count = countsBySlug.get(cat.category_slug);
+              return (
+                <li key={cat.id} className="admin-card admin-card-content">
+                  <div className="flex gap-3">
+                    <Link href={cat.image} target="_blank" className="shrink-0">
+                      <Image
+                        src={cat.image}
+                        alt={cat.name}
+                        width={72}
+                        height={72}
+                        loading="eager"
+                        className="h-[72px] w-[72px] rounded-md border border-slate-600/55 object-cover"
+                      />
+                    </Link>
 
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">{cat.name}</p>
-                    <p className="text-xs text-slate-400">{cat.category_slug}</p>
-                    <p className="mt-1 line-clamp-2 text-xs text-slate-300">{cat.title_full}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold">{cat.name}</p>
+                      <p className="text-xs text-slate-400">{cat.category_slug}</p>
+                      <p className="mt-1 line-clamp-2 text-xs text-slate-300">{cat.title_full}</p>
+                    </div>
                   </div>
-                </div>
 
-                <p className="mt-3 line-clamp-3 text-sm text-slate-300">{cat.description}</p>
+                  <p className="mt-3 line-clamp-3 text-sm text-slate-300">{cat.description}</p>
 
-                <div className="mt-3 border-t border-slate-600/45 pt-3">
-                  <CategoryRowActions
-                    category={cat}
-                    onEdit={openModal}
-                    onDelete={handleDelete}
-                    isDeleting={isPendingDell && idToDelete === cat.id}
-                  />
-                </div>
-              </li>
-            ))}
+                  <div className="mt-3 border-t border-slate-600/45 pt-3">
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="text-sm">Товарів:</span>
+                      {count ? (
+                        <span className="text-sm">{count.total}</span>
+                      ) : (
+                        <span className="admin-muted text-sm">0</span>
+                      )}
+                      {count && count.hidden > 0 && (
+                        <AdminBadge tone="amber">{count.hidden} прих.</AdminBadge>
+                      )}
+                    </div>
+                    <CategoryRowActions
+                      category={cat}
+                      onEdit={openModal}
+                      onDelete={handleDelete}
+                      isDeleting={isPendingDell && idToDelete === cat.id}
+                    />
+                  </div>
+                </li>
+              );
+            })}
           </ul>
+
+          {totalPages > 1 && (
+            <div className="mt-4">
+              <AdminPagination
+                page={page}
+                totalPages={totalPages}
+                totalItems={filteredSorted.length}
+                pageSize={pageSize}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+              />
+            </div>
+          )}
         </>
       ) : (
         <div className="admin-empty">Категорій ще немає.</div>

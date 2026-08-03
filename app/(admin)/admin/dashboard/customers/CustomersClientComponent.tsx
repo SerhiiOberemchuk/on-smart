@@ -5,6 +5,9 @@ import type {
   AdminCustomersSummary,
 } from "@/app/actions/admin/customers/queries";
 import { useMemo, useState } from "react";
+import AdminStatCard from "../AdminStatCard";
+import AdminBadge from "../AdminBadge";
+import { exportCsv } from "../csv-export";
 
 const euro = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
 const dateFmt = new Intl.DateTimeFormat("uk-UA", { dateStyle: "short", timeZone: "Europe/Rome" });
@@ -89,49 +92,6 @@ function sortRows(rows: AdminCustomerRow[], sort: SortKey) {
   }
 }
 
-function csvCell(value: string) {
-  return /[",\n;]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
-}
-
-function exportCsv(rows: AdminCustomerRow[]) {
-  const header = [
-    "Ім'я",
-    "Email",
-    "Телефон",
-    "Тип",
-    "Компанія",
-    "Місто",
-    "Реєстрація",
-    "Замовлень",
-    "Оплачених",
-    "Витрачено (EUR)",
-    "Останнє замовлення",
-    "Вподобань",
-  ];
-  const body = rows.map((row) => [
-    row.name,
-    row.email,
-    row.phone ?? "",
-    row.clientType === "azienda" ? "Компанія" : "Приватний",
-    row.companyName ?? "",
-    row.city ?? "",
-    formatDate(row.createdAt),
-    String(row.ordersCount),
-    String(row.paidOrdersCount),
-    row.totalSpent.toFixed(2),
-    row.lastOrderAt ? formatDate(row.lastOrderAt) : "",
-    String(row.wishlistCount),
-  ]);
-  const csv = [header, ...body].map((cols) => cols.map(csvCell).join(",")).join("\n");
-  // Prepend a UTF-8 BOM so Excel renders Cyrillic/accented names correctly.
-  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = `clienti-${new Date().toISOString().slice(0, 10)}.csv`;
-  anchor.click();
-  URL.revokeObjectURL(url);
-}
 
 export default function CustomersClientComponent({
   customers,
@@ -203,7 +163,37 @@ export default function CustomersClientComponent({
           </select>
           <button
             type="button"
-            onClick={() => exportCsv(filtered)}
+            onClick={() => {
+              const header = [
+                "Ім'я",
+                "Email",
+                "Телефон",
+                "Тип",
+                "Компанія",
+                "Місто",
+                "Реєстрація",
+                "Замовлень",
+                "Оплачених",
+                "Витрачено (EUR)",
+                "Останнє замовлення",
+                "Вподобань",
+              ];
+              const rows = filtered.map((row) => [
+                row.name,
+                row.email,
+                row.phone ?? "",
+                row.clientType === "azienda" ? "Компанія" : "Приватний",
+                row.companyName ?? "",
+                row.city ?? "",
+                formatDate(row.createdAt),
+                String(row.ordersCount),
+                String(row.paidOrdersCount),
+                row.totalSpent.toFixed(2),
+                row.lastOrderAt ? formatDate(row.lastOrderAt) : "",
+                String(row.wishlistCount),
+              ]);
+              exportCsv({ filenamePrefix: "clienti", header, rows });
+            }}
             disabled={!filtered.length}
             className="admin-btn-secondary"
           >
@@ -213,32 +203,32 @@ export default function CustomersClientComponent({
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <StatCard
+        <AdminStatCard
           label="Всього клієнтів"
           value={String(summary.total)}
           hint={`${summary.business} компаній • ${summary.total - summary.business} приватних`}
         />
-        <StatCard
+        <AdminStatCard
           label="Нові за 30 днів"
           value={String(summary.newLast30)}
           hint={`${pct(summary.newLast30, summary.total)}% бази`}
         />
-        <StatCard
+        <AdminStatCard
           label="Підтвердили email"
           value={String(summary.verified)}
           hint={`${pct(summary.verified, summary.total)}% бази`}
         />
-        <StatCard
+        <AdminStatCard
           label="З замовленнями"
           value={String(summary.withOrders)}
           hint={`конверсія ${pct(summary.withOrders, summary.total)}%`}
         />
-        <StatCard
+        <AdminStatCard
           label="Загальна виручка"
           value={euro.format(summary.totalRevenue)}
           hint={`середній LTV ${euro.format(avgLtv)}`}
         />
-        <StatCard
+        <AdminStatCard
           label="Ліди без покупок"
           value={String(summary.total - summary.withOrders)}
           hint={`${pct(summary.total - summary.withOrders, summary.total)}% бази`}
@@ -276,7 +266,7 @@ export default function CustomersClientComponent({
                     </a>
                     <div className="mt-1 flex flex-wrap gap-1">
                       <VerifiedBadge verified={row.emailVerified} />
-                      {row.banned ? <Badge tone="red">заблок.</Badge> : null}
+                      {row.banned ? <AdminBadge tone="red">заблок.</AdminBadge> : null}
                     </div>
                   </td>
                   <td>
@@ -333,8 +323,8 @@ export default function CustomersClientComponent({
 
               <div className="mt-2 flex flex-wrap gap-1">
                 <VerifiedBadge verified={row.emailVerified} />
-                {row.banned ? <Badge tone="red">заблоковано</Badge> : null}
-                {row.companyName ? <Badge tone="neutral">{row.companyName}</Badge> : null}
+                {row.banned ? <AdminBadge tone="red">заблоковано</AdminBadge> : null}
+                {row.companyName ? <AdminBadge tone="neutral">{row.companyName}</AdminBadge> : null}
               </div>
 
               <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-slate-600/45 pt-3 text-sm">
@@ -361,15 +351,6 @@ export default function CustomersClientComponent({
   );
 }
 
-function StatCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
-  return (
-    <div className="admin-card admin-card-content">
-      <div className="text-xs font-medium tracking-wide uppercase admin-muted">{label}</div>
-      <div className="mt-1 text-2xl font-semibold">{value}</div>
-      {hint ? <div className="mt-0.5 text-xs admin-muted">{hint}</div> : null}
-    </div>
-  );
-}
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
@@ -380,36 +361,19 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Badge({ tone, children }: { tone: "green" | "red" | "amber" | "neutral"; children: React.ReactNode }) {
-  const toneClass =
-    tone === "green"
-      ? "border-green-500/40 bg-green-500/15 text-green-300"
-      : tone === "red"
-        ? "border-red-500/40 bg-red-500/15 text-red-300"
-        : tone === "amber"
-          ? "border-yellow-500/40 bg-yellow-500/15 text-yellow-200"
-          : "border-slate-500/40 bg-slate-500/15 text-slate-300";
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[0.68rem] ${toneClass}`}
-    >
-      {children}
-    </span>
-  );
-}
 
 function VerifiedBadge({ verified }: { verified: boolean }) {
   return verified ? (
-    <Badge tone="green">✓ email</Badge>
+    <AdminBadge tone="green">✓ email</AdminBadge>
   ) : (
-    <Badge tone="amber">email не підтв.</Badge>
+    <AdminBadge tone="amber">email не підтв.</AdminBadge>
   );
 }
 
 function ClientTypeChip({ clientType }: { clientType: AdminCustomerRow["clientType"] }) {
   return clientType === "azienda" ? (
-    <Badge tone="amber">Компанія</Badge>
+    <AdminBadge tone="amber">Компанія</AdminBadge>
   ) : (
-    <Badge tone="neutral">Приватний</Badge>
+    <AdminBadge tone="neutral">Приватний</AdminBadge>
   );
 }

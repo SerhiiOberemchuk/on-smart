@@ -24,3 +24,5 @@ export const DELIVERY_METHOD_CONSTANT = createConstatObjFromEnumArray(DELIVERY_M
 export const CURRENCY_LIST = ["EUR"] as const;
 export type CurrencyType = (typeof CURRENCY_LIST)[number];
 export const CURRENCY_CONSTANT = createConstatObjFromEnumArray(CURRENCY_LIST);
+
+export const PAID_ORDER_STATUS_LIST = ["PAID", "FULFILLING", "SHIPPED", "READY_FOR_PICKUP", "COMPLETED"] as const satisfies readonly OrderStatusTypes[];

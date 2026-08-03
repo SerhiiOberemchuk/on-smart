@@ -1,4 +1,4 @@
-import { getAllCategoryProducts } from "@/app/actions/admin/categories/queries";
+import { getAllCategoryProducts, getCategoryProductCounts } from "@/app/actions/admin/categories/queries";
 import Spiner from "@/components/Spiner";
 import { headers } from "next/headers";
 import { Suspense } from "react";
@@ -14,11 +14,19 @@ export default function CategoriesPage() {
 
 async function GetDataComponent() {
   await headers();
-  const res = await getAllCategoryProducts();
+  const [listRes, countsRes] = await Promise.all([
+    getAllCategoryProducts(),
+    getCategoryProductCounts(),
+  ]);
 
-  if (res.error) {
+  if (listRes.error) {
     return <p className="admin-empty">Помилка завантаження даних</p>;
   }
 
-  return <CategoriesClientPage initialData={res} />;
+  return (
+    <CategoriesClientPage
+      initialData={listRes}
+      productCounts={countsRes.success ? countsRes.data : []}
+    />
+  );
 }

@@ -3,9 +3,13 @@
 import { OrderTypes } from "@/db/schemas/orders.schema";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { URL_DASHBOARD } from "../dashboard-admin.types";
 import { getDeliveryMethodLabel, getOrderStatusLabel } from "./[id]/_order-details/formatters";
+import { PAID_ORDER_STATUS_LIST } from "@/types/orders.types";
+import AdminStatCard from "../AdminStatCard";
+import AdminPagination, { usePagination } from "../AdminPagination";
+import { exportCsv } from "../csv-export";
 
 type OrderStatus = OrderTypes["orderStatus"];
 
@@ -213,6 +217,24 @@ export default function PageOrdersClient({
       .sort((left, right) => sortOrders(left, right, sortBy));
   }, [orders, userIdFilter, query, status, dateFilter, sortBy]);
 
+  const { page, pageSize, totalPages, pageItems, setPage, setPageSize } = usePagination(filteredOrders, 20);
+
+  const kpiStats = useMemo(() => {
+    const paidOrders = filteredOrders.filter((order) => PAID_ORDER_STATUS_LIST.includes(order.orderStatus as typeof PAID_ORDER_STATUS_LIST[number]));
+    const paidCount = paidOrders.length;
+    const paidRevenue = paidOrders.reduce((sum, order) => sum + (Number(order.orderTotal) || 0), 0);
+    const averageCheck = paidCount > 0 ? paidRevenue / paidCount : 0;
+
+    const pendingOrders = filteredOrders.filter((order) => order.orderStatus === "PENDING_PAYMENT");
+    const pendingTotal = pendingOrders.reduce((sum, order) => sum + (Number(order.orderTotal) || 0), 0);
+
+    return { paidCount, paidRevenue, averageCheck, pendingCount: pendingOrders.length, pendingTotal };
+  }, [filteredOrders]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, status, dateFilter, sortBy, userIdFilter, setPage]);
+
   const allOrdersCount = orders?.length ?? 0;
   const filteredOrdersCount = filteredOrders.length;
 
@@ -281,7 +303,53 @@ export default function PageOrdersClient({
               </option>
             ))}
           </select>
+
+          <button
+            onClick={() => {
+              const header = ["Номер", "Створено", "Клієнт", "Email", "Телефон", "Статус", "Доставка", "Адреса", "Трекінг", "Сума (EUR)", "Доставка (EUR)"];
+              const rows = filteredOrders.map((order) => [
+                order.orderNumber || "",
+                formatDate(order.createdAt) || "",
+                getClientLabel(order) || "",
+                order.email || "",
+                order.numeroTelefono || "",
+                getOrderStatusLabel(order.orderStatus) || "",
+                getDeliveryMethodLabel(order.deliveryMethod) || "",
+                getShippingLine(order) || "",
+                order.trackingNumber || "",
+                Number(order.orderTotal || 0).toFixed(2),
+                getDeliveryPrice(order).toFixed(2),
+              ]);
+              exportCsv({ filenamePrefix: "orders", header, rows });
+            }}
+            disabled={filteredOrders.length === 0}
+            className="admin-btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Експорт CSV
+          </button>
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <AdminStatCard
+          label="Замовлень"
+          value={String(filteredOrdersCount)}
+          hint={`${kpiStats.paidCount} оплачених`}
+        />
+        <AdminStatCard
+          label="Виручка (фільтр)"
+          value={formatCurrency(kpiStats.paidRevenue, "EUR")}
+          hint="без скасованих і неоплачених"
+        />
+        <AdminStatCard
+          label="Середній чек"
+          value={formatCurrency(kpiStats.averageCheck, "EUR")}
+        />
+        <AdminStatCard
+          label="Очікують оплати"
+          value={String(kpiStats.pendingCount)}
+          hint={formatCurrency(kpiStats.pendingTotal, "EUR")}
+        />
       </div>
 
       {error ? (
@@ -309,7 +377,7 @@ export default function PageOrdersClient({
             </thead>
 
             <tbody>
-              {filteredOrders.map((order) => (
+              {pageItems.map((order) => (
                 <tr key={order.id}>
                   <td>
                     <Link
@@ -361,7 +429,7 @@ export default function PageOrdersClient({
 
       {filteredOrdersCount ? (
         <div className="grid grid-cols-1 gap-3 xl:hidden">
-          {filteredOrders.map((order) => (
+          {pageItems.map((order) => (
             <article key={order.id} className="admin-card admin-card-content">
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -423,6 +491,17 @@ export default function PageOrdersClient({
             </article>
           ))}
         </div>
+      ) : null}
+
+      {filteredOrdersCount ? (
+        <AdminPagination
+          page={page}
+          totalPages={totalPages}
+          totalItems={filteredOrdersCount}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
       ) : null}
     </section>
   );

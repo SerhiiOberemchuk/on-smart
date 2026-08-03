@@ -49,6 +49,7 @@
     "react-range": "^1.10.0",
     "react-toastify": "^11.1.0",
     "react-tooltip": "^6.0.8",
+    "recharts": "^3.10.1",
     "schema-dts": "^2.0.0",
     "sharp": "^0.35.3",
     "swiper": "^14.0.2",

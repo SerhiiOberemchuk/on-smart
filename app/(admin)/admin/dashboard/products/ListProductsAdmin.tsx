@@ -9,12 +9,15 @@ import { ProductType } from "@/db/schemas/product.schema";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition, useEffect } from "react";
 import { toast } from "react-toastify";
 import { AdminIconActionButton, AdminIconActionLink } from "../AdminIconAction";
 import { confirmActionToast } from "../confirm-action-toast";
 import ButtonXDellete from "../ButtonXDellete";
 import ModalAddVariant from "./ModalCreateVariant";
+import AdminSearchInput from "../AdminSearchInput";
+import { usePagination } from "../AdminPagination";
+import AdminPagination from "../AdminPagination";
 import IconCopy from "@/assets/icons/copy.svg";
 import IconCopyActive from "@/assets/icons/copy-active.svg";
 import IconEdit from "@/assets/icons/edit.svg";
@@ -46,6 +49,8 @@ type SortType =
   | "stock_desc"
   | "variants_desc";
 
+type StockFilterType = "ALL" | "OUT_OF_STOCK" | "LOW_STOCK" | "HIDDEN" | "ON_ORDER";
+
 export default function ListProductsAdmin({ products }: { products: ProductType[] }) {
   const router = useRouter();
   const [isCopyPending, startCopyTransition] = useTransition();
@@ -58,6 +63,8 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
   const [selectedBrand, setSelectedBrand] = useState<string>("ALL");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [sortType, setSortType] = useState<SortType>("default");
+  const [query, setQuery] = useState<string>("");
+  const [stockFilter, setStockFilter] = useState<StockFilterType>("ALL");
 
   const parentProducts = useMemo(
     () => products.filter((product) => !product.parent_product_id),
@@ -98,9 +105,71 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
       parentProducts.filter((product) => {
         const byBrand = selectedBrand === "ALL" || product.brand_slug === selectedBrand;
         const byCategory = selectedCategory === "ALL" || product.category_slug === selectedCategory;
-        return byBrand && byCategory;
+
+        // Search filter
+        let bySearch = true;
+        if (query.trim()) {
+          const q = query.trim().toLowerCase();
+          const parentHaystack = [
+            product.nameFull,
+            product.name,
+            product.slug,
+            product.ean || "",
+            ...(product.searchKeywords ?? []),
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          bySearch = parentHaystack.includes(q);
+
+          // Check variants if parent doesn't match
+          if (!bySearch) {
+            const variants = variantsByParentId.get(product.id) ?? [];
+            bySearch = variants.some((variant) => {
+              const variantHaystack = [
+                variant.nameFull,
+                variant.name,
+                variant.slug,
+                variant.ean || "",
+                ...(variant.searchKeywords ?? []),
+              ]
+                .join(" ")
+                .toLowerCase();
+              return variantHaystack.includes(q);
+            });
+          }
+        }
+
+        // Stock filter
+        let byStock = true;
+        if (stockFilter !== "ALL") {
+          const checkProduct = (p: ProductType) => {
+            switch (stockFilter) {
+              case "OUT_OF_STOCK":
+                return p.inStock <= 0;
+              case "LOW_STOCK":
+                return p.inStock >= 1 && p.inStock <= 3;
+              case "HIDDEN":
+                return p.isHidden;
+              case "ON_ORDER":
+                return p.isOnOrder;
+              default:
+                return true;
+            }
+          };
+
+          byStock = checkProduct(product);
+
+          // Check variants if parent doesn't match
+          if (!byStock) {
+            const variants = variantsByParentId.get(product.id) ?? [];
+            byStock = variants.some((variant) => checkProduct(variant));
+          }
+        }
+
+        return byBrand && byCategory && bySearch && byStock;
       }),
-    [parentProducts, selectedBrand, selectedCategory],
+    [parentProducts, selectedBrand, selectedCategory, query, stockFilter, variantsByParentId],
   );
 
   const sortedParentProducts = useMemo(() => {
@@ -131,9 +200,19 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
     }
   }, [filteredParentProducts, sortType, variantsByParentId]);
 
+  const { page, pageSize, totalPages, pageItems, setPage, setPageSize } = usePagination(
+    sortedParentProducts,
+    20,
+  );
+
+  useEffect(() => {
+    setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, selectedBrand, selectedCategory, stockFilter, sortType]);
+
   const visibleParentIdsSet = useMemo(
-    () => new Set(sortedParentProducts.map((product) => product.id)),
-    [sortedParentProducts],
+    () => new Set(pageItems.map((product) => product.id)),
+    [pageItems],
   );
 
   const visibleOpenedProductIds = useMemo(() => {
@@ -146,12 +225,12 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
 
   const visibleProductsWithVariants = useMemo(
     () =>
-      sortedParentProducts
+      pageItems
         .filter(
           (product) => (variantsByParentId.get(product.id)?.length ?? 0) > 0 || product.hasVariants,
         )
         .map((product) => product.id),
-    [sortedParentProducts, variantsByParentId],
+    [pageItems, variantsByParentId],
   );
 
   const areAllVisibleVariantsExpanded = useMemo(
@@ -165,6 +244,9 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
     setSelectedBrand("ALL");
     setSelectedCategory("ALL");
     setSortType("default");
+    setQuery("");
+    setStockFilter("ALL");
+    setPage(1);
   };
 
   const openVariantModal = (product: ProductType) => {
@@ -272,7 +354,15 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
   return (
     <>
       <div className="admin-card admin-card-content mb-2">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,220px)_minmax(0,220px)_minmax(0,280px)_auto_auto]">
+        <div className="mb-3">
+          <AdminSearchInput
+            value={query}
+            onChange={setQuery}
+            placeholder="Пошук за назвою, слагом, EAN..."
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,220px)_minmax(0,220px)_minmax(0,220px)_minmax(0,280px)_auto_auto]">
           <label className="admin-field">
             <span className="admin-field-label">Фільтр за брендом</span>
             <select
@@ -306,6 +396,21 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
           </label>
 
           <label className="admin-field">
+            <span className="admin-field-label">Фільтр за статусом</span>
+            <select
+              className="admin-select"
+              value={stockFilter}
+              onChange={(event) => setStockFilter(event.target.value as StockFilterType)}
+            >
+              <option value="ALL">Усі товари</option>
+              <option value="OUT_OF_STOCK">Немає в наявності</option>
+              <option value="LOW_STOCK">Мало на складі (1–3)</option>
+              <option value="HIDDEN">Приховані</option>
+              <option value="ON_ORDER">Під замовлення</option>
+            </select>
+          </label>
+
+          <label className="admin-field">
             <span className="admin-field-label">Сортування</span>
             <select
               className="admin-select"
@@ -329,7 +434,11 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
               className="admin-btn-secondary w-full text-sm! md:w-auto"
               onClick={resetFilters}
               disabled={
-                selectedBrand === "ALL" && selectedCategory === "ALL" && sortType === "default"
+                selectedBrand === "ALL" &&
+                selectedCategory === "ALL" &&
+                sortType === "default" &&
+                query === "" &&
+                stockFilter === "ALL"
               }
             >
               Скинути фільтри
@@ -349,7 +458,8 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
         </div>
 
         <p className="mt-3 text-xs text-slate-400">
-          Показано товарів: {sortedParentProducts.length} із {parentProducts.length}
+          Показано: {pageItems.length} із відфільтрованих {sortedParentProducts.length} (всього:{" "}
+          {parentProducts.length})
         </p>
       </div>
 
@@ -358,7 +468,7 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
       ) : null}
 
       <ul className="flex flex-col gap-2">
-        {sortedParentProducts.map((item) => {
+        {pageItems.map((item) => {
           const variants = variantsByParentId.get(item.id) ?? [];
           const hasVariants = variants.length > 0 || item.hasVariants;
           const isOpened = visibleOpenedProductIds.has(item.id);
@@ -560,6 +670,15 @@ export default function ListProductsAdmin({ products }: { products: ProductType[
           );
         })}
       </ul>
+
+      <AdminPagination
+        page={page}
+        totalPages={totalPages}
+        totalItems={sortedParentProducts.length}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
 
       {variantModalOpen && parentProduct ? (
         <ModalAddVariant

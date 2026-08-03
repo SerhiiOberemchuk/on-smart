@@ -15,3 +15,5 @@ export const PAYMENT_STATUS_LIST = [
 ] as const;
 export const PAYMENT_STATUS_CONSTANT = createConstatObjFromEnumArray(PAYMENT_STATUS_LIST);
 export type PaymentStatusTypes = (typeof PAYMENT_STATUS_LIST)[number];
+
+export const PAID_PAYMENT_STATUS_LIST = ["SUCCESS", "PAYED"] as const satisfies readonly PaymentStatusTypes[];

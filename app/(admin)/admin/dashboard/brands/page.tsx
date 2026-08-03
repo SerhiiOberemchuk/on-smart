@@ -1,4 +1,4 @@
-import { getAllBrands } from "@/app/actions/admin/brands/queries";
+import { getAllBrands, getBrandProductCounts } from "@/app/actions/admin/brands/queries";
 import Spiner from "@/components/Spiner";
 import { headers } from "next/headers";
 import { Suspense } from "react";
@@ -14,11 +14,16 @@ export default function BrandsPage() {
 
 async function GetDataComponent() {
   await headers();
-  const res = await getAllBrands();
+  const [listRes, countsRes] = await Promise.all([getAllBrands(), getBrandProductCounts()]);
 
-  if (res.error) {
+  if (listRes.error) {
     return <p className="admin-empty">Помилка завантаження даних</p>;
   }
 
-  return <BrandsPageClient brandsData={res.data} />;
+  return (
+    <BrandsPageClient
+      brandsData={listRes.data}
+      productCounts={countsRes.success ? countsRes.data : []}
+    />
+  );
 }
