@@ -22,6 +22,19 @@ const nextConfig: NextConfig = {
         hostname: "on-smart.r3-it.storage.cloud.it",
       },
     ],
+    // The Aruba app-server node is memory-capped (cloudlet scaling limit), and
+    // sharp decodes images into raw bitmaps *outside* the V8 heap — a 50MB
+    // source (Next's default ceiling) can expand to hundreds of MB of native
+    // memory and kill the container before V8 ever reports pressure. No
+    // legitimate product photo is anywhere near 10MB.
+    maximumResponseBody: 10 * 1024 * 1024,
+    // Uploaded files get a fresh ULID key on every upload (app/actions/files/
+    // uploadFile.ts), so an image URL is immutable — re-running sharp every 4h
+    // (the default minimumCacheTTL) only burns CPU and RAM on a 400MHz cloudlet.
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+    // The optimized-image disk cache is unbounded by default; cap it so it
+    // cannot creep toward the node's disk limit.
+    maximumDiskCacheSize: 2 * 1024 * 1024 * 1024,
   },
   experimental: {
     serverActions: {
