@@ -18,6 +18,56 @@ import { baseUrl } from "@/types/baseUrl";
 // immediately distinguishable from production.
 const baseHost = new URL(baseUrl).hostname;
 
+// Memory sampling: the container is capped at 640 MiB and V8 sizes its heap from
+// that (~320 MB), so the process has already died once from a heap OOM. RSS alone
+// cannot distinguish a leak from V8 simply growing lazily toward its ceiling —
+// the breakdown below can. `arrayBuffers` in particular is the signature of the
+// Next fetch/cache retention bugs: it climbs while `heapUsed` stays flat.
+const MEMORY_SAMPLE_INTERVAL_MS = 5 * 60 * 1000;
+
+// Warn while there is still headroom to act. A heap OOM kills the process
+// instantly, and a dead process cannot send its own alert.
+const DEFAULT_RSS_ALERT_MB = 520;
+
+const toMb = (bytes: number) => Math.round(bytes / 1024 / 1024);
+
+export function register(): void {
+  // `register` also runs in the edge runtime, where `process.memoryUsage` and
+  // timers are not meaningful.
+  if (process.env.NEXT_RUNTIME !== "nodejs") return;
+
+  const alertAtMb = Number(process.env.MEMORY_ALERT_RSS_MB) || DEFAULT_RSS_ALERT_MB;
+
+  const timer = setInterval(() => {
+    const usage = process.memoryUsage();
+    const rssMb = toMb(usage.rss);
+
+    console.log(
+      `[memory] rss=${rssMb}MB heapUsed=${toMb(usage.heapUsed)}MB ` +
+        `heapTotal=${toMb(usage.heapTotal)}MB external=${toMb(usage.external)}MB ` +
+        `arrayBuffers=${toMb(usage.arrayBuffers)}MB`,
+    );
+
+    if (rssMb < alertAtMb) return;
+
+    // Keyed so the alert module's dedupe window throttles this to one message
+    // per 15 minutes no matter how long the process stays over the threshold.
+    void sendTelegramAlert({
+      key: "memory-high",
+      title: `memory high on ${baseHost}`,
+      details: {
+        rss: `${rssMb}MB (alert at ${alertAtMb}MB)`,
+        heapUsed: `${toMb(usage.heapUsed)}MB of ${toMb(usage.heapTotal)}MB`,
+        arrayBuffers: `${toMb(usage.arrayBuffers)}MB`,
+        external: `${toMb(usage.external)}MB`,
+      },
+    });
+  }, MEMORY_SAMPLE_INTERVAL_MS);
+
+  // Must not keep the event loop alive and delay container shutdown.
+  timer.unref();
+}
+
 type RequestErrorContext = {
   routerKind: "Pages Router" | "App Router";
   routePath: string;
