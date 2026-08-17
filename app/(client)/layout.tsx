@@ -36,7 +36,10 @@ export const metadata: Metadata = {
   },
   applicationName: "OnSmart",
   verification: {
-    google: "Bus1aCcYooja0SCsxpxMoqtpZKMjqz47fl0BtySOU8I",
+    google: [
+      "Bus1aCcYooja0SCsxpxMoqtpZKMjqz47fl0BtySOU8I",
+      "ka2RuONo67B_PrwW_yRmT9lczrI2MNfA4dwCcTwzvxc",
+    ],
     other: {
       "msvalidate.01": "4CC5472328D38C599ED3D0D8DE1788DB",
     },
@@ -85,6 +88,7 @@ export const metadata: Metadata = {
       "Videosorveglianza, antifurto, smart home e accessori professionali per casa e azienda.",
     images: ["/og-image.png"],
   },
+  
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
