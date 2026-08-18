@@ -31,12 +31,80 @@ const DEFAULT_RSS_ALERT_MB = 520;
 
 const toMb = (bytes: number) => Math.round(bytes / 1024 / 1024);
 
+// Fetch attribution. `arrayBuffers` is climbing monotonically (1 -> 78 MB over a
+// day) and every known suspect in this class of Next bug retains a *response
+// body*, so the question is which caller produces the volume. Counting by host
+// answers it — and, just as usefully, can rule fetch out entirely: if no host
+// grows in step with `arrayBuffers`, the leak is elsewhere (mysql2 packets,
+// sharp output buffers) and we stop looking here.
+//
+// Note that `next/image` optimization also goes through global fetch
+// (`image-optimizer.js` -> `fetchExternalImage`), so remote image pulls from the
+// storage bucket show up under their own host and are measured for free.
+const fetchCallsByHost = new Map<string, number>();
+const fetchCallsAtLastSample = new Map<string, number>();
+
+/**
+ * Counts outbound fetches per host, then delegates unchanged.
+ *
+ * Safe to install in any order relative to Next's own patching: Next guards
+ * against double-patching with a global symbol (`patch-fetch.js` ->
+ * `isFetchPatched`), not with a property on the fetch function, so wrapping
+ * `globalThis.fetch` neither hides its patch nor triggers a second one.
+ */
+function instrumentFetch(): void {
+  const original = globalThis.fetch;
+
+  if (typeof original !== "function") return;
+
+  globalThis.fetch = function instrumentedFetch(
+    input: Parameters<typeof original>[0],
+    init?: Parameters<typeof original>[1],
+  ) {
+    try {
+      const url =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.href
+            : (input as Request).url;
+      const { host } = new URL(url);
+      fetchCallsByHost.set(host, (fetchCallsByHost.get(host) ?? 0) + 1);
+    } catch {
+      // A malformed or relative URL is not worth failing the request over.
+    }
+
+    return original.call(globalThis, input, init);
+  } as typeof original;
+}
+
+/** Per-host call counts since the previous sample, busiest first. */
+function drainFetchDelta(): string {
+  const deltas: Array<[string, number]> = [];
+
+  for (const [host, total] of fetchCallsByHost) {
+    const delta = total - (fetchCallsAtLastSample.get(host) ?? 0);
+    fetchCallsAtLastSample.set(host, total);
+    if (delta > 0) deltas.push([host, delta]);
+  }
+
+  if (deltas.length === 0) return "none";
+
+  return deltas
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([host, delta]) => `${host}=${delta}`)
+    .join(" ");
+}
+
 export function register(): void {
   // `register` also runs in the edge runtime, where `process.memoryUsage` and
   // timers are not meaningful.
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
 
   const alertAtMb = Number(process.env.MEMORY_ALERT_RSS_MB) || DEFAULT_RSS_ALERT_MB;
+
+  instrumentFetch();
 
   const timer = setInterval(() => {
     const usage = process.memoryUsage();
@@ -45,7 +113,7 @@ export function register(): void {
     console.log(
       `[memory] rss=${rssMb}MB heapUsed=${toMb(usage.heapUsed)}MB ` +
         `heapTotal=${toMb(usage.heapTotal)}MB external=${toMb(usage.external)}MB ` +
-        `arrayBuffers=${toMb(usage.arrayBuffers)}MB`,
+        `arrayBuffers=${toMb(usage.arrayBuffers)}MB | fetch/5m: ${drainFetchDelta()}`,
     );
 
     if (rssMb < alertAtMb) return;
