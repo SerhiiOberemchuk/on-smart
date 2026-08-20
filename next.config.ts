@@ -15,6 +15,19 @@ const nextConfig: NextConfig = {
   // the native linux binaries copied into the standalone image (see Dockerfile)
   // are used rather than the broken wasm32 fallback.
   serverExternalPackages: ["sharp"],
+  // Halved from Next's 50MB default. This value sizes TWO separate in-memory
+  // LRUs — the "use cache" handler (`cache-handlers/default.js`) and the
+  // ISR/fetch cache (`next-server.js`) — and both store RSC chunks as `Buffer`,
+  // which is exactly what `process.memoryUsage().arrayBuffers` reports. At the
+  // default that is up to ~100MB of buffers on a container that only recently
+  // had 640MB total, and it is the leading explanation for the slow
+  // `arrayBuffers` climb the instrumentation recorded (3 -> 78MB) with almost
+  // zero outbound fetches.
+  //
+  // NOT zero: `use-cache/handlers.js` turns the production handler into a no-op
+  // at 0, which would send all ~25 `use cache` sites to MySQL on every request.
+  // 25MB keeps both caches working, just smaller.
+  cacheMaxMemorySize: 25 * 1024 * 1024,
   images: {
     remotePatterns: [
       {
