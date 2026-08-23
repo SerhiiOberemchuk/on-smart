@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { countRequest } from "@/lib/request-counter";
 import { isLegacyAdminAuthPath, isMalformedServerAction, requiresSession } from "@/proxy.helpers";
 
 const SESSION_COOKIE_NAMES = [
@@ -13,6 +14,10 @@ let loggedFirstBlock = false;
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Counted before any early return so the number covers every request the
+  // matcher sees, including the ones rejected below.
+  countRequest();
 
   // Reject forged Server Action ids before Next starts rendering. Without this
   // the framework rejects them only mid-render, after it has already kicked off

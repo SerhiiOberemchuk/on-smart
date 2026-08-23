@@ -11,6 +11,7 @@
 // Next 16 does not re-export the instrumentation types from the package root,
 // so the signature is declared locally rather than deep-importing from
 // `next/dist/server/instrumentation/types`.
+import { takeRequestCount } from "@/lib/request-counter";
 import { sendTelegramAlert } from "@/lib/telegram-alert";
 import { baseUrl } from "@/types/baseUrl";
 
@@ -106,14 +107,27 @@ export function register(): void {
 
   instrumentFetch();
 
+  // Previous sample's external bytes, so each line reports how far the off-heap
+  // total moved PER REQUEST. That ratio is the point: a steady KB/req means the
+  // growth rides the hot request path, while steady MB/hour with varying
+  // traffic means it is time-driven and requests are innocent.
+  let previousExternal = process.memoryUsage().external;
+
   const timer = setInterval(() => {
     const usage = process.memoryUsage();
     const rssMb = toMb(usage.rss);
+    const requests = takeRequestCount();
+    const externalDelta = usage.external - previousExternal;
+    previousExternal = usage.external;
+    const perRequest =
+      requests > 0 ? `${Math.round(externalDelta / requests / 1024)}KB/req` : "n/a";
 
     console.log(
       `[memory] rss=${rssMb}MB heapUsed=${toMb(usage.heapUsed)}MB ` +
         `heapTotal=${toMb(usage.heapTotal)}MB external=${toMb(usage.external)}MB ` +
-        `arrayBuffers=${toMb(usage.arrayBuffers)}MB | fetch/5m: ${drainFetchDelta()}`,
+        `arrayBuffers=${toMb(usage.arrayBuffers)}MB ` +
+        `| req/5m=${requests} ext${externalDelta >= 0 ? "+" : ""}${Math.round(externalDelta / 1024)}KB ${perRequest} ` +
+        `| fetch/5m: ${drainFetchDelta()}`,
     );
 
     if (rssMb < alertAtMb) return;
