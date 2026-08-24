@@ -6,9 +6,15 @@ import carello from "@/assets/icons/carrello.svg";
 import { useBasketStore } from "@/store/basket-store";
 
 export default function Cart() {
-  const { basket } = useBasketStore();
+  const { basket, hasHydrated } = useBasketStore();
+
+  // The basket lives in localStorage, which the server cannot read, so the
+  // server always renders this badge as 0. Reading the store before zustand
+  // has rehydrated makes the client's first render disagree with that HTML
+  // (React #418 on every page). Render 0 until rehydration, matching the
+  // server, then let the real count appear on the next render.
   const qnt = () => {
-    if (basket.length === 0) return 0;
+    if (!hasHydrated || basket.length === 0) return 0;
     return basket.reduce((acc, item) => acc + item.quantity, 0);
   };
   return (

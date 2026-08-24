@@ -66,16 +66,16 @@ const nextConfig: NextConfig = {
         destination: `${baseUrl}/:path*`,
         permanent: true,
       },
+      // The only content redirect we keep. The client printed business cards
+      // whose QR code points at /index.html, so that one URL must keep landing
+      // on the home page. Everything else that does not exist must return a
+      // real 404 — Search Console flags a site with no 404 as an indexing
+      // error, and the old `[...notFound]` catch-all (deleted) used to answer
+      // every unknown URL with a 301 to `/`, so Google never saw one.
       {
         source: "/index.html",
         destination: "/",
         permanent: true,
-      },
-      // Legacy guest checkout wizard removed — old step URLs go to the single-page checkout.
-      {
-        source: "/checkout/:step(informazioni|consegna|pagamento|riepilogo)",
-        destination: "/checkout",
-        permanent: false,
       },
     ];
   },
