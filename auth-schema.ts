@@ -44,6 +44,15 @@ export const account = mysqlTable(
     id: varchar("id", { length: 36 }).primaryKey(),
     accountId: text("account_id").notNull(),
     providerId: text("provider_id").notNull(),
+    // Required by Better Auth >= 1.7, which scopes account identity by issuer
+    // (see its 1.7 upgrade guide). Without this column the Drizzle adapter
+    // refuses every write with `The field "issuer" does not exist in the
+    // "account" Drizzle schema`, which silently broke customer registration.
+    // Values are `local:credential` for email/password and
+    // `local:oauth:<provider>` for social logins; varchar rather than text so
+    // it can carry the unique (issuer, accountId) index MySQL needs a bounded
+    // key length for.
+    issuer: varchar("issuer", { length: 255 }).notNull(),
     userId: varchar("user_id", { length: 36 })
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
