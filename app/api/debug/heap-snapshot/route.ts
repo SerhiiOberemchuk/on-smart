@@ -1,5 +1,7 @@
 import { requireAdminSession } from "@/app/actions/admin/_shared/require-admin-session";
 import { isValidOpsToken } from "@/lib/ops-token";
+import { accessSync, constants, mkdirSync } from "fs";
+import os from "os";
 import path from "path";
 import { writeHeapSnapshot } from "v8";
 
@@ -19,6 +21,36 @@ import { writeHeapSnapshot } from "v8";
 const DEFAULT_RSS_ALERT_MB = 520;
 
 const toMb = (bytes: number) => Math.round(bytes / 1024 / 1024);
+
+/**
+ * Picks a directory the runtime user can actually write to.
+ *
+ * The container runs as `node` while WORKDIR created /app as root, so writing
+ * the snapshot next to server.js fails with EACCES. The Dockerfile now ships an
+ * owned `diagnostics/` directory for exactly this; the tmpdir fallback keeps the
+ * route working if the image predates that change, since a failed diagnostic is
+ * useless precisely when it is needed most.
+ */
+function resolveSnapshotDir(): string {
+  const candidates = [path.join(process.cwd(), "diagnostics"), os.tmpdir()];
+
+  let lastError: unknown;
+
+  for (const dir of candidates) {
+    try {
+      // mkdirSync succeeds silently on a directory that already exists but is
+      // owned by root, which would reproduce the original EACCES at write time.
+      // Only an explicit W_OK check actually proves the candidate is usable.
+      mkdirSync(dir, { recursive: true });
+      accessSync(dir, constants.W_OK);
+      return dir;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError ?? new Error("No writable snapshot directory");
+}
 
 // `writeHeapSnapshot` is synchronous and pauses the whole process, so a large
 // heap can outlast the load balancer's read timeout. The caller then sees a
@@ -70,11 +102,11 @@ export async function POST(request: Request) {
     // Timestamped so a "before" and an "after" snapshot never collide — the
     // diff between two is what actually identifies a leak.
     const filename = `heap-${new Date().toISOString().replace(/[:.]/g, "-")}.heapsnapshot`;
-    const filePath = path.join(process.cwd(), filename);
+    const filePath = path.join(resolveSnapshotDir(), filename);
 
-    console.log(`[heap-snapshot] writing ${filename} at rss=${rssMb}MB`);
+    console.log(`[heap-snapshot] writing ${filePath} at rss=${rssMb}MB`);
     writeHeapSnapshot(filePath);
-    console.log(`[heap-snapshot] wrote ${filename}`);
+    console.log(`[heap-snapshot] wrote ${filePath}`);
 
     return Response.json({
       success: true,
@@ -86,8 +118,18 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("[heap-snapshot] FAILED:", error);
+    // The caller is already authenticated and this is an ops endpoint, so the
+    // errno and the target directory go back in the response: needing a second
+    // trip to run.log to learn "EACCES" is what made the first failure slow to
+    // diagnose. Still no stack — that can carry file contents.
+    const code = (error as { code?: unknown })?.code;
     return Response.json(
-      { success: false, error: "Snapshot failed. See server logs." },
+      {
+        success: false,
+        error: "Snapshot failed. See server logs.",
+        code: typeof code === "string" ? code : undefined,
+        dir: path.join(process.cwd(), "diagnostics"),
+      },
       { status: 500 },
     );
   } finally {

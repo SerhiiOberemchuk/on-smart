@@ -116,6 +116,13 @@ COPY --from=builder --chown=node:node /app/scripts/migrate.mjs ./scripts/migrate
 # cached responses are available immediately on startup, uncomment this line:
 # COPY --from=builder --chown=node:node /app/.next/cache ./.next/cache
 
+# Writable target for POST /api/debug/heap-snapshot (and for
+# `--heapsnapshot-signal`, which also writes into the working directory).
+# WORKDIR creates /app as root and only the paths copied above are chowned, so
+# the `node` user cannot create files directly in /app — without this the
+# snapshot fails with EACCES.
+RUN mkdir -p diagnostics && chown node:node diagnostics
+
 # Switch to non-root user for security best practices
 USER node
 
