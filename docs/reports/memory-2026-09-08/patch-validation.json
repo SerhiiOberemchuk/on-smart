@@ -1,0 +1,25 @@
+{
+  "date": "2026-09-08",
+  "next": "16.3.4",
+  "localNode": "24.20.0",
+  "dockerNode": "24.13.0-slim",
+  "cleanNpmCi": "passed; postinstall applied next@16.3.4 patch",
+  "regressionBeforePatch": { "failed": 2, "passed": 6 },
+  "regressionAfterPatch": { "failed": 0, "passed": 8 },
+  "npmTest": { "exitCode": 0, "filesPassed": 11, "testsPassed": 56 },
+  "npmBuild": {
+    "exitCode": 0,
+    "standaloneSourceVerified": true,
+    "compiledServerChunksInspected": 2,
+    "notes": [
+      "Local MySQL unavailable; existing build read wrappers returned fallbacks. Runtime DB flows were not validated."
+    ]
+  },
+  "npmLint": { "exitCode": 1, "errors": 94, "warnings": 26, "unchangedBaseline": true },
+  "newScriptsLint": { "exitCode": 0 },
+  "encodingCheck": "passed",
+  "dockerImageBuiltLocally": false,
+  "migrationsChangedOrRun": false,
+  "productionDeployed": false,
+  "productionRootCauseConfirmed": false
+}

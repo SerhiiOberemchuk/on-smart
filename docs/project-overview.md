@@ -54,6 +54,7 @@ Route constants for storefront navigation live in `types/pages.types.ts` (`PAGES
 | Aruba S3 | Product images & documents (`on-smart.r3-it.storage.cloud.it`) | `lib/s3-files.ts`, `app/actions/files/` | `S3_REGION/ENDPOINT/BUCKET/ACCESS_KEY_ID/SECRET_ACCESS_KEY` |
 | Apify | Google-reviews scraping (daily cached) | `app/actions/goodle-reviews/` | `APIFY_API_TOKEN`, `APIFY_TASK_ID` |
 | Google Analytics | Traffic analytics (gtag in client layout) | `components/analytics/` | `GOOGLE_GTAG` |
+| Microsoft Clarity | Heatmaps and session recordings after analytics consent | `components/analytics/MicrosoftClarity.tsx` | None; public project ID `yf44pg3x6f` |
 | Odoo | **Dead experiment** — not wired into the store | `app/actions/test.ts` | `ODOO` |
 
 ## Repository landmarks

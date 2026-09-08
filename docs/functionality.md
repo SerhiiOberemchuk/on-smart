@@ -98,7 +98,7 @@ Access: `role === "admin"` — `proxy.ts` gates `/admin/*` (redirects to `/acced
 
 - `app/sitemap.ts`, `app/robots.ts`, `app/manifest.ts`, `next-sitemap`; JSON-LD via `lib/seo/` (`schema-dts`); canonical redirects (www ↔ non-www) in `next.config.ts` using `types/baseUrl.ts`; `BingSiteAuth.xml`.
 - Google reviews section on home: Apify-scraped, cached `hours` (`app/actions/goodle-reviews/`).
-- Analytics: Google gtag in `app/(client)/layout.tsx`.
+- Analytics: Google gtag and Microsoft Clarity (`yf44pg3x6f`) in `app/(client)/layout.tsx`; the admin layout does not load either integration. `components/analytics/MicrosoftClarity.tsx` uses the installed `@microsoft/clarity` SDK and initializes only after the existing cookie banner's analytics consent is accepted (including stored consent). Consent API v2 grants analytics storage only; ad storage stays denied. Preference changes, including changes from another tab, update consent without reinjecting the script. Revocation switches the already loaded SDK to Microsoft's no-consent/cookieless mode; after a full reload it is not loaded while consent remains denied. The banner and Italian cookie/privacy policies name both providers. No custom customer identifiers are sent.
 
 ## 9. Known gaps & quirks (registered — do not "fix" in passing)
 

@@ -1,0 +1,33 @@
+{
+  "date": "2026-09-08",
+  "npmTest": {
+    "exitCode": 0,
+    "filesPassed": 10,
+    "testsPassed": 48
+  },
+  "npmBuild": {
+    "exitCode": 0,
+    "notes": [
+      "Local MySQL unavailable during prerender; existing read wrappers returned fallbacks.",
+      "Existing Edge Runtime warnings in instrumentation.ts."
+    ]
+  },
+  "npmLint": {
+    "exitCode": 1,
+    "errors": 94,
+    "warnings": 26,
+    "baseline": "Same 94 errors and 26 warnings reported before this analysis."
+  },
+  "diagnosticScriptLint": {
+    "exitCode": 0
+  },
+  "gcProbe": {
+    "node24.13": "passed",
+    "node24.20": "passed",
+    "withoutCleanupRetained": 100,
+    "withCleanupRetained": 0,
+    "identicalRenderSha256": true
+  },
+  "productionChanged": false,
+  "productionRootCauseConfirmed": false
+}

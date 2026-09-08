@@ -119,6 +119,11 @@ Context: store launched guest-only; owner decided (2026-07) to require accounts 
 **ADR-9 — Instant static shell + Suspense islands; `loading.tsx` forbidden (2026-07).**
 Context: `cacheComponents` prerenders each page's static shell, but a route-level `loading.tsx` replaces the entire content area with one fallback, hiding structure the user should see instantly. Decision (owner): every page returns its static structure immediately and composes small self-fetching data components under `<Suspense>` with structured skeletons; `loading.tsx` is forbidden in new code. Consequences: two legacy files (`app/(client)/carrello/loading.tsx`, `app/(admin)/admin/dashboard/loading.tsx`) are migrated via to-do #21; granularity/file-size rules codified in code-style-rules.md §18.
 
+**ADR-10 — Temporary Next cache cleanup backport (2026-09-08).**
+Context: local reproduction confirms composite AbortSignal listener retention; its contribution to Aruba memory growth still requires a production comparison.
+Decision: pin Next 16.3.4 and apply upstream PR #97476 with patch-package during dependency installation; verify CJS/ESM sources before build and the standalone CJS copy after build.
+Consequences: upgrading Next requires reviewing/removing this backport and its checks. Keep Node 24.13.0 for the first comparison; deploy steps and limits: [memory deployment](reports/memory-2026-09-08/deployment.md).
+
 ## 8. How to extend this document
 
 Add facts to §§1–6 only when structure actually changes (new layer, new store, new enforcement point). For choices, append a new ADR — Context / Decision / Consequences, ≤6 lines — and link it from the section it affects. Keep this file a map: details belong in the rulebook or the specs.

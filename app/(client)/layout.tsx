@@ -15,6 +15,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ToastContainer } from "react-toastify";
 import { ReactNode, Suspense } from "react";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import MicrosoftClarity from "@/components/analytics/MicrosoftClarity";
 import CookieBanner from "@/components/cookie-consent/CookieBanner";
 import { baseUrl } from "@/types/baseUrl";
 
@@ -96,6 +97,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="it-IT">
       <body className={clsx(fixelFont.className, "flex min-h-svh flex-col")}>
         <GoogleAnalytics gtagId={process.env.GOOGLE_GTAG} />
+        <MicrosoftClarity />
         <NuqsAdapter>
           <StickyHeaderShell>
             <Header />

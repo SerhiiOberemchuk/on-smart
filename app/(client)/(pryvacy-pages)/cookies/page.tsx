@@ -63,6 +63,18 @@ export default function CookiePolicy() {
             dei pagamenti online. Le rispettive informative sono disponibili sui siti dei singoli
             fornitori.
           </p>
+          <p>
+            Microsoft Clarity viene caricato dopo il consenso ai cookie analitici per analizzare
+            le interazioni tramite mappe di calore e registrazioni delle sessioni. La preferenza
+            viene comunicata a Microsoft tramite la Consent API; il consenso pubblicitario resta
+            negato. Dopo la revoca, Clarity passa alla modalità senza cookie nella pagina già
+            aperta e non viene caricato al successivo caricamento del sito. Per informazioni sul
+            trattamento dei dati consulta la{" "}
+            <a className="underline" href="https://privacy.microsoft.com/privacystatement">
+              Informativa sulla privacy di Microsoft
+            </a>
+            .
+          </p>
         </li>
         <li>
           <h2>5. Durata dei cookie</h2>
@@ -85,7 +97,7 @@ export default function CookiePolicy() {
           <p>
             La presente Cookie Policy può essere aggiornata in qualsiasi momento. Le modifiche
             entreranno in vigore al momento della pubblicazione sul sito. Ultimo aggiornamento:
-            01.01.2026.
+            08.09.2026.
           </p>
         </li>
       </ul>

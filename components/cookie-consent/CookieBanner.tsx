@@ -83,7 +83,8 @@ export default function CookieBanner() {
       </div>
 
       <p className="mb-2 text-lg font-semibold leading-tight">
-        Usiamo cookie tecnici e, previo consenso, Google Analytics per migliorare il sito.
+        Usiamo cookie tecnici e, previo consenso, Google Analytics e Microsoft Clarity per
+        migliorare il sito.
       </p>
 
       <p className="text-sm leading-6 text-text-grey">
@@ -117,7 +118,7 @@ export default function CookieBanner() {
               <div>
                 <p className="font-medium text-white">Cookie analitici</p>
                 <p className="text-sm text-text-grey">
-                  Google Analytics:{" "}
+                  Google Analytics e Microsoft Clarity:{" "}
                   <span className={analyticsEnabled ? "text-green-400" : "text-yellow-500"}>
                     {analyticsEnabled ? "attivi" : "disattivati"}
                   </span>

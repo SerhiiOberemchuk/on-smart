@@ -1,0 +1,21 @@
+{
+  "node": "v24.13.0",
+  "next": "16.3.4",
+  "platform": "win32",
+  "current": {
+    "cleanup": false,
+    "rendered": 100,
+    "retained": 100,
+    "listenersAfterRender": 100,
+    "bytes": 823090,
+    "sha256": "34fb6554170b83f340820ea7310ae5eb3428604176d444e3f813c9152d3593b2"
+  },
+  "upstreamCleanup": {
+    "cleanup": true,
+    "rendered": 100,
+    "retained": 0,
+    "listenersAfterRender": 0,
+    "bytes": 823090,
+    "sha256": "34fb6554170b83f340820ea7310ae5eb3428604176d444e3f813c9152d3593b2"
+  }
+}

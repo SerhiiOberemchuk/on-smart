@@ -105,7 +105,9 @@ export default function InformativaSullaPrivacy() {
           <h2> 9. Cookie </h2>
           <p>
             Il sito utilizza cookie tecnici e, previo consenso, cookie analitici e di profilazione
-            (ad esempio Google Analytics). Per maggiori informazioni consultare la Cookie Policy
+            (ad esempio Google Analytics e Microsoft Clarity). Clarity analizza le interazioni
+            tramite mappe di calore e registrazioni delle sessioni, dopo il consenso ai cookie
+            analitici. Per maggiori informazioni consultare la Cookie Policy
             dedicata.
           </p>
         </li>
@@ -122,7 +124,7 @@ export default function InformativaSullaPrivacy() {
           <p>
             Il Titolare si riserva il diritto di modificare in qualsiasi momento la presente
             informativa. Le modifiche saranno pubblicate su questa pagina con indicazione della data
-            di aggiornamento. Ultimo aggiornamento: 01.01.2026.
+            di aggiornamento. Ultimo aggiornamento: 08.09.2026.
           </p>
         </li>
       </ol>

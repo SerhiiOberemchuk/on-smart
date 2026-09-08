@@ -1,0 +1,366 @@
+{
+  "sourceSha256": "9dac85e69b4e6ded59c21824e3f52bcdbe3005b22bf04a3356846f7132490595",
+  "sourceBytes": 183954,
+  "lineCount": 1399,
+  "sampleCount": 1161,
+  "hoursBetweenFirstAndLastAssuming5Minutes": 96.66666666666667,
+  "timeCaveat": "No per-sample timestamps. Hours assume uninterrupted 5-minute sampling.",
+  "first": {
+    "rss": 148,
+    "heapUsed": 59,
+    "heapTotal": 64,
+    "external": 4,
+    "arrayBuffers": 1,
+    "requests": 2,
+    "externalDeltaKB": 808,
+    "line": 6,
+    "sample": 1,
+    "hours": 0.0,
+    "fetch": "api.apify.com=1"
+  },
+  "last": {
+    "rss": 815,
+    "heapUsed": 377,
+    "heapTotal": 401,
+    "external": 236,
+    "arrayBuffers": 232,
+    "requests": 2,
+    "externalDeltaKB": 55,
+    "line": 1399,
+    "sample": 1161,
+    "hours": 96.66666666666667,
+    "fetch": "none"
+  },
+  "maxima": {
+    "rss": 839,
+    "heapUsed": 393,
+    "heapTotal": 411,
+    "external": 240,
+    "arrayBuffers": 236,
+    "requests": 1355
+  },
+  "totalProxyRequests": 10033,
+  "zeroProxyRequestWindows": 501,
+  "fitsAfter12Hours": {
+    "rss": {
+      "MiBPerHour": 2.9415,
+      "rSquared": 0.9565
+    },
+    "heapUsed": {
+      "MiBPerHour": 2.9052,
+      "rSquared": 0.9867
+    },
+    "heapTotal": {
+      "MiBPerHour": 2.9838,
+      "rSquared": 0.9741
+    },
+    "external": {
+      "MiBPerHour": 2.2835,
+      "rSquared": 0.9945
+    },
+    "arrayBuffers": {
+      "MiBPerHour": 2.2838,
+      "rSquared": 0.9945
+    }
+  },
+  "snapshots": [
+    {
+      "line": 10,
+      "rss": 205
+    }
+  ],
+  "errors": [
+    {
+      "line": 124,
+      "method": "POST",
+      "route": "/chi-siamo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 862,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 875,
+      "method": "POST",
+      "route": "/",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 886,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 896,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 906,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 916,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 926,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 936,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 946,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 956,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 966,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 976,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 986,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 996,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 1006,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 1016,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 1026,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 1036,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 1046,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 1057,
+      "method": "POST",
+      "route": "/catalogo",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 1076,
+      "method": "POST",
+      "route": "/",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    },
+    {
+      "line": 1136,
+      "method": "POST",
+      "route": "/",
+      "type": "action",
+      "message": "Unexpected end of JSON input",
+      "validRouterJson": true,
+      "actionIdLength": 42
+    }
+  ],
+  "checkpoints": [
+    {
+      "rss": 148,
+      "heapUsed": 59,
+      "heapTotal": 64,
+      "external": 4,
+      "arrayBuffers": 1,
+      "requests": 2,
+      "externalDeltaKB": 808,
+      "line": 6,
+      "sample": 1,
+      "hours": 0.0,
+      "fetch": "api.apify.com=1"
+    },
+    {
+      "rss": 559,
+      "heapUsed": 122,
+      "heapTotal": 143,
+      "external": 37,
+      "arrayBuffers": 32,
+      "requests": 4,
+      "externalDeltaKB": -2962,
+      "line": 163,
+      "sample": 145,
+      "hours": 12.0,
+      "fetch": "none"
+    },
+    {
+      "rss": 592,
+      "heapUsed": 157,
+      "heapTotal": 168,
+      "external": 67,
+      "arrayBuffers": 63,
+      "requests": 0,
+      "externalDeltaKB": 0,
+      "line": 307,
+      "sample": 289,
+      "hours": 24.0,
+      "fetch": "none"
+    },
+    {
+      "rss": 705,
+      "heapUsed": 226,
+      "heapTotal": 239,
+      "external": 125,
+      "arrayBuffers": 122,
+      "requests": 0,
+      "externalDeltaKB": -1640,
+      "line": 595,
+      "sample": 577,
+      "hours": 48.0,
+      "fetch": "on-smart.r3-it.storage.cloud.it=5"
+    },
+    {
+      "rss": 763,
+      "heapUsed": 292,
+      "heapTotal": 326,
+      "external": 173,
+      "arrayBuffers": 169,
+      "requests": 0,
+      "externalDeltaKB": 0,
+      "line": 1093,
+      "sample": 865,
+      "hours": 72.0,
+      "fetch": "none"
+    },
+    {
+      "rss": 831,
+      "heapUsed": 393,
+      "heapTotal": 406,
+      "external": 240,
+      "arrayBuffers": 236,
+      "requests": 1,
+      "externalDeltaKB": 1667,
+      "line": 1391,
+      "sample": 1153,
+      "hours": 96.0,
+      "fetch": "none"
+    }
+  ],
+  "outboundByHost": {
+    "api.apify.com": 7,
+    "on-smart.r3-it.storage.cloud.it": 414,
+    "api.telegram.org": 22
+  }
+}
