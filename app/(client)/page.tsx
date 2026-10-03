@@ -20,7 +20,9 @@ import {
 import type { WebSite, WithContext } from "schema-dts";
 
 export const metadata: Metadata = {
-  title: "Elettronica, videosorveglianza e smart home al miglior prezzo",
+  // Most search clicks are brand queries ("on smart"), so the brand leads. The
+  // layout's "%s | OnSmart" template does not apply to a page in its own segment.
+  title: { absolute: "OnSmart – Videosorveglianza, antifurti e smart home online" },
   description:
     "Acquista online elettronica, sistemi di videosorveglianza, smart home e accessori per la sicurezza. Consegna veloce, prezzi competitivi e supporto professionale.",
   keywords: [
@@ -77,9 +79,6 @@ export const metadata: Metadata = {
 function HomePageFallback() {
   return (
     <>
-      <h1 className="sr-only">
-        OnSmart: elettronica, videosorveglianza, sistemi smart home e sicurezza per casa e azienda
-      </h1>
       <FallbackHeroSection />
       <TopSalesSectionFallback />
       <CategorySectionFallback />
@@ -103,9 +102,6 @@ async function HomeContent() {
 
   return (
     <>
-      <h1 className="sr-only">
-        OnSmart: elettronica, videosorveglianza, sistemi smart home e sicurezza per casa e azienda
-      </h1>
       <Suspense fallback={<FallbackHeroSection />}>
         <HeroSection />
       </Suspense>
@@ -131,9 +127,16 @@ async function HomeContent() {
 }
 
 export default function Home() {
+  // The heading belongs to the static shell, once — inside the Suspense it was
+  // emitted twice (fallback + streamed content).
   return (
-    <Suspense fallback={<HomePageFallback />}>
-      <HomeContent />
-    </Suspense>
+    <>
+      <h1 className="sr-only">
+        OnSmart: elettronica, videosorveglianza, sistemi smart home e sicurezza per casa e azienda
+      </h1>
+      <Suspense fallback={<HomePageFallback />}>
+        <HomeContent />
+      </Suspense>
+    </>
   );
 }

@@ -132,7 +132,6 @@ export default async function BundlePageContent({
     description: bundleDescriptionForSeo || bundle.nameFull,
     sku: bundle.id,
     productID: eanValue ?? bundle.id,
-    mpn: bundle.id,
     identifier: eanValue
       ? {
           "@type": "PropertyValue",

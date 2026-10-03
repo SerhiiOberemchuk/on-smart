@@ -4,13 +4,23 @@ import { Metadata } from "next";
 import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
 import { notFound } from "next/navigation";
 import { CONTACTS_ADDRESS } from "@/contacts-adress/contacts";
-import { buildSeoDescription, buildSeoTitle, normalizeSeoText } from "@/lib/seo/metadata";
+import { getBrandLandingProducts } from "@/lib/catalog/landing-products";
+import {
+  buildLandingPageRobots,
+  buildSeoDescription,
+  buildSeoTitle,
+  isLandingPageIndexable,
+  normalizeSeoText,
+} from "@/lib/seo/metadata";
 
 type Props = { params: Promise<{ brand_slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { brand_slug } = await params;
-  const { success, data } = await getBrandBySlug(brand_slug);
+  const [{ success, data }, products] = await Promise.all([
+    getBrandBySlug(brand_slug),
+    getBrandLandingProducts(brand_slug),
+  ]);
 
   if (!success || !data) {
     notFound();
@@ -33,18 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: {
       canonical,
     },
-    robots: {
-      index: true,
-      follow: true,
-      noarchive: false,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-        "max-video-preview": -1,
-      },
-    },
+    robots: buildLandingPageRobots(isLandingPageIndexable(products)),
     openGraph: {
       title,
       description,

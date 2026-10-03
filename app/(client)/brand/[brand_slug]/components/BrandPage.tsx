@@ -6,7 +6,7 @@ import { BrandTypes } from "@/types/brands.types";
 import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAllProductsFiltered } from "@/app/actions/product/get-all-products-filtered";
+import { getBrandLandingProducts } from "@/lib/catalog/landing-products";
 import { ProductType } from "@/db/schemas/product.schema";
 import { JsonLd } from "@/lib/seo/JsonLd";
 import {
@@ -15,8 +15,6 @@ import {
   buildProductPhysicalProperties,
 } from "@/lib/seo/product-structured-data";
 import type { Brand, BreadcrumbList, ItemList, WithContext } from "schema-dts";
-
-const BRAND_PRODUCTS_LIMIT = 24;
 
 function buildProductHref(product: ProductType): string {
   if (product.productType === "bundle") {
@@ -42,12 +40,7 @@ function normalizeDescription(description: string) {
 export default async function BrandPage({ brand_slug }: { brand_slug: BrandTypes["brand_slug"] }) {
   const [brandResponse, productsResponse] = await Promise.all([
     getBrandBySlug(brand_slug),
-    getAllProductsFiltered({
-      brandSlugs: [brand_slug],
-      mode: "parentsOnly",
-      limit: BRAND_PRODUCTS_LIMIT,
-      sort: "new",
-    }),
+    getBrandLandingProducts(brand_slug),
   ]);
 
   if (!brandResponse.success || !brandResponse.data) {
