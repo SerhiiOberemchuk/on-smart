@@ -124,6 +124,11 @@ Context: local reproduction confirms composite AbortSignal listener retention; i
 Decision: pin Next 16.3.4 and apply upstream PR #97476 with patch-package during dependency installation; verify CJS/ESM sources before build and the standalone CJS copy after build.
 Consequences: upgrading Next requires reviewing/removing this backport and its checks. Keep Node 24.13.0 for the first comparison; deploy steps and limits: [memory deployment](reports/memory-2026-09-08/deployment.md).
 
+**ADR-11 — Next 16.3.8 + server-action stale-shell backport (2026-10-03).** Supersedes ADR-10's pin.
+Context: ADR-10's build ran 25 days flat (memory leak resolved); upstream shipped the same cleanup in 16.3.5, and 16.3.8 carries relevant security fixes. Still unfixed upstream: vercel/next.js#99564 — a server action POST on a stale PPR shell schedules a background revalidation that reuses `req` and runs `handleAction` a second time, so one side reads an empty body (500 / possible double execution).
+Decision: pin Next 16.3.8, drop the #97476 patch, add `patches/next+16.3.8.patch` (skip that background revalidation when `isPossibleServerAction`; the next GET still revalidates). `scripts/verify-next-patches.mjs` fails closed on any other Next version and checks both fixes in sources and in the minified standalone chunk.
+Consequences: every Next upgrade must re-check #99564 upstream and regenerate/remove the patch.
+
 ## 8. How to extend this document
 
 Add facts to §§1–6 only when structure actually changes (new layer, new store, new enforcement point). For choices, append a new ADR — Context / Decision / Consequences, ≤6 lines — and link it from the section it affects. Keep this file a map: details belong in the rulebook or the specs.

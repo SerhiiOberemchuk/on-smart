@@ -40,4 +40,10 @@
 
 28. [x] Підготувати backport Next #97476 для 16.3.4: автоматичний patch-package при npm ci, Docker build integration, перевірка standalone та regression tests cleanup/timeout. [Порядок деплою](reports/memory-2026-09-08/deployment.md).
 
-29. [ ] Виконати контрольний redeploy memory fix на Aruba та порівняти heap/arrayBuffers/RSS за 24–48 годин; лише після цього оцінити production-результат. Оновлення Node 24.20.0 провести окремо.
+29. [x] Виконати контрольний redeploy memory fix на Aruba та порівняти heap/arrayBuffers/RSS за 24–48 годин; лише після цього оцінити production-результат. Оновлення Node 24.20.0 провести окремо. **Результат (`run (7).log`, 03.10.2026):** 25 діб одним процесом без рестарту; нахили після прогріву — RSS +0,06, heapUsed +0,05, arrayBuffers +0,002 MiB/год (до патча +2,94 / +2,91 / +2,28). arrayBuffers 3–5 MB весь час, максимум RSS 423 з 896 MiB; нижній рівень heapUsed 85 → 100 → 109 MB сходинками й останні 10 діб плаский. Витік усунено.
+
+30. [x] Оновити Next 16.3.4 → 16.3.8 (`@next/env`, `@next/third-parties`, `eslint-config-next` теж). Фікс витоку #97476 тепер upstream (16.3.5, #98448) — власний backport видалено. Додано `patches/next+16.3.8.patch` — backport vercel/next.js#99564: server action на сторінці із застарілим PPR-shell більше не запускає фонову ревалідацію, що вдруге читала тіло запиту (`Unexpected end of JSON input`, 500 у пошуку й wishlist). Перевірки: `scripts/verify-next-patches.mjs` (pre/postbuild, включно з мініфікованим чанком) і regression tests `scripts/next-stale-action-revalidation.test.ts`.
+
+31. [ ] Задеплоїти пункт 30 і 3–5 діб порівнювати `[memory]` з базою з пункту 29 (heapUsed trough ~109 MB, arrayBuffers <15 MB, RSS 345–420). Перевірити, що в run.log зникли `Unexpected end of JSON input` від справжніх Next-Action id і `Error revalidating the page in the background`.
+
+32. [ ] Лише після пункту 31: решта patch/minor оновлень окремим кроком (better-auth 1.7.7 — читати changelog через історію зі схемою `issuer`, mysql2, drizzle, sharp 0.35.5 — нативна пам'ять, aws-sdk, react 19.3 та ін.). Мажорні (eslint 10 — відомий краш, vitest 5, framer-motion 14, nodemailer 10, dotenv 18, @sumup/sdk 0.2) — окремо, кожен з оцінкою.
