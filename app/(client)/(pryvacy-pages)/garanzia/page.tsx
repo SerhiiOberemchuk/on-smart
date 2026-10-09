@@ -105,9 +105,9 @@ export default function Garanzia() {
         <p>
           4. Rimborso Fatte salve eventuali spese per danni all`imballo originale, On Smart
           rimborserà al cliente l`importo pagato (escluse le spese di spedizione iniziali) entro 14
-          giorni dal ricevimento del reso, utilizzando lo stesso metodo di pagamento dell'ordine o
+          giorni dal ricevimento del reso, utilizzando lo stesso metodo di pagamento dell&apos;ordine o
           tramite bonifico bancario. In quest`ultimo caso, i dati bancari devono essere corretti e
-          intestati allo stesso nominativo dell'ordine originale.
+          intestati allo stesso nominativo dell&apos;ordine originale.
         </p>
 
         <p>

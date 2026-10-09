@@ -39,8 +39,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: path === "/" ? 1 : 0.8,
   }));
 
-  const uniqueCategorySlugs = Array.from(new Set(categories.map((item) => item.category_slug)));
-  const uniqueBrandSlugs = Array.from(new Set(brands.map((item) => item.brand_slug)));
+  // Brand/category pages without products are noindex (buildLandingPageRobots),
+  // so they stay out of the sitemap too. If the product read failed, list every
+  // landing page rather than none.
+  const listedItems = [...products, ...bundles];
+  const hasProductData = productsResponse.success;
+  const categoriesWithProducts = new Set(listedItems.map((item) => item.category_slug));
+  const brandsWithProducts = new Set(listedItems.map((item) => item.brand_slug));
+
+  const uniqueCategorySlugs = Array.from(
+    new Set(categories.map((item) => item.category_slug)),
+  ).filter((slug) => !hasProductData || categoriesWithProducts.has(slug));
+  const uniqueBrandSlugs = Array.from(new Set(brands.map((item) => item.brand_slug))).filter(
+    (slug) => !hasProductData || brandsWithProducts.has(slug),
+  );
 
   const categoryEntries: MetadataRoute.Sitemap = uniqueCategorySlugs.map((categorySlug) => ({
     url: `${baseUrl}/categoria/${encodeURIComponent(categorySlug)}`,

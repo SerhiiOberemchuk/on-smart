@@ -9,6 +9,8 @@ const redirectHost = canonicalHost.startsWith("www.")
 const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
+  // Preserve existing prefetch behavior; adopt Partial Prefetching separately.
+  partialPrefetching: false,
   reactCompiler: true,
   allowedDevOrigins: ["10.18.212.244"],
   // Load sharp from node_modules at runtime instead of tracing/bundling it, so
@@ -75,6 +77,23 @@ const nextConfig: NextConfig = {
       {
         source: "/index.html",
         destination: "/",
+        permanent: true,
+      },
+      // `/catalogo/<category>` and `/catalogo/<category>/<brand>` have no page of
+      // their own; the landing pages live at /categoria and /brand. This must
+      // happen at the routing layer: a permanentRedirect() inside the PPR page
+      // arrives after the 200 shell is flushed, so crawlers got a 200 with a
+      // meta refresh and a canonical pointing at the home page. Query strings
+      // are passed through. Product URLs have three or more segments and are
+      // not matched.
+      {
+        source: "/catalogo/:category",
+        destination: "/categoria/:category",
+        permanent: true,
+      },
+      {
+        source: "/catalogo/:category/:brand",
+        destination: "/brand/:brand",
         permanent: true,
       },
     ];

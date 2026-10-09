@@ -27,7 +27,7 @@ async function DashboardDataComponent() {
         <div className="admin-grid-2">
           <div className="admin-kv-list">
             <div className="admin-kv">
-              <span className="admin-kv-key">Ім'я</span>
+              <span className="admin-kv-key">Ім&apos;я</span>
               <span className="admin-kv-value">{session?.user.name ?? "-"}</span>
             </div>
             <div className="admin-kv">

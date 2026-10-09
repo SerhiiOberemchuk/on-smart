@@ -3,6 +3,8 @@
 import { GoogleAnalytics as NextGoogleAnalytics, sendGAEvent } from "@next/third-parties/google";
 import { useEffect, useState } from "react";
 
+import { useCookieConsent } from "@/components/cookie-consent/use-cookie-consent";
+
 import {
   COOKIE_CONSENT_CHANGED_EVENT,
   COOKIE_CONSENT_STORAGE_KEY,
@@ -88,38 +90,26 @@ function sendConfig(gtagId: string) {
 
 export default function GoogleAnalytics({ gtagId }: GoogleAnalyticsProps) {
   const [hasMountedAnalytics, setHasMountedAnalytics] = useState(false);
-  const [consent, setConsent] = useState<CookieConsentState | null>(null);
+  const consent = useCookieConsent();
+  if (consent === "accepted" && !hasMountedAnalytics) setHasMountedAnalytics(true);
 
   useEffect(() => {
     if (!gtagId || typeof window === "undefined") {
       return;
     }
 
-    const storedConsent = getStoredConsent();
-    const disableFlag = `ga-disable-${gtagId}` as const;
-
-    window[disableFlag] = storedConsent !== "accepted";
-    setConsent(storedConsent);
-    setHasMountedAnalytics(storedConsent === "accepted");
-
-    const handleConsentChanged = (event: Event) => {
-      const detail = (event as CustomEvent<{ consent?: CookieConsentState }>).detail;
-      const nextConsent = detail?.consent ?? getStoredConsent();
-
+    const disableFlag = ("ga-disable-" + gtagId) as `ga-disable-${string}`;
+    const syncConsent = () => {
+      const nextConsent = getStoredConsent();
       window[disableFlag] = nextConsent !== "accepted";
-      setConsent(nextConsent);
-      if (nextConsent === "accepted") {
-        setHasMountedAnalytics(true);
-      }
-      if (nextConsent !== "accepted") {
-        deleteGoogleAnalyticsCookies();
-      }
+      if (nextConsent !== "accepted") deleteGoogleAnalyticsCookies();
     };
-
-    window.addEventListener(COOKIE_CONSENT_CHANGED_EVENT, handleConsentChanged);
-
+    syncConsent();
+    window.addEventListener(COOKIE_CONSENT_CHANGED_EVENT, syncConsent);
+    window.addEventListener("storage", syncConsent);
     return () => {
-      window.removeEventListener(COOKIE_CONSENT_CHANGED_EVENT, handleConsentChanged);
+      window.removeEventListener(COOKIE_CONSENT_CHANGED_EVENT, syncConsent);
+      window.removeEventListener("storage", syncConsent);
     };
   }, [gtagId]);
 

@@ -11,6 +11,7 @@ import VisualProductSection from "@/components/ProductPageSections/VisualTopSect
 import ProductRowListSection from "@/components/ProductRowListSection/ProductRowListSection";
 import type { ProductType } from "@/db/schemas/product.schema";
 import { JsonLd } from "@/lib/seo/JsonLd";
+import { truncateSeoText } from "@/lib/seo/metadata";
 import {
   buildOfferPriceSpecification,
   buildOfferShippingAndReturnPolicy,
@@ -19,6 +20,8 @@ import {
 import { baseUrl } from "@/types/baseUrl";
 import { notFound } from "next/navigation";
 import type { BreadcrumbList, Product, WithContext } from "schema-dts";
+
+const PRODUCT_DESCRIPTION_MAX_LENGTH = 5000;
 
 function toAbsoluteUrl(url: string) {
   return /^https?:\/\//i.test(url) ? url : `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
@@ -119,6 +122,9 @@ export default async function PageSlug({
   const brandUrl = `${baseUrl}/brand/${product.brand_slug}`;
   const eanValue = normalizeOptionalText(product.ean);
   const productImages = sliderImages.map((url) => toAbsoluteUrl(url));
+  const descriptionText = normalizeOptionalText(
+    productDetails?.characteristics_descrizione?.description,
+  );
   const reviews = productDetails?.characteristics_valutazione ?? [];
   const reviewCount = reviews.length;
   const productPrice = Number(product.price ?? 0);
@@ -136,10 +142,12 @@ export default async function PageSlug({
     url: productUrl,
     name: product.name,
     image: productImages,
-    description: product.nameFull,
+    // The visible "Descrizione" text; Merchant Center caps descriptions at 5000 chars.
+    description: descriptionText
+      ? truncateSeoText(descriptionText, PRODUCT_DESCRIPTION_MAX_LENGTH)
+      : product.nameFull,
     sku: product.id,
     productID: eanValue ?? product.id,
-    mpn: product.id,
     category: categoryDisplayName,
     identifier: eanValue
       ? {

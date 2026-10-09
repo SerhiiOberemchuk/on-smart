@@ -7,7 +7,8 @@ import { ProductType } from "@/db/schemas/product.schema";
 import { BrandTypes } from "@/types/brands.types";
 import { CategoryTypes } from "@/types/category.types";
 import Image from "next/image";
-import { use, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import InlineSpinner from "@/components/InlineSpinner";
+import { use, useEffect, useRef, useState, useTransition } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { FILE_MAX_SIZE } from "../../../categories/ModalCategoryForm";
@@ -101,6 +102,7 @@ export default function PageProductAdmin({
   const [isSaveAllRequested, setIsSaveAllRequested] = useState(false);
   const [pendingChildSaves, setPendingChildSaves] = useState(0);
   const [saveAllErrors, setSaveAllErrors] = useState<string[]>([]);
+  const [completedSaveErrors, setCompletedSaveErrors] = useState<string[] | null>(null);
 
   const onSubmit: SubmitHandler<typeof mainPartDataProduct> = (data) => {
     if (!isSaveConfirmedRef.current) {
@@ -109,7 +111,8 @@ export default function PageProductAdmin({
     }
     isSaveConfirmedRef.current = false;
 
-    const hasValue = (value: unknown) => value !== null && value !== undefined && `${value}`.trim() !== "";
+    const hasValue = (value: unknown) =>
+      value !== null && value !== undefined && `${value}`.trim() !== "";
     if (
       !hasValue(data.ean) ||
       !hasValue(data.lengthCm) ||
@@ -160,7 +163,8 @@ export default function PageProductAdmin({
           const uploadResponse = await uploadFile({ file: fotoToUpload, sub_bucket: "products" });
           if (uploadResponse.$metadata.httpStatusCode !== 200 || !uploadResponse.fileUrl) {
             reportProductSaveAllResult({
-              emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+              emit: (eventName, detail) =>
+                document.dispatchEvent(new CustomEvent(eventName, { detail })),
               status: "error",
               message: "Не вдалося завантажити нове зображення",
             });
@@ -178,7 +182,8 @@ export default function PageProductAdmin({
           }
           console.error(updateResponse.error);
           reportProductSaveAllResult({
-            emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+            emit: (eventName, detail) =>
+              document.dispatchEvent(new CustomEvent(eventName, { detail })),
             status: "error",
             message: "Не вдалося оновити основні дані товару",
           });
@@ -194,14 +199,16 @@ export default function PageProductAdmin({
         }
 
         reportProductSaveAllResult({
-          emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+          emit: (eventName, detail) =>
+            document.dispatchEvent(new CustomEvent(eventName, { detail })),
           status: "success",
         });
         setFotoToUpload(null);
       } catch (error) {
         console.error(error);
         reportProductSaveAllResult({
-          emit: (eventName, detail) => document.dispatchEvent(new CustomEvent(eventName, { detail })),
+          emit: (eventName, detail) =>
+            document.dispatchEvent(new CustomEvent(eventName, { detail })),
           status: "error",
           message: "Помилка під час оновлення товару",
         });
@@ -279,7 +286,8 @@ export default function PageProductAdmin({
 
   useEffect(() => {
     const listener = (event: Event) => {
-      const detail = (event as CustomEvent<{ status?: "success" | "error"; message?: string }>).detail;
+      const detail = (event as CustomEvent<{ status?: "success" | "error"; message?: string }>)
+        .detail;
       if (detail?.status === "error") {
         setSaveAllErrors((prev) => (detail.message ? [...prev, detail.message] : prev));
       }
@@ -291,18 +299,22 @@ export default function PageProductAdmin({
   }, []);
 
   useEffect(() => {
-    if (isSaveAllRequested && !isPendingUpdateProduct && pendingChildSaves === 0) {
-      if (saveAllErrors.length > 0) {
-        const uniq = Array.from(new Set(saveAllErrors));
+    if (completedSaveErrors) {
+      if (completedSaveErrors.length > 0) {
+        const uniq = Array.from(new Set(completedSaveErrors));
         toast.error(`Не вдалося зберегти:\n${uniq.map((m) => `• ${m}`).join("\n")}`, {
           autoClose: 8000,
         });
       } else {
         toast.success("Усі зміни успішно збережено");
       }
-      setIsSaveAllRequested(false);
     }
-  }, [isPendingUpdateProduct, isSaveAllRequested, pendingChildSaves, saveAllErrors]);
+  }, [completedSaveErrors]);
+
+  if (isSaveAllRequested && !isPendingUpdateProduct && pendingChildSaves === 0) {
+    setIsSaveAllRequested(false);
+    setCompletedSaveErrors(saveAllErrors);
+  }
 
   const isSavingAll = isPendingUpdateProduct || (isSaveAllRequested && pendingChildSaves > 0);
 
@@ -332,24 +344,73 @@ export default function PageProductAdmin({
         </div>
       </div>
 
-      <form id="product-edit-form" ref={formRef} onSubmit={handleSubmit(onSubmit)} className="admin-card admin-card-content space-y-4">
+      <form
+        id="product-edit-form"
+        ref={formRef}
+        onSubmit={(event) => {
+          void handleSubmit(onSubmit)(event);
+        }}
+        className="admin-card admin-card-content space-y-4"
+      >
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-4">
             <div className="admin-grid-2">
-              <InputAdminStyle input_title="Назва" {...register("name")} defaultValue={product.name} />
-              <InputAdminStyle input_title="Повна назва" {...register("nameFull")} defaultValue={product.nameFull} />
+              <InputAdminStyle
+                input_title="Назва"
+                {...register("name")}
+                defaultValue={product.name}
+              />
+              <InputAdminStyle
+                input_title="Повна назва"
+                {...register("nameFull")}
+                defaultValue={product.nameFull}
+              />
             </div>
 
-            <InputAdminStyle input_title="Слаг" {...register("slug", { required: true })} defaultValue={product.slug} />
+            <InputAdminStyle
+              input_title="Слаг"
+              {...register("slug", { required: true })}
+              defaultValue={product.slug}
+            />
 
             <div className="admin-grid-3">
-              <InputAdminStyle input_title="Ціна" type="number" min={0} step={0.01} {...register("price")} defaultValue={product.price} />
-              <InputAdminStyle input_title="Стара ціна" type="number" min={0} step={0.01} {...register("oldPrice")} defaultValue={product.oldPrice || ""} />
-              <InputAdminStyle input_title="Кількість в наявності" type="number" min={0} {...register("inStock")} defaultValue={product.inStock} />
+              <InputAdminStyle
+                input_title="Ціна"
+                type="number"
+                min={0}
+                step={0.01}
+                {...register("price")}
+                defaultValue={product.price}
+              />
+              <InputAdminStyle
+                input_title="Стара ціна"
+                type="number"
+                min={0}
+                step={0.01}
+                {...register("oldPrice")}
+                defaultValue={product.oldPrice || ""}
+              />
+              <InputAdminStyle
+                input_title="Кількість в наявності"
+                type="number"
+                min={0}
+                {...register("inStock")}
+                defaultValue={product.inStock}
+              />
             </div>
 
-            <InputAdminStyle input_title="Товар під замовлення" type="checkbox" {...register("isOnOrder")} defaultChecked={product.isOnOrder} />
-            <InputAdminStyle input_title="Приховати товар на сайті" type="checkbox" {...register("isHidden")} defaultChecked={product.isHidden} />
+            <InputAdminStyle
+              input_title="Товар під замовлення"
+              type="checkbox"
+              {...register("isOnOrder")}
+              defaultChecked={product.isOnOrder}
+            />
+            <InputAdminStyle
+              input_title="Приховати товар на сайті"
+              type="checkbox"
+              {...register("isHidden")}
+              defaultChecked={product.isHidden}
+            />
 
             {!product.parent_product_id ? (
               <div className="admin-grid-2">
@@ -357,7 +418,10 @@ export default function PageProductAdmin({
                   <SelectComponentAdmin
                     selectTitle="Категорія"
                     optionsTitle="-- Виберіть категорію --"
-                    options={categories.map((item) => ({ value: item.category_slug as string, name: item.name }))}
+                    options={categories.map((item) => ({
+                      value: item.category_slug as string,
+                      name: item.name,
+                    }))}
                     required
                     defaultValue={product.category_slug}
                     {...register("category_slug", { required: true })}
@@ -368,7 +432,10 @@ export default function PageProductAdmin({
                   <SelectComponentAdmin
                     selectTitle="Бренд"
                     optionsTitle="-- Виберіть бренд --"
-                    options={brands.map((item) => ({ value: item.brand_slug as string, name: item.name }))}
+                    options={brands.map((item) => ({
+                      value: item.brand_slug as string,
+                      name: item.name,
+                    }))}
                     required
                     defaultValue={product.brand_slug}
                     {...register("brand_slug", { required: true })}
@@ -397,13 +464,45 @@ export default function PageProductAdmin({
             </div>
 
             <div className="admin-grid-3">
-              <InputAdminStyle input_title="Довжина, см" type="number" min={0} step={0.01} required {...register("lengthCm", { required: true })} defaultValue={product.lengthCm ?? ""} />
-              <InputAdminStyle input_title="Ширина, см" type="number" min={0} step={0.01} required {...register("widthCm", { required: true })} defaultValue={product.widthCm ?? ""} />
-              <InputAdminStyle input_title="Висота, см" type="number" min={0} step={0.01} required {...register("heightCm", { required: true })} defaultValue={product.heightCm ?? ""} />
+              <InputAdminStyle
+                input_title="Довжина, см"
+                type="number"
+                min={0}
+                step={0.01}
+                required
+                {...register("lengthCm", { required: true })}
+                defaultValue={product.lengthCm ?? ""}
+              />
+              <InputAdminStyle
+                input_title="Ширина, см"
+                type="number"
+                min={0}
+                step={0.01}
+                required
+                {...register("widthCm", { required: true })}
+                defaultValue={product.widthCm ?? ""}
+              />
+              <InputAdminStyle
+                input_title="Висота, см"
+                type="number"
+                min={0}
+                step={0.01}
+                required
+                {...register("heightCm", { required: true })}
+                defaultValue={product.heightCm ?? ""}
+              />
             </div>
 
             <div className="admin-grid-3">
-              <InputAdminStyle input_title="Вага, кг" type="number" min={0} step={0.001} required {...register("weightKg", { required: true })} defaultValue={product.weightKg ?? ""} />
+              <InputAdminStyle
+                input_title="Вага, кг"
+                type="number"
+                min={0}
+                step={0.001}
+                required
+                {...register("weightKg", { required: true })}
+                defaultValue={product.weightKg ?? ""}
+              />
             </div>
           </div>
 
@@ -416,8 +515,17 @@ export default function PageProductAdmin({
               alt="Головне зображення"
               className="mx-auto aspect-square h-auto w-full max-w-[326px] rounded-lg border border-slate-600/55 object-cover object-center"
             />
-            <InputAdminStyle input_title="Завантажити нове фото" type="file" accept="image/*" onChange={(e) => prepareFileUpload(e)} />
-            {fotoToUpload ? <p className="text-xs text-amber-300">Нове головне фото буде збережено кнопкою "Зберегти все".</p> : null}
+            <InputAdminStyle
+              input_title="Завантажити нове фото"
+              type="file"
+              accept="image/*"
+              onChange={(e) => prepareFileUpload(e)}
+            />
+            {fotoToUpload ? (
+              <p className="text-xs text-amber-300">
+                Нове головне фото буде збережено кнопкою &quot;Зберегти все&quot;.
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -432,7 +540,13 @@ export default function PageProductAdmin({
       </form>
 
       <div className="fixed right-4 bottom-4 z-50">
-        <ButtonYellow type="button" className="admin-btn-primary px-4! py-2! text-sm! shadow-lg" disabled={isSavingAll} onClick={handleSaveAll}>
+        <ButtonYellow
+          type="button"
+          className="admin-btn-primary gap-2 px-4! py-2! text-sm! shadow-lg disabled:pointer-events-none disabled:opacity-60"
+          disabled={isSavingAll}
+          onClick={handleSaveAll}
+        >
+          {isSavingAll && <InlineSpinner />}
           {isSavingAll ? "Оновлення..." : "Зберегти все"}
         </ButtonYellow>
       </div>

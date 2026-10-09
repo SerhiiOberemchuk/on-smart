@@ -1,5 +1,6 @@
 "use client";
 
+import InlineSpinner from "@/components/InlineSpinner";
 import Form from "next/form";
 import Link from "next/link";
 import { useActionState, useEffect, useId, useState } from "react";
@@ -33,7 +34,8 @@ export default function FormFeedback({
         ? createBundleReview
         : sendMailAssistance;
   const [state, formAction, isPending] = useActionState(action, { success: false });
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [dismissedState, setDismissedState] = useState<typeof state | null>(null);
+  const showSuccess = state.success && state !== dismissedState;
   const formUid = useId();
   const nameId = `${formUid}-name`;
   const emailId = `${formUid}-email`;
@@ -58,18 +60,10 @@ export default function FormFeedback({
     : null;
 
   useEffect(() => {
-    if (!state.success) {
-      setShowSuccess(false);
-      return;
-    }
-
-    setShowSuccess(true);
-    const timeout = setTimeout(() => {
-      setShowSuccess(false);
-    }, 3000);
-
+    if (!state.success) return;
+    const timeout = setTimeout(() => setDismissedState(state), 3000);
     return () => clearTimeout(timeout);
-  }, [state.success]);
+  }, [state]);
 
   return (
     <Form
@@ -83,7 +77,9 @@ export default function FormFeedback({
         className,
       )}
     >
-      {type === "product-review" ? <input type="hidden" name="productId" value={productId} /> : null}
+      {type === "product-review" ? (
+        <input type="hidden" name="productId" value={productId} />
+      ) : null}
       {type === "bundle-review" ? <input type="hidden" name="bundleId" value={bundleId} /> : null}
       {/* Honeypot: hidden from real users; bots that fill it are silently dropped server-side. */}
       <input
@@ -103,7 +99,14 @@ export default function FormFeedback({
         </label>
         <label htmlFor={emailId} className="helper_text flex flex-1 flex-col lg:mt-0">
           <span>Email*</span>
-          <input type="email" id={emailId} required name="email" autoComplete="email" inputMode="email" />
+          <input
+            type="email"
+            id={emailId}
+            required
+            name="email"
+            autoComplete="email"
+            inputMode="email"
+          />
         </label>
       </div>
 
@@ -135,8 +138,9 @@ export default function FormFeedback({
       <button
         type="submit"
         disabled={isPending}
-        className="button_yellow btn mt-2 ml-auto flex text-black lg:mt-1"
+        className="button_yellow btn mt-2 ml-auto flex items-center gap-2 text-black disabled:pointer-events-none disabled:opacity-60 lg:mt-1"
       >
+        {isPending && <InlineSpinner />}
         {isPending ? "Invio..." : "Invia"}
       </button>
     </Form>

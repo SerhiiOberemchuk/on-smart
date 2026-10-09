@@ -1,5 +1,10 @@
 "use server";
 
+import {
+  MAX_AUTH_PASSWORD_LENGTH,
+  PASSWORD_TOO_LONG_MESSAGE,
+} from "@/types/auth-password.constant";
+
 import { user } from "@/auth-schema";
 import { db } from "@/db/db";
 import { isAdminEmail } from "@/lib/admin-emails";
@@ -19,8 +24,16 @@ export async function signInCustomer(
   const password = String(formData.get("password") ?? "");
   const explicitTarget = safeRedirect(String(formData.get("redirect") ?? ""), "");
 
+  if (password.length > MAX_AUTH_PASSWORD_LENGTH) {
+    return { success: false, errorCode: "INVALID_INPUT", errorMessage: PASSWORD_TOO_LONG_MESSAGE };
+  }
+
   if (!email || !password) {
-    return { success: false, errorCode: "INVALID_INPUT", errorMessage: "Inserisci email e password." };
+    return {
+      success: false,
+      errorCode: "INVALID_INPUT",
+      errorMessage: "Inserisci email e password.",
+    };
   }
 
   try {

@@ -32,6 +32,15 @@ export default function CartSection({
   const { basket, hasHydrated, removeFromBasketById, updateBasket, setProductsInBasket } =
     useBasketStore();
 
+  if (
+    basket.length === 0 &&
+    (fetchedProducts.length > 0 || isLoadingProducts || pendingProductIds.length > 0)
+  ) {
+    setFetchedProducts([]);
+    setIsLoadingProducts(false);
+    setPendingProductIds([]);
+  }
+
   useEffect(() => {
     setProductsInBasket(fetchedProducts);
     previousFetchedProductsRef.current = fetchedProducts;
@@ -43,13 +52,11 @@ export default function CartSection({
     }
 
     if (basket.length === 0) {
-      setFetchedProducts([]);
-      setIsLoadingProducts(false);
-      setPendingProductIds([]);
       hasValidatedOnceRef.current = false;
       return;
     }
 
+    let active = true;
     const load = async () => {
       setIsLoadingProducts(true);
 
@@ -62,6 +69,7 @@ export default function CartSection({
         includeHidden: true,
       });
 
+      if (!active) return;
       if (!success) {
         if (errorMessage) {
           console.error(`[CartSection] ${errorMessage}`);
@@ -181,7 +189,10 @@ export default function CartSection({
       setPendingProductIds([]);
     };
 
-    load();
+    void load();
+    return () => {
+      active = false;
+    };
   }, [basket, hasHydrated, removeFromBasketById, updateBasket]);
 
   const isInitialLoading = !hasHydrated || (isLoadingProducts && fetchedProducts.length === 0);

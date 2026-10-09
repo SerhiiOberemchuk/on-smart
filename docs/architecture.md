@@ -66,12 +66,12 @@ proxy.ts               Next.js 16 middleware (renamed from middleware.ts) — co
 
 Zustand only — there is no React Context in source. Stores in `store/`:
 
-| Store | Storage | Purpose |
-|---|---|---|
-| `basket-store.ts` | localStorage `"carello"` | Cart items + product snapshot; survives sessions; device-local by design |
-| `checkout-store.ts` | sessionStorage `"checkout-storage"` | Checkout wizard state machine (`step 0–4`) + step data blocks |
-| `card-dialog-store.ts` | memory | Add-to-cart dialog |
-| `qnt-products-filtered.ts` | memory | Catalog filtered-count |
+| Store                      | Storage                             | Purpose                                                                  |
+| -------------------------- | ----------------------------------- | ------------------------------------------------------------------------ |
+| `basket-store.ts`          | localStorage `"carello"`            | Cart items + product snapshot; survives sessions; device-local by design |
+| `checkout-store.ts`        | sessionStorage `"checkout-storage"` | Checkout wizard state machine (`step 0–4`) + step data blocks            |
+| `card-dialog-store.ts`     | memory                              | Add-to-cart dialog                                                       |
+| `qnt-products-filtered.ts` | memory                              | Catalog filtered-count                                                   |
 
 Choosing where state lives: **URL** (`nuqs`) for anything shareable/bookmarkable (filters, sort, pagination); **Zustand** for cross-page client state (cart, wizard); **server** for everything else — if it can be computed from the DB per request, it is not client state. Forms: react-hook-form typed against schema-derived types; `useActionState` vs `useTransition` per code-style-rules.md §14.
 
@@ -123,6 +123,16 @@ Context: `cacheComponents` prerenders each page's static shell, but a route-leve
 Context: local reproduction confirms composite AbortSignal listener retention; its contribution to Aruba memory growth still requires a production comparison.
 Decision: pin Next 16.3.4 and apply upstream PR #97476 with patch-package during dependency installation; verify CJS/ESM sources before build and the standalone CJS copy after build.
 Consequences: upgrading Next requires reviewing/removing this backport and its checks. Keep Node 24.13.0 for the first comparison; deploy steps and limits: [memory deployment](reports/memory-2026-09-08/deployment.md).
+
+**ADR-11 — Next 16.3.8 + server-action stale-shell backport (2026-10-03).** Supersedes ADR-10's pin.
+Context: ADR-10's build ran 25 days flat (memory leak resolved); upstream shipped the same cleanup in 16.3.5, and 16.3.8 carries relevant security fixes. Still unfixed upstream: vercel/next.js#99564 — a server action POST on a stale PPR shell schedules a background revalidation that reuses `req` and runs `handleAction` a second time, so one side reads an empty body (500 / possible double execution).
+Decision: pin Next 16.3.8, drop the #97476 patch, add `patches/next+16.3.8.patch` (skip that background revalidation when `isPossibleServerAction`; the next GET still revalidates). `scripts/verify-next-patches.mjs` fails closed on any other Next version and checks both fixes in sources and in the minified standalone chunk.
+Consequences: every Next upgrade must re-check #99564 upstream and regenerate/remove the patch.
+
+**ADR-12 - Next 16.4.0 and dependency compatibility audit (2026-10-08).** Supersedes ADR-11\'s framework pin and patch.
+Context: the owner upgraded dependencies together and requested compatibility fixes plus existing lint errors. Next 16.4 retains the memory cleanup and separates forced prerendering from action rendering.
+Decision: remove patch-package and the 16.3.8 patch; retain version-pinned source/standalone regression checks and explicitly preserve legacy prefetching. Load Node memory diagnostics through a conditional instrumentation import. Hold ESLint at 9.39.5 while the installed Next plugins exclude 10 from supported peers.
+Consequences: Better Auth 1.7.7 uses its regenerated schema without issuer; the owner must repair any required issuer column before deployment. No migration is authored or applied here. Validation and remaining advisories: [dependency audit](reports/dependencies-2026-10-08.md).
 
 ## 8. How to extend this document
 

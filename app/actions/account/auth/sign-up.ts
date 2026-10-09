@@ -1,5 +1,10 @@
 "use server";
 
+import {
+  MAX_AUTH_PASSWORD_LENGTH,
+  PASSWORD_TOO_LONG_MESSAGE,
+} from "@/types/auth-password.constant";
+
 import { user } from "@/auth-schema";
 import { db } from "@/db/db";
 import { isAdminEmail } from "@/lib/admin-emails";
@@ -23,6 +28,10 @@ export async function createCustomerAccount(
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
   const redirectTarget = safeRedirect(String(formData.get("redirect") ?? ""), "");
+
+  if (password.length > MAX_AUTH_PASSWORD_LENGTH) {
+    return { success: false, errorCode: "INVALID_INPUT", errorMessage: PASSWORD_TOO_LONG_MESSAGE };
+  }
 
   if (!name || !email || !password) {
     return fail("INVALID_INPUT", "Compila nome, email e password.");

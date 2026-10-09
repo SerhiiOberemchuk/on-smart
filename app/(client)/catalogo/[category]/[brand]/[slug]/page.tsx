@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getProductBySlug } from "@/app/actions/product/get-product-by-slug";
+import { getBrandBySlug } from "@/app/actions/brands/brand-actions";
 import { baseUrl } from "@/types/baseUrl";
 import PageSlug from "./PageSlug";
 import { Suspense } from "react";
 import ProductPageFallback from "./ProductPageFallback";
 import {
+  buildProductSeoTitle,
   buildSeoDescription,
-  buildSeoTitle,
   formatEuroPrice,
 } from "@/lib/seo/metadata";
 
@@ -41,8 +42,9 @@ export async function generateMetadata({
     notFound();
   }
 
+  const brandResponse = await getBrandBySlug(data.brand_slug);
   const eanValue = normalizeOptionalText(data.ean);
-  const brandLabel = normalizeSlugLabel(data.brand_slug);
+  const brandLabel = brandResponse.data?.name || normalizeSlugLabel(data.brand_slug);
   const categoryLabel = normalizeSlugLabel(data.category_slug);
   const slugLabel = normalizeSlugLabel(data.slug);
   const metadataImageUrl = normalizeImageUrl(data.imgSrc, `${baseUrl}/logo.png`);
@@ -71,9 +73,11 @@ export async function generateMetadata({
   const canonicalUrl = `${baseUrl}/catalogo/${data.category_slug}/${data.brand_slug}/${data.slug}`;
 
   return {
-    title: buildSeoTitle(
-      `${data.name} ${brandLabel}${eanValue ? ` EAN ${eanValue}` : ""} - Prezzo e disponibilità`,
-    ),
+    title: buildProductSeoTitle({
+      name: data.nameFull || data.name,
+      brandName: brandLabel,
+      price: formattedPrice,
+    }),
     description: descriptionWithEan,
     keywords,
     alternates: {

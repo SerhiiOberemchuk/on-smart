@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { useCookieConsent } from "@/components/cookie-consent/use-cookie-consent";
 import ButtonYellow from "@/components/BattonYellow";
 import {
   COOKIE_CONSENT_CHANGED_EVENT,
@@ -26,23 +27,11 @@ function persistConsent(consent: CookieConsentState) {
 
 export default function CookieBanner() {
   const [isOpen, setIsOpen] = useState(false);
-  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
+  const consent = useCookieConsent();
+  const [isDismissed, setIsDismissed] = useState(false);
+  const [analyticsPreference, setAnalyticsEnabled] = useState<boolean | null>(null);
+  const analyticsEnabled = analyticsPreference ?? consent === "accepted";
   const [isCustomizing, setIsCustomizing] = useState(false);
-
-  useEffect(() => {
-    const storedConsent = localStorage.getItem(
-      COOKIE_CONSENT_STORAGE_KEY,
-    ) as CookieConsentState | null;
-
-    if (!storedConsent) {
-      setAnalyticsEnabled(false);
-      setIsCustomizing(false);
-      setIsOpen(true);
-      return;
-    }
-
-    setAnalyticsEnabled(storedConsent === "accepted");
-  }, []);
 
   useEffect(() => {
     const openBanner = () => {
@@ -62,27 +51,26 @@ export default function CookieBanner() {
 
   const handleDecision = (consent: CookieConsentState) => {
     persistConsent(consent);
+    setIsDismissed(true);
     setAnalyticsEnabled(consent === "accepted");
     setIsCustomizing(false);
     setIsOpen(false);
   };
 
-  if (!isOpen) {
+  if (!isOpen && !(consent === null && !isDismissed)) {
     return null;
   }
 
   return (
     <aside className="fixed inset-x-4 bottom-4 z-50 mx-auto w-auto max-w-[28rem] rounded-2xl border border-stroke-grey bg-[linear-gradient(180deg,rgba(51,51,51,0.96)_0%,rgba(18,18,18,0.98)_100%)] p-5 text-white shadow-[0_20px_70px_rgba(0,0,0,0.45)] backdrop-blur md:inset-x-6 md:bottom-6 md:max-w-[34rem]">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-yellow-500">
-          Cookie
-        </p>
+        <p className="text-sm font-semibold tracking-[0.18em] text-yellow-500 uppercase">Cookie</p>
         <span className="rounded-full border border-green/40 bg-green/10 px-2 py-1 text-[11px] font-medium text-green-400">
           Essenziali attivi
         </span>
       </div>
 
-      <p className="mb-2 text-lg font-semibold leading-tight">
+      <p className="mb-2 text-lg leading-tight font-semibold">
         Usiamo cookie tecnici e, previo consenso, Google Analytics e Microsoft Clarity per
         migliorare il sito.
       </p>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import InlineSpinner from "@/components/InlineSpinner";
 import { PayPalButtons, PayPalMessages, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 import type { PayPalButtonsComponentOptions } from "@paypal/paypal-js";
 
@@ -25,7 +26,16 @@ type CreatedOrderRef = {
   providerOrderId?: string | null;
 };
 
-export default function PayPalButtonsClient({
+export default function PayPalButtonsClient(props: Props) {
+  const attemptKey = JSON.stringify([
+    props.totalPrice,
+    props.dataFirstStep.deliveryMethod,
+    props.basket,
+  ]);
+  return <PayPalPaymentAttempt key={attemptKey} {...props} />;
+}
+
+function PayPalPaymentAttempt({
   totalPrice,
   basket,
   productsInBasket,
@@ -38,8 +48,13 @@ export default function PayPalButtonsClient({
   const router = useRouter();
   const [{ isPending: isSdkPending }] = usePayPalScriptReducer();
 
-  const [priceToPay, setPriceToPay] = useState("0.00");
-  const [showMessages, setShowMessages] = useState(false);
+  const priceToPay = totalPrice
+    ? getTotalPriceToPayWithCommission({
+        totalPrice,
+        deliveryMetod: dataFirstStep.deliveryMethod,
+        paymentMethod: "paypal",
+      }).toFixed(2)
+    : "0.00";
   const [isProcessingPayPal, setIsProcessingPayPal] = useState(false);
 
   const [internalOrderNumber, setInternalOrderNumber] = useState(() => makeOrderNumber("OS"));
@@ -74,22 +89,6 @@ export default function PayPalButtonsClient({
     );
   }, [router, paymentErrorPath]);
 
-  useEffect(() => {
-    if (!totalPrice) return;
-
-    setShowMessages(false);
-
-    const next = getTotalPriceToPayWithCommission({
-      totalPrice,
-      deliveryMetod: dataFirstStep.deliveryMethod,
-      paymentMethod: "paypal",
-    }).toFixed(2);
-
-    setPriceToPay(next);
-    setShowMessages(true);
-    resetDraftOrderIdentity();
-  }, [totalPrice, dataFirstStep.deliveryMethod, basket, resetDraftOrderIdentity]);
-
   const canPay = useMemo(() => {
     const amount = Number(priceToPay);
     return (
@@ -105,10 +104,15 @@ export default function PayPalButtonsClient({
 
   return (
     <div className="bg-white px-2 pt-2">
-      {isSdkPending ? <span className="animate-spin">Caricamento...</span> : null}
+      {(isSdkPending || isProcessingPayPal) && (
+        <p role="status" className="flex items-center gap-2">
+          <InlineSpinner />
+          {isSdkPending ? "Caricamento..." : "Verifica del pagamento in corso..."}
+        </p>
+      )}
 
       <div className="py-3">
-        {showMessages && canPay && (
+        {canPay && (
           <PayPalMessages
             key={`pp-msg-${priceToPay}-${currency}`}
             forceReRender={[priceToPay, currency]}
@@ -125,7 +129,8 @@ export default function PayPalButtonsClient({
         disabled={!canPay || isSdkPending || isProcessingPayPal}
         createOrder={async () => {
           if (!canPay) throw new Error("PayPal createOrder blocked: invalid state");
-          if (isCreatingRef.current) throw new Error("PayPal createOrder blocked: already creating");
+          if (isCreatingRef.current)
+            throw new Error("PayPal createOrder blocked: already creating");
 
           isCreatingRef.current = true;
           setIsProcessingPayPal(true);
@@ -183,7 +188,10 @@ export default function PayPalButtonsClient({
           });
 
           if (!paymentCreateUpdate.success) {
-            console.error("updateOrderPaymentAction after PayPal create failed:", paymentCreateUpdate);
+            console.error(
+              "updateOrderPaymentAction after PayPal create failed:",
+              paymentCreateUpdate,
+            );
           }
 
           isCreatingRef.current = false;

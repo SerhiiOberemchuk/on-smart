@@ -4,7 +4,7 @@ import { getProductDocumentsById } from "@/app/actions/admin/product-details/que
 import { updateProductDocumentsById } from "@/app/actions/admin/characteristics/mutations";
 import { deleteFileFromS3, uploadFile } from "@/app/actions/admin/files/mutations";
 import { ProductDocumentsType } from "@/db/schemas/product-documents.schema";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useEffectEvent, useState } from "react";
 import { toast } from "react-toastify";
 import { FILE_MAX_SIZE } from "../../../../categories/ModalCategoryForm";
 import ButtonXDellete from "../../../../ButtonXDellete";
@@ -57,16 +57,6 @@ export default function DocumentsProduct({ id }: { id: string }) {
 
     fetch();
   }, [id]);
-
-  useEffect(() => {
-    const listener = () => {
-      if ((file && title.trim()) || isDirtyTitles) {
-        void handleSubmit();
-      }
-    };
-    document.addEventListener(PRODUCT_SAVE_ALL_EVENT, listener);
-    return () => document.removeEventListener(PRODUCT_SAVE_ALL_EVENT, listener);
-  }, [file, title, isDirtyTitles, documents]);
 
   const handleSelectFile = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
@@ -195,13 +185,24 @@ export default function DocumentsProduct({ id }: { id: string }) {
     }
   };
 
+  const onSaveAll = useEffectEvent(() => {
+    if ((file && title.trim()) || isDirtyTitles) void handleSubmit();
+  });
+  useEffect(() => {
+    const listener = () => onSaveAll();
+    document.addEventListener(PRODUCT_SAVE_ALL_EVENT, listener);
+    return () => document.removeEventListener(PRODUCT_SAVE_ALL_EVENT, listener);
+  }, []);
+
   const handleChangeExistingTitle = (link: string, value: string) => {
     setDocuments((prev) => {
       if (!prev) return prev;
 
       return {
         ...prev,
-        documents: prev.documents.map((doc) => (doc.link === link ? { ...doc, title: value } : doc)),
+        documents: prev.documents.map((doc) =>
+          doc.link === link ? { ...doc, title: value } : doc,
+        ),
       };
     });
     setIsDirtyTitles(true);
@@ -217,17 +218,20 @@ export default function DocumentsProduct({ id }: { id: string }) {
             <p className="text-sm text-slate-400">Документів поки немає</p>
           ) : (
             documents.documents.map((doc) => (
-              <li
-                key={doc.link}
-                className="flex flex-col gap-2 border-b border-slate-600/45 pb-2"
-              >
+              <li key={doc.link} className="flex flex-col gap-2 border-b border-slate-600/45 pb-2">
                 <div className="min-w-0 flex-1">
                   <InputAdminStyle
                     input_title="Назва документа"
                     value={doc.title}
-                    onChange={(event) => handleChangeExistingTitle(doc.link, event.currentTarget.value)}
+                    onChange={(event) =>
+                      handleChangeExistingTitle(doc.link, event.currentTarget.value)
+                    }
                   />
-                  <a href={doc.link} target="_blank" className="block break-all text-xs text-amber-300 hover:underline">
+                  <a
+                    href={doc.link}
+                    target="_blank"
+                    className="block text-xs break-all text-amber-300 hover:underline"
+                  >
                     {getDocumentDisplayName(doc.link, doc.title)}
                   </a>
                 </div>
@@ -235,7 +239,8 @@ export default function DocumentsProduct({ id }: { id: string }) {
                 <div className="flex justify-end">
                   <ButtonXDellete
                     onClick={() => handleDelete(doc.link)}
-                    disabled={isDeleting === doc.link}
+                    disabled={isDeleting !== null || isLoading}
+                    isPending={isDeleting === doc.link}
                     className="h-8 w-8 rounded-md"
                   />
                 </div>
@@ -246,7 +251,12 @@ export default function DocumentsProduct({ id }: { id: string }) {
       ) : null}
 
       <form className="mt-3 flex flex-col gap-3">
-        <InputAdminStyle input_title="Оберіть документ" required type="file" onChange={handleSelectFile} />
+        <InputAdminStyle
+          input_title="Оберіть документ"
+          required
+          type="file"
+          onChange={handleSelectFile}
+        />
 
         <InputAdminStyle
           input_title="Назва документа"
@@ -258,16 +268,17 @@ export default function DocumentsProduct({ id }: { id: string }) {
         />
 
         {file && title.trim() ? (
-          <p className="text-xs text-amber-300">Документ буде збережено кнопкою "Зберегти все".</p>
+          <p className="text-xs text-amber-300">
+            Документ буде збережено кнопкою &quot;Зберегти все&quot;.
+          </p>
         ) : null}
 
         {isDirtyTitles ? (
-          <p className="text-xs text-amber-300">Оновлені назви документів будуть збережені кнопкою "Зберегти все".</p>
+          <p className="text-xs text-amber-300">
+            Оновлені назви документів будуть збережені кнопкою &quot;Зберегти все&quot;.
+          </p>
         ) : null}
       </form>
     </div>
   );
 }
-
-
-

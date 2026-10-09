@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { baseUrl } from "@/types/baseUrl";
 import type { BundlePageData } from "./bundle-page.types";
-import { buildSeoDescription, buildSeoTitle, formatEuroPrice } from "@/lib/seo/metadata";
+import { buildProductSeoTitle, buildSeoDescription, formatEuroPrice } from "@/lib/seo/metadata";
 
 export function buildBundleMetadata(bundle: BundlePageData): Metadata {
   const eanValue = bundle.ean?.trim();
@@ -38,9 +38,11 @@ export function buildBundleMetadata(bundle: BundlePageData): Metadata {
   const description = descriptionWithEan;
 
   return {
-    title: buildSeoTitle(
-      `Kit ${bundle.name} ${bundle.brand_name}${eanValue ? ` EAN ${eanValue}` : ""} - Prezzo e componenti`,
-    ),
+    title: buildProductSeoTitle({
+      name: bundle.nameFull || bundle.name,
+      brandName: bundle.brand_name,
+      price: formattedPrice,
+    }),
     description,
     keywords,
     alternates: {

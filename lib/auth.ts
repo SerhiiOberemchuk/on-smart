@@ -2,6 +2,7 @@ import "../envConfig";
 // import "dotenv/config";
 import { account, session, user, verification } from "@/auth-schema";
 import { db } from "@/db/db";
+import { MAX_AUTH_PASSWORD_LENGTH } from "@/types/auth-password.constant";
 import { sendAuthMail } from "@/lib/auth-mail";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -20,6 +21,7 @@ export const auth = betterAuth({
     // Mandatory email verification for everyone, admins included (spec decision #16).
     requireEmailVerification: true,
     minPasswordLength: 8,
+    maxPasswordLength: MAX_AUTH_PASSWORD_LENGTH,
     sendResetPassword: async ({ user, url }) => {
       await sendAuthMail("reset-password", { to: user.email, url, name: user.name });
     },
@@ -45,6 +47,6 @@ export const auth = betterAuth({
     max: 10,
   },
 
-  plugins: [ admin(),nextCookies(),],
+  plugins: [admin(), nextCookies()],
   secret: process.env.BETTER_AUTH_SECRET!,
 });

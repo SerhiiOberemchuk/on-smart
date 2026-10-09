@@ -6,10 +6,16 @@ import { notFound } from "next/navigation";
 import SmartImage from "@/components/SmartImage";
 import Link from "next/link";
 import LinkYellow from "@/components/YellowLink";
-import { getAllProductsFiltered } from "@/app/actions/product/get-all-products-filtered";
+import { getCategoryLandingProducts } from "@/lib/catalog/landing-products";
 import { ProductType } from "@/db/schemas/product.schema";
 import { JsonLd } from "@/lib/seo/JsonLd";
-import { buildSeoDescription, buildSeoTitle, normalizeSeoText } from "@/lib/seo/metadata";
+import {
+  buildLandingPageRobots,
+  buildSeoDescription,
+  buildSeoTitle,
+  isLandingPageIndexable,
+  normalizeSeoText,
+} from "@/lib/seo/metadata";
 import {
   buildOfferPriceSpecification,
   buildOfferShippingAndReturnPolicy,
@@ -18,8 +24,6 @@ import {
 import type { BreadcrumbList, CollectionPage, WithContext } from "schema-dts";
 
 type Props = { params: Promise<{ categoria: string }> };
-
-const CATEGORY_PRODUCTS_LIMIT = 24;
 
 function buildProductHref(product: ProductType): string {
   if (product.productType === "bundle") {
@@ -40,7 +44,10 @@ function toAbsoluteImageUrl(src: string) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { categoria } = await params;
-  const categoryInfo = await getCategoryBySlug(categoria);
+  const [categoryInfo, products] = await Promise.all([
+    getCategoryBySlug(categoria),
+    getCategoryLandingProducts(categoria),
+  ]);
 
   if (!categoryInfo.success || !categoryInfo.data) {
     notFound();
@@ -64,18 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: {
       canonical,
     },
-    robots: {
-      index: true,
-      follow: true,
-      noarchive: false,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-        "max-video-preview": -1,
-      },
-    },
+    robots: buildLandingPageRobots(isLandingPageIndexable(products)),
     openGraph: {
       title,
       description,
@@ -106,12 +102,7 @@ export default async function PageCategoria({ params }: Props) {
 
   const [categoryResponse, productsResponse] = await Promise.all([
     getCategoryBySlug(categoria),
-    getAllProductsFiltered({
-      categorySlugs: [categoria],
-      mode: "parentsOnly",
-      limit: CATEGORY_PRODUCTS_LIMIT,
-      sort: "new",
-    }),
+    getCategoryLandingProducts(categoria),
   ]);
 
   if (!categoryResponse.success || !categoryResponse.data) {

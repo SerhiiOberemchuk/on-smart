@@ -1,29 +1,37 @@
 import SmartImage from "@/components/SmartImage";
+import InlineSpinner from "@/components/InlineSpinner";
 import iconClose from "@/assets/icons/icon-close.svg";
 import { ButtonHTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 
 export default function ButtonXDellete({
   icon = "trash",
+  isPending = false,
   ...rest
 }: {
   icon?: "trash" | "close";
+  isPending?: boolean;
 } & ButtonHTMLAttributes<HTMLButtonElement>) {
   const isCloseButton = icon === "close";
 
   return (
     <button
       {...rest}
+      disabled={rest.disabled || isPending}
+      aria-busy={isPending || undefined}
       aria-label={rest["aria-label"] ?? (isCloseButton ? "Закрити" : "Видалити")}
       className={twMerge(
         isCloseButton
           ? "inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-600 bg-transparent text-slate-100 transition hover:bg-slate-700/40 hover:text-white"
           : "admin-icon-action admin-icon-action-delete",
         rest.className,
-        rest.disabled && "cursor-not-allowed opacity-50",
+        "disabled:pointer-events-none disabled:opacity-60",
+        (rest.disabled || isPending) && "cursor-not-allowed",
       )}
     >
-      {isCloseButton ? (
+      {isPending ? (
+        <InlineSpinner />
+      ) : isCloseButton ? (
         <SmartImage src={iconClose} alt="Закрити" width={18} height={18} aria-hidden />
       ) : (
         <svg

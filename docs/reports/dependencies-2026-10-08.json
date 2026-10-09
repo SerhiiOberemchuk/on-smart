@@ -1,0 +1,526 @@
+{
+  "date": "2026-10-08",
+  "baseline": "HEAD before owner bulk upgrade",
+  "dependencies": [
+    {
+      "name": "@aws-sdk/client-s3",
+      "scope": "runtime",
+      "before": "3.1120.0",
+      "installed": "3.1148.0",
+      "requested": "^3.1148.0",
+      "changed": true
+    },
+    {
+      "name": "@dnd-kit/core",
+      "scope": "runtime",
+      "before": "6.3.1",
+      "installed": "6.3.1",
+      "requested": "^6.3.1",
+      "changed": false
+    },
+    {
+      "name": "@dnd-kit/sortable",
+      "scope": "runtime",
+      "before": "10.0.0",
+      "installed": "10.0.0",
+      "requested": "^10.0.0",
+      "changed": false
+    },
+    {
+      "name": "@eslint/eslintrc",
+      "scope": "development",
+      "before": "3.3.7",
+      "installed": "3.3.7",
+      "requested": "^3",
+      "changed": false
+    },
+    {
+      "name": "@microsoft/clarity",
+      "scope": "runtime",
+      "before": "1.0.2",
+      "installed": "1.0.2",
+      "requested": "^1.0.2",
+      "changed": false
+    },
+    {
+      "name": "@next/env",
+      "scope": "runtime",
+      "before": "16.3.8",
+      "installed": "16.4.0",
+      "requested": "^16.4.0",
+      "changed": true
+    },
+    {
+      "name": "@next/third-parties",
+      "scope": "runtime",
+      "before": "16.3.8",
+      "installed": "16.4.0",
+      "requested": "^16.4.0",
+      "changed": true
+    },
+    {
+      "name": "@paypal/react-paypal-js",
+      "scope": "runtime",
+      "before": "10.4.0",
+      "installed": "10.6.0",
+      "requested": "^10.6.0",
+      "changed": true
+    },
+    {
+      "name": "@sindresorhus/slugify",
+      "scope": "runtime",
+      "before": "3.0.0",
+      "installed": "3.0.1",
+      "requested": "^3.0.1",
+      "changed": true
+    },
+    {
+      "name": "@sumup/sdk",
+      "scope": "runtime",
+      "before": "0.1.9",
+      "installed": "0.2.0",
+      "requested": "^0.2.0",
+      "changed": true
+    },
+    {
+      "name": "@tailwindcss/postcss",
+      "scope": "development",
+      "before": "4.3.0",
+      "installed": "4.3.3",
+      "requested": "^4",
+      "changed": true
+    },
+    {
+      "name": "@types/hammerjs",
+      "scope": "development",
+      "before": "2.0.46",
+      "installed": "2.0.46",
+      "requested": "^2.0.46",
+      "changed": false
+    },
+    {
+      "name": "@types/node",
+      "scope": "development",
+      "before": "26.4.0",
+      "installed": "26.6.4",
+      "requested": "^26.6.4",
+      "changed": true
+    },
+    {
+      "name": "@types/nodemailer",
+      "scope": "development",
+      "before": "8.0.1",
+      "installed": "8.0.2",
+      "requested": "^8.0.2",
+      "changed": true
+    },
+    {
+      "name": "@types/pg",
+      "scope": "development",
+      "before": "8.23.1",
+      "installed": "8.23.1",
+      "requested": "^8.23.1",
+      "changed": false
+    },
+    {
+      "name": "@types/react",
+      "scope": "development",
+      "before": "19.2.14",
+      "installed": "19.3.0",
+      "requested": "^19",
+      "changed": true
+    },
+    {
+      "name": "@types/react-dom",
+      "scope": "development",
+      "before": "19.2.3",
+      "installed": "19.3.0",
+      "requested": "^19",
+      "changed": true
+    },
+    {
+      "name": "@typescript/native",
+      "scope": "development",
+      "before": "7.0.2",
+      "installed": "7.0.2",
+      "requested": "npm:typescript@^7.0.2",
+      "changed": false
+    },
+    {
+      "name": "apify-client",
+      "scope": "runtime",
+      "before": "2.25.0",
+      "installed": "2.25.0",
+      "requested": "^2.25.0",
+      "changed": false
+    },
+    {
+      "name": "babel-plugin-react-compiler",
+      "scope": "runtime",
+      "before": "1.0.0",
+      "installed": "1.0.0",
+      "requested": "^1.0.0",
+      "changed": false
+    },
+    {
+      "name": "better-auth",
+      "scope": "runtime",
+      "before": "1.7.2",
+      "installed": "1.7.7",
+      "requested": "^1.7.7",
+      "changed": true
+    },
+    {
+      "name": "clsx",
+      "scope": "runtime",
+      "before": "2.1.1",
+      "installed": "2.1.1",
+      "requested": "^2.1.1",
+      "changed": false
+    },
+    {
+      "name": "dotenv",
+      "scope": "runtime",
+      "before": "17.4.2",
+      "installed": "18.0.6",
+      "requested": "^18.0.6",
+      "changed": true
+    },
+    {
+      "name": "drizzle-kit",
+      "scope": "development",
+      "before": "0.31.10",
+      "installed": "0.31.11",
+      "requested": "^0.31.11",
+      "changed": true
+    },
+    {
+      "name": "drizzle-orm",
+      "scope": "runtime",
+      "before": "0.45.2",
+      "installed": "0.45.4",
+      "requested": "^0.45.4",
+      "changed": true
+    },
+    {
+      "name": "embla-carousel-autoplay",
+      "scope": "runtime",
+      "before": "8.6.0",
+      "installed": "8.6.0",
+      "requested": "^8.6.0",
+      "changed": false
+    },
+    {
+      "name": "embla-carousel-react",
+      "scope": "runtime",
+      "before": "8.6.0",
+      "installed": "8.6.0",
+      "requested": "^8.6.0",
+      "changed": false
+    },
+    {
+      "name": "esbuild",
+      "scope": "development",
+      "before": "0.28.2",
+      "installed": "0.28.2",
+      "requested": "^0.28.2",
+      "changed": false
+    },
+    {
+      "name": "eslint",
+      "scope": "development",
+      "before": "9.39.5",
+      "installed": "9.39.5",
+      "requested": "9.39.5",
+      "changed": false
+    },
+    {
+      "name": "eslint-config-next",
+      "scope": "development",
+      "before": "16.3.8",
+      "installed": "16.4.0",
+      "requested": "^16.4.0",
+      "changed": true
+    },
+    {
+      "name": "eslint-config-prettier",
+      "scope": "development",
+      "before": "10.1.8",
+      "installed": "10.1.8",
+      "requested": "^10.1.8",
+      "changed": false
+    },
+    {
+      "name": "framer-motion",
+      "scope": "runtime",
+      "before": "13.1.1",
+      "installed": "14.0.0",
+      "requested": "^14.0.0",
+      "changed": true
+    },
+    {
+      "name": "hammerjs",
+      "scope": "runtime",
+      "before": "2.0.8",
+      "installed": "2.0.8",
+      "requested": "^2.0.8",
+      "changed": false
+    },
+    {
+      "name": "jspdf",
+      "scope": "runtime",
+      "before": "4.2.1",
+      "installed": "4.2.1",
+      "requested": "^4.2.1",
+      "changed": false
+    },
+    {
+      "name": "jspdf-autotable",
+      "scope": "runtime",
+      "before": "5.0.8",
+      "installed": "5.0.8",
+      "requested": "^5.0.8",
+      "changed": false
+    },
+    {
+      "name": "mysql2",
+      "scope": "runtime",
+      "before": "3.24.2",
+      "installed": "3.24.5",
+      "requested": "^3.24.5",
+      "changed": true
+    },
+    {
+      "name": "next",
+      "scope": "runtime",
+      "before": "16.3.8",
+      "installed": "16.4.0",
+      "requested": "16.4.0",
+      "changed": true
+    },
+    {
+      "name": "next-sitemap",
+      "scope": "runtime",
+      "before": "4.2.3",
+      "installed": "4.2.3",
+      "requested": "^4.2.3",
+      "changed": false
+    },
+    {
+      "name": "nodemailer",
+      "scope": "runtime",
+      "before": "9.0.6",
+      "installed": "10.0.16",
+      "requested": "^10.0.16",
+      "changed": true
+    },
+    {
+      "name": "nuqs",
+      "scope": "runtime",
+      "before": "2.10.1",
+      "installed": "2.10.2",
+      "requested": "^2.10.2",
+      "changed": true
+    },
+    {
+      "name": "pg",
+      "scope": "runtime",
+      "before": "8.23.0",
+      "installed": "8.23.1",
+      "requested": "^8.23.1",
+      "changed": true
+    },
+    {
+      "name": "postgres",
+      "scope": "runtime",
+      "before": "3.4.9",
+      "installed": "3.4.9",
+      "requested": "^3.4.9",
+      "changed": false
+    },
+    {
+      "name": "prettier",
+      "scope": "development",
+      "before": "3.9.6",
+      "installed": "3.9.9",
+      "requested": "^3.9.9",
+      "changed": true
+    },
+    {
+      "name": "prettier-plugin-tailwindcss",
+      "scope": "development",
+      "before": "0.8.1",
+      "installed": "0.8.1",
+      "requested": "^0.8.1",
+      "changed": false
+    },
+    {
+      "name": "react",
+      "scope": "runtime",
+      "before": "19.2.8",
+      "installed": "19.3.0",
+      "requested": "^19.3.0",
+      "changed": true
+    },
+    {
+      "name": "react-dom",
+      "scope": "runtime",
+      "before": "19.2.8",
+      "installed": "19.3.0",
+      "requested": "^19.3.0",
+      "changed": true
+    },
+    {
+      "name": "react-dropzone",
+      "scope": "runtime",
+      "before": "20.1.1",
+      "installed": "20.1.2",
+      "requested": "^20.1.2",
+      "changed": true
+    },
+    {
+      "name": "react-error-boundary",
+      "scope": "runtime",
+      "before": "6.1.3",
+      "installed": "6.1.6",
+      "requested": "^6.1.6",
+      "changed": true
+    },
+    {
+      "name": "react-hook-form",
+      "scope": "runtime",
+      "before": "7.86.0",
+      "installed": "7.89.0",
+      "requested": "^7.89.0",
+      "changed": true
+    },
+    {
+      "name": "react-intersection-observer",
+      "scope": "runtime",
+      "before": "11.0.1",
+      "installed": "11.0.1",
+      "requested": "^11.0.1",
+      "changed": false
+    },
+    {
+      "name": "react-range",
+      "scope": "runtime",
+      "before": "1.10.0",
+      "installed": "1.10.0",
+      "requested": "^1.10.0",
+      "changed": false
+    },
+    {
+      "name": "react-toastify",
+      "scope": "runtime",
+      "before": "11.1.0",
+      "installed": "11.1.0",
+      "requested": "^11.1.0",
+      "changed": false
+    },
+    {
+      "name": "react-tooltip",
+      "scope": "runtime",
+      "before": "6.0.8",
+      "installed": "6.0.8",
+      "requested": "^6.0.8",
+      "changed": false
+    },
+    {
+      "name": "recharts",
+      "scope": "runtime",
+      "before": "3.10.1",
+      "installed": "3.10.1",
+      "requested": "^3.10.1",
+      "changed": false
+    },
+    {
+      "name": "schema-dts",
+      "scope": "runtime",
+      "before": "2.0.0",
+      "installed": "2.1.0",
+      "requested": "^2.1.0",
+      "changed": true
+    },
+    {
+      "name": "sharp",
+      "scope": "runtime",
+      "before": "0.35.4",
+      "installed": "0.35.5",
+      "requested": "^0.35.5",
+      "changed": true
+    },
+    {
+      "name": "swiper",
+      "scope": "runtime",
+      "before": "14.2.0",
+      "installed": "14.3.0",
+      "requested": "^14.3.0",
+      "changed": true
+    },
+    {
+      "name": "tailwind-merge",
+      "scope": "runtime",
+      "before": "3.6.0",
+      "installed": "3.7.0",
+      "requested": "^3.7.0",
+      "changed": true
+    },
+    {
+      "name": "tailwindcss",
+      "scope": "development",
+      "before": "4.3.0",
+      "installed": "4.3.3",
+      "requested": "^4",
+      "changed": true
+    },
+    {
+      "name": "tsx",
+      "scope": "development",
+      "before": "4.23.12",
+      "installed": "4.23.15",
+      "requested": "^4.23.15",
+      "changed": true
+    },
+    {
+      "name": "typescript",
+      "scope": "development",
+      "before": "6.0.2",
+      "installed": "6.0.2",
+      "requested": "npm:@typescript/typescript6@^6.0.2",
+      "changed": false
+    },
+    {
+      "name": "ulid",
+      "scope": "runtime",
+      "before": "3.0.2",
+      "installed": "3.0.2",
+      "requested": "^3.0.2",
+      "changed": false
+    },
+    {
+      "name": "vitest",
+      "scope": "development",
+      "before": "4.1.11",
+      "installed": "5.0.3",
+      "requested": "^5.0.3",
+      "changed": true
+    },
+    {
+      "name": "zustand",
+      "scope": "runtime",
+      "before": "5.0.15",
+      "installed": "5.0.15",
+      "requested": "^5.0.15",
+      "changed": false
+    }
+  ],
+  "audit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 4,
+    "high": 11,
+    "critical": 0,
+    "total": 15
+  }
+}

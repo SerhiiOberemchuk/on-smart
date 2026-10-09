@@ -1,17 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 
 export function usePagination<T>(items: T[], initialPageSize = 20) {
-  const [page, setPageState] = useState(1);
+  const [requestedPage, setPageState] = useState(1);
   const [pageSize, setPageSizeState] = useState(initialPageSize);
 
   const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
 
-  const pageItems = useMemo(
-    () => items.slice((page - 1) * pageSize, page * pageSize),
-    [items, page, pageSize],
-  );
+  const page = Math.min(requestedPage, totalPages);
+  const pageItems = items.slice((page - 1) * pageSize, page * pageSize);
+  if (requestedPage !== page) setPageState(page);
 
   const setPage = (newPage: number) => {
     setPageState(Math.max(1, Math.min(newPage, totalPages)));
@@ -21,12 +20,6 @@ export function usePagination<T>(items: T[], initialPageSize = 20) {
     setPageSizeState(size);
     setPageState(1);
   };
-
-  useEffect(() => {
-    if (page > totalPages) {
-      setPageState(totalPages);
-    }
-  }, [page, totalPages]);
 
   return {
     page,

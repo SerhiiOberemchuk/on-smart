@@ -32,8 +32,8 @@ export default function CookiePolicy() {
           <h2>1. Cosa sono i cookie</h2>
           <p>
             I cookie sono piccoli file di testo che i siti web visitati inviano al dispositivo
-            dell'utente, dove vengono memorizzati per essere poi ritrasmessi agli stessi siti in
-            occasione di visite successive. Servono per migliorare l'esperienza di navigazione,
+            dell&apos;utente, dove vengono memorizzati per essere poi ritrasmessi agli stessi siti in
+            occasione di visite successive. Servono per migliorare l&apos;esperienza di navigazione,
             memorizzare preferenze o raccogliere informazioni statistiche anonime.
           </p>
         </li>
@@ -41,7 +41,7 @@ export default function CookiePolicy() {
           <h2>2. Tipologie di cookie utilizzati</h2>
           <p>
             Il sito on-smart.it utilizza cookie tecnici necessari al corretto funzionamento del sito,
-            cookie analitici per raccogliere statistiche anonime sull'uso del sito, cookie di terze
+            cookie analitici per raccogliere statistiche anonime sull&apos;uso del sito, cookie di terze
             parti collegati a servizi esterni come pagamenti e analytics, e cookie di profilazione
             installati solo previo consenso esplicito.
           </p>
@@ -49,10 +49,10 @@ export default function CookiePolicy() {
         <li>
           <h2>3. Gestione dei cookie</h2>
           <p>
-            Al primo accesso al sito, un banner informa l'utente sull'uso dei cookie e consente di
+            Al primo accesso al sito, un banner informa l&apos;utente sull&apos;uso dei cookie e consente di
             accettare tutti i cookie, rifiutare quelli non essenziali o personalizzare le
             preferenze. Le preferenze possono essere modificate in qualsiasi momento tramite le
-            impostazioni del browser o il link "Gestisci cookie".
+            impostazioni del browser o il link &quot;Gestisci cookie&quot;.
           </p>
         </li>
         <li>
@@ -81,13 +81,13 @@ export default function CookiePolicy() {
           <p>
             I cookie hanno una durata variabile: alcuni vengono eliminati alla chiusura del browser,
             mentre altri restano memorizzati fino alla scadenza prevista o alla cancellazione
-            manuale da parte dell'utente.
+            manuale da parte dell&apos;utente.
           </p>
         </li>
         <li>
           <h2>6. Come disabilitare i cookie</h2>
           <p>
-            L'utente può gestire o disabilitare i cookie tramite le impostazioni del proprio
+            L&apos;utente può gestire o disabilitare i cookie tramite le impostazioni del proprio
             browser. Le istruzioni sono disponibili nelle guide ufficiali di Google Chrome, Mozilla
             Firefox, Safari e Microsoft Edge.
           </p>

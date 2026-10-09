@@ -4,12 +4,10 @@ import {
   getAccountWithdrawalOrders,
   type WithdrawalOrderOption,
 } from "@/app/actions/account/withdrawal/get-account-withdrawal-orders";
+import InlineSpinner from "@/components/InlineSpinner";
 import { CustomSelect } from "@/components/CustomSelect";
 import WithdrawalForm from "@/components/WithdrawalForm";
-import {
-  WITHDRAWAL_STATUS_LABEL_IT,
-  WITHDRAWAL_STATUS_TEXT_CLASS,
-} from "@/types/withdrawal.types";
+import { WITHDRAWAL_STATUS_LABEL_IT, WITHDRAWAL_STATUS_TEXT_CLASS } from "@/types/withdrawal.types";
 import clsx from "clsx";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -53,6 +51,22 @@ export default function RecessoClient({
   const [toDate, setToDate] = useState("");
   const [selected, setSelected] = useState<WithdrawalOrderOption | null>(null);
 
+  const changePeriod = (value: PeriodOption) => {
+    if (value === period) return;
+    setLoading(value !== "CUSTOM" || Boolean(fromDate || toDate));
+    setPeriod(value);
+  };
+  const changeFromDate = (value: string) => {
+    if (value === fromDate) return;
+    setLoading(Boolean(value || toDate));
+    setFromDate(value);
+  };
+  const changeToDate = (value: string) => {
+    if (value === toDate) return;
+    setLoading(Boolean(fromDate || value));
+    setToDate(value);
+  };
+
   // The default 30-day set arrives from the server; only re-fetch when the
   // period changes so we never load every order up front.
   const isFirst = useRef(true);
@@ -64,7 +78,6 @@ export default function RecessoClient({
     if (period === "CUSTOM" && !fromDate && !toDate) return;
 
     let active = true;
-    setLoading(true);
     const range = resolvePeriodRange(period, fromDate, toDate);
     getAccountWithdrawalOrders({ fromMs: range.from, toMs: range.to })
       .then((data) => active && setOrders(data.orders))
@@ -137,7 +150,7 @@ export default function RecessoClient({
           variant="box"
           className="w-full sm:w-52"
           value={period}
-          onChange={(v) => setPeriod(v as PeriodOption)}
+          onChange={(v) => changePeriod(v as PeriodOption)}
           options={PERIOD_OPTIONS}
         />
       </div>
@@ -146,8 +159,8 @@ export default function RecessoClient({
         <PeriodDateRange
           fromDate={fromDate}
           toDate={toDate}
-          onFromChange={setFromDate}
-          onToChange={setToDate}
+          onFromChange={changeFromDate}
+          onToChange={changeToDate}
         />
       )}
 
@@ -165,9 +178,11 @@ export default function RecessoClient({
           {period !== "ALL" && (
             <button
               type="button"
-              onClick={() => setPeriod("ALL")}
-              className="text-yellow-500 underline underline-offset-2"
+              onClick={() => changePeriod("ALL")}
+              disabled={loading}
+              className="inline-flex items-center gap-2 text-yellow-500 underline underline-offset-2 disabled:pointer-events-none disabled:opacity-60"
             >
+              {loading && <InlineSpinner />}
               Mostra tutti gli ordini
             </button>
           )}
