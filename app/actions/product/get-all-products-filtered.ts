@@ -34,13 +34,69 @@ type CatalogProductsFilteredResult = {
   errorMessage: string | null;
 };
 
-export async function getAllProductsFiltered(
+// A "use cache" entry is created per DISTINCT argument value, and this payload
+// is crawler-controlled via the catalog searchParams: `price` is a continuous
+// range, `characteristics` are combinatorial and `page` is unbounded, so
+// caching every combination let bots grow the in-memory cache without limit —
+// ~2.3MB of retained buffers per never-repeated URL (the Aug/Sep memory-growth
+// incident). Only the bounded "head" of the key space earns a cache entry;
+// the long tail goes straight to MySQL, which costs milliseconds per query.
+const CACHEABLE_MAX_PAGE = 5;
+const CACHEABLE_MAX_SLUGS = 3;
+
+function isCacheableCatalogPayload(payload: CatalogQueryPayload): boolean {
+  if (payload.characteristics && Object.keys(payload.characteristics).length > 0) return false;
+  if (payload.price?.min !== undefined || payload.price?.max !== undefined) return false;
+  if ((payload.page ?? 1) > CACHEABLE_MAX_PAGE) return false;
+  if ((payload.categorySlugs?.length ?? 0) > CACHEABLE_MAX_SLUGS) return false;
+  if ((payload.brandSlugs?.length ?? 0) > CACHEABLE_MAX_SLUGS) return false;
+  return true;
+}
+
+/**
+ * Stable field set, sorted slugs, normalized defaults — equivalent payloads
+ * must serialize identically or they create separate cache entries.
+ */
+function canonicalizeCatalogPayload(payload: CatalogQueryPayload): CatalogQueryPayload {
+  return {
+    categorySlugs: [...(payload.categorySlugs ?? [])].sort(),
+    brandSlugs: [...(payload.brandSlugs ?? [])].sort(),
+    sort:
+      payload.sort === "price-asc" || payload.sort === "price-desc" ? payload.sort : "new",
+    page:
+      Number.isFinite(payload.page) && (payload.page ?? 0) > 0
+        ? Math.trunc(payload.page as number)
+        : 1,
+    limit:
+      Number.isFinite(payload.limit) && (payload.limit ?? 0) > 0
+        ? Math.min(Math.trunc(payload.limit as number), 100)
+        : 20,
+    mode: payload.mode === "parentsOnly" ? "parentsOnly" : "all",
+  };
+}
+
+async function getAllProductsFilteredCached(
   payload: CatalogQueryPayload,
 ): Promise<CatalogProductsFilteredResult> {
   "use cache";
   cacheTag(CACHE_TAGS.product.all);
   cacheLife("minutes");
 
+  return queryCatalogProducts(payload);
+}
+
+export async function getAllProductsFiltered(
+  payload: CatalogQueryPayload,
+): Promise<CatalogProductsFilteredResult> {
+  if (isCacheableCatalogPayload(payload)) {
+    return getAllProductsFilteredCached(canonicalizeCatalogPayload(payload));
+  }
+  return queryCatalogProducts(payload);
+}
+
+async function queryCatalogProducts(
+  payload: CatalogQueryPayload,
+): Promise<CatalogProductsFilteredResult> {
   const {
     categorySlugs,
     brandSlugs,

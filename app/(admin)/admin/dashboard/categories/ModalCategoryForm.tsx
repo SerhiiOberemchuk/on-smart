@@ -1,5 +1,7 @@
 "use client";
 
+import InlineSpinner from "@/components/InlineSpinner";
+
 import {
   createCategoryProducts,
   updateCategoryProductsById,
@@ -10,7 +12,7 @@ import { CategoryTypes } from "@/types/category.types";
 import slugify from "@sindresorhus/slugify";
 import clsx from "clsx";
 import Image from "next/image";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "react-toastify";
 import { buildCategoryPayload } from "./helpers/buildCategoryPayload";
 import { uploadCategoryImage } from "./helpers/uploadCategoryImage";
@@ -50,17 +52,19 @@ export default function ModalCategoryForm({
     setFileToUpload(null);
   };
 
-  useEffect(() => {
+  const [previousInitialData, setPreviousInitialData] = useState<Props["initialData"]>(undefined);
+  if (initialData !== previousInitialData) {
+    setPreviousInitialData(initialData);
     if (initialData) {
       setName(initialData.name);
       setSlug(initialData.category_slug);
       setFullTitle(initialData.title_full);
       setDescription(initialData.description);
       setImage(initialData.image);
-      return;
+    } else {
+      cleanStates();
     }
-    cleanStates();
-  }, [initialData]);
+  }
 
   if (!isOpen) return null;
 
@@ -175,7 +179,12 @@ export default function ModalCategoryForm({
               />
             ) : null}
 
-            <input type="file" accept="image/*" onChange={handleFileUpload} className="admin-file-input" />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="admin-file-input"
+            />
 
             {fileToUpload ? (
               <p
@@ -215,12 +224,21 @@ export default function ModalCategoryForm({
 
           <div className="admin-field">
             <span className="admin-field-label">Повний заголовок</span>
-            <input type="text" value={fullTitle} onChange={(e) => setFullTitle(e.target.value)} className="admin-input" />
+            <input
+              type="text"
+              value={fullTitle}
+              onChange={(e) => setFullTitle(e.target.value)}
+              className="admin-input"
+            />
           </div>
 
           <div className="admin-field">
             <span className="admin-field-label">Опис</span>
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="admin-textarea" />
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="admin-textarea"
+            />
           </div>
         </div>
 
@@ -239,9 +257,16 @@ export default function ModalCategoryForm({
           <ButtonYellow
             onClick={initialData ? handleUpdate : handleCreate}
             disabled={isPendingCreate || isPendingUpdate}
-            className="admin-btn-primary !px-4 !py-2 !text-sm"
+            className="admin-btn-primary gap-2 !px-4 !py-2 !text-sm disabled:pointer-events-none disabled:opacity-60"
           >
-            {initialData ? (isPendingUpdate ? "Оновлення..." : "Оновити") : isPendingCreate ? "Створення..." : "Створити"}
+            {(isPendingCreate || isPendingUpdate) && <InlineSpinner />}
+            {initialData
+              ? isPendingUpdate
+                ? "Оновлення..."
+                : "Оновити"
+              : isPendingCreate
+                ? "Створення..."
+                : "Створити"}
           </ButtonYellow>
         </div>
       </div>

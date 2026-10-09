@@ -30,6 +30,7 @@ async function OrdersList() {
   // Per-user + current time → dynamic; opt in before reading Date.now().
   await connection();
   // Load only the last 30 days by default; the client fetches wider ranges on demand.
+  // eslint-disable-next-line react-hooks/purity -- Request-time Server Component after connection().
   const orders = await getAccountOrders({ fromMs: Date.now() - THIRTY_DAYS_MS, toMs: null });
   const hasAny = orders.length > 0 ? true : await hasAccountOrders();
 

@@ -102,7 +102,7 @@ export default async function CarrelloPage() {
               ))}
             </ul>
           )}
-          <p className="H4M">e altri marchi selezionati in base alla qualità e all'affidabilità.</p>
+          <p className="H4M">e altri marchi selezionati in base alla qualità e all&apos;affidabilità.</p>
         </div>
       </section>
       <section className="py-16">
@@ -140,7 +140,7 @@ export default async function CarrelloPage() {
             <SmartImage src={icon_quote} width={34} height={24} alt="Quote icon" />
             <p className="H4M">
               Crediamo nelle soluzioni che facilitano la vita quotidiana, nel valore della
-              protezione degli spazi in cui viviamo e lavoriamo, e nell'importanza di un'assistenza
+              protezione degli spazi in cui viviamo e lavoriamo, e nell&apos;importanza di un&apos;assistenza
               che mette al centro le persone. Offriamo supporto con professionalità, attenzione e
               disponibilità, cercando sempre la soluzione più adatta alle esigenze reali.
             </p>

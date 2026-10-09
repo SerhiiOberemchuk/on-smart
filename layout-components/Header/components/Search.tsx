@@ -6,7 +6,15 @@ import {
 } from "@/app/actions/search/get-global-search-results";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useRef, useState, useTransition, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useTransition,
+  type ReactNode,
+} from "react";
 import { twMerge } from "tailwind-merge";
 
 const PRODUCTS_PAGE_SIZE = 8;
@@ -129,8 +137,6 @@ export default function Search({
     }
 
     loadMoreRequestIdRef.current += 1;
-    setIsLoadingMoreProducts(false);
-    setActiveIndex(-1);
     const currentRequestId = ++requestIdRef.current;
     const timeoutId = setTimeout(() => {
       startTransition(async () => {
@@ -242,7 +248,12 @@ export default function Search({
   ]);
 
   useEffect(() => {
-    if (!isOpen || !results.meta.products.hasMore || !listboxRef.current || !productsLoadMoreRef.current) {
+    if (
+      !isOpen ||
+      !results.meta.products.hasMore ||
+      !listboxRef.current ||
+      !productsLoadMoreRef.current
+    ) {
       return;
     }
 
@@ -386,7 +397,11 @@ export default function Search({
             if (query.trim().length >= 2) setIsOpen(true);
           }}
           onKeyDown={handleInputKeyDown}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => {
+            setIsLoadingMoreProducts(false);
+            setActiveIndex(-1);
+            setQuery(event.target.value);
+          }}
         />
       </form>
 

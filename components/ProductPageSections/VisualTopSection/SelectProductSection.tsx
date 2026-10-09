@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import StarsRating from "../../StarsRating";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import styles from "./style.module.css";
 import SmartImage from "@/components/SmartImage";
@@ -25,7 +25,8 @@ export default function SelectProductSection({
   variantsProduct: ProductType[] | null;
 }) {
   const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(() => {
-    const fallback = variantsProduct?.find((item) => item.id === product.id) ?? variantsProduct?.[0] ?? product;
+    const fallback =
+      variantsProduct?.find((item) => item.id === product.id) ?? variantsProduct?.[0] ?? product;
     return { ...fallback, qnt: 1 };
   });
   const [variantsToShow, setVariantsToShow] = useState(NUMBER_OF_VARIANTS_TO_SHOW);
@@ -51,18 +52,34 @@ export default function SelectProductSection({
 
   const shouldShowVariants = (variantsProduct?.length ?? 0) > 1;
 
-  useEffect(() => {
+  const [previousSelection, setPreviousSelection] = useState({
+    productId: product.id,
+    parentId: product.parent_product_id,
+    variantsProduct,
+  });
+  if (
+    previousSelection.productId !== product.id ||
+    previousSelection.parentId !== product.parent_product_id ||
+    previousSelection.variantsProduct !== variantsProduct
+  ) {
+    setPreviousSelection({
+      productId: product.id,
+      parentId: product.parent_product_id,
+      variantsProduct,
+    });
     const fallback =
       variantsProduct?.find((item) => item.id === product.id) ?? variantsProduct?.[0] ?? product;
     setSelectedProduct({ ...fallback, qnt: 1 });
     setVariantsToShow(NUMBER_OF_VARIANTS_TO_SHOW);
-  }, [product.id, product.parent_product_id, variantsProduct]);
+  }
 
   return (
     <section className="w-full rounded-sm bg-background p-3 xl:flex-1">
       <header>
         <h1 className="H3 line-clamp-2">{uiProduct.name}</h1>
-        {uiProduct.ean ? <p className="helper_text mt-1 text-text-grey">EAN: {uiProduct.ean}</p> : null}
+        {uiProduct.ean ? (
+          <p className="helper_text mt-1 text-text-grey">EAN: {uiProduct.ean}</p>
+        ) : null}
         <StarsRating rating={uiProduct.rating} className="mt-2 justify-end" />
       </header>
 
@@ -149,4 +166,3 @@ export default function SelectProductSection({
     </section>
   );
 }
-

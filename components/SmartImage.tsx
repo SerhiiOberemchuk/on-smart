@@ -2,7 +2,7 @@
 
 import { getBlurDataUrl } from "@/lib/image/getBlurDataUrl";
 import Image, { type ImageProps } from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 
 type SmartImageProps = Omit<ImageProps, "src"> & {
   src?: ImageProps["src"] | null;
@@ -11,10 +11,7 @@ type SmartImageProps = Omit<ImageProps, "src"> & {
 
 const DEFAULT_FALLBACK = "/images/image-fallback.svg";
 
-function resolveSource(
-  src: SmartImageProps["src"],
-  fallbackSrc: string,
-): ImageProps["src"] {
+function resolveSource(src: SmartImageProps["src"], fallbackSrc: string): ImageProps["src"] {
   if (typeof src === "string") {
     const trimmed = src.trim();
     return trimmed.length > 0 ? trimmed : fallbackSrc;
@@ -33,34 +30,33 @@ export default function SmartImage({
   placeholder,
   blurDataURL,
   onError,
+  alt,
   ...props
 }: SmartImageProps) {
   const safeSrc = resolveSource(src, fallbackSrc);
-  const [resolvedSrc, setResolvedSrc] = useState<ImageProps["src"]>(safeSrc);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    setResolvedSrc(safeSrc);
-    setFailed(false);
-  }, [safeSrc]);
+  const [failedSource, setFailedSource] = useState<ImageProps["src"] | null>(null);
+  const [previousSource, setPreviousSource] = useState(safeSrc);
+  if (previousSource !== safeSrc) {
+    setPreviousSource(safeSrc);
+    setFailedSource(null);
+  }
+  const failed = failedSource === safeSrc;
+  const resolvedSrc = failed ? fallbackSrc : safeSrc;
 
   const computedPlaceholder = placeholder ?? "blur";
-  const computedBlur = useMemo(
-    () => blurDataURL ?? getBlurDataUrl(),
-    [blurDataURL],
-  );
+  const computedBlur = blurDataURL ?? getBlurDataUrl();
 
   return (
     <Image
       {...props}
       src={resolvedSrc}
+      alt={alt}
       placeholder={computedPlaceholder}
       blurDataURL={computedBlur}
       onError={(event) => {
         onError?.(event);
         if (!failed) {
-          setResolvedSrc(fallbackSrc);
-          setFailed(true);
+          setFailedSource(safeSrc);
         }
       }}
     />

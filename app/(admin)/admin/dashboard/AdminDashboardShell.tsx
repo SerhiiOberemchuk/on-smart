@@ -4,11 +4,26 @@ import { signOutCustomer } from "@/app/actions/account/auth/sign-out";
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState, useSyncExternalStore } from "react";
 import AdminSignOutButton from "./AdminSignOutButton";
 import { dashboardLinks, type DashboardLinkIcon, URL_DASHBOARD } from "./dashboard-admin.types";
 
 const SIDEBAR_COLLAPSED_STORAGE_KEY = "admin_sidebar_collapsed";
+const SIDEBAR_CHANGED_EVENT = "admin-sidebar-changed";
+function subscribeSidebar(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  window.addEventListener(SIDEBAR_CHANGED_EVENT, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(SIDEBAR_CHANGED_EVENT, onChange);
+  };
+}
+function getSidebarCollapsed() {
+  return localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) === "1";
+}
+function getServerSidebarCollapsed() {
+  return false;
+}
 
 function SidebarItemIcon({ icon }: { icon: DashboardLinkIcon }) {
   switch (icon) {
@@ -134,22 +149,20 @@ function CollapseToggleIcon({ isCollapsed }: { isCollapsed: boolean }) {
 export default function AdminDashboardShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-  useEffect(() => {
+  const isSidebarCollapsed = useSyncExternalStore(
+    subscribeSidebar,
+    getSidebarCollapsed,
+    getServerSidebarCollapsed,
+  );
+  const [previousPath, setPreviousPath] = useState(path);
+  if (previousPath !== path) {
+    setPreviousPath(path);
     setSidebarOpen(false);
-  }, [path]);
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY);
-    if (stored === "1") {
-      setSidebarCollapsed(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, isSidebarCollapsed ? "1" : "0");
-  }, [isSidebarCollapsed]);
+  }
+  const toggleSidebarCollapsed = () => {
+    localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, isSidebarCollapsed ? "0" : "1");
+    window.dispatchEvent(new Event(SIDEBAR_CHANGED_EVENT));
+  };
 
   return (
     <div className="admin-shell">
@@ -184,14 +197,20 @@ export default function AdminDashboardShell({ children }: { children: React.Reac
           onClick={() => setSidebarOpen(false)}
         />
 
-        <aside className={clsx("admin-sidebar", isSidebarOpen && "is-open", isSidebarCollapsed && "is-collapsed")}>
+        <aside
+          className={clsx(
+            "admin-sidebar",
+            isSidebarOpen && "is-open",
+            isSidebarCollapsed && "is-collapsed",
+          )}
+        >
           <div className="admin-sidebar-header">
             <button
               type="button"
               className="admin-icon-btn admin-sidebar-toggle"
               aria-label={isSidebarCollapsed ? "Розгорнути сайдбар" : "Згорнути сайдбар"}
               title={isSidebarCollapsed ? "Розгорнути сайдбар" : "Згорнути сайдбар"}
-              onClick={() => setSidebarCollapsed((prev) => !prev)}
+              onClick={toggleSidebarCollapsed}
             >
               <CollapseToggleIcon isCollapsed={isSidebarCollapsed} />
             </button>
@@ -247,4 +266,3 @@ export default function AdminDashboardShell({ children }: { children: React.Reac
     </div>
   );
 }
-

@@ -99,7 +99,7 @@ export function OrderCustomerCard({
               Дані приватної особи
             </div>
             <div>
-              <div className="text-xs text-neutral-400">Ім'я</div>
+              <div className="text-xs text-neutral-400">Ім&apos;я</div>
               <div className="font-medium">{safeValue(order.nome)}</div>
             </div>
             <div className="mt-2">

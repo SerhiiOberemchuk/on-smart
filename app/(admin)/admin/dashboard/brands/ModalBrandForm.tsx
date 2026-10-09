@@ -1,5 +1,7 @@
 "use client";
 
+import InlineSpinner from "@/components/InlineSpinner";
+
 import { createBrand, updateBrandById } from "@/app/actions/admin/brands/mutations";
 import { deleteFileFromS3 } from "@/app/actions/admin/files/mutations";
 import ButtonYellow from "@/components/BattonYellow";
@@ -47,18 +49,19 @@ export default function ModalBrandForm({
     setFileToUpload(null);
   };
 
-  useEffect(() => {
+  const [previousInitialData, setPreviousInitialData] = useState<Props["initialData"]>(undefined);
+  if (initialData !== previousInitialData) {
+    setPreviousInitialData(initialData);
     if (initialData) {
       setName(initialData.name);
       setSlug(initialData.brand_slug);
       setFullTitle(initialData.title_full);
       setDescription(initialData.description);
       setImage(initialData.image);
-      return;
+    } else {
+      cleanStates();
     }
-
-    cleanStates();
-  }, [initialData]);
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -162,7 +165,9 @@ export default function ModalBrandForm({
     <div className="admin-modal-overlay">
       <div className="admin-modal max-w-2xl">
         <div className="admin-modal-header">
-          <h2 className="text-base font-semibold">{initialData ? "Редагувати бренд" : "Новий бренд"}</h2>
+          <h2 className="text-base font-semibold">
+            {initialData ? "Редагувати бренд" : "Новий бренд"}
+          </h2>
         </div>
 
         <div className="admin-modal-content space-y-4">
@@ -179,7 +184,12 @@ export default function ModalBrandForm({
               />
             ) : null}
 
-            <input type="file" accept="image/*" onChange={handleFileUpload} className="admin-file-input" />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="admin-file-input"
+            />
 
             {fileToUpload ? (
               <p
@@ -219,13 +229,24 @@ export default function ModalBrandForm({
 
           <div className="admin-field">
             <span className="admin-field-label">Повний заголовок</span>
-            <input type="text" value={fullTitle} onChange={(e) => setFullTitle(e.target.value)} className="admin-input" />
+            <input
+              type="text"
+              value={fullTitle}
+              onChange={(e) => setFullTitle(e.target.value)}
+              className="admin-input"
+            />
           </div>
 
           <div className="admin-field">
             <span className="admin-field-label">Опис</span>
-            <span className="text-xs text-slate-500">Використовуйте "|" для нового абзацу</span>
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="admin-textarea" />
+            <span className="text-xs text-slate-500">
+              Використовуйте &quot;|&quot; для нового абзацу
+            </span>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="admin-textarea"
+            />
           </div>
         </div>
 
@@ -244,9 +265,16 @@ export default function ModalBrandForm({
           <ButtonYellow
             onClick={initialData ? handleUpdate : handleCreate}
             disabled={isPendingCreate || isPendingUpdate}
-            className="admin-btn-primary !px-4 !py-2 !text-sm"
+            className="admin-btn-primary gap-2 !px-4 !py-2 !text-sm disabled:pointer-events-none disabled:opacity-60"
           >
-            {initialData ? (isPendingUpdate ? "Оновлення..." : "Оновити") : isPendingCreate ? "Створення..." : "Створити"}
+            {(isPendingCreate || isPendingUpdate) && <InlineSpinner />}
+            {initialData
+              ? isPendingUpdate
+                ? "Оновлення..."
+                : "Оновити"
+              : isPendingCreate
+                ? "Створення..."
+                : "Створити"}
           </ButtonYellow>
         </div>
       </div>

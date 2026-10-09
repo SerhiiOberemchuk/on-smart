@@ -1,51 +1,58 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-type CacheEntry = { isStale: boolean | -1 } | undefined;
-type ShouldRevalidate = (entry: CacheEntry, isPossibleServerAction: boolean) => unknown;
+describe.each(["", "esm/"])("Next action/prerender isolation (%s)", (prefix) => {
+  const readSource = (path: string) =>
+    readFileSync(`node_modules/next/dist/${prefix}${path}.js`, "utf8");
+  const template = readSource("build/templates/app-page-runtime");
+  const condition = template.match(/const isRequestSpecificRender = ([^;]+);/)?.[1];
+  const dispatch = template.match(/const result = (renderOperation === 'prerender'[^;]+);/)?.[1];
+  if (!condition || !dispatch)
+    throw new Error("Next render dispatch changed; review action isolation.");
 
-// Execute the stale-entry condition from the installed framework, not a copy of
-// the fix (vercel/next.js#99564, patches/next+16.3.8.patch).
-function getInstalledCondition(moduleFormat: "commonjs" | "esm"): ShouldRevalidate {
-  const prefix = moduleFormat === "esm" ? "esm/" : "";
-  const source = readFileSync(
-    `node_modules/next/dist/${prefix}build/templates/app-page-runtime.js`,
-    "utf8",
-  );
-  const marker = source.indexOf("We want to trigger this flow if the cache entry is stale");
-  const start = source.lastIndexOf("if (incrementalCacheEntry &&", marker);
-  const branch = source
-    .slice(start)
-    .match(/^if \(([\s\S]*?)\) \{\s*\/\/ We want to schedule this on the next tick/);
-  if (marker === -1 || !branch) {
-    throw new Error("Next stale revalidation branch changed; review the backport.");
-  }
-
-  return new Function(
-    "incrementalCacheEntry",
+  // Execute the installed framework expressions with spies at the route-module boundary.
+  const isRequestRender = new Function(
+    "forceStaticRender",
+    "isDebugPrerender",
+    "supportsDynamicResponse",
     "isPossibleServerAction",
-    `return (${branch[1]});`,
-  ) as ShouldRevalidate;
-}
+    `return ${condition};`,
+  ) as (forced: boolean, debug: boolean, dynamic: boolean, action: boolean) => boolean;
+  const invoke = new Function(
+    "renderOperation",
+    "routeModule",
+    "nextReq",
+    "nextRes",
+    "context",
+    `return ${dispatch};`,
+  ) as (operation: string, module: { render: () => void; prerender: () => void }) => void;
 
-describe.each(["commonjs", "esm"] as const)(
-  "Next stale-shell revalidation (%s)",
-  (moduleFormat) => {
-    const shouldRevalidate = getInstalledCondition(moduleFormat);
+  it("does not re-execute the action while revalidating a stale shell", () => {
+    const routeModule = { render: vi.fn(), prerender: vi.fn() };
+    for (const forced of [false, true]) {
+      invoke(isRequestRender(forced, false, true, true) ? "render" : "prerender", routeModule);
+    }
+    expect(routeModule.render).toHaveBeenCalledTimes(1);
+    expect(routeModule.prerender).toHaveBeenCalledTimes(1);
+  });
 
-    it("does not revalidate in the background for a server action", () => {
-      expect(shouldRevalidate({ isStale: true }, true)).toBe(false);
-      expect(shouldRevalidate({ isStale: -1 }, true)).toBe(false);
-    });
+  it("uses prerender for background navigation revalidation and shell debugging", () => {
+    expect(isRequestRender(true, false, true, false)).toBe(false);
+    expect(isRequestRender(false, true, true, true)).toBe(false);
+    expect(isRequestRender(false, false, true, false)).toBe(true);
+  });
 
-    it("still revalidates a stale shell for a navigation", () => {
-      expect(shouldRevalidate({ isStale: true }, false)).toBe(true);
-      expect(shouldRevalidate({ isStale: -1 }, false)).toBe(true);
-    });
-
-    it("leaves a fresh shell alone", () => {
-      expect(shouldRevalidate({ isStale: false }, false)).toBe(false);
-      expect(shouldRevalidate(undefined, false)).toBeFalsy();
-    });
-  },
-);
+  it("keeps action handling out of the dedicated prerender implementation", () => {
+    const source = readSource("server/app-render/app-render");
+    const prerender = source.slice(
+      source.indexOf("async function prerenderAppPage("),
+      source.indexOf("async function renderAppPage("),
+    );
+    expect(prerender).toContain("prerenderToStreamWithTracing");
+    expect(prerender).not.toContain("handleAction");
+    expect(source.slice(source.indexOf("async function renderAppPage("))).toContain("handleAction");
+    expect(readSource("server/route-modules/app-page/module")).toMatch(
+      /prerender\(req, res, context\) \{\s+return [^;]*prerenderToHTMLOrFlight/,
+    );
+  });
+});

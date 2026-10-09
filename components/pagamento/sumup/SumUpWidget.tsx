@@ -1,5 +1,7 @@
 "use client";
 
+import SumUpPaymentDialog from "@/components/pagamento/sumup/SumUpPaymentDialog";
+import InlineSpinner from "@/components/InlineSpinner";
 import Script from "next/script";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -34,6 +36,7 @@ export default function SumUpModalButton({
 }: PaymentWidgetData & { paymentErrorPath: string }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [sdkState, setSdkState] = useState<"loading" | "ready" | "error">("loading");
 
   const [open, setOpen] = useState(false);
   const [attempt, setAttempt] = useState(1);
@@ -44,6 +47,9 @@ export default function SumUpModalButton({
   const createdRef = useRef<CreatedOrderRef | null>(null);
 
   const startingRef = useRef(false);
+  const closingRef = useRef(false);
+  const [isStarting, setIsStarting] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   const priceToPay = totalPrice
     ? getTotalPriceToPay({
@@ -62,18 +68,20 @@ export default function SumUpModalButton({
   }, [open]);
 
   const close = useCallback(async () => {
-    if (checkoutId) {
-      try {
-        await deactivateCheckoutSumUp({ id: checkoutId });
-      } catch (e) {
-        console.error("Errore deactivate checkout:", e);
-      }
+    if (closingRef.current) return;
+    closingRef.current = true;
+    setIsClosing(true);
+    try {
+      if (checkoutId) await deactivateCheckoutSumUp({ id: checkoutId });
+    } catch (error) {
+      console.error("Errore deactivate checkout:", error);
+    } finally {
+      setOpen(false);
+      setCheckoutId(null);
+      if (containerRef.current) containerRef.current.innerHTML = "";
+      closingRef.current = false;
+      setIsClosing(false);
     }
-
-    setOpen(false);
-    setCheckoutId(null);
-
-    if (containerRef.current) containerRef.current.innerHTML = "";
   }, [checkoutId]);
 
   const redirectToSumUpErrorState = useCallback(
@@ -90,11 +98,7 @@ export default function SumUpModalButton({
   useEffect(() => {
     if (!open || !checkoutId) return;
 
-    if (!window.SumUpCard) {
-      toast.error("SumUp non disponibile, riprova.", PERSISTENT_PAYMENT_TOAST_OPTIONS);
-      void close();
-      return;
-    }
+    if (!window.SumUpCard) return;
 
     const el = containerRef.current;
     if (!el) return;
@@ -166,19 +170,18 @@ export default function SumUpModalButton({
         }
       },
     });
-  }, [
-    open,
-    checkoutId,
-    close,
-    isProcessingResponse,
-    redirectToSumUpErrorState,
-  ]);
+  }, [open, checkoutId, close, isProcessingResponse, redirectToSumUpErrorState, router]);
 
   const openAndCreate = async () => {
     if (startingRef.current) return;
+    if (sdkState !== "ready" || !window.SumUpCard) {
+      toast.error("SumUp non disponibile, riprova.", PERSISTENT_PAYMENT_TOAST_OPTIONS);
+      return;
+    }
     if (!totalPrice || priceToPay <= 0) return;
 
     startingRef.current = true;
+    setIsStarting(true);
 
     try {
       if (!createdRef.current) {
@@ -199,10 +202,7 @@ export default function SumUpModalButton({
         });
 
         if (!created?.success || !created.orderId || !created.orderNumber) {
-          toast.error(
-            `Errore: ${String(created?.error ?? "")}`,
-            PERSISTENT_PAYMENT_TOAST_OPTIONS,
-          );
+          toast.error(`Errore: ${String(created?.error ?? "")}`, PERSISTENT_PAYMENT_TOAST_OPTIONS);
           return;
         }
 
@@ -244,6 +244,7 @@ export default function SumUpModalButton({
       });
     } finally {
       startingRef.current = false;
+      setIsStarting(false);
     }
   };
 
@@ -252,52 +253,41 @@ export default function SumUpModalButton({
       <Script
         src="https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js"
         strategy="afterInteractive"
+        onReady={() => setSdkState(window.SumUpCard ? "ready" : "error")}
+        onError={() => setSdkState("error")}
       />
 
       <button
         type="button"
         onClick={openAndCreate}
-        disabled={pending || startingRef.current || open || isProcessingResponse}
-        className="w-full rounded-xl bg-[#F2C94C] px-6 py-3 font-semibold text-black disabled:opacity-60"
+        disabled={
+          sdkState !== "ready" || pending || isStarting || open || isProcessingResponse || isClosing
+        }
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#F2C94C] px-6 py-3 font-semibold text-black disabled:pointer-events-none disabled:opacity-60"
       >
-        {isProcessingResponse
-          ? "Verifica del pagamento in corso..."
-          : open
-            ? "Finestra di pagamento aperta..."
-            : pending || startingRef.current
-              ? "Preparazione del pagamento..."
-              : "Paga e procedi avanti"}
+        {(sdkState === "loading" || pending || isStarting || isProcessingResponse || isClosing) && (
+          <InlineSpinner />
+        )}
+        {sdkState === "error"
+          ? "Pagamento non disponibile. Ricarica la pagina."
+          : sdkState === "loading"
+            ? "Caricamento pagamento..."
+            : isProcessingResponse
+              ? "Verifica del pagamento in corso..."
+              : open
+                ? "Finestra di pagamento aperta..."
+                : pending || isStarting
+                  ? "Preparazione del pagamento..."
+                  : "Paga e procedi avanti"}
       </button>
 
       {open && (
-        <div
-          className="fixed inset-0 z-1000 flex justify-center overflow-y-scroll bg-black/60 py-4"
-          role="dialog"
-          aria-modal="true"
-          onMouseDown={(e) => {
-            if (isProcessingResponse) return;
-            if (e.target === e.currentTarget) void close();
-          }}
-        >
-          <div className="relative w-full max-w-2xl shadow-2xl">
-            <button
-              type="button"
-              onClick={() => void close()}
-              disabled={isProcessingResponse}
-              className="absolute top-3 right-3 rounded-lg px-3 py-1 text-sm text-black/70 hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Chiudi"
-            >
-              x
-            </button>
-
-            {isProcessingResponse ? (
-              <div className="px-4 pt-4 text-sm text-white">
-                Conferma del pagamento in corso. Non chiudere questa finestra.
-              </div>
-            ) : null}
-            <div id="sumUpIdContainer" ref={containerRef} className="pb-4" />
-          </div>
-        </div>
+        <SumUpPaymentDialog
+          isProcessingResponse={isProcessingResponse}
+          isClosing={isClosing}
+          onClose={close}
+          containerRef={containerRef}
+        />
       )}
     </>
   );

@@ -4,6 +4,7 @@ import {
   getAccountOrders,
   type AccountOrderListItem,
 } from "@/app/actions/account/orders/get-account-orders";
+import InlineSpinner from "@/components/InlineSpinner";
 import { CustomSelect } from "@/components/CustomSelect";
 import { ORDER_STATUS_LIST, type OrderStatusTypes } from "@/types/orders.types";
 import clsx from "clsx";
@@ -27,11 +28,7 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "TOTAL_ASC", label: "Totale: dal più basso" },
 ];
 
-export default function OrdiniClient({
-  initialOrders,
-}: {
-  initialOrders: AccountOrderListItem[];
-}) {
+export default function OrdiniClient({ initialOrders }: { initialOrders: AccountOrderListItem[] }) {
   const [orders, setOrders] = useState(initialOrders);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
@@ -40,6 +37,22 @@ export default function OrdiniClient({
   const [period, setPeriod] = useState<PeriodOption>("30D");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+
+  const changePeriod = (value: PeriodOption) => {
+    if (value === period) return;
+    setLoading(value !== "CUSTOM" || Boolean(fromDate || toDate));
+    setPeriod(value);
+  };
+  const changeFromDate = (value: string) => {
+    if (value === fromDate) return;
+    setLoading(Boolean(value || toDate));
+    setFromDate(value);
+  };
+  const changeToDate = (value: string) => {
+    if (value === toDate) return;
+    setLoading(Boolean(fromDate || value));
+    setToDate(value);
+  };
 
   // The default 30-day set arrives from the server; only re-fetch when the
   // period changes so we never load every order up front.
@@ -52,7 +65,6 @@ export default function OrdiniClient({
     if (period === "CUSTOM" && !fromDate && !toDate) return;
 
     let active = true;
-    setLoading(true);
     const range = resolvePeriodRange(period, fromDate, toDate);
     getAccountOrders({ fromMs: range.from, toMs: range.to })
       .then((data) => active && setOrders(data))
@@ -111,7 +123,7 @@ export default function OrdiniClient({
           variant="box"
           className="w-full sm:w-52"
           value={period}
-          onChange={(v) => setPeriod(v as PeriodOption)}
+          onChange={(v) => changePeriod(v as PeriodOption)}
           options={PERIOD_OPTIONS}
         />
         <CustomSelect
@@ -127,8 +139,8 @@ export default function OrdiniClient({
         <PeriodDateRange
           fromDate={fromDate}
           toDate={toDate}
-          onFromChange={setFromDate}
-          onToChange={setToDate}
+          onFromChange={changeFromDate}
+          onToChange={changeToDate}
         />
       )}
 
@@ -146,9 +158,11 @@ export default function OrdiniClient({
           {period !== "ALL" && (
             <button
               type="button"
-              onClick={() => setPeriod("ALL")}
-              className="text-yellow-500 underline underline-offset-2"
+              onClick={() => changePeriod("ALL")}
+              disabled={loading}
+              className="inline-flex items-center gap-2 text-yellow-500 underline underline-offset-2 disabled:pointer-events-none disabled:opacity-60"
             >
+              {loading && <InlineSpinner />}
               Mostra tutti gli ordini
             </button>
           )}
@@ -176,7 +190,9 @@ export default function OrdiniClient({
                   >
                     {ORDER_STATUS_LABEL[order.orderStatus] ?? order.orderStatus}
                   </span>
-                  <span className="font-semibold whitespace-nowrap">{order.total.toFixed(2)} €</span>
+                  <span className="font-semibold whitespace-nowrap">
+                    {order.total.toFixed(2)} €
+                  </span>
                   <span
                     aria-hidden
                     className="text-lg text-yellow-500 opacity-0 transition group-hover:opacity-100"

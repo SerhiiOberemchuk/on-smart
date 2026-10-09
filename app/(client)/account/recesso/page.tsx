@@ -41,6 +41,7 @@ async function RecessoContent() {
   await connection();
   // Load only the last 30 days by default; the client fetches wider ranges on demand.
   const { nome, email, orders } = await getAccountWithdrawalOrders({
+    // eslint-disable-next-line react-hooks/purity -- Request-time Server Component after connection().
     fromMs: Date.now() - THIRTY_DAYS_MS,
     toMs: null,
   });

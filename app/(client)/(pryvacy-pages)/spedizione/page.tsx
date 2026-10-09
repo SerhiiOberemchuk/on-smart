@@ -21,7 +21,7 @@ export default function SpedizionePage() {
           Per rendere sicure, veloci e affidabili le nostre spedizioni, lavoriamo con SDA, GLS, UPS,
           BRT e altri corrieri espresso che consegnano in tutta Italia. Per la merce disponibile in
           stock presso il nostro magazzino, la consegna avviene mediamente in 24/48 ore
-          dall'evasione dell'ordine; per alcune zone remote può richiedere fino a 72 ore. La
+          dall&apos;evasione dell&apos;ordine; per alcune zone remote può richiedere fino a 72 ore. La
           consegna viene effettuata dal lunedì al venerdì.
         </p>
 
@@ -34,19 +34,19 @@ export default function SpedizionePage() {
         </p>
 
         <p>
-          Nel caso di pagamento tramite bonifico bancario, l'evasione dell'ordine avviene
-          esclusivamente al momento dell'accredito del pagamento. Il numero di tracking viene
-          comunicato via e-mail all'indirizzo inserito in fase di registrazione.
+          Nel caso di pagamento tramite bonifico bancario, l&apos;evasione dell&apos;ordine avviene
+          esclusivamente al momento dell&apos;accredito del pagamento. Il numero di tracking viene
+          comunicato via e-mail all&apos;indirizzo inserito in fase di registrazione.
         </p>
 
         <p>
-          Informazioni aggiuntive sullo stato dell'ordine possono essere richieste via e-mail a
+          Informazioni aggiuntive sullo stato dell&apos;ordine possono essere richieste via e-mail a
           assistenza@on-smart.it.
         </p>
 
         <h2 className="H3 pt-4 text-white">Modalità di consegna</h2>
         <p>
-          Il corriere effettua due tentativi di consegna all'indirizzo indicato dal cliente. Se la
+          Il corriere effettua due tentativi di consegna all&apos;indirizzo indicato dal cliente. Se la
           consegna non va a buon fine, la spedizione viene trattenuta in giacenza e il cliente viene
           contattato per concordare una nuova consegna o il ritiro presso il centro di smistamento
           del corriere. Eventuali costi di giacenza e riconsegna sono a carico del cliente.
@@ -54,8 +54,8 @@ export default function SpedizionePage() {
 
         <h2 className="H3 pt-4 text-white">Costi di spedizione</h2>
         <p>
-          I costi di spedizione sono calcolati in base all'indirizzo di consegna, alle dimensioni e
-          al peso della merce. Per l'Italia, il costo minimo di spedizione parte da{" "}
+          I costi di spedizione sono calcolati in base all&apos;indirizzo di consegna, alle dimensioni e
+          al peso della merce. Per l&apos;Italia, il costo minimo di spedizione parte da{" "}
           {DELIVERY_DATA.PRISE_DELIVERY.toFixed(2)} euro IVA inclusa, salvo possibili variazioni.
         </p>
 
@@ -84,8 +84,8 @@ export default function SpedizionePage() {
 
         <ul className="list-disc space-y-2 pl-6">
           <li>
-            <strong>accettare con riserva:</strong> scrivere sulla ricevuta "Accetto con riserva"
-            indicando l'anomalia riscontrata;
+            <strong>accettare con riserva:</strong> scrivere sulla ricevuta &quot;Accetto con riserva&quot;
+            indicando l&apos;anomalia riscontrata;
           </li>
           <li>
             <strong>rifiutare il pacco:</strong> in caso di evidente manomissione o apertura non

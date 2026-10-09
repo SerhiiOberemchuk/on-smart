@@ -38,7 +38,7 @@ export default function CompletatoPage({
           <span className="body_R_20">{order.order?.orderNumber ?? "-"}</span>
         </p>
         <p className="btn_small">
-          Data dell'ordine:{" "}
+          Data dell&apos;ordine:{" "}
           <span className="body_R_20">{order.order?.createdAt?.toLocaleDateString() ?? "-"}</span>
         </p>
 
@@ -64,7 +64,7 @@ export default function CompletatoPage({
         )}
         <p className="helper_text mt-2 w-full text-left text-text-grey">
           L`ordine è stato correttamente inviato. Riceverai una mail di conferma con i dettagli
-          dell'ordine e la fattura. Per qualsiasi domanda o assistenza, non esitare a contattarci.
+          dell&apos;ordine e la fattura. Per qualsiasi domanda o assistenza, non esitare a contattarci.
         </p>
 
         {order.order?.userId ? (

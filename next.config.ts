@@ -9,6 +9,8 @@ const redirectHost = canonicalHost.startsWith("www.")
 const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
+  // Preserve existing prefetch behavior; adopt Partial Prefetching separately.
+  partialPrefetching: false,
   reactCompiler: true,
   allowedDevOrigins: ["10.18.212.244"],
   // Load sharp from node_modules at runtime instead of tracing/bundling it, so

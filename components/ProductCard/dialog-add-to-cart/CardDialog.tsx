@@ -104,22 +104,20 @@ export default function CardDialog() {
     });
   };
 
+  const [previousProduct, setPreviousProduct] = useState<typeof product | undefined>(undefined);
+  if (previousProduct !== product) {
+    setPreviousProduct(product);
+    setSelectedProduct(product ? { ...product, qnt: 1 } : null);
+    const sourceId =
+      product?.parent_product_id && product.parent_product_id !== "NULL"
+        ? product.parent_product_id
+        : product?.id;
+    setVariantsOfProduct(sourceId ? (dialogVariantsCache.get(sourceId) ?? null) : null);
+    setSupportProducts(sourceId ? (dialogSupportProductsCache.get(sourceId) ?? null) : null);
+  }
+
   useEffect(() => {
-    const setPreselectedProduct = () => {
-      if (!product) {
-        setSelectedProduct(null);
-        return;
-      }
-
-      setSelectedProduct({ ...product, qnt: 1 } as ProductType & { qnt: number });
-    };
-    setPreselectedProduct();
-
-    if (!product?.id) {
-      setVariantsOfProduct(null);
-      setSupportProducts(null);
-      return;
-    }
+    if (!product?.id) return;
 
     let isCancelled = false;
     const supportSourceId =
@@ -129,18 +127,6 @@ export default function CardDialog() {
     const variantsCacheKey = supportSourceId;
     const cachedVariants = dialogVariantsCache.get(variantsCacheKey);
     const cachedSupportProducts = dialogSupportProductsCache.get(supportSourceId);
-
-    if (cachedVariants !== undefined) {
-      setVariantsOfProduct(cachedVariants);
-    } else {
-      setVariantsOfProduct(null);
-    }
-
-    if (cachedSupportProducts !== undefined) {
-      setSupportProducts(cachedSupportProducts);
-    } else {
-      setSupportProducts(null);
-    }
 
     const fetchDialogData = async () => {
       try {
@@ -417,4 +403,3 @@ export default function CardDialog() {
     </>
   );
 }
-

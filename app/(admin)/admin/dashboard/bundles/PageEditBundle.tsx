@@ -1108,7 +1108,7 @@ export default function PageEditBundle({
                     <div key={review.id || `bundle-review-${index}`} className="rounded border border-slate-600/55 p-3">
                       <div className="grid grid-cols-1 gap-2 text-sm text-slate-300 md:grid-cols-2">
                         <p>
-                          <span className="text-slate-400">Ім'я:</span> {review.client_name}
+                          <span className="text-slate-400">Ім&apos;я:</span> {review.client_name}
                         </p>
                         <p>
                           <span className="text-slate-400">Email:</span> {review.email}
